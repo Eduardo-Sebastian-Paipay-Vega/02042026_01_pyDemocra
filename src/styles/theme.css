@@ -1,0 +1,106 @@
+@font-face {
+  font-family: "Coolvetica Black";
+  src:
+    local("Coolvetica Black"),
+    local("Coolvetica");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-brand-display: "Coolvetica Black", "Coolvetica", system-ui, -apple-system, "Segoe UI", Inter, Arial, sans-serif;
+}
+
+.brand-logo-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.brand > span {
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.nav-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.36rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-login__label {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 245, 0.64);
+}
+
+.nav-login__link {
+  font-size: 0.75rem;
+  color: rgba(245, 245, 245, 0.78);
+  padding: 0.26rem 0.5rem;
+  border-radius: 999px;
+  transition: color 180ms ease, background 180ms ease, opacity 180ms ease;
+}
+
+.nav-login__link:hover,
+.nav-login__link:focus-visible {
+  color: rgba(245, 245, 245, 0.95);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.nav-login__link.is-active {
+  color: rgba(245, 245, 245, 0.96);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.mobile-simple-menu {
+  display: none;
+  align-items: center;
+  gap: 0.42rem;
+  margin-left: auto;
+  padding: 0.36rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobile-simple-menu__label {
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 245, 0.62);
+}
+
+.mobile-simple-menu__link {
+  font-size: 0.74rem;
+  color: rgba(245, 245, 245, 0.86);
+  padding: 0.2rem 0.44rem;
+  border-radius: 999px;
+}
+
+.mobile-simple-menu__link:hover,
+.mobile-simple-menu__link:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.mobile-simple-menu__link.is-active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 860px) {
+  .mobile-simple-menu {
+    display: inline-flex;
+  }
+
+  .nav-login {
+    display: none;
+  }
+}

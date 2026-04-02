@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Testing y temporales
+coverage/
+.tmp-tools/
+.DS_Store
+
+# Builds de producción
+dist/
+build/
+
+# Variables de entorno (¡Muy importante por seguridad!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

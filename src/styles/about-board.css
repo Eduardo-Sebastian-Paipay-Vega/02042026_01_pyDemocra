@@ -1,0 +1,430 @@
+/* ===================================================== */
+/* SOLARIS GLOBAL VARIABLES – FUNDACIÓN                  */
+/* ===================================================== */
+
+:root {
+  /* Board */
+  --board-width: 1280px;
+  --board-aspect: 16 / 9;
+
+  /* Nodes */
+  --node-size: 120px;
+  --node-scale-active: 1.18;
+
+  /* Motion */
+  --transition-fast: 0.25s ease;
+  --transition-slow: 0.6s ease;
+
+  /* Color */
+  --copper: #c77a3f;
+  --dark-1: #0b0b0b;
+  --dark-2: #050505;
+}
+
+/* ===================================================== */
+/* TYPO / HEADER (LO QUE YA TENÍAS, LIMPIO)              */
+/* ===================================================== */
+
+.studio-hero__title {
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* Logo */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-img {
+  height: 24px;
+  width: auto;
+}
+
+/* ===================================================== */
+/* HERO                                                   */
+/* ===================================================== */
+
+.hero {
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding-top: 0 !important;
+}
+
+.hero-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-big-static {
+  width: 80%;
+  max-width: 1400px;
+  height: auto;
+  object-fit: contain;
+  z-index: 2;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.7;
+  cursor: pointer;
+  animation: bounceArrow 2s infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% { transform: translateX(-50%) translateY(-10px); }
+  60% { transform: translateX(-50%) translateY(-5px); }
+}
+
+/* ===================================================== */
+/* SOLARIS BOARD – SISTEMA PREMIUM                        */
+/* ===================================================== */
+
+.solaris-board-wrapper {
+  width: 100%;
+  min-height: 80vh;
+  padding: 8rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Board base */
+.solaris-board {
+  position: relative;
+  width: min(var(--board-width), 92vw);
+  aspect-ratio: var(--board-aspect);
+  min-height: 520px;
+  border-radius: 32px;
+  isolation: isolate;
+}
+
+/* Reset interno */
+.solaris-board,
+.solaris-board * {
+  box-sizing: border-box;
+}
+
+.solaris-board img {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===================================================== */
+/* BACKGROUND                                             */
+/* ===================================================== */
+
+.solaris-board-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(120% 120% at 85% 0%, rgba(255,255,255,0.06), transparent 55%),
+    linear-gradient(135deg, var(--dark-1), var(--dark-2) 65%);
+  z-index: 0;
+}
+
+/* ===================================================== */
+/* PATHS (ESCALABLES Y CORRECTOS)                          */
+/* ===================================================== */
+
+.solaris-paths-off,
+.solaris-path {
+  position: absolute;
+  inset: 6%;
+}
+
+.solaris-paths-off {
+  opacity: 0.35;
+  z-index: 1;
+}
+
+.solaris-path {
+  opacity: 0;
+  z-index: 2;
+  transition: opacity var(--transition-slow);
+}
+
+.solaris-path.active {
+  opacity: 1;
+}
+
+/* ===================================================== */
+/* NODES – ESTANDARIZADOS                                 */
+/* ===================================================== */
+
+.solaris-node {
+  position: absolute;
+  width: var(--node-size);
+  height: var(--node-size);
+  cursor: pointer;
+  z-index: 3;
+}
+
+.solaris-node img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.solaris-node img.on {
+  opacity: 0;
+}
+
+.solaris-node.active img.off {
+  opacity: 0;
+}
+
+.solaris-node.active img.on {
+  opacity: 1;
+  transform: scale(var(--node-scale-active));
+}
+
+/* ===================================================== */
+/* FOCUS MODE (DIM)                                       */
+/* ===================================================== */
+
+.solaris-board.dim .solaris-node:not(.active),
+.solaris-board.dim .solaris-path:not(.active) {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+/* ===================================================== */
+/* MAPA DE POSICIONES – EXTENDIBLE                        */
+/* ===================================================== */
+
+.solaris-node[data-node="solaris"] {
+  top: 10%;
+  left: 45%;
+}
+
+.solaris-node[data-node="design"] {
+  top: 38%;
+  left: 22%;
+}
+
+.solaris-node[data-node="labs"] {
+  top: 64%;
+  left: 45%;
+}
+
+.solaris-node[data-node="ventures"] {
+  top: 38%;
+  left: 68%;
+}
+
+.solaris-node[data-node="seed"] {
+  top: 24%;
+  left: 84%;
+}
+
+.solaris-node[data-node="grow"] {
+  top: 60%;
+  left: 84%;
+}
+
+/* ===================================================== */
+/* RESPONSIVE                                             */
+/* ===================================================== */
+
+@media (max-width: 900px) {
+  :root {
+    --node-size: 90px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --node-size: 70px;
+  }
+
+  .solaris-board-wrapper {
+    padding: 4rem 0;
+  }
+}
+
+/* ===================================================== */
+/* DEBUG (DESACTIVA CUANDO TERMINES)                      */
+/* ===================================================== */
+
+/*
+.solaris-board {
+  outline: 2px dashed red;
+}
+
+.solaris-node {
+  background: rgba(255, 0, 0, 0.3);
+}
+*/
+
+
+/* CONFIGURACIÓN GENERAL DEL TABLERO */
+:root {
+    --board-w: 1400px;
+    --board-h: 700px;
+    
+    /* Dimensiones de los rectángulos */
+    --node-width: 200px; 
+    --node-height: 80px;
+    
+    --color-neon: #c77a3f; /* Tu color naranja/cobre */
+    --bg-dark: #000000;
+    --bg-card: rgba(20, 20, 20, 0.9);
+}
+
+.solaris-board-wrapper {
+    background-color: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 0;
+    overflow: hidden; /* Evita scroll lateral si se escala */
+}
+
+.solaris-board {
+    position: relative;
+    width: var(--board-w);
+    height: var(--board-h);
+    background: radial-gradient(circle at 50% 30%, #1a1a1a 0%, #000000 70%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 40px;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+}
+
+/* --- CAPA DE CABLES (SVG) --- */
+.paths-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permite clicks a través de las líneas */
+    z-index: 1;
+}
+
+.connection-path {
+    fill: none;
+    stroke: #333; /* Color apagado por defecto */
+    stroke-width: 2;
+    transition: all 0.5s ease;
+    opacity: 0.4;
+}
+
+/* Efecto ILUMINADO (Lit) */
+.connection-path.lit {
+    stroke: var(--color-neon);
+    opacity: 1;
+    stroke-width: 3;
+    filter: url(#glow-effect); /* Aplica el brillo definido en HTML */
+}
+
+/* --- NODOS (Cajas Rectangulares) --- */
+.solaris-node {
+    position: absolute;
+    width: var(--node-width);
+    height: var(--node-height);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    cursor: pointer;
+}
+
+.node-box {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.node-title {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* LUZ DE ESTADO (Puntito) */
+.status-dot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #555; /* Apagado */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    transition: background 0.3s ease;
+}
+
+/* ESTADOS DE INTERACCIÓN */
+.solaris-node:hover:not(.locked) .node-box {
+    border-color: var(--color-neon);
+    transform: translateY(-4px);
+    box-shadow: 0 0 20px rgba(199, 122, 63, 0.3);
+}
+
+.solaris-node.active .status-dot {
+    background-color: var(--color-neon);
+    box-shadow: 0 0 8px var(--color-neon);
+}
+
+.solaris-node.active .node-box {
+    border-color: rgba(199, 122, 63, 0.6);
+}
+
+/* ESTADO BLOQUEADO */
+.solaris-node.locked {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    pointer-events: none;
+}
+
+/* --- POSICIONES (Coordenadas) --- */
+/* Deben coincidir con los puntos del SVG */
+.node-solaris  { top: 17%; left: 50%; } /* 120px, 700px */
+
+.node-design   { top: 54%; left: 21.5%; } /* 380px, 300px aprox */
+.node-labs     { top: 54%; left: 50%; }   /* 380px, 700px */
+.node-ventures { top: 54%; left: 78.5%; } /* 380px, 1100px aprox */
+
+.node-seed     { top: 35%; left: 93%; }   /* 250px */
+.node-grow     { top: 73%; left: 93%; }   /* 510px */
+
+/* RESPONSIVE (Escalado) */
+@media (max-width: 1200px) {
+    .solaris-board { zoom: 0.7; }
+}
+@media (max-width: 800px) {
+    .solaris-board { zoom: 0.45; }
+}

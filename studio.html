@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        visibility: hidden;
+        background: #050505;
+      }
+
+      html.loaded {
+        visibility: visible;
+      }
+    </style>
+    <noscript><style>html { visibility: visible !important; }</style></noscript>
+    <title>Solaris · Archivo</title>
+
+    <!-- Tus CSS actuales -->
+    <link rel="preconnect" href="https://fonts.cdnfonts.com">
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+
+    <!-- Favicon (usa el logo blanco por ahora) -->
+    <link rel="icon" type="image/png" href="./Imagen/Iconos/logo_cua1.png" />
+    <link rel="preload" href="/src/styles/styles.css" as="style" />
+    <link rel="preload" href="/src/styles/animations.css" as="style" />
+    <link rel="preload" href="/src/styles/theme.css" as="style" />
+    <link rel="stylesheet" href="/src/styles/styles.css" />
+    <link rel="stylesheet" href="/src/styles/animations.css" />
+    <link rel="stylesheet" href="/src/styles/theme.css" />
+  </head>
+
+  <body class="is-studio">
+    <!-- Header: mismo lenguaje que tu home -->
+    <header class="header">
+      <div class="container header-inner">
+        <a class="brand" href="./index.html" aria-label="Volver al inicio">
+          <img class="brand-mark" src="./Imagen/Iconos/logo_cobre.png" alt="Solaris" />
+          <span class="brand-name">Solaris</span>
+        </a>
+
+        <nav class="nav" aria-label="Navegación principal">
+          <a class="nav-link" href="./index.html#enfoque">Enfoque</a>
+          <a class="nav-link" href="./studio.html">Archivo</a>
+          <a class="nav-link" href="./nosotros.html">Nosotros</a>
+          <div class="nav-login" aria-label="Login">
+            <span class="nav-login__label">Login</span>
+            <a class="nav-login__link" href="/login.html">Ingresar</a>
+            <a class="nav-login__link" href="/register.html">Registrarse</a>
+          </div>
+          <button class="btn-contact" type="button" data-open-contact>Contacto</button>
+        </nav>
+
+        <div class="mobile-simple-menu" aria-label="Menu de acceso">
+          <span class="mobile-simple-menu__label">Login</span>
+          <a class="mobile-simple-menu__link" href="/login.html">Ingresar</a>
+          <a class="mobile-simple-menu__link" href="/register.html">Registrarse</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="studio">
+      <!-- Portada / Statement del archivo -->
+      <section class="studio-hero container stagger reveal">
+        <div class="studio-hero__badge">ARCHIVO</div>
+
+        <div class="studio-hero__titleRow">
+
+          
+          
+          <h1 class="studio-hero__title">Solaris - piensa mejor.</h1>
+          
+        </div>
+
+        <p class="studio-hero__subtitle">
+          Un archivo curado de ideas, flujos y sistemas. Menos ruido. Más criterio.
+        </p>
+
+        <div class="studio-filters reveal reveal--soft" role="tablist" aria-label="Filtros del archivo">
+          <button class="chip is-active" type="button" data-filter="all">Todo</button>
+          <button class="chip" type="button" data-filter="systems">Systems</button>
+          <button class="chip" type="button" data-filter="strategy">Strategy</button>
+          <button class="chip" type="button" data-filter="future">Future</button>
+        </div>
+        
+      
+      </section>
+
+      <!-- Grid museo -->
+      <section id="archivo" class="studio-grid container reveal">
+        <!-- Journal -->
+        <article class="card-item" data-type="journal" data-tag="systems"
+          data-title="Silencio en sistemas"
+          data-kicker="Journal · Systems"
+          data-desc="Diseñar con criterio: reducir complejidad sin perder potencia. Decidir qué NO construir."
+        >
+          <div class="card-item__top">
+            <div class="card-item__kicker">Journal</div>
+            <div class="card-item__tag">Systems</div>
+          </div>
+          <h3 class="card-item__title">Silencio en sistemas</h3>
+          <p class="card-item__desc">Reducir complejidad sin perder potencia. Decidir qué NO construir.</p>
+          <button class="card-item__open" type="button">Previsualizar</button>
+        </article>
+
+        <article class="card-item" data-type="journal" data-tag="strategy"
+          data-title="Proceso antes que herramienta"
+          data-kicker="Journal · Strategy"
+          data-desc="La estrategia no es un documento: es una secuencia de decisiones sostenibles."
+        >
+          <div class="card-item__top">
+            <div class="card-item__kicker">Journal</div>
+            <div class="card-item__tag">Strategy</div>
+          </div>
+          <h3 class="card-item__title">Proceso antes que herramienta</h3>
+          <p class="card-item__desc">Estrategia como secuencia de decisiones sostenibles.</p>
+          <button class="card-item__open" type="button">Previsualizar</button>
+        </article>
+
+        <!-- Workflows (imágenes por ahora) -->
+        <article class="card-item" data-type="workflow" data-tag="systems"
+          data-title="Flow: diagnóstico Solaris"
+          data-kicker="Workflows · Systems"
+          data-desc="De señales dispersas a estructura. Entrada, análisis, propuesta, decisión."
+          data-media="./Imagen/Line/flow_01.png"
+        >
+          <div class="card-item__top">
+            <div class="card-item__kicker">Workflows</div>
+            <div class="card-item__tag">Systems</div>
+          </div>
+          <h3 class="card-item__title">Flow: diagnóstico Solaris</h3>
+          <p class="card-item__desc">Entrada ? análisis ? propuesta ? decisión.</p>
+          <button class="card-item__open" type="button">Previsualizar</button>
+        </article>
+
+        <article class="card-item" data-type="workflow" data-tag="future"
+          data-title="Flow: roadmap con intención"
+          data-kicker="Workflows · Future"
+          data-desc="Un roadmap que respira: objetivos, límites, riesgos, iteraciones."
+          data-media="./Imagen/Line/flow_02.png"
+        >
+          <div class="card-item__top">
+            <div class="card-item__kicker">Workflows</div>
+            <div class="card-item__tag">Future</div>
+          </div>
+          <h3 class="card-item__title">Flow: roadmap con intención</h3>
+          <p class="card-item__desc">Objetivos, límites, riesgos, iteraciones.</p>
+          <button class="card-item__open" type="button">Previsualizar</button>
+        </article>
+
+        <!-- Nota conceptual -->
+        <article class="card-item" data-type="note" data-tag="future"
+          data-title="Futuro, pero con bordes"
+          data-kicker="Note · Future"
+          data-desc="Visión sin límites es poesía. Visión con bordes es producto."
+        >
+          <div class="card-item__top">
+            <div class="card-item__kicker">Note</div>
+            <div class="card-item__tag">Future</div>
+          </div>
+          <h3 class="card-item__title">Futuro, pero con bordes</h3>
+          <p class="card-item__desc">Visión con bordes: producto. Sin bordes: solo ruido.</p>
+          <button class="card-item__open" type="button">Previsualizar</button>
+        </article>
+      </section>
+      
+      <section id="journal" class="studio-grid container reveal">
+        <!-- Solo Journal -->
+      </section>
+
+      <section id="workflows" class="studio-grid container reveal">
+        <!-- Solo Workflows -->
+      </section>
+
+      <section id="notes" class="studio-grid container reveal">
+        <!-- Solo Notes -->
+      </section>
+
+    
+
+
+      <footer class="section" style="padding: 4rem 0; border-top: 1px solid var(--border);">
+        <div class="container" style="text-align: center;">
+            <p class="brand" style="margin-bottom: 1rem;">© 2026 Solaris Studio</p>
+            <p style="color: var(--muted-2); font-size: 0.8rem;">Perú</p>
+        </div>
+    </footer>
+
+    </main>
+
+    <!-- Modal: Preview -->
+    <div class="modal" id="previewModal" aria-hidden="true">
+        <div class="modal__backdrop" data-close-preview></div>
+        <div class="modal__panel modal__panel--preview" role="dialog" aria-modal="true" aria-label="Previsualización">
+            <div class="modal__head">
+                <div class="modal__kicker" id="pvKicker">Archivo</div>
+                <button class="modal__close" type="button" data-close-preview aria-label="Cerrar">×</button>
+            </div>
+
+            <h2 class="modal__title modal__title--preview" id="pvTitle">Título</h2>
+
+            <div class="preview-meta">
+                <span class="preview-pill" id="pvTag">Studio</span>
+                <span class="preview-muted">Previsualización</span>
+            </div>
+
+            <p class="modal__desc preview-desc" id="pvDesc">Descripción</p>
+
+            <div class="modal__media preview-media" id="pvMediaWrap" hidden>
+                <img id="pvMedia" alt="Preview visual" />
+            </div>
+
+            <div class="modal__actions">
+                <button class="btn btn--ghost" type="button" data-close-preview>Cerrar</button>
+                <a class="btn btn--solid" href="./studio.html">Volver al archivo</a>
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="contactModal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-contact></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Contacto">
+        <div class="modal__head">
+            <div class="modal__kicker">Conectemos</div>
+            <button class="modal__close" type="button" data-close-contact aria-label="Cerrar">×</button>
+        </div>
+
+        <h2 class="modal__title">Impulsa tu proyecto</h2>
+        <p class="modal__desc">
+            Acceso directo a consultoría especializada. Sin intermediarios.
+        </p>
+
+        <div class="contact-premium">
+            <div class="contact-premium__grid">
+                <div class="contact-premium__block">
+                    <div class="contact-premium__label">E-mail Corporativo</div>
+                    <button class="contact-premium__value" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
+                        tu-correo@ejemplo.com
+                    </button>
+                    <div class="contact-premium__hint">Clic para copiar correo</div>
+                </div>
+
+                <div class="contact-premium__block">
+                    <div class="contact-premium__label">Línea de Consultoría</div>
+                    <button class="contact-premium__value" type="button" onclick="copyValue('https://wa.me/51953714752', this)">
+                        wa.me/51953714752
+                    </button>
+                    <a href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
+                       target="_blank" class="contact-premium__hint" style="color: #25D366; text-decoration: underline;">
+                        Click para ir directamente
+                    </a>
+                </div>
+            </div>
+
+            <div class="contact-premium__qrRow">
+                <div class="contact-premium__qr">
+                    <img class="qr-img" src="./Imagen/Line/qr_placeholder.png" alt="QR de contacto" />
+                </div>
+
+                <div class="contact-premium__cta">
+                    <div class="contact-premium__title">Soluciones a medida</div>
+                    <div class="contact-premium__text">
+                        Escanea el código para una respuesta inmediata vía WhatsApp o utiliza nuestros accesos rápidos.
+                    </div>
+
+                    <div class="contact-premium__actions">
+                        <button class="btn btn--ghost btn--small" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
+                            Copiar correo
+                        </button>
+                        <a class="btn btn--solid btn--small" 
+                           href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
+                           target="_blank">
+                            Iniciar Chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Micro sound (solo una vez) -->
+    <audio id="ui-sound" src="./assets/sound/ui-soft.mp3" preload="auto"></audio>
+    <script>
+      window.addEventListener("load", function () {
+        document.documentElement.classList.add("loaded");
+      });
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+

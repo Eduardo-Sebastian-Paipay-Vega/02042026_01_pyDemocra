@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        visibility: hidden;
+        background: #050505;
+      }
+
+      html.loaded {
+        visibility: visible;
+      }
+    </style>
+    <noscript><style>html { visibility: visible !important; }</style></noscript>
+
+    <title>Solaris Studio</title>
+    <meta
+      name="description"
+      content="Solaris Studio: estudio conceptual de sistemas, procesos y diseño. Menos ruido. Más criterio."
+    />
+    <meta name="theme-color" content="#050505" />
+
+    <meta property="og:title" content="Solaris Studio" />
+    <meta
+      property="og:description"
+      content="Sistemas en calma. Futuro con intención. Estudio conceptual de tecnología, procesos y diseño."
+    />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
+    
+    <link rel="icon" href="./Imagen/Iconos/logo_cua1.png" type="image/png" />
+    <link rel="apple-touch-icon" href="./Imagen/Iconos/logo_negro.png" />
+    <link rel="preload" href="/src/styles/styles.css" as="style" />
+    <link rel="preload" href="/src/styles/animations.css" as="style" />
+    <link rel="preload" href="/src/styles/theme.css" as="style" />
+    <link rel="preload" href="/src/styles/about-board.css" as="style" />
+    <link rel="stylesheet" href="/src/styles/styles.css" />
+    <link rel="stylesheet" href="/src/styles/animations.css" />
+    <link rel="stylesheet" href="/src/styles/theme.css" />
+    <link rel="stylesheet" href="/src/styles/about-board.css" />
+
+  </head>
+
+  <body>
+    <div id="top"></div>
+    <div class="mobile-progress" aria-hidden="true">
+      <span class="mobile-progress-fill"></span>
+    </div>
+
+    <header class="header">
+      <div class="container header-inner">
+
+        <a class="brand" href="#top" aria-label="Solaris Home">
+            <img src="./Imagen/Iconos/logo_cua1.png" alt="Logo" class="brand-logo-img"> 
+            <span>SOLARIS</span>
+        </a>
+
+        <nav class="nav" aria-label="Navegación principal">
+          <a class="nav-link" href="./index.html#enfoque">Enfoque</a>
+          <a class="nav-link" href="./studio.html">Archivo</a>
+          <a class="nav-link" href="./nosotros.html">Nosotros</a>
+          <div class="nav-login" aria-label="Login">
+            <span class="nav-login__label">Login</span>
+            <a class="nav-login__link" href="/login.html">Ingresar</a>
+            <a class="nav-login__link" href="/register.html">Registrarse</a>
+          </div>
+          <button class="nav-contact" type="button" data-open-contact>Contacto</button>
+        </nav>
+
+        <div class="mobile-simple-menu" aria-label="Menu de acceso">
+          <span class="mobile-simple-menu__label">Login</span>
+          <a class="mobile-simple-menu__link" href="/login.html">Ingresar</a>
+          <a class="mobile-simple-menu__link" href="/register.html">Registrarse</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <section class="hero" id="hero" aria-label="Solaris Hero">
+        <div class="hero-inner">
+            <img src="./Imagen/nosotros/quienes-somos.png" alt="¿Quiénes somos?" class="hero-big-static" />
+        </div>
+
+        <div class="scroll-indicator" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+            </svg>
+        </div>
+
+        <div class="hero-fade" aria-hidden="true"></div>
+      </section>
+
+      <section class="section" id="about" aria-label="Acerca de Solaris">
+        <div class="container section-inner">
+          <p class="section-text scroll-trigger">
+            Sabemos tus necesidades. Te ayudamos a lograr más con menos esfuerzo.
+            Somos un estudio conceptual especializado en sistemas, procesos y diseño.
+          </p>
+        </div>
+      </section>
+
+
+      <section class="solaris-board-wrapper">
+        <div class="solaris-board">
+
+          <svg class="paths-layer" viewBox="0 0 1400 700">
+            <defs>
+              <filter id="glow-effect" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <path id="path-design" class="connection-path" d="M700 120 L300 380" />
+            <path id="path-labs" class="connection-path" d="M700 120 L700 380" />
+            <path id="path-ventures" class="connection-path" d="M700 120 L1100 380" />
+
+            <path id="path-seed" class="connection-path" d="M1100 380 L1300 250" />
+            <path id="path-grow" class="connection-path" d="M1100 380 L1300 510" />
+          </svg>
+
+          <div class="solaris-node node-solaris" data-id="solaris">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Solaris</span>
+            </div>
+          </div>
+
+          <div class="solaris-node node-design locked" data-id="design" data-path="path-design">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Design</span>
+            </div>
+          </div>
+
+          <div class="solaris-node node-labs locked" data-id="labs" data-path="path-labs">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Labs</span>
+            </div>
+          </div>
+
+          <div class="solaris-node node-ventures locked" data-id="ventures" data-path="path-ventures">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Ventures</span>
+            </div>
+          </div>
+
+          <div class="solaris-node node-seed locked" data-id="seed" data-path="path-seed">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Seed</span>
+            </div>
+          </div>
+
+          <div class="solaris-node node-grow locked" data-id="grow" data-path="path-grow">
+            <div class="node-box">
+               <div class="status-dot"></div>
+               <span class="node-title">Grow</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+      </main>
+
+    <footer class="section" style="padding: 4rem 0; border-top: 1px solid var(--border);">
+        <div class="container" style="text-align: center;">
+            <p class="brand" style="justify-content: center; margin-bottom: 1rem;">© 2026 Solaris Studio</p>
+            <p style="color: var(--muted-2); font-size: 0.8rem;">Perú</p>
+        </div>
+    </footer>
+
+    <nav class="section-indicator" aria-label="Section indicator">
+      <span class="dot is-active" data-target="#top" data-label="Inicio"></span>
+      <span class="dot" data-target="#about" data-label="Solaris"></span>
+      <span class="dot" data-target="#enfoque" data-label="Enfoque"></span>
+      <span class="dot" data-target="#contact" data-label="Contacto"></span>
+    </nav>
+
+    <div class="progress-rail" aria-hidden="true">
+      <span class="progress-fill"></span>
+    </div>
+    
+    <div class="modal" id="contactModal" aria-hidden="true">
+    <div class="modal__backdrop" data-close-contact></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Contacto">
+        <div class="modal__head">
+            <div class="modal__kicker">Conectemos</div>
+            <button class="modal__close" type="button" data-close-contact aria-label="Cerrar">×</button>
+        </div>
+
+        <h2 class="modal__title">Impulsa tu proyecto</h2>
+        <p class="modal__desc">
+            Acceso directo a consultoría especializada. Sin intermediarios.
+        </p>
+
+        <div class="contact-premium">
+            <div class="contact-premium__grid">
+                <div class="contact-premium__block">
+                    <div class="contact-premium__label">E-mail Corporativo</div>
+                    <button class="contact-premium__value" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
+                        tu-correo@ejemplo.com
+                    </button>
+                    <div class="contact-premium__hint">Clic para copiar correo</div>
+                </div>
+
+                <div class="contact-premium__block">
+                    <div class="contact-premium__label">Línea de Consultoría</div>
+                    <button class="contact-premium__value" type="button" onclick="copyValue('https://wa.me/51953714752', this)">
+                        wa.me/51953714752
+                    </button>
+                    <a href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
+                       target="_blank" class="contact-premium__hint" style="color: #25D366; text-decoration: underline;">
+                        Click para ir directamente
+                    </a>
+                </div>
+            </div>
+
+            <div class="contact-premium__qrRow">
+                <div class="contact-premium__qr">
+                    <img class="qr-img" src="./Imagen/Line/qr_placeholder.png" alt="QR de contacto" />
+                </div>
+
+                <div class="contact-premium__cta">
+                    <div class="contact-premium__title">Soluciones a medida</div>
+                    <div class="contact-premium__text">
+                        Escanea el código para una respuesta inmediata vía WhatsApp o utiliza nuestros accesos rápidos.
+                    </div>
+
+                    <div class="contact-premium__actions">
+                        <button class="btn btn--ghost btn--small" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
+                            Copiar correo
+                        </button>
+                        <a class="btn btn--solid btn--small" 
+                           href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
+                           target="_blank">
+                            Iniciar Chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio id="ui-sound" src="./assets/sound/ui-soft.mp3" preload="auto"></audio>
+    <script>
+      window.addEventListener("load", function () {
+        document.documentElement.classList.add("loaded");
+      });
+    </script>
+    <script type="module" src="/src/main.js"></script>
+
+</body>
+</html>
+
