@@ -3,6 +3,7 @@ import express from "express";
 import { assertServerConfig, config } from "./config.js";
 import authRoutes from "./routes/auth.js";
 import auditRoutes from "./routes/audit.js";
+import iamRoutes from "./routes/iam.js";
 import onboardingRoutes from "./routes/onboarding.js";
 
 assertServerConfig();
@@ -22,6 +23,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/security", auditRoutes);
+app.use("/api/iam", iamRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 
 app.use((req, res) => {

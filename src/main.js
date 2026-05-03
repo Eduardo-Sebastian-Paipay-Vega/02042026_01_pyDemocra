@@ -4,6 +4,13 @@ import { loadRoute } from "./router.js";
 import { createStore } from "./state/store.js";
 
 const bootstrap = async () => {
+  const appRoot = document.getElementById("app-root");
+  if (appRoot) {
+    const { mountIntegratedApp } = await import("./app/bootstrap.tsx");
+    mountIntegratedApp(appRoot);
+    return;
+  }
+
   const store = createStore();
   const common = initCommonPage({ store });
 

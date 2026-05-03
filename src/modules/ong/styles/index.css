@@ -1,0 +1,73 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--t-bg, var(--background));
+  color: var(--t-text, var(--foreground));
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out;
+}
+
+.ong-field-control {
+  color-scheme: inherit;
+}
+
+.ong-field-control::placeholder {
+  color: var(--t-placeholder, var(--t-text-tertiary, rgba(148, 163, 184, 0.72)));
+  opacity: 1;
+}
+
+.ong-field-control:disabled {
+  color: var(--t-text-tertiary);
+  cursor: not-allowed;
+}
+
+.ong-native-select option,
+.ong-native-select optgroup {
+  background: var(--t-elevated, #111315);
+  color: var(--t-text, #f5f5f5);
+}
+
+/* Custom scrollbar for better Apple-like aesthetics */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        visibility: hidden;
+        background: #020202;
+      }
+
+      html.loaded {
+        visibility: visible;
+      }
+    </style>
+    <noscript><style>html { visibility: visible !important; }</style></noscript>
+    <title>Solaris | Onboarding Wizard</title>
+    <meta
+      name="description"
+      content="Asistente visual de onboarding para configurar tu empresa en 4 pasos."
+    />
+    <link rel="icon" href="./Imagen/Iconos/logo_cua1.png" type="image/png" />
+    <link rel="preload" href="/src/styles/theme.css" as="style" />
+    <link rel="preload" href="/src/styles/auth.css" as="style" />
+    <link rel="stylesheet" href="/src/styles/theme.css" />
+    <link rel="stylesheet" href="/src/styles/auth.css" />
+  </head>
+  <body class="auth-page page-auth page-onboarding has-fixed-header">
+    <header class="header">
+      <div class="container header-inner">
+        <a class="brand" href="/index.html" aria-label="Solaris Home">
+          <img
+            src="/assets/logo-solaris.svg"
+            alt="Logo Solaris"
+            class="brand-logo-img"
+            onerror="this.onerror=null;this.src='./Imagen/Iconos/logo_cua1.png';"
+          />
+          <span>SOLARIS</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="auth-shell auth-shell--wizard" data-onboarding-root>
+      <section class="auth-card auth-card--wizard" aria-label="Asistente de onboarding">
+        <div class="wiz-header">
+          <p class="wiz-step" data-step-label>Paso 1/4</p>
+          <h1 class="wiz-title" data-step-title>Datos de la empresa</h1>
+          <div class="wiz-progress" role="progressbar" aria-valuemin="1" aria-valuemax="4">
+            <span class="wiz-progress__fill" data-progress-fill></span>
+          </div>
+          <p class="wiz-subtitle">
+            Completa cada paso para crear tu empresa. El avance esta bloqueado por validacion.
+          </p>
+        </div>
+
+        <div class="wiz-panel is-active" data-step-panel="1">
+          <h2 class="wiz-panel__title">DATOS DE LA EMPRESA</h2>
+          <p class="wiz-panel__text">Valida el RUC para autocompletar la razon social oficial.</p>
+
+          <div class="auth-form">
+            <div>
+              <label class="auth-label" for="wiz-ruc">Numero RUC</label>
+              <div class="wiz-inline-field">
+                <input
+                  class="auth-input"
+                  id="wiz-ruc"
+                  name="tax_id"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="11"
+                  required
+                />
+                <button type="button" class="wiz-inline-button" data-validate-ruc>
+                  Validar RUC
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="auth-label" for="wiz-phone">Telefono</label>
+              <input
+                class="auth-input"
+                id="wiz-phone"
+                name="phone"
+                type="tel"
+                autocomplete="tel"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="auth-label" for="wiz-tenant-name">Razon Social</label>
+              <input
+                class="auth-input"
+                id="wiz-tenant-name"
+                name="tenant_name_preview"
+                type="text"
+                readonly
+                placeholder="Se completa automaticamente"
+              />
+            </div>
+          </div>
+
+          <div class="wiz-actions">
+            <button class="auth-submit" type="button" data-step1-next disabled>
+              Siguiente
+            </button>
+          </div>
+        </div>
+
+        <div class="wiz-panel" data-step-panel="2" hidden>
+          <h2 class="wiz-panel__title">SELECCION DE SECTOR</h2>
+          <p class="wiz-panel__text">Elige tu rubro con una tarjeta visual. Avance automatico.</p>
+
+          <div class="wiz-grid wiz-grid--choices" data-industry-grid></div>
+          <p class="wiz-hint" data-catalog-summary="industry"></p>
+          <p class="wiz-hint wiz-hint--warn" data-industry-hint></p>
+
+          <div class="wiz-actions">
+            <button class="wiz-ghost" type="button" data-go-step="1">Volver</button>
+          </div>
+        </div>
+
+        <div class="wiz-panel" data-step-panel="3" hidden>
+          <h2 class="wiz-panel__title">PLAN DE SUSCRIPCION</h2>
+          <p class="wiz-panel__text">Selecciona un plan para continuar al cierre del onboarding.</p>
+
+          <div class="wiz-grid wiz-grid--plans" data-plan-grid></div>
+          <p class="wiz-hint" data-catalog-summary="plan"></p>
+          <p class="wiz-hint wiz-hint--warn" data-plan-hint></p>
+
+          <div class="wiz-actions">
+            <button class="wiz-ghost" type="button" data-go-step="2">Volver</button>
+          </div>
+        </div>
+
+        <div class="wiz-panel" data-step-panel="4" hidden>
+          <h2 class="wiz-panel__title">DIA DE FACTURACION</h2>
+          <p class="wiz-panel__text">Define cuando inicia tu ciclo mensual.</p>
+
+          <div class="wiz-grid wiz-grid--billing" data-billing-grid></div>
+
+          <div class="wiz-actions wiz-actions--between">
+            <button class="wiz-ghost" type="button" data-go-step="3">Volver</button>
+            <button class="auth-submit" type="button" data-finish-onboarding disabled>
+              Crear empresa
+            </button>
+          </div>
+        </div>
+
+        <p class="auth-feedback" data-onboarding-notice aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script>
+      window.addEventListener("load", function () {
+        document.documentElement.classList.add("loaded");
+      });
+    </script>
+    <script type="module" src="/src/js/onboarding.js"></script>
+  </body>
+</html>

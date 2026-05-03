@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(xargs ls *)",
+      "Bash(xargs head *)",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(npx tsc *)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npm install *)",
+      "Bash(/d/PROYECTO/Democra\\(git\\)/node_modules/.bin/tsc *)",
+      "Bash(xargs grep *)",
+      "Bash(find /d/PROYECTO/Democra* -type f \\\\\\( -name \"*Admision*\" -o -name \"*admission*\" -o -name \"*admission*\" \\\\\\))"
+    ]
+  }
+}

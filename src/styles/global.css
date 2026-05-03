@@ -1,0 +1,22 @@
+/*
+  Critical global styles loaded before React renders.
+  Imported by src/main.tsx so Vite injects them as the first stylesheet.
+*/
+
+/* Flash-of-invisible-content guard — main.tsx adds html.loaded after first render */
+html {
+  visibility: hidden;
+  background: #050505;
+}
+
+html.loaded {
+  visibility: visible;
+}
+
+/* Hero title font — declared globally because it targets a class rendered by LandingPage */
+.studio-hero__title {
+  font-family: "Satoshi", sans-serif;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
