@@ -740,6 +740,29 @@ async function saveTemplate(
   return detail;
 }
 
+/**
+ * Upload a background image for an ID card template to Supabase Storage
+ * bucket `id_templates` and return the public URL.
+ *
+ * Path: id_templates/<tenantId>/<timestamp>-<filename>
+ */
+export async function uploadTemplateBackground(file: File): Promise<string> {
+  const tenantId = await getRequiredTenantId();
+  const ext = file.name.split(".").pop() ?? "png";
+  const path = `${tenantId}/${Date.now()}-template-bg.${ext}`;
+
+  const { error: uploadError } = await peopleDb.storage
+    .from("id_templates")
+    .upload(path, file, { upsert: true, contentType: file.type });
+
+  if (uploadError) {
+    throw new Error(toFriendlyError(uploadError, "No se pudo subir la imagen de fondo."));
+  }
+
+  const { data } = peopleDb.storage.from("id_templates").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export async function createIdCardTemplate(
   input: IdCardTemplateUpsertInput
 ): Promise<IdCardTemplateDetailData> {
