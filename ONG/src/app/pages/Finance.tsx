@@ -238,7 +238,7 @@ export function Finance() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <PageHeader title="Recursos - Finanzas" description="Operacion real sobre finanzas.cuentas, finanzas.cat_tipos_cuenta, finanzas.transacciones, finanzas.aprobaciones_transaccion y finanzas.comprobantes_financieros." action={{ label: "Refrescar", onClick: () => { accounts.refresh(); categories.refresh(); transactions.refresh(); reports.refresh(); } }} />
+      <PageHeader title="Recursos - Finanzas" description="Administra cuentas, categorías, transacciones, aprobaciones y comprobantes financieros del tenant." action={{ label: "Refrescar", onClick: () => { accounts.refresh(); categories.refresh(); transactions.refresh(); reports.refresh(); } }} />
       <div className="flex flex-wrap gap-2">
         <GradientButton size="sm" onClick={() => setView("accounts")}>Cuentas</GradientButton>
         <OutlineButton size="sm" onClick={() => setView("categories")}>Categorias</OutlineButton>

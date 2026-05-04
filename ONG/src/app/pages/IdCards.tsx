@@ -388,7 +388,7 @@ export function IdCards() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Credenciales ID"
-          description="Gestiona plantillas, coordenadas y credenciales reales sobre ong.id_card_templates, ong.id_card_template_fields y ong.id_cards."
+          description="Diseña plantillas de credencial y emite identificaciones digitales para el voluntariado."
           action={{ label: "Actualizar", onClick: workspace.refresh }}
         />
       </motion.div>
@@ -437,7 +437,7 @@ export function IdCards() {
               Plantillas
             </h2>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Gestion de base_image_url y coordenadas por field_key.
+              Configura la imagen de fondo y la posición de cada campo visible en la credencial.
             </p>
           </div>
           <GradientButton size="sm" onClick={openTemplateCreate} disabled={!canManage}>
@@ -469,7 +469,7 @@ export function IdCards() {
               Credenciales emitidas
             </h2>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Emision real de foto, nombre, DNI, codigo y QR para voluntariado.
+              Credenciales emitidas con foto, nombre, documento, código y QR del voluntario.
             </p>
           </div>
           <GradientButton size="sm" onClick={openCardCreate} disabled={!canManage}>

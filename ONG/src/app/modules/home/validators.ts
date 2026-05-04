@@ -62,8 +62,8 @@ export function validateDashboardActivityForm(
 ): DashboardActivityFormErrors {
   const errors: DashboardActivityFormErrors = {};
 
-  if (!input.taskId.trim()) {
-    errors.taskId = "Selecciona una tarea.";
+  if (!input.projectId.trim()) {
+    errors.projectId = "Selecciona un proyecto.";
   }
 
   const title = sanitizeText(input.title, MAX_ACTIVITY_TITLE_LENGTH);

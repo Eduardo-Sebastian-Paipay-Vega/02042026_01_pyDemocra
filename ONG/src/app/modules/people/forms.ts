@@ -200,7 +200,7 @@ export function validateVolunteerForm(values: VolunteerFormValues): VolunteerFie
       continue;
     }
     if (!skill.code) {
-      errors.skills = "Cada fila de habilidad debe seleccionar una habilidad real.";
+      errors.skills = "Cada habilidad debe tener una opción seleccionada.";
       break;
     }
     if (skillCodes.has(skill.code)) {
@@ -216,7 +216,7 @@ export function validateVolunteerForm(values: VolunteerFormValues): VolunteerFie
       continue;
     }
     if (!role.roleId) {
-      errors.operationalRoles = "Cada fila de rol debe seleccionar un rol operativo real.";
+      errors.operationalRoles = "Cada rol operativo debe tener una opción seleccionada.";
       break;
     }
     if (roleIds.has(role.roleId)) {

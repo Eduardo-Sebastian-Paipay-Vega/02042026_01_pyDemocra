@@ -542,7 +542,7 @@ async function resolveTenantAdmin(warnings: string[]) {
     const { data, error } = await supabase.rpc("fn_is_tenant_admin");
     if (error) {
       warnings.push(
-        "No se pudo validar tenant admin con public.fn_is_tenant_admin()."
+        "No se pudo verificar el nivel de acceso de administrador. Algunos permisos podrían no estar disponibles."
       );
       return false;
     }

@@ -951,7 +951,7 @@ export function Hours() {
               Detalle de horas
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Registro, aprobacion y trazabilidad disponible en la tabla real.
+              Información completa del registro de horas, estado de aprobación y trazabilidad.
             </p>
           </div>
           <button
@@ -1014,10 +1014,10 @@ export function Hours() {
                 style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
               >
                 <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                  Advertencia del contrato SQL
+                  Nota
                 </p>
                 <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                  ong.horas_actividad no guarda rango horario, pero ya persiste `comentario_resolucion` e `id_aprobacion`. La pantalla sincroniza el comentario con `ong.aprobaciones`.
+                  Este registro no almacena rango horario exacto. El comentario de resolución queda vinculado a la aprobación correspondiente.
                 </p>
               </div>
 
@@ -1058,7 +1058,7 @@ export function Hours() {
                 : "Resolver horas"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario es opcional y se sincroniza en `ong.aprobaciones.comentario` y `ong.horas_actividad.comentario_resolucion`.
+              El comentario es opcional y quedará registrado como observación de la resolución.
             </p>
           </div>
           <button

@@ -434,7 +434,7 @@ export function Approvals() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Bandeja de aprobaciones"
-          description="Bandeja real sobre `ong.aprobaciones` para horas. El contexto operativo se obtiene desde `ong.horas_actividad`."
+          description="Bandeja de aprobaciones pendientes: horas, evidencias y solicitudes de voluntarios."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -589,7 +589,7 @@ export function Approvals() {
               Solicitar revisión
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Devuelve un registro real de `ong.horas_actividad` al estado pendiente.
+              Marca el registro de horas como pendiente para una nueva revisión.
             </p>
           </div>
           <button
@@ -675,7 +675,7 @@ export function Approvals() {
               Detalle de aprobación
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Contexto real del registro en `ong.horas_actividad`.
+              Información detallada del registro de horas seleccionado.
             </p>
           </div>
           <button
@@ -799,7 +799,7 @@ export function Approvals() {
                 : "Resolver aprobación"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario es opcional y se sincroniza en `ong.aprobaciones.comentario` y `ong.horas_actividad.comentario_resolucion`.
+              El comentario es opcional y quedará registrado como observación de la resolución.
             </p>
           </div>
           <button

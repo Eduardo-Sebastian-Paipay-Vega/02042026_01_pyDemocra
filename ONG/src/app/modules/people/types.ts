@@ -453,6 +453,8 @@ export interface IdCardTemplateUpsertInput {
   templateHeight: number;
   isActive: boolean;
   fields: IdCardTemplateFieldRow[];
+  /** Template config JSONB (any JSON schema). Persisted to template_config. */
+  templateConfig?: Record<string, unknown> | null;
 }
 
 export interface IdCardUpsertInput {

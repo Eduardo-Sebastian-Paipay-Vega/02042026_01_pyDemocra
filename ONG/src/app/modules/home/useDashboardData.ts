@@ -148,7 +148,7 @@ export function useDashboardData() {
               data: [] as DashboardTaskOption[],
               error: toFriendlyError(
                 error,
-                "No se pudo cargar el catalogo de tareas para crear/editar actividades."
+                "No se pudo cargar el catalogo de proyectos para crear/editar actividades."
               ),
             })),
           fetchActivityLocationOptions()

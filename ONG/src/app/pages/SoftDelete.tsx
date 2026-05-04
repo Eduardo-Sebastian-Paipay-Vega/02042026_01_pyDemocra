@@ -135,7 +135,7 @@ export function SoftDelete() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Retencion y borrado"
-          description="Revisa la ventana real de retencion por plan, los registros soft deleted restaurables en whitelist y la trazabilidad de DELETE consolidada en bitacoras reales."
+          description="Revisa la política de retención vigente, restaura elementos eliminados y consulta la trazabilidad de bajas."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -163,7 +163,7 @@ export function SoftDelete() {
             </p>
           )}
           <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            Ventana de retencion actual: {data.retentionPolicyLabel}. Si `public.tenants` o `public.plan_policies` no estan expuestos, la vista degrada con warning sin inventar valores.
+            Política de retención activa: {data.retentionPolicyLabel}. Si la política no está disponible, se mostrará una advertencia.
           </p>
         </div>
       </motion.div>
@@ -182,7 +182,7 @@ export function SoftDelete() {
           <div className="mb-4 flex items-center gap-2">
             <ArchiveX className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <h2 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Estado real del soporte
+              Cobertura de retención
             </h2>
           </div>
 

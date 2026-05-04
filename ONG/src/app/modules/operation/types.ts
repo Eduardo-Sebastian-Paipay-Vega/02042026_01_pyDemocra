@@ -26,7 +26,7 @@ export type ActivityStatusKind =
 
 export interface OperationActivityRow {
   id: string;
-  taskId: string;
+  taskId: string | null;
   name: string;
   description: string;
   taskName: string;
@@ -77,7 +77,7 @@ export interface OperationActivitiesData {
 }
 
 export interface ActivityCreateInput {
-  taskId: string;
+  projectId: string;
   name: string;
   description?: string;
   statusId: number;
@@ -89,7 +89,7 @@ export interface ActivityCreateInput {
 }
 
 export interface ActivityUpdateInput {
-  taskId?: string;
+  projectId?: string;
   name?: string;
   description?: string | null;
   statusId?: number;

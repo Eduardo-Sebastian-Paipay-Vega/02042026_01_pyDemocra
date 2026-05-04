@@ -244,7 +244,7 @@ export function NotificationTemplates() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Plantillas"
-        description="Gestiona registros reales en comunicaciones.plantillas_notificacion, incluyendo codigo_evento y variables JSON, sin inventar motores de disparo o render."
+        description="Administra las plantillas de notificación con su evento asociado y variables configurables."
         action={
           data.access.canManageTemplates
             ? { label: "Nueva plantilla", onClick: openCreateModal }

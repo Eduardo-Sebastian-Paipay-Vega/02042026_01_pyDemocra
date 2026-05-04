@@ -358,7 +358,7 @@ interface OngProyectoRow {
 interface OngTareaRow {
   id: Uuid;
   tenant_id: Uuid;
-  id_proyecto: Uuid;
+  id_actividad: Uuid | null;
   titulo: string;
   descripcion: string | null;
   estado: "pendiente" | "en_progreso" | "completada" | "cancelada" | null;
@@ -372,7 +372,7 @@ interface OngTareaRow {
 interface OngActividadRow {
   id: Uuid;
   tenant_id: Uuid;
-  id_tarea: Uuid;
+  id_proyecto: Uuid | null;
   titulo: string;
   descripcion: string | null;
   codigo_estado:
@@ -502,6 +502,8 @@ interface OngIdCardTemplateRow {
   base_image_url: string;
   template_width: number;
   template_height: number;
+  /** JSON schema template config (layers, metadata, positions in mm). Null for legacy templates. */
+  template_config: JsonValue | null;
   activa: boolean;
   created_at: IsoDateTime;
   updated_at: IsoDateTime;
@@ -1079,6 +1081,30 @@ interface AuditoriaAuditLogRow {
   source: string;
 }
 
+/**
+ * Dedicated view/projection for medical audit entries surfaced to the
+ * medical_audit_viewer RBAC role.  Read-only; populated by the service layer
+ * by merging clinico access logs + auditoria.audit_log rows tagged with
+ * "medical_audit:" source prefix.
+ */
+interface AuditoriaMedicalAccessRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  /** UUID of the medical record that was accessed. */
+  record_id: Uuid;
+  /** "ficha_medica" | "ficha_sensible_voluntario" */
+  record_kind: string;
+  /** "VIEW" | "EDIT" | "DELETE" */
+  action: string;
+  actor_id: Uuid | null;
+  reason: string | null;
+  /** Comma-separated field names (no values) for EDIT events. */
+  changed_fields: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  event_at: IsoDateTime;
+}
+
 type PublicFunctions = {
   fn_current_tenant_id: {
     Args: Record<string, never>;
@@ -1250,6 +1276,7 @@ export interface AppDatabase {
   auditoria: EmptySchema & {
     Tables: {
       audit_log: GenericTable<AuditoriaAuditLogRow>;
+      medical_access: GenericTable<AuditoriaMedicalAccessRow>;
     };
   };
 }

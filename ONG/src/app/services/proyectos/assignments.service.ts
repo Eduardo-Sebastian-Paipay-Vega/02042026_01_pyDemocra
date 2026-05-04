@@ -34,7 +34,7 @@ type TaskDbRow = {
 
 type ActivityDbRow = {
   id: string;
-  id_tarea: string;
+  id_proyecto: string | null;
   titulo: string;
 };
 
@@ -139,7 +139,7 @@ async function loadActivityMap(
 
   const { data, error } = await ongSchema()
     .from("actividades")
-    .select("id, id_tarea, titulo")
+    .select("id, id_proyecto, titulo")
     .eq("tenant_id", tenantId)
     .in("id", ids);
 
@@ -348,14 +348,10 @@ export async function listAssignments(
       tenantId,
       raw.activityVolunteerRows.map((row) => row.id_actividad)
     );
-    const taskMap = await loadTaskMap(
-      tenantId,
-      Array.from(activityMap.values()).map((row) => row.id_tarea)
-    );
     const projectMap = await loadProjectMap(tenantId, [
       ...raw.projectVolunteerRows.map((row) => row.id_proyecto),
       ...raw.resourceRows.map((row) => row.id_proyecto),
-      ...Array.from(taskMap.values()).map((row) => row.id_proyecto),
+      ...Array.from(activityMap.values()).map((row) => row.id_proyecto).filter(Boolean) as string[],
     ]);
     const volunteerMap = await loadVolunteerMap(tenantId, [
       ...raw.projectVolunteerRows.map((row) => row.id_voluntario),
@@ -382,21 +378,14 @@ export async function listAssignments(
         if (!activity) {
           return null;
         }
-        const task = taskMap.get(activity.id_tarea);
-        if (!task) {
-          return null;
-        }
-        const project = projectMap.get(task.id_proyecto);
-        if (!project) {
-          return null;
-        }
+        const project = activity.id_proyecto ? projectMap.get(activity.id_proyecto) : undefined;
 
         return mapActivityVolunteerAssignmentRow(
           row,
-          project.id,
-          task.id,
-          `${project.codigo} - ${project.nombre_proyecto}`,
-          task.titulo,
+          project?.id ?? "",
+          "",
+          project ? `${project.codigo} - ${project.nombre_proyecto}` : "Proyecto no disponible",
+          "",
           activity.titulo,
           volunteerMap.get(row.id_voluntario) ?? row.id_voluntario
         );

@@ -4,14 +4,22 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:full",
-    "dev:web": "vite",
+    "dev": "npm run dev:all",
+    "dev:web": "vite --force",
     "dev:api": "node server/index.js",
-    "dev:full": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:ong": "npm run dev --prefix ONG",
+    "clean:ports": "node scripts/clean-ports.mjs",
+    "clean:cache": "node scripts/clean-cache.mjs",
+    "clean": "node scripts/clean-ports.mjs && node scripts/clean-cache.mjs",
+    "clean:build": "npx rimraf node_modules/.vite dist",
+    "dev:force": "npm run clean:build && vite --force",
+    "predev:all": "node scripts/clean-ports.mjs && node scripts/clean-cache.mjs && node scripts/startup-banner.mjs",
+    "dev:all": "concurrently --kill-others-on-fail --names \"API,ADMIN,ONG\" -c \"bgBlue.bold,bgYellow.bold,bgGreen.bold\" \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:ong\"",
     "build": "vite build",
     "preview": "vite preview",
     "start:api": "node server/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/validate-env.mjs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",

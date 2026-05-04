@@ -34,7 +34,6 @@ export const ONG_SHELL_BASE_PATH = "/app/ong";
 export type TenantRouteId =
   | "home"
   | "search"
-  | "operation-activities"
   | "operation-attendance"
   | "operation-hours"
   | "operation-evidence"
@@ -150,18 +149,6 @@ const ROUTES: TenantRouteDefinition[] = [
     anyPermissions: ["projects.read"],
   },
   {
-    id: "tasks",
-    label: "Tareas",
-    title: "Tareas",
-    breadcrumb: "Proyectos",
-    path: `${ONG_SHELL_BASE_PATH}/projects/tasks`,
-    legacyPath: "/admin/tasks",
-    icon: ListTodo,
-    groupId: "proyectos",
-    moduleKeys: ["projects", "ong"],
-    anyPermissions: ["projects.read"],
-  },
-  {
     id: "project-activities",
     label: "Actividades",
     title: "Actividades del proyecto",
@@ -169,6 +156,18 @@ const ROUTES: TenantRouteDefinition[] = [
     path: `${ONG_SHELL_BASE_PATH}/projects/activities`,
     legacyPath: "/admin/project-activities",
     icon: Calendar,
+    groupId: "proyectos",
+    moduleKeys: ["projects", "ong"],
+    anyPermissions: ["projects.read"],
+  },
+  {
+    id: "tasks",
+    label: "Tareas",
+    title: "Tareas",
+    breadcrumb: "Proyectos",
+    path: `${ONG_SHELL_BASE_PATH}/projects/tasks`,
+    legacyPath: "/admin/tasks",
+    icon: ListTodo,
     groupId: "proyectos",
     moduleKeys: ["projects", "ong"],
     anyPermissions: ["projects.read"],
@@ -184,18 +183,6 @@ const ROUTES: TenantRouteDefinition[] = [
     groupId: "proyectos",
     moduleKeys: ["projects", "ong"],
     anyPermissions: ["projects.read"],
-  },
-  {
-    id: "operation-activities",
-    label: "Actividades",
-    title: "Actividades",
-    breadcrumb: "Operacion",
-    path: `${ONG_SHELL_BASE_PATH}/operation/activities`,
-    legacyPath: "/admin/activities",
-    icon: Calendar,
-    groupId: "operacion",
-    moduleKeys: ["operation", "ong"],
-    anyPermissions: ["operation.activities.read"],
   },
   {
     id: "operation-attendance",
@@ -574,7 +561,7 @@ export function resolveTenantInitialPath(context: TenantContextValue) {
   const priorityOrder: TenantRouteId[] = [
     "home",
     "projects",
-    "operation-activities",
+    "operation-attendance",
     "operation-hours",
     "volunteers",
     "admission-requests",
@@ -626,7 +613,7 @@ export function buildTenantCommandRoutes(context: TenantContextValue | null | un
 
 export function resolveShortcutTargets(context: TenantContextValue | null | undefined) {
   const candidates: Record<string, TenantRouteId[]> = {
-    a: ["operation-activities"],
+    a: ["operation-attendance"],
     d: ["home"],
     h: ["approvals-hours", "operation-hours"],
     m: ["medical-records"],

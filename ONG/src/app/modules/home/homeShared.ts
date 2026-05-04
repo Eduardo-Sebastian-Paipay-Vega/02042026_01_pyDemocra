@@ -26,7 +26,7 @@ export const EMPTY_GLOBAL_SEARCH_RESULTS: GlobalSearchGroupedResults = {
 
 export interface TaskLookup {
   id: string;
-  projectId: string;
+  activityId: string | null;
   title: string;
   status: "pendiente" | "en_progreso" | "completada" | "cancelada";
   dueDate: string | null;
@@ -34,7 +34,15 @@ export interface TaskLookup {
 }
 
 export function toFriendlyError(error: unknown, fallbackMessage: string): string {
-  const rawMessage = error instanceof Error ? error.message : String(error ?? "");
+  let rawMessage: string;
+  if (error instanceof Error) {
+    rawMessage = error.message;
+  } else if (error !== null && typeof error === "object" && "message" in error) {
+    const pgErr = error as { message?: string; details?: string };
+    rawMessage = [pgErr.message, pgErr.details].filter(Boolean).join(" — ");
+  } else {
+    rawMessage = String(error ?? "");
+  }
   const normalized = rawMessage.toLowerCase();
 
   if (
@@ -331,7 +339,7 @@ export async function getTaskMap(
   let query = db
     .schema("ong")
     .from("tareas")
-    .select("id, id_proyecto, titulo, estado, fecha_limite, created_at")
+    .select("id, id_actividad, titulo, estado, fecha_limite, created_at")
     .in("id", taskIds);
 
   if (tenantId) {
@@ -349,7 +357,7 @@ export async function getTaskMap(
       row.id,
       {
         id: row.id,
-        projectId: row.id_proyecto,
+        activityId: row.id_actividad ?? null,
         title: row.titulo,
         status: row.estado,
         dueDate: row.fecha_limite,

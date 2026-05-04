@@ -41,12 +41,6 @@ const EVIDENCE_VALIDATION_BLOCKED_MESSAGE =
 
 type ActivityLookup = {
   id: string;
-  id_tarea: string;
-  titulo: string;
-};
-
-type TaskLookup = {
-  id: string;
   id_proyecto: string;
   titulo: string;
 };
@@ -70,17 +64,16 @@ type EvidenceDbRow = {
 
 async function loadActivityLookups(activityIds: string[]): Promise<{
   activities: Map<string, ActivityLookup>;
-  tasks: Map<string, TaskLookup>;
   projects: Map<string, ProjectLookup>;
 }> {
   if (!activityIds.length) {
-    return { activities: new Map(), tasks: new Map(), projects: new Map() };
+    return { activities: new Map(), projects: new Map() };
   }
 
   const tenantId = await getRequiredTenantId();
   const { data: activityRows, error: activityError } = await ongSchema()
     .from("actividades")
-    .select("id, id_tarea, titulo")
+    .select("id, id_proyecto, titulo")
     .eq("tenant_id", tenantId)
     .in("id", activityIds);
 
@@ -94,22 +87,11 @@ async function loadActivityLookups(activityIds: string[]): Promise<{
       row,
     ])
   );
-  const taskIds = uniqueNonEmpty((activityRows ?? []).map((row) => row.id_tarea));
+  const projectIds = uniqueNonEmpty((activityRows ?? []).map((row) => row.id_proyecto));
 
-  const { data: taskRows, error: taskError } = await ongSchema()
-    .from("tareas")
-    .select("id, id_proyecto, titulo")
-    .eq("tenant_id", tenantId)
-    .in("id", taskIds);
-
-  if (taskError) {
-    throw new Error(taskError.message);
+  if (!projectIds.length) {
+    return { activities, projects: new Map() };
   }
-
-  const tasks = new Map<string, TaskLookup>(
-    ((taskRows ?? []) as TaskLookup[]).map((row): [string, TaskLookup] => [row.id, row])
-  );
-  const projectIds = uniqueNonEmpty((taskRows ?? []).map((row) => row.id_proyecto));
 
   const { data: projectRows, error: projectError } = await ongSchema()
     .from("proyectos")
@@ -124,7 +106,7 @@ async function loadActivityLookups(activityIds: string[]): Promise<{
   const projects = new Map<string, ProjectLookup>(
     ((projectRows ?? []) as ProjectLookup[]).map((row): [string, ProjectLookup] => [row.id, row])
   );
-  return { activities, tasks, projects };
+  return { activities, projects };
 }
 
 async function loadVolunteerLabels(volunteerIds: string[]): Promise<Map<string, string>> {
@@ -146,15 +128,14 @@ function mapRow(
   volunteerLabels: Map<string, string>
 ): OperationEvidenceRow {
   const activity = lookups.activities.get(row.id_actividad);
-  const task = activity ? lookups.tasks.get(activity.id_tarea) : undefined;
-  const project = task ? lookups.projects.get(task.id_proyecto) : undefined;
+  const project = activity ? lookups.projects.get(activity.id_proyecto) : undefined;
   const validationKind = mapApprovalStatusKind("otro");
 
   return {
     id: row.id,
     activityId: row.id_actividad,
     activityName: activity?.titulo ?? "Actividad no disponible",
-    projectId: task?.id_proyecto ?? null,
+    projectId: activity?.id_proyecto ?? null,
     projectName: project ? `${project.codigo} - ${project.nombre_proyecto}` : "Proyecto no disponible",
     volunteerId: row.id_voluntario,
     volunteerName: row.id_voluntario ? volunteerLabels.get(row.id_voluntario) ?? row.id_voluntario : "Sin autor",

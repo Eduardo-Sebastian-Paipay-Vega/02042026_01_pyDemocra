@@ -171,7 +171,7 @@ export function HoursApproval() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Aprobacion de horas"
-          description="Vista especializada de `ong.aprobaciones` para registros de `ong.horas_actividad`."
+          description="Revisión y aprobación de registros de horas reportados por los voluntarios."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -231,7 +231,7 @@ export function HoursApproval() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Detalle de aprobacion</h3>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Fuente principal: `ong.aprobaciones`.</p>
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Registro de aprobaciones de horas del período seleccionado.</p>
             </div>
             <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsDetailOpen(false)}>X</button>
           </div>
@@ -266,7 +266,7 @@ export function HoursApproval() {
               {resolutionTarget?.action === "approved" ? "Aprobar horas" : "Rechazar horas"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario se persiste en `ong.aprobaciones.comentario` y `ong.horas_actividad.comentario_resolucion`.
+              El comentario quedará registrado como observación de la resolución.
             </p>
           </div>
           <textarea value={resolutionComment} onChange={(event) => { setResolutionComment(event.target.value); setResolutionError(null); }} rows={4} placeholder="Comentario opcional" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />

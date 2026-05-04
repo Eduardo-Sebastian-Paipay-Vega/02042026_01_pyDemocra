@@ -241,7 +241,7 @@ export function SensitiveAccess() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Accesos sensibles"
-          description="Monitorea eventos reales de clinico.accesos_sensibles_log y clinico.accesos_sensibles_voluntario_log, y gestiona restricciones de acceso sobre public.role_access_constraints."
+          description="Monitorea los accesos a información clínica sensible y gestiona las restricciones de acceso por rol."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -269,7 +269,7 @@ export function SensitiveAccess() {
             </p>
           )}
           <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            `governance.sensitive.read` habilita la bitacora consolidada. `settings.roles.read` y `settings.roles.manage` controlan la lectura y mutacion de `public.role_access_constraints`.
+            El permiso de lectura sensible habilita la bitácora consolidada. Los permisos de gestión de roles controlan las restricciones de acceso.
           </p>
           {data.unsupportedFlows.map((item) => (
             <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -374,7 +374,7 @@ export function SensitiveAccess() {
 
           {!error && !loading && !data.access.canReadConstraints && (
             <GovernanceErrorBlock
-              message="La tabla public.role_access_constraints existe y soporta escritura, pero esta vista exige `settings.roles.read` / `settings.roles.manage` o tenant admin."
+              message="No tienes permisos para visualizar las restricciones de acceso. Se requiere el permiso de gestión de roles o acceso de administrador."
               onRetry={refresh}
             />
           )}
@@ -454,7 +454,7 @@ export function SensitiveAccess() {
                 {editingConstraint ? "Editar restriccion" : "Nueva restriccion"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.role_access_constraints
+                Restricción de acceso por rol y sede.
               </p>
             </div>
             <button

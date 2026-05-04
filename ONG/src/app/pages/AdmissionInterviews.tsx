@@ -365,7 +365,7 @@ export function AdmissionInterviews() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Entrevistas de admision"
-        description="Programacion y seguimiento real sobre `rrhh.entrevistas_admision` con `puntaje`."
+        description="Programación y seguimiento de entrevistas del proceso de admisión."
         action={{ label: "Nueva entrevista", onClick: openCreateModal }}
       />
 

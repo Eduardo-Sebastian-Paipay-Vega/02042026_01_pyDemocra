@@ -112,7 +112,7 @@ export function AuditLog() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Auditoria"
-          description="Consulta bitacoras reales desde public.audit_logs y auditoria.audit_log, con filtros por entidad, actor, operacion y fecha."
+          description="Consulta el historial de actividad del sistema con filtros por entidad, actor, operación y fecha."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>

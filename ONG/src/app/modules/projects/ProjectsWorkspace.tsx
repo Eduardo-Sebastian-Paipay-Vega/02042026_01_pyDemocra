@@ -50,25 +50,25 @@ const SECTION_META: Record<
   projects: {
     title: "Proyectos",
     description:
-      "Gestiona `ong.proyectos` con area, estado catalogado, equipo y recursos reales.",
+      "Administra los proyectos de la organización con área, estado, equipo y presupuesto.",
     path: "/app/ong/projects",
-  },
-  tasks: {
-    title: "Tareas",
-    description:
-      "Gestiona `ong.tareas` por proyecto, respetando estado real y fecha limite.",
-    path: "/app/ong/projects/tasks",
   },
   activities: {
     title: "Actividades",
     description:
-      "Gestiona `ong.actividades` con estado, fechas, descripcion y ubicacion propias dentro del contrato vigente.",
+      "Gestiona las actividades de cada proyecto: fechas, ubicación, horas estimadas y voluntarios asignados.",
     path: "/app/ong/projects/activities",
+  },
+  tasks: {
+    title: "Tareas",
+    description:
+      "Organiza las tareas vinculadas a las actividades, con estado de avance y fecha límite.",
+    path: "/app/ong/projects/tasks",
   },
   assignments: {
     title: "Asignaciones",
     description:
-      "Gestiona `ong.asignaciones_proyecto`, `ong.asignaciones_actividad` y `ong.recursos_proyecto`.",
+      "Administra las asignaciones de voluntarios y recursos en proyectos y actividades.",
     path: "/app/ong/projects/assignments",
   },
 };
@@ -87,7 +87,7 @@ const EMPTY_PROJECT_FORM: ProjectFormValues = {
 };
 
 const EMPTY_TASK_FORM: TaskFormValues = {
-  projectId: "",
+  activityId: "",
   title: "",
   description: "",
   statusCode: "pendiente",
@@ -95,7 +95,7 @@ const EMPTY_TASK_FORM: TaskFormValues = {
 };
 
 const EMPTY_ACTIVITY_FORM: ActivityFormValues = {
-  taskId: "",
+  projectId: "",
   title: "",
   description: "",
   statusCode: "pendiente",
@@ -293,7 +293,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     `${storageKeyPrefix}.task-filters`,
     {
       searchTerm: "",
-      projectId: "all",
+      activityId: "all",
       statusCode: "all",
     }
   );
@@ -301,7 +301,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     useSessionStorageState<ActivityListFilters>(`${storageKeyPrefix}.activity-filters`, {
       searchTerm: "",
       projectId: "all",
-      taskId: "all",
       statusCode: "all",
       locationId: "all",
       dateFrom: null,
@@ -353,6 +352,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     useState<ProjectResourceAssignmentFormValues>(
       EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM
     );
+  // Used only in the Task form UI to cascade-filter activities by project.
+  // Not part of TaskFormValues — purely presentational.
+  const [taskFormProjectFilter, setTaskFormProjectFilter] = useState<string>("");
 
   const { catalogs, loading: catalogsLoading, error: catalogsError, refresh: refreshCatalogs } =
     useProjectCatalogs();
@@ -403,6 +405,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setEditingActivityId(null);
     setEditingAssignment(null);
     setAssignmentFormKind("project-volunteer");
+    setTaskFormProjectFilter("");
   }
 
   function openCreateForm() {
@@ -461,7 +464,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   function openTaskEdit(row: TaskRow) {
     setEditingTaskId(row.id);
     setTaskForm({
-      projectId: row.projectId,
+      activityId: row.activityId ?? "",
       title: row.title,
       description: row.description ?? "",
       statusCode: row.statusCode,
@@ -473,7 +476,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   function openActivityEdit(row: ActivityRow) {
     setEditingActivityId(row.id);
     setActivityForm({
-      taskId: row.taskId,
+      projectId: row.projectId,
       title: row.title,
       description: row.description ?? "",
       statusCode: row.statusCode,
@@ -707,15 +710,15 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const taskFiltersView = (
     <div className="grid gap-3 md:grid-cols-2">
       <SelectField
-        value={taskFilters.projectId === "all" ? "" : taskFilters.projectId}
+        value={taskFilters.activityId === "all" ? "" : taskFilters.activityId}
         onChange={(value) =>
           setTaskFilters((current) => ({
             ...current,
-            projectId: value || "all",
+            activityId: value || "all",
           }))
         }
-        options={catalogs.projects}
-        placeholder="Proyecto"
+        options={catalogs.activities}
+        placeholder="Actividad"
       />
       <SelectField
         value={taskFilters.statusCode === "all" ? "" : taskFilters.statusCode}
@@ -746,17 +749,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         }
         options={catalogs.projects}
         placeholder="Proyecto"
-      />
-      <SelectField
-        value={activityFilters.taskId === "all" ? "" : activityFilters.taskId}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            taskId: value || "all",
-          }))
-        }
-        options={catalogs.tasks}
-        placeholder="Tarea"
       />
       <SelectField
         value={activityFilters.statusCode === "all" ? "" : activityFilters.statusCode}
@@ -933,10 +925,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "counts",
-      label: "Tareas / Act.",
+      label: "Act. / Tareas",
       render: (row) => (
         <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-          {row.taskCount} / {row.activityCount}
+          {row.activityCount} / {row.taskCount}
         </span>
       ),
     },
@@ -959,7 +951,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div>
           <div style={{ color: "var(--t-text)" }}>{row.title}</div>
           <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.projectName}
+            {row.activityName ?? "Sin actividad asignada"}
           </div>
         </div>
       ),
@@ -981,15 +973,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       ),
     },
     {
-      key: "activities",
-      label: "Actividades",
-      render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>{row.activityCount}</span>
-      ),
-    },
-    {
       key: "team",
-      label: "Equipo proyecto",
+      label: "Voluntarios",
       render: (row) => (
         <span style={{ color: "var(--t-text-secondary)" }}>{row.volunteerCount}</span>
       ),
@@ -1004,7 +989,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div>
           <div style={{ color: "var(--t-text)" }}>{row.title}</div>
           <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.taskName} - {row.projectName}
+            {row.projectName}
           </div>
         </div>
       ),
@@ -1043,6 +1028,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <span style={{ color: "var(--t-text-secondary)" }}>
           {row.estimatedHours ?? 0} est. / {row.registeredHours} reg.
         </span>
+      ),
+    },
+    {
+      key: "tasks",
+      label: "Tareas",
+      render: (row) => (
+        <span style={{ color: "var(--t-text-secondary)" }}>{row.taskCount}</span>
       ),
     },
     {
@@ -1211,12 +1203,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             return (
               <>
                 <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</div><div style={{ color: "var(--t-text)" }}>{detail.task.projectName}</div></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</div><div style={{ color: "var(--t-text)" }}>{detail.task.activityName ?? "Sin actividad asignada"}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getTaskStatusVariant(detail.task.statusKind)}>{detail.task.statusLabel}</StatusDot></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fecha limite</div><div style={{ color: "var(--t-text)" }}>{detail.task.deadline || "Sin fecha"}</div></div>
                 </div>
                 <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.task.description || "Sin descripcion registrada."}</div></div>
-                <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Actividades vinculadas</div>{detail.linkedActivities.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin actividades vinculadas.</div> : detail.linkedActivities.map((row) => <div key={row.id} className="flex items-center justify-between gap-3 py-2"><div><div style={{ color: "var(--t-text)" }}>{row.title}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{formatActivityWindow(row.startAt, row.endAt)}{row.locationName ? ` · ${row.locationName}` : ""}</div></div><div className="flex items-center gap-2"><StatusDot variant={getActivityStatusVariant(row.statusKind)}>{row.statusLabel}</StatusDot><span style={{ color: "var(--t-text-secondary)" }}>{row.estimatedHours ?? 0} h</span></div></div>)}</div>
               </>
             );
           })()
@@ -1229,8 +1220,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 {detail.warnings.length > 0 ? <Alert><AlertCircle className="h-4 w-4" /><AlertTitle>Advertencia</AlertTitle><AlertDescription>{detail.warnings[0]}</AlertDescription></Alert> : null}
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</div><div style={{ color: "var(--t-text)" }}>{detail.activity.projectName}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Tarea</div><div style={{ color: "var(--t-text)" }}>{detail.activity.taskName}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getActivityStatusVariant(detail.activity.statusKind)}>{detail.activity.statusLabel}</StatusDot></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Tareas</div><div style={{ color: "var(--t-text)" }}>{detail.linkedTasks.length}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fechas</div><div style={{ color: "var(--t-text)" }}>{formatActivityWindow(detail.activity.startAt, detail.activity.endAt)}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Ubicacion</div><div style={{ color: "var(--t-text)" }}>{detail.activity.locationName || "Sin ubicacion"}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Horas</div><div style={{ color: "var(--t-text)" }}>{detail.activity.estimatedHours ?? 0} h estimadas / {detail.activity.registeredHours} h registradas</div></div>
@@ -1316,7 +1307,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           section === "projects"
             ? "Buscar por codigo, proyecto, area o estado..."
             : section === "tasks"
-            ? "Buscar por tarea, proyecto o estado..."
+            ? "Buscar por tarea, actividad o estado..."
             : section === "activities"
             ? "Buscar por actividad, descripcion, estado, ubicacion o proyecto..."
             : "Buscar por proyecto, voluntario, actividad, recurso o estado..."
@@ -1338,7 +1329,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="flex items-start justify-between gap-3 border-b border-[var(--t-border)] px-4 py-3">
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Detalle de {meta.title.toLowerCase()}</h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Datos cargados desde el esquema real del modulo.</p>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Información del registro seleccionado.</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => void details.reload()}>Recargar</Button>
@@ -1354,14 +1345,59 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
               {section === "projects" ? editingProjectId ? "Editar proyecto" : "Crear proyecto" : section === "tasks" ? editingTaskId ? "Editar tarea" : "Crear tarea" : section === "activities" ? editingActivityId ? "Editar actividad" : "Crear actividad" : editingAssignment ? `Editar ${getAssignmentKindLabel(assignmentFormKind).toLowerCase()}` : "Crear asignacion"}
             </h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Formulario alineado al schema real. No se guardan columnas inexistentes.</p>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Complete los campos y guarde los cambios.</p>
           </div>
           <Button variant="outline" size="sm" onClick={closeForm}>Cerrar</Button>
         </div>
         <div className="max-h-[75vh] space-y-4 overflow-y-auto p-4">
           {section === "projects" ? <div className="grid gap-3 md:grid-cols-2"><InputField value={projectForm.code} onChange={(value) => setProjectForm((current) => ({ ...current, code: value }))} placeholder="Codigo (ej: PROJ-001, auto si vacío)" /><InputField value={projectForm.name} onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))} placeholder="Nombre del proyecto" /><SelectField value={projectForm.areaId} onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))} options={catalogs.areas} placeholder="Area" /><SelectField value={projectForm.stateCode} onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))} options={catalogs.projectStates} placeholder="Estado" /><InputField value={projectForm.startDate} onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))} placeholder="Fecha inicio" type="date" /><InputField value={projectForm.endDate} onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))} placeholder="Fecha fin" type="date" /><InputField value={projectForm.budget} onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))} placeholder="Presupuesto" type="number" /><div className="md:col-span-2"><ImageUploadField label="Imagen del proyecto (opcional)" existingUrl={projectForm.imageUrl || null} previewFile={projectForm.imageFile} onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))} onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))} /></div><div className="md:col-span-2"><TextareaField value={projectForm.description} onChange={(value) => setProjectForm((current) => ({ ...current, description: value }))} placeholder="Descripcion del proyecto" /></div></div> : null}
-          {section === "tasks" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={taskForm.projectId} onChange={(value) => setTaskForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={taskForm.statusCode} onChange={(value) => setTaskForm((current) => ({ ...current, statusCode: value as TaskFormValues["statusCode"] }))} options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" /><InputField value={taskForm.title} onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la tarea" /><InputField value={taskForm.deadline} onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))} placeholder="Fecha limite" type="date" /><div className="md:col-span-2"><TextareaField value={taskForm.description} onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la tarea" /></div></div> : null}
-          {section === "activities" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={activityForm.taskId} onChange={(value) => setActivityForm((current) => ({ ...current, taskId: value }))} options={catalogs.tasks} placeholder="Tarea" /><SelectField value={activityForm.statusCode} onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))} options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" /><InputField value={activityForm.title} onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la actividad" /><InputField value={activityForm.estimatedHours} onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))} placeholder="Horas estimadas" type="number" /><InputField value={activityForm.startAt} onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))} placeholder="Fecha inicio" type="date" /><InputField value={activityForm.endAt} onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))} placeholder="Fecha fin" type="date" /><div className="md:col-span-2"><SelectField value={activityForm.locationId} onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))} options={catalogs.locations} placeholder="Ubicacion (opcional)" /></div><div className="md:col-span-2"><TextareaField value={activityForm.description} onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la actividad" /></div></div> : null}
+          {section === "tasks" ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {/* Cascading: first pick a project to filter the activities list */}
+              <SelectField
+                value={taskFormProjectFilter}
+                onChange={(value) => {
+                  setTaskFormProjectFilter(value);
+                  setTaskForm((current) => ({ ...current, activityId: "" }));
+                }}
+                options={catalogs.projects}
+                placeholder="Proyecto (para filtrar actividad)"
+              />
+              <SelectField
+                value={taskForm.activityId}
+                onChange={(value) => setTaskForm((current) => ({ ...current, activityId: value }))}
+                options={
+                  taskFormProjectFilter
+                    ? catalogs.activities.filter((a) => a.projectId === taskFormProjectFilter)
+                    : catalogs.activities
+                }
+                placeholder="Actividad"
+              />
+              <SelectField
+                value={taskForm.statusCode}
+                onChange={(value) => setTaskForm((current) => ({ ...current, statusCode: value as TaskFormValues["statusCode"] }))}
+                options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))}
+                placeholder="Estado"
+              />
+              <InputField value={taskForm.deadline} onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))} placeholder="Fecha limite" type="date" />
+              <InputField value={taskForm.title} onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la tarea" />
+              <div className="md:col-span-2">
+                <TextareaField value={taskForm.description} onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la tarea" />
+              </div>
+            </div>
+          ) : null}
+          {section === "activities" ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <SelectField value={activityForm.projectId} onChange={(value) => setActivityForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" />
+              <SelectField value={activityForm.statusCode} onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))} options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" />
+              <InputField value={activityForm.title} onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la actividad" />
+              <InputField value={activityForm.estimatedHours} onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))} placeholder="Horas estimadas" type="number" />
+              <InputField value={activityForm.startAt} onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))} placeholder="Fecha inicio" type="date" />
+              <InputField value={activityForm.endAt} onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))} placeholder="Fecha fin" type="date" />
+              <div className="md:col-span-2"><SelectField value={activityForm.locationId} onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))} options={catalogs.locations} placeholder="Ubicacion (opcional)" /></div>
+              <div className="md:col-span-2"><TextareaField value={activityForm.description} onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la actividad" /></div>
+            </div>
+          ) : null}
           {section === "assignments" ? <div className="space-y-4">{!editingAssignment ? <SelectField value={assignmentFormKind} onChange={(value) => setAssignmentFormKind(value as AssignmentKind)} options={[{ value: "project-volunteer", label: "Voluntario en proyecto" }, { value: "activity-volunteer", label: "Voluntario en actividad" }, { value: "project-resource", label: "Recurso de proyecto" }]} placeholder="Tipo de asignacion" /> : null}{assignmentFormKind === "project-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectVolunteerAssignmentForm.projectId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectVolunteerAssignmentForm.volunteerId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><InputField value={projectVolunteerAssignmentForm.role} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en proyecto" /><InputField value={projectVolunteerAssignmentForm.joinedAt} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, joinedAt: value }))} placeholder="Fecha ingreso" type="date" /><label className="flex items-center gap-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}><input type="checkbox" checked={projectVolunteerAssignmentForm.active} onChange={(event) => setProjectVolunteerAssignmentForm((current) => ({ ...current, active: event.target.checked }))} />Asignacion activa</label></div> : null}{assignmentFormKind === "activity-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={activityVolunteerAssignmentForm.activityId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, activityId: value }))} options={catalogs.activities} placeholder="Actividad" /><SelectField value={activityVolunteerAssignmentForm.volunteerId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><div className="md:col-span-2"><InputField value={activityVolunteerAssignmentForm.role} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en actividad" /></div></div> : null}{assignmentFormKind === "project-resource" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectResourceAssignmentForm.projectId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectResourceAssignmentForm.itemId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, itemId: value }))} options={catalogs.items} placeholder="Item" /><InputField value={projectResourceAssignmentForm.quantityRequired} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityRequired: value }))} placeholder="Cantidad requerida" type="number" /><InputField value={projectResourceAssignmentForm.quantityAssigned} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityAssigned: value }))} placeholder="Cantidad asignada" type="number" /></div> : null}</div> : null}
         </div>
         <div className="flex gap-2 border-t border-[var(--t-border)] px-4 py-3"><Button onClick={() => void handleSubmitForm()} disabled={mutations.isSaving}>{mutations.isSaving ? "Guardando..." : "Guardar"}</Button><Button variant="outline" onClick={closeForm}>Cancelar</Button></div>

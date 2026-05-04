@@ -414,10 +414,10 @@ export async function fetchProjectOptions(): Promise<SelectOption[]> {
   );
 }
 
-export async function fetchTaskOptions(): Promise<SelectOption[]> {
+export async function fetchActivityOptions(): Promise<SelectOption[]> {
   const tenantId = await getRequiredTenantId();
   const { data, error } = await ongSchema()
-    .from("tareas")
+    .from("actividades")
     .select("id, titulo, id_proyecto")
     .eq("tenant_id", tenantId)
     .order("titulo", { ascending: true });
@@ -435,15 +435,16 @@ export async function fetchTaskOptions(): Promise<SelectOption[]> {
     (row: { id: string; titulo: string; id_proyecto: string }): SelectOption => ({
       value: row.id,
       label: `${row.titulo} - ${projectLabelById.get(row.id_proyecto) ?? row.id_proyecto}`,
+      projectId: row.id_proyecto,
     })
   );
 }
 
-export async function fetchActivityOptions(): Promise<SelectOption[]> {
+export async function fetchTaskOptions(): Promise<SelectOption[]> {
   const tenantId = await getRequiredTenantId();
   const { data, error } = await ongSchema()
-    .from("actividades")
-    .select("id, titulo, id_tarea")
+    .from("tareas")
+    .select("id, titulo, id_actividad")
     .eq("tenant_id", tenantId)
     .order("titulo", { ascending: true });
 
@@ -451,15 +452,17 @@ export async function fetchActivityOptions(): Promise<SelectOption[]> {
     throw new Error(error.message);
   }
 
-  const tasks = await fetchTaskOptions().catch(() => [] as SelectOption[]);
-  const taskLabelById = new Map<string, string>(
-    tasks.map((item): [string, string] => [item.value, item.label])
+  const activities = await fetchActivityOptions().catch(() => [] as SelectOption[]);
+  const activityLabelById = new Map<string, string>(
+    activities.map((item): [string, string] => [item.value, item.label])
   );
 
   return (data ?? []).map(
-    (row: { id: string; titulo: string; id_tarea: string }): SelectOption => ({
+    (row: { id: string; titulo: string; id_actividad: string | null }): SelectOption => ({
       value: row.id,
-      label: `${row.titulo} - ${taskLabelById.get(row.id_tarea) ?? row.id_tarea}`,
+      label: row.id_actividad
+        ? `${row.titulo} - ${activityLabelById.get(row.id_actividad) ?? row.id_actividad}`
+        : row.titulo,
     })
   );
 }
@@ -531,7 +534,6 @@ export async function fetchProjectCatalogs(): Promise<ProjectCatalogs> {
     projectStates,
     areas,
     projects,
-    tasks,
     activityStates,
     activities,
     locations,
@@ -542,7 +544,6 @@ export async function fetchProjectCatalogs(): Promise<ProjectCatalogs> {
     fetchProjectStateOptions(),
     fetchAreaOptions(),
     fetchProjectOptions(),
-    fetchTaskOptions(),
     Promise.resolve(getActivityStatusOptions()),
     fetchActivityOptions(),
     fetchLocationOptions(),
@@ -550,6 +551,8 @@ export async function fetchProjectCatalogs(): Promise<ProjectCatalogs> {
     fetchItemOptions(),
     resolveProjectManageCapability(),
   ]);
+  // Tasks depend on activities, fetch after
+  const tasks = await fetchTaskOptions().catch(() => [] as SelectOption[]);
 
   return {
     projectStates,

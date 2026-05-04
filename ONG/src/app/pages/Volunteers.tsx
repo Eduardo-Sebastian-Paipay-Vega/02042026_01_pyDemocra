@@ -253,7 +253,7 @@ export function Volunteers() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Voluntarios"
-          description="Gestion real del perfil, habilidades, roles y documentos del voluntariado sobre la nueva BD multi-esquema."
+          description="Administra los perfiles de voluntarios con sus habilidades, roles y documentación."
           action={{ label: "Actualizar", onClick: volunteers.refresh }}
         />
       </motion.div>

@@ -634,7 +634,7 @@ export async function fetchActivityCatalog(): Promise<ActivityCatalogRow[]> {
   const tenantId = await getRequiredTenantId();
   const { data: activityRows, error: activityError } = await ongSchema()
     .from("actividades")
-    .select("id, id_tarea, titulo")
+    .select("id, id_proyecto, titulo")
     .eq("tenant_id", tenantId)
     .order("titulo", { ascending: true });
 
@@ -644,60 +644,39 @@ export async function fetchActivityCatalog(): Promise<ActivityCatalogRow[]> {
 
   const rows = (activityRows ?? []) as Array<{
     id: string;
-    id_tarea: string | null;
+    id_proyecto: string | null;
     titulo: string;
   }>;
-  const taskIds = uniqueNonEmpty(rows.map((row) => row.id_tarea));
-  const taskMap = new Map<string, { id_proyecto: string | null }>();
+  const projectIds = uniqueNonEmpty(rows.map((row) => row.id_proyecto));
   const projectLabelById = new Map<string, string>();
 
-  if (taskIds.length > 0) {
-    const { data: taskRows, error: taskError } = await ongSchema()
-      .from("tareas")
-      .select("id, id_proyecto")
+  if (projectIds.length > 0) {
+    const { data: projectRows, error: projectError } = await ongSchema()
+      .from("proyectos")
+      .select("id, codigo, nombre_proyecto")
       .eq("tenant_id", tenantId)
-      .in("id", taskIds);
+      .in("id", projectIds);
 
-    if (taskError) {
-      throw new Error(taskError.message);
+    if (projectError) {
+      throw new Error(projectError.message);
     }
 
-    for (const row of (taskRows ?? []) as Array<{ id: string; id_proyecto: string | null }>) {
-      taskMap.set(row.id, { id_proyecto: row.id_proyecto });
-    }
-
-    const projectIds = uniqueNonEmpty(
-      (taskRows ?? []).map((row: { id_proyecto: string | null }) => row.id_proyecto)
-    );
-
-    if (projectIds.length > 0) {
-      const { data: projectRows, error: projectError } = await ongSchema()
-        .from("proyectos")
-        .select("id, codigo, nombre_proyecto")
-        .eq("tenant_id", tenantId)
-        .in("id", projectIds);
-
-      if (projectError) {
-        throw new Error(projectError.message);
-      }
-
-      for (const row of (projectRows ?? []) as Array<{
-        id: string;
-        codigo: string;
-        nombre_proyecto: string;
-      }>) {
-        projectLabelById.set(row.id, `${row.codigo} - ${row.nombre_proyecto}`.trim());
-      }
+    for (const row of (projectRows ?? []) as Array<{
+      id: string;
+      codigo: string;
+      nombre_proyecto: string;
+    }>) {
+      projectLabelById.set(row.id, `${row.codigo} - ${row.nombre_proyecto}`.trim());
     }
   }
 
   return rows.map((row) => {
-    const projectId = row.id_tarea ? (taskMap.get(row.id_tarea)?.id_proyecto ?? null) : null;
+    const projectId = row.id_proyecto ?? null;
     const projectLabel = projectId ? projectLabelById.get(projectId) ?? projectId : null;
 
     return {
       id: row.id,
-      taskId: row.id_tarea,
+      taskId: null,
       projectId,
       label: projectLabel ? `${row.titulo} · ${projectLabel}` : row.titulo,
     };
@@ -708,7 +687,7 @@ export async function fetchTaskCatalog(): Promise<TaskCatalogRow[]> {
   const tenantId = await getRequiredTenantId();
   const { data, error } = await ongSchema()
     .from("tareas")
-    .select("id, id_proyecto, titulo")
+    .select("id, id_actividad, titulo")
     .eq("tenant_id", tenantId)
     .order("titulo", { ascending: true });
 
@@ -716,18 +695,11 @@ export async function fetchTaskCatalog(): Promise<TaskCatalogRow[]> {
     throw new Error(error.message);
   }
 
-  const projectOptions = await fetchProjectCatalog().catch(
-    () => [] as Array<{ value: string; label: string }>
-  );
-  const projectLabelById = new Map<string, string>(
-    projectOptions.map((item): [string, string] => [item.value, item.label])
-  );
-
-  return (data ?? []).map((row: { id: string; id_proyecto: string; titulo: string }) => ({
+  return (data ?? []).map((row: { id: string; id_actividad: string | null; titulo: string }) => ({
     id: row.id,
-    projectId: row.id_proyecto,
+    projectId: row.id_actividad ?? "",
     name: row.titulo,
-    projectName: projectLabelById.get(row.id_proyecto) ?? row.id_proyecto,
+    projectName: "",
   }));
 }
 

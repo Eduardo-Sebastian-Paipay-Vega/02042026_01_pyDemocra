@@ -640,6 +640,7 @@ function validateTemplateInput(input: IdCardTemplateUpsertInput): IdCardTemplate
     templateHeight,
     isActive: Boolean(input.isActive),
     fields: normalizedFields,
+    templateConfig: input.templateConfig ?? null,
   };
 }
 
@@ -696,6 +697,7 @@ async function saveTemplate(
         template_width: normalized.templateWidth,
         template_height: normalized.templateHeight,
         activa: normalized.isActive,
+        template_config: normalized.templateConfig ?? null,
         updated_by: actorId,
       })
       .eq("tenant_id", tenantId)
@@ -714,6 +716,7 @@ async function saveTemplate(
         template_width: normalized.templateWidth,
         template_height: normalized.templateHeight,
         activa: normalized.isActive,
+        template_config: normalized.templateConfig ?? null,
         created_by: actorId,
         updated_by: actorId,
       })

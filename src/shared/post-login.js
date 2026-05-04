@@ -11,12 +11,12 @@ function normalizeIndustry(value) {
 export async function resolvePostLoginDestination({ auth, user, profile }) {
   const sessionUser = user || (await auth.getCurrentUser());
   if (!sessionUser) {
-    return "/login.html";
+    return "/login";
   }
 
   const userProfile = profile || (await auth.getProfile(sessionUser.id));
   if (!userProfile?.tenant_id) {
-    return "/onboarding.html";
+    return "/onboarding";
   }
 
   const { data: tenant, error: tenantError } = await auth.supabase
@@ -27,7 +27,7 @@ export async function resolvePostLoginDestination({ auth, user, profile }) {
     .maybeSingle();
 
   if (tenantError || !tenant) {
-    return "/onboarding.html";
+    return "/onboarding";
   }
 
   const industryTypeId = normalizeIndustry(tenant.industry_type_id);

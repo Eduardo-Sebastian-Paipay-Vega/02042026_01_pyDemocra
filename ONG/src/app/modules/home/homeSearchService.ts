@@ -9,7 +9,6 @@ import {
   SEARCH_MIN_LENGTH,
   getRequiredTenantId,
   getProjectNameMap,
-  getTaskMap,
   safeOrPatternValue,
   toFriendlyError,
   uniqueNonEmpty,
@@ -162,7 +161,7 @@ export async function searchGlobalEntities(
   let activitiesQuery = db
     .schema("ong")
     .from("actividades")
-    .select("id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion")
+    .select("id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion")
     .eq("tenant_id", tenantId)
     .or(`titulo.ilike.${searchPattern},descripcion.ilike.${searchPattern}`)
     .limit(limitPerGroup);
@@ -205,10 +204,8 @@ export async function searchGlobalEntities(
   }
 
   const activityRows = activitiesResult.data ?? [];
-  const taskIds = uniqueNonEmpty(activityRows.map((item) => item.id_tarea));
-  const taskMap = await getTaskMap(taskIds, tenantId);
   const projectNameMap = await getProjectNameMap(
-    uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.projectId)),
+    uniqueNonEmpty(activityRows.map((item) => item.id_proyecto)),
     tenantId
   );
 
@@ -231,16 +228,15 @@ export async function searchGlobalEntities(
   }));
 
   const activities: GlobalSearchItem[] = activityRows.map((row) => {
-    const task = taskMap.get(row.id_tarea);
-    const projectName = task
-      ? projectNameMap.get(task.projectId) ?? "Proyecto"
+    const projectName = row.id_proyecto
+      ? projectNameMap.get(row.id_proyecto) ?? "Proyecto"
       : "Proyecto";
 
     return {
       id: row.id,
       type: "activity",
       title: row.titulo,
-      subtitle: `${task?.title ?? "Tarea"} - ${projectName} - ${formatActivityStatusLabel(row.codigo_estado)}`,
+      subtitle: `${projectName} - ${formatActivityStatusLabel(row.codigo_estado)}`,
       targetPath: buildEntityTargetPath("activity", row.id),
     };
   });
@@ -362,7 +358,7 @@ export async function fetchGlobalSearchDetail(
     const { data, error } = await db
       .schema("ong")
       .from("actividades")
-      .select("id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at")
+      .select("id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at")
       .eq("tenant_id", tenantId)
       .eq("id", item.id)
       .limit(1);
@@ -378,8 +374,8 @@ export async function fetchGlobalSearchDetail(
       throw new Error("La actividad ya no existe o no pertenece al tenant.");
     }
 
-    const [taskMap, locationResult] = await Promise.all([
-      getTaskMap([row.id_tarea], tenantId),
+    const [projectMap, locationResult] = await Promise.all([
+      getProjectNameMap(row.id_proyecto ? [row.id_proyecto] : [], tenantId),
       row.id_ubicacion
         ? db
             .schema("ong")
@@ -402,20 +398,17 @@ export async function fetchGlobalSearchDetail(
         toFriendlyError(locationResult.error, "No se pudo resolver la ubicacion de la actividad.")
       );
     }
-    const task = taskMap.get(row.id_tarea);
-    const projectMap = await getProjectNameMap(task ? [task.projectId] : [], tenantId);
-    const projectName = task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto";
+    const projectName = row.id_proyecto ? projectMap.get(row.id_proyecto) ?? "Proyecto" : "Proyecto";
     const location = locationResult.data?.[0];
 
     return {
       id: row.id,
       type: item.type,
       title: row.titulo,
-      subtitle: `${task?.title ?? "Tarea"} - ${projectName}`,
+      subtitle: projectName,
       targetPath: item.targetPath,
       fields: [
         { label: "Proyecto", value: projectName },
-        { label: "Tarea", value: task?.title ?? "-" },
         { label: "Estado actividad", value: formatActivityStatusLabel(row.codigo_estado) },
         { label: "Fecha inicio", value: formatDateLabel(row.fecha_inicio) },
         { label: "Fecha fin", value: formatDateLabel(row.fecha_fin) },
@@ -433,8 +426,6 @@ export async function fetchGlobalSearchDetail(
                   maximumFractionDigits: 1,
                 }),
         },
-        { label: "Estado tarea", value: task?.status ?? "-" },
-        { label: "Vencimiento tarea", value: formatDateLabel(task?.dueDate) },
         { label: "Registro", value: formatDateLabel(row.created_at) },
         { label: "Descripcion", value: row.descripcion ?? "-" },
       ],

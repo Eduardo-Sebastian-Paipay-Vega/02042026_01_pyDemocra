@@ -442,7 +442,7 @@ export function SystemUsers() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Usuarios del sistema"
-          description="Gestiona perfiles reales del tenant desde public.profiles y su acceso institucional mediante public.user_roles_sedes. La creacion o invitacion de usuarios se resuelve por backend seguro y el resumen de sesiones depende de `settings.sessions.read`."
+          description="Administra los perfiles de usuario del tenant y sus accesos institucionales. La creación o invitación de usuarios se gestiona de forma segura desde el servidor."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -497,7 +497,7 @@ export function SystemUsers() {
             </p>
           )}
           <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            `settings.users.manage` habilita la Edge Function `admin-provision-user`. `settings.sessions.read` habilita el resumen visible de sesiones y `settings.sessions.terminate` permite la revocacion masiva por usuario.
+            El permiso de gestión de usuarios habilita la creación e invitación. El permiso de lectura de sesiones activa el resumen visible, y el de terminación permite la revocación masiva.
           </p>
           {data.unsupportedFlows.map((item) => (
             <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -524,7 +524,7 @@ export function SystemUsers() {
           <SettingsErrorBlock
             message={
               error ??
-              "La lectura de usuarios requiere `settings.users.read`, `settings.users.manage` o compatibilidad legacy `iam.user_roles.manage` / tenant admin."
+              "No tienes los permisos necesarios para ver los usuarios del sistema. Contacta al administrador."
             }
             onRetry={refresh}
           />
@@ -590,7 +590,7 @@ export function SystemUsers() {
                 Detalle del perfil
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.profiles + public.user_roles_sedes
+                Perfil e información de accesos institucionales del usuario.
               </p>
             </div>
           </div>
@@ -667,7 +667,7 @@ export function SystemUsers() {
                   : "Habilitar acceso institucional"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La operacion escribe filas reales en public.user_roles_sedes. La provision de `auth.users` se resuelve por separado via la Edge Function `admin-provision-user`.
+                Actualiza los accesos institucionales del perfil seleccionado. La creación de credenciales de acceso se gestiona de forma independiente.
               </p>
             </div>
             <button
@@ -738,7 +738,7 @@ export function SystemUsers() {
 
             <div className="flex gap-2">
               <OutlineButton size="sm" onClick={addAssignmentRow}>
-                Agregar fila
+                Agregar acceso
               </OutlineButton>
             </div>
           </div>
@@ -774,7 +774,7 @@ export function SystemUsers() {
                 Crear o invitar usuario
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La operacion usa la Edge Function `admin-provision-user` para crear o invitar `auth.users`, sincronizar `public.profiles` y vincular opcionalmente `ong.voluntarios.iam_user_id`. Esta accion no se ejecuta desde frontend directo y exige `settings.users.manage` o tenant admin.
+                Crea o invita a un nuevo usuario al sistema. La operación se ejecuta de forma segura desde el servidor y requiere permisos de gestión de usuarios o acceso de administrador.
               </p>
             </div>
             <button
@@ -960,7 +960,7 @@ export function SystemUsers() {
                 Revocar accesos institucionales
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                Esta accion elimina filas reales de public.user_roles_sedes.
+                Esta acción eliminará todos los accesos institucionales del usuario seleccionado.
               </p>
             </div>
           </div>

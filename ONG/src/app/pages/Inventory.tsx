@@ -164,7 +164,7 @@ export function Inventory() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <PageHeader title="Recursos - Inventario" description="Operacion real sobre ong.items, ong.ubicaciones, ong.tipo_transaccion_inventario y ong.transacciones_inventario." action={{ label: "Refrescar", onClick: () => { items.refresh(); locations.refresh(); movements.refresh(); kardex.refresh(); } }} />
+      <PageHeader title="Recursos - Inventario" description="Administra ítems, ubicaciones, movimientos y el kardex de inventario del tenant." action={{ label: "Refrescar", onClick: () => { items.refresh(); locations.refresh(); movements.refresh(); kardex.refresh(); } }} />
       <div className="flex flex-wrap gap-2">
         <GradientButton size="sm" onClick={() => setView("items")}>Items</GradientButton>
         <OutlineButton size="sm" onClick={() => setView("locations")}>Ubicaciones</OutlineButton>

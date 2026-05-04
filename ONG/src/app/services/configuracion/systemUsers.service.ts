@@ -124,7 +124,7 @@ function sanitizeAssignmentInput(input: SystemUserAssignmentInput): {
     const roleId = sanitizeOptionalId(row.roleId);
     const sedeId = sanitizeOptionalId(row.sedeId);
     if (!roleId || !sedeId) {
-      throw new Error("Cada fila debe seleccionar un rol y una sede.");
+      throw new Error("Cada acceso debe tener un rol y una sede asignados.");
     }
 
     return { roleId, sedeId };

@@ -473,7 +473,7 @@ export function Evidence() {
               {editingEvidenceId ? "Editar evidencia" : "Registrar evidencia"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              La tabla real no define estados de validacion; este modal solo cubre carga y mantenimiento.
+              Carga y mantiene evidencias de actividad. La validación se gestiona en la bandeja de aprobaciones.
             </p>
           </div>
           <button

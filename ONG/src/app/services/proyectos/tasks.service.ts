@@ -12,7 +12,8 @@ import {
   getTaskStatusKind,
   getTaskStatusLabel,
   normalizeDateValue,
-    ongSchema,
+  normalizeText,
+  ongSchema,
   resolveActivityStatusCode,
   resolveCurrentUserId,
   resolveProfileLabels,
@@ -23,10 +24,12 @@ import {
   uniqueNonEmpty,
 } from "./shared";
 
+// ─── DB row types ─────────────────────────────────────────────────────────────
+
 type TaskDbRow = {
   id: string;
   tenant_id: string;
-  id_proyecto: string;
+  id_actividad: string | null;
   titulo: string;
   descripcion: string | null;
   estado: string | null;
@@ -37,15 +40,9 @@ type TaskDbRow = {
   updated_by: string | null;
 };
 
-type ProjectDbRow = {
-  id: string;
-  codigo: string;
-  nombre_proyecto: string;
-};
-
 type ActivityDbRow = {
   id: string;
-  id_tarea: string;
+  id_proyecto: string;
   titulo: string;
   descripcion: string | null;
   codigo_estado: string;
@@ -55,6 +52,12 @@ type ActivityDbRow = {
   horas_estimadas: number | null;
   created_at: string;
   updated_at: string;
+};
+
+type ProjectDbRow = {
+  id: string;
+  codigo: string;
+  nombre_proyecto: string;
 };
 
 type LocationDbRow = {
@@ -69,6 +72,8 @@ type ProjectAssignmentDbRow = {
   activo: boolean | null;
 };
 
+// ─── Status helpers ───────────────────────────────────────────────────────────
+
 function resolveTaskStatusCode(value: string | null | undefined): TaskRow["statusCode"] {
   const cleaned = sanitizeText(value ?? "pendiente", 40) || "pendiente";
   if (
@@ -79,29 +84,27 @@ function resolveTaskStatusCode(value: string | null | undefined): TaskRow["statu
   ) {
     return cleaned;
   }
-
   return "pendiente";
 }
 
+// ─── Mapping helpers ──────────────────────────────────────────────────────────
+
 function mapTaskRow(
   row: TaskDbRow,
-  projectLabel: string,
-  activityCount: number,
+  activityLabel: string | null,
   volunteerCount: number
 ): TaskRow {
   const statusCode = resolveTaskStatusCode(row.estado);
-
   return {
     id: row.id,
-    projectId: row.id_proyecto,
-    projectName: projectLabel,
+    activityId: row.id_actividad,
+    activityName: activityLabel,
     title: row.titulo,
     description: row.descripcion,
     statusCode,
     statusLabel: getTaskStatusLabel(statusCode),
     statusKind: getTaskStatusKind(statusCode),
     deadline: row.fecha_limite,
-    activityCount,
     volunteerCount,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -110,16 +113,12 @@ function mapTaskRow(
 
 function mapActivityRow(
   row: ActivityDbRow,
-  task: TaskDbRow,
   project: ProjectDbRow,
   location: LocationDbRow | undefined
 ): ActivityRow {
   const statusCode = resolveActivityStatusCode(row.codigo_estado);
-
   return {
     id: row.id,
-    taskId: row.id_tarea,
-    taskName: task.titulo,
     projectId: project.id,
     projectName: `${project.codigo} - ${project.nombre_proyecto}`,
     title: row.titulo,
@@ -135,9 +134,32 @@ function mapActivityRow(
     assignedVolunteers: 0,
     registeredHours: 0,
     evidenceCount: 0,
+    taskCount: 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+// ─── Loader helpers ───────────────────────────────────────────────────────────
+
+async function loadActivityMap(
+  tenantId: string,
+  activityIds: string[]
+): Promise<Map<string, ActivityDbRow>> {
+  const ids = uniqueNonEmpty(activityIds);
+  if (!ids.length) return new Map();
+
+  const { data, error } = await ongSchema()
+    .from("actividades")
+    .select("id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at")
+    .eq("tenant_id", tenantId)
+    .in("id", ids);
+
+  if (error) throw new Error(error.message);
+
+  return new Map(
+    ((data ?? []) as ActivityDbRow[]).map((row): [string, ActivityDbRow] => [row.id, row])
+  );
 }
 
 async function loadProjectMap(
@@ -145,9 +167,7 @@ async function loadProjectMap(
   projectIds: string[]
 ): Promise<Map<string, ProjectDbRow>> {
   const ids = uniqueNonEmpty(projectIds);
-  if (!ids.length) {
-    return new Map();
-  }
+  if (!ids.length) return new Map();
 
   const { data, error } = await ongSchema()
     .from("proyectos")
@@ -155,45 +175,11 @@ async function loadProjectMap(
     .eq("tenant_id", tenantId)
     .in("id", ids);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   return new Map(
     ((data ?? []) as ProjectDbRow[]).map((row): [string, ProjectDbRow] => [row.id, row])
   );
-}
-
-async function loadActivityMapByTask(
-  tenantId: string,
-  taskIds: string[]
-): Promise<Map<string, ActivityDbRow[]>> {
-  const ids = uniqueNonEmpty(taskIds);
-  if (!ids.length) {
-    return new Map();
-  }
-
-  const { data, error } = await ongSchema()
-    .from("actividades")
-    .select(
-      "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at"
-    )
-    .eq("tenant_id", tenantId)
-    .in("id_tarea", ids)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const grouped = new Map<string, ActivityDbRow[]>();
-  for (const row of (data ?? []) as ActivityDbRow[]) {
-    const current = grouped.get(row.id_tarea) ?? [];
-    current.push(row);
-    grouped.set(row.id_tarea, current);
-  }
-
-  return grouped;
 }
 
 async function loadLocationMap(
@@ -201,9 +187,7 @@ async function loadLocationMap(
   locationIds: string[]
 ): Promise<Map<string, LocationDbRow>> {
   const ids = uniqueNonEmpty(locationIds);
-  if (!ids.length) {
-    return new Map();
-  }
+  if (!ids.length) return new Map();
 
   const { data, error } = await ongSchema()
     .from("ubicaciones")
@@ -211,9 +195,7 @@ async function loadLocationMap(
     .eq("tenant_id", tenantId)
     .in("id", ids);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   return new Map(
     ((data ?? []) as LocationDbRow[]).map((row): [string, LocationDbRow] => [row.id, row])
@@ -225,9 +207,7 @@ async function loadProjectAssignmentCounts(
   projectIds: string[]
 ): Promise<Map<string, number>> {
   const ids = uniqueNonEmpty(projectIds);
-  if (!ids.length) {
-    return new Map();
-  }
+  if (!ids.length) return new Map();
 
   const { data, error } = await ongSchema()
     .from("asignaciones_proyecto")
@@ -235,59 +215,58 @@ async function loadProjectAssignmentCounts(
     .eq("tenant_id", tenantId)
     .in("id_proyecto", ids);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   const counts = new Map<string, number>();
   for (const row of (data ?? []) as ProjectAssignmentDbRow[]) {
-    if (row.activo === false) {
-      continue;
-    }
+    if (row.activo === false) continue;
     counts.set(row.id_proyecto, (counts.get(row.id_proyecto) ?? 0) + 1);
   }
-
   return counts;
 }
 
-async function ensureProjectExists(tenantId: string, projectId: string): Promise<void> {
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+async function ensureActivityExists(tenantId: string, activityId: string): Promise<void> {
   const { data, error } = await ongSchema()
-    .from("proyectos")
+    .from("actividades")
     .select("id")
     .eq("tenant_id", tenantId)
-    .eq("id", projectId)
+    .eq("id", activityId)
     .limit(1);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
   if ((data ?? []).length === 0) {
-    throw new Error("El proyecto seleccionado no existe o no pertenece al tenant actual.");
+    throw new Error("La actividad seleccionada no existe o no pertenece al tenant actual.");
   }
 }
 
+// ─── Payload builder ──────────────────────────────────────────────────────────
+
 function buildTaskPayload(input: TaskFormValues) {
-  const projectId = sanitizeOptionalId(input.projectId);
+  const activityId = sanitizeOptionalId(input.activityId);
   const title = sanitizeText(input.title, 200);
   const description = sanitizeText(input.description, 4000) || null;
   const statusCode = resolveTaskStatusCode(input.statusCode);
   const deadline = normalizeDateValue(input.deadline);
 
-  if (!projectId) {
-    throw new Error("El proyecto es obligatorio.");
+  if (!activityId) {
+    throw new Error("La actividad es obligatoria.");
   }
   if (!title) {
     throw new Error("El titulo de la tarea es obligatorio.");
   }
 
   return {
-    id_proyecto: projectId,
+    id_actividad: activityId,
     titulo: title,
     descripcion: description,
     estado: statusCode,
     fecha_limite: deadline,
   };
 }
+
+// ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function listTasks(filters: TaskListFilters): Promise<TaskRow[]> {
   try {
@@ -296,56 +275,39 @@ export async function listTasks(filters: TaskListFilters): Promise<TaskRow[]> {
 
     let query = ongSchema()
       .from("tareas")
-      .select("id, tenant_id, id_proyecto, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
+      .select("id, tenant_id, id_actividad, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false });
 
-    if (filters.projectId !== "all") {
-      query = query.eq("id_proyecto", filters.projectId);
+    if (filters.activityId !== "all") {
+      query = query.eq("id_actividad", filters.activityId);
     }
     if (filters.statusCode !== "all") {
       query = query.eq("estado", filters.statusCode);
     }
-    if (searchTerm) {
-      query = query.or(`titulo.ilike.%${searchTerm}%,descripcion.ilike.%${searchTerm}%`);
-    }
 
     const { data, error } = await query;
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     const rows = (data ?? []) as TaskDbRow[];
-    const projectMap = await loadProjectMap(
-      tenantId,
-      rows.map((row) => row.id_proyecto)
-    );
-    const activitiesByTask = await loadActivityMapByTask(
-      tenantId,
-      rows.map((row) => row.id)
-    );
-    const projectAssignmentCounts = await loadProjectAssignmentCounts(
-      tenantId,
-      rows.map((row) => row.id_proyecto)
-    );
+    const activityIds = uniqueNonEmpty(rows.map((row) => row.id_actividad).filter(Boolean) as string[]);
+    const activityMap = await loadActivityMap(tenantId, activityIds);
+    const projectIds = uniqueNonEmpty(Array.from(activityMap.values()).map((row) => row.id_proyecto));
+    const projectMap = await loadProjectMap(tenantId, projectIds);
+    const volunteerCounts = await loadProjectAssignmentCounts(tenantId, projectIds);
 
     return rows
       .map((row) => {
-        const project = projectMap.get(row.id_proyecto);
-        return mapTaskRow(
-          row,
-          project ? `${project.codigo} - ${project.nombre_proyecto}` : row.id_proyecto,
-          activitiesByTask.get(row.id)?.length ?? 0,
-          projectAssignmentCounts.get(row.id_proyecto) ?? 0
-        );
+        const activity = row.id_actividad ? activityMap.get(row.id_actividad) : undefined;
+        const activityLabel = activity ? activity.titulo : null;
+        const projectId = activity ? activity.id_proyecto : null;
+        const volunteerCount = projectId ? (volunteerCounts.get(projectId) ?? 0) : 0;
+        return mapTaskRow(row, activityLabel, volunteerCount);
       })
       .filter((row) => {
-        if (!searchTerm) {
-          return true;
-        }
-
+        if (!searchTerm) return true;
         return normalizeText(
-          `${row.title} ${row.description ?? ""} ${row.projectName} ${row.statusLabel}`
+          `${row.title} ${row.description ?? ""} ${row.activityName ?? ""} ${row.statusLabel}`
         ).includes(normalizeText(searchTerm));
       });
   } catch (error) {
@@ -356,70 +318,46 @@ export async function listTasks(filters: TaskListFilters): Promise<TaskRow[]> {
 export async function getTaskDetail(taskId: string): Promise<TaskDetailData | null> {
   try {
     const id = sanitizeOptionalId(taskId);
-    if (!id) {
-      throw new Error("No se encontro la tarea solicitada.");
-    }
+    if (!id) throw new Error("No se encontro la tarea solicitada.");
 
     const tenantId = await getRequiredTenantId();
     const { data, error } = await ongSchema()
       .from("tareas")
-      .select("id, tenant_id, id_proyecto, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
+      .select("id, tenant_id, id_actividad, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
       .eq("tenant_id", tenantId)
       .eq("id", id)
       .maybeSingle();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-    if (!data) {
-      return null;
-    }
+    if (error) throw new Error(error.message);
+    if (!data) return null;
 
     const task = data as TaskDbRow;
-    const [projectMap, activitiesByTask, projectAssignmentCounts, profileLabels] =
-      await Promise.all([
-        loadProjectMap(tenantId, [task.id_proyecto]),
-        loadActivityMapByTask(tenantId, [task.id]),
-        loadProjectAssignmentCounts(tenantId, [task.id_proyecto]),
-        resolveProfileLabels(
-          [task.created_by, task.updated_by].filter(Boolean) as string[]
-        ).catch(() => new Map<string, string>()),
-      ]);
+    const activityIds = task.id_actividad ? [task.id_actividad] : [];
+    const [activityMap, profileLabels] = await Promise.all([
+      loadActivityMap(tenantId, activityIds),
+      resolveProfileLabels(
+        [task.created_by, task.updated_by].filter(Boolean) as string[]
+      ).catch(() => new Map<string, string>()),
+    ]);
 
-    const project = projectMap.get(task.id_proyecto);
-    if (!project) {
-      throw new Error("La tarea apunta a un proyecto que no existe en el tenant actual.");
+    const activity = task.id_actividad ? activityMap.get(task.id_actividad) : undefined;
+    const projectId = activity?.id_proyecto;
+    let volunteerCount = 0;
+    if (projectId) {
+      const counts = await loadProjectAssignmentCounts(tenantId, [projectId]);
+      volunteerCount = counts.get(projectId) ?? 0;
     }
 
-    const activityRows = activitiesByTask.get(task.id) ?? [];
-    const locationMap = await loadLocationMap(
-      tenantId,
-      activityRows.map((row) => row.id_ubicacion).filter(Boolean) as string[]
-    );
-
-    const linkedActivities = activityRows.map((row) =>
-      mapActivityRow(
-        row,
-        task,
-        project,
-        row.id_ubicacion ? locationMap.get(row.id_ubicacion) : undefined
-      )
-    );
-
-    const volunteerCounts = projectAssignmentCounts.get(task.id_proyecto) ?? 0;
+    const warnings: string[] = [];
+    if (task.id_actividad && !activity) {
+      warnings.push("La actividad vinculada ya no esta disponible en el tenant actual.");
+    }
 
     return {
-      task: mapTaskRow(
-        task,
-        `${project.codigo} - ${project.nombre_proyecto}`,
-        linkedActivities.length,
-        volunteerCounts
-      ),
+      task: mapTaskRow(task, activity?.titulo ?? null, volunteerCount),
       createdBy: task.created_by ? profileLabels.get(task.created_by) ?? task.created_by : null,
       updatedBy: task.updated_by ? profileLabels.get(task.updated_by) ?? task.updated_by : null,
-      linkedActivities,
-      projectAssignments: [],
-      warnings: [],
+      warnings,
     };
   } catch (error) {
     throw toProjectsError(error, "No se pudo cargar el detalle de la tarea.");
@@ -432,28 +370,18 @@ export async function createTask(input: TaskFormValues): Promise<TaskDetailData>
     const actorId = await resolveCurrentUserId();
     const payload = buildTaskPayload(input);
 
-    await ensureProjectExists(tenantId, payload.id_proyecto);
+    await ensureActivityExists(tenantId, payload.id_actividad);
 
     const { data, error } = await ongSchema()
       .from("tareas")
-      .insert({
-        tenant_id: tenantId,
-        ...payload,
-        created_by: actorId,
-        updated_by: actorId,
-      })
+      .insert({ tenant_id: tenantId, ...payload, created_by: actorId, updated_by: actorId })
       .select("id")
       .single();
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     const detail = await getTaskDetail(data.id);
-    if (!detail) {
-      throw new Error("La tarea fue creada, pero no se pudo recuperar su detalle.");
-    }
-
+    if (!detail) throw new Error("La tarea fue creada, pero no se pudo recuperar su detalle.");
     return detail;
   } catch (error) {
     throw toProjectsError(error, "No se pudo crear la tarea.");
@@ -463,34 +391,24 @@ export async function createTask(input: TaskFormValues): Promise<TaskDetailData>
 export async function updateTask(taskId: string, input: TaskFormValues): Promise<TaskDetailData> {
   try {
     const id = sanitizeOptionalId(taskId);
-    if (!id) {
-      throw new Error("No se encontro la tarea a actualizar.");
-    }
+    if (!id) throw new Error("No se encontro la tarea a actualizar.");
 
     const tenantId = await getRequiredTenantId();
     const actorId = await resolveCurrentUserId();
     const payload = buildTaskPayload(input);
 
-    await ensureProjectExists(tenantId, payload.id_proyecto);
+    await ensureActivityExists(tenantId, payload.id_actividad);
 
     const { error } = await ongSchema()
       .from("tareas")
-      .update({
-        ...payload,
-        updated_by: actorId,
-      })
+      .update({ ...payload, updated_by: actorId })
       .eq("tenant_id", tenantId)
       .eq("id", id);
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     const detail = await getTaskDetail(id);
-    if (!detail) {
-      throw new Error("La tarea fue actualizada, pero no se pudo recuperar su detalle.");
-    }
-
+    if (!detail) throw new Error("La tarea fue actualizada, pero no se pudo recuperar su detalle.");
     return detail;
   } catch (error) {
     throw toProjectsError(error, "No se pudo actualizar la tarea.");
@@ -500,31 +418,21 @@ export async function updateTask(taskId: string, input: TaskFormValues): Promise
 export async function cancelTask(taskId: string): Promise<TaskDetailData> {
   try {
     const id = sanitizeOptionalId(taskId);
-    if (!id) {
-      throw new Error("No se encontro la tarea a cancelar.");
-    }
+    if (!id) throw new Error("No se encontro la tarea a cancelar.");
 
     const tenantId = await getRequiredTenantId();
     const actorId = await resolveCurrentUserId();
 
     const { error } = await ongSchema()
       .from("tareas")
-      .update({
-        estado: "cancelada",
-        updated_by: actorId,
-      })
+      .update({ estado: "cancelada", updated_by: actorId })
       .eq("tenant_id", tenantId)
       .eq("id", id);
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     const detail = await getTaskDetail(id);
-    if (!detail) {
-      throw new Error("La tarea fue cancelada, pero no se pudo recuperar su detalle.");
-    }
-
+    if (!detail) throw new Error("La tarea fue cancelada, pero no se pudo recuperar su detalle.");
     return detail;
   } catch (error) {
     throw toProjectsError(error, "No se pudo cancelar la tarea.");

@@ -45,6 +45,8 @@ export type AssignmentKind =
 export interface SelectOption {
   value: string;
   label: string;
+  /** Optional FK metadata — used for cascading selectors (e.g. filter activities by project). */
+  projectId?: string;
 }
 
 export interface ProjectStatusOption extends SelectOption {
@@ -84,14 +86,13 @@ export interface ProjectListFilters {
 
 export interface TaskListFilters {
   searchTerm: string;
-  projectId: string | "all";
+  activityId: string | "all";
   statusCode: TaskStatusCode | "all";
 }
 
 export interface ActivityListFilters {
   searchTerm: string;
   projectId: string | "all";
-  taskId: string | "all";
   statusCode: ActivityStatusCode | "all";
   locationId: string | "all";
   dateFrom: string | null;
@@ -160,24 +161,28 @@ export interface ProjectDetailData {
   project: ProjectRow;
   createdBy: string | null;
   updatedBy: string | null;
-  linkedTasks: TaskRow[];
   linkedActivities: ActivityRow[];
+  linkedTasks: TaskRow[];
   volunteerAssignments: ProjectVolunteerAssignmentRow[];
   resourceAssignments: ProjectResourceAssignmentRow[];
   warnings: string[];
 }
 
+/**
+ * Hierarchy: Proyecto → Actividad → Tarea
+ * Tasks are children of Activities. activityId may be null for tasks created
+ * before the hierarchy migration (they must be re-assigned via UI).
+ */
 export interface TaskRow {
   id: string;
-  projectId: string;
-  projectName: string;
+  activityId: string | null;
+  activityName: string | null;
   title: string;
   description: string | null;
   statusCode: TaskStatusCode;
   statusLabel: string;
   statusKind: TaskStatusKind;
   deadline: string | null;
-  activityCount: number;
   volunteerCount: number;
   createdAt: string;
   updatedAt: string;
@@ -187,15 +192,15 @@ export interface TaskDetailData {
   task: TaskRow;
   createdBy: string | null;
   updatedBy: string | null;
-  linkedActivities: ActivityRow[];
-  projectAssignments: ProjectVolunteerAssignmentRow[];
   warnings: string[];
 }
 
+/**
+ * Hierarchy: Proyecto → Actividad → Tarea
+ * Activities are direct children of Projects.
+ */
 export interface ActivityRow {
   id: string;
-  taskId: string;
-  taskName: string;
   projectId: string;
   projectName: string;
   title: string;
@@ -211,6 +216,7 @@ export interface ActivityRow {
   assignedVolunteers: number;
   registeredHours: number;
   evidenceCount: number;
+  taskCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -252,6 +258,7 @@ export interface ActivityDetailData {
   assignments: ActivityVolunteerAssignmentRow[];
   hours: ActivityHourRow[];
   evidences: ActivityEvidenceRow[];
+  linkedTasks: TaskRow[];
   warnings: string[];
 }
 
@@ -297,7 +304,7 @@ export interface ProjectFormValues {
 }
 
 export interface TaskFormValues {
-  projectId: string;
+  activityId: string;
   title: string;
   description: string;
   statusCode: TaskStatusCode;
@@ -305,7 +312,7 @@ export interface TaskFormValues {
 }
 
 export interface ActivityFormValues {
-  taskId: string;
+  projectId: string;
   title: string;
   description: string;
   statusCode: ActivityStatusCode;

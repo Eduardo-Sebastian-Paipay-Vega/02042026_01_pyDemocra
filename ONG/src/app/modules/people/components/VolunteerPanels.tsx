@@ -136,7 +136,7 @@ export function VolunteerFormModal({
     <ModalShell open={open} onClose={onClose} width="max-w-[1180px]">
       <PeopleModalHeader
         title={mode === "edit" ? "Editar voluntario" : "Nuevo voluntario"}
-        description="Formulario conectado a ong.voluntarios, rrhh.voluntario_habilidades, rrhh.asignaciones_rol y rrhh.documentos_voluntario."
+        description="Completa el perfil del voluntario con sus datos personales, habilidades, roles y documentos."
         onClose={onClose}
       />
 
@@ -149,7 +149,7 @@ export function VolunteerFormModal({
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <PeopleField label="ID perfil IAM">
-              <PeopleTextInput placeholder="UUID de public.profiles" {...register("iamUserId")} />
+              <PeopleTextInput placeholder="ID del perfil de usuario (opcional)" {...register("iamUserId")} />
             </PeopleField>
             <PeopleField label="Numero documento" error={errors.documentNumber?.message}>
               <PeopleTextInput
@@ -603,7 +603,7 @@ export function VolunteerDetailModal({
             </PeopleSection>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <PeopleSection title="Habilidades" description="rrhh.voluntario_habilidades">
+              <PeopleSection title="Habilidades" description="Competencias y áreas de especialización del voluntario.">
                 <div className="space-y-2">
                   {detail.skills.length === 0 ? (
                     <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -626,7 +626,7 @@ export function VolunteerDetailModal({
                 </div>
               </PeopleSection>
 
-              <PeopleSection title="Roles operativos" description="rrhh.asignaciones_rol">
+              <PeopleSection title="Roles operativos" description="Roles operativos asignados al voluntario en la organización.">
                 <div className="space-y-2">
                   {detail.operationalRoles.length === 0 ? (
                     <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -661,7 +661,7 @@ export function VolunteerDetailModal({
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <PeopleSection title="Roles institucionales" description="public.user_roles_sedes + public.roles">
+              <PeopleSection title="Roles institucionales" description="Roles institucionales asignados al voluntario en el sistema.">
                 <div className="space-y-2">
                   {detail.institutionalRoles.length === 0 ? (
                     <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -686,7 +686,7 @@ export function VolunteerDetailModal({
                 </div>
               </PeopleSection>
 
-              <PeopleSection title="Documentos" description="rrhh.documentos_voluntario">
+              <PeopleSection title="Documentos" description="Documentos oficiales del voluntario registrados en el sistema.">
                 <div className="space-y-2">
                   {detail.documents.length === 0 ? (
                     <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -723,7 +723,7 @@ export function VolunteerDetailModal({
               </PeopleSection>
             </div>
 
-            <PeopleSection title="Perfil coordinador" description="rrhh.perfil_coordinador">
+            <PeopleSection title="Perfil coordinador" description="Datos del perfil de coordinación del voluntario.">
               {detail.coordinatorProfile ? (
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <PeopleDetailField

@@ -36,7 +36,7 @@ const RELATION_LIMIT = 100;
 
 type ActivityDbRow = {
   id: string;
-  id_tarea: string;
+  id_proyecto: string | null;
   titulo: string;
   descripcion: string | null;
   codigo_estado: string;
@@ -46,13 +46,6 @@ type ActivityDbRow = {
   horas_estimadas: number | null;
   created_at: string;
   updated_at: string;
-};
-
-type TaskDbRow = {
-  id: string;
-  id_proyecto: string;
-  titulo: string;
-  estado: string | null;
 };
 
 type ProjectDbRow = {
@@ -150,27 +143,6 @@ function activityPeriodMatches(
   return start <= weekEnd && (end ?? start) >= weekStart;
 }
 
-async function loadTaskMap(taskIds: string[]): Promise<Map<string, TaskDbRow>> {
-  if (!taskIds.length) {
-    return new Map();
-  }
-
-  const tenantId = await getRequiredTenantId();
-  const { data, error } = await ongSchema()
-    .from("tareas")
-    .select("id, id_proyecto, titulo, estado")
-    .eq("tenant_id", tenantId)
-    .in("id", taskIds);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map<string, TaskDbRow>(
-    (data ?? []).map((row: TaskDbRow): [string, TaskDbRow] => [row.id, row])
-  );
-}
-
 async function loadProjectMap(projectIds: string[]): Promise<Map<string, ProjectDbRow>> {
   if (!projectIds.length) {
     return new Map();
@@ -220,7 +192,7 @@ async function loadActivityRows(activityIds?: string[] | null): Promise<Activity
   let query = ongSchema()
     .from("actividades")
     .select(
-      "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at"
+      "id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at"
     )
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
@@ -280,7 +252,6 @@ async function loadVolunteerLabels(volunteerIds: string[]): Promise<Map<string, 
 
 function mapActivityRow(
   activity: ActivityDbRow,
-  task: TaskDbRow | undefined,
   project: ProjectDbRow | undefined,
   location: LocationDbRow | undefined,
   assignments: AssignmentDbRow[],
@@ -294,11 +265,11 @@ function mapActivityRow(
 
   return {
     id: activity.id,
-    taskId: activity.id_tarea,
+    taskId: null,
     name: activity.titulo,
     description: activity.descripcion ?? "",
-    taskName: task?.titulo ?? "Tarea no disponible",
-    projectId: task?.id_proyecto ?? null,
+    taskName: "",
+    projectId: activity.id_proyecto ?? null,
     projectName: project ? `${project.codigo} - ${project.nombre_proyecto}` : "Proyecto no disponible",
     locationId: activity.id_ubicacion,
     statusId,
@@ -334,7 +305,6 @@ function mapAssignmentRow(row: AssignmentDbRow, volunteerName: string | null): A
 
 async function resolveActivityContext(activityId: string): Promise<{
   activity: ActivityDbRow;
-  task: TaskDbRow | undefined;
   project: ProjectDbRow | undefined;
   location: LocationDbRow | undefined;
 }> {
@@ -344,14 +314,12 @@ async function resolveActivityContext(activityId: string): Promise<{
     throw new Error("La actividad ya no existe o no pertenece al tenant actual.");
   }
 
-  const taskMap = await loadTaskMap([activity.id_tarea]);
-  const task = taskMap.get(activity.id_tarea);
-  const projectMap = task?.id_proyecto ? await loadProjectMap([task.id_proyecto]) : new Map();
-  const project = task?.id_proyecto ? projectMap.get(task.id_proyecto) : undefined;
+  const projectMap = activity.id_proyecto ? await loadProjectMap([activity.id_proyecto]) : new Map();
+  const project = activity.id_proyecto ? projectMap.get(activity.id_proyecto) : undefined;
   const locationMap = activity.id_ubicacion ? await loadLocationMap([activity.id_ubicacion]) : new Map();
   const location = activity.id_ubicacion ? locationMap.get(activity.id_ubicacion) : undefined;
 
-  return { activity, task, project, location };
+  return { activity, project, location };
 }
 
 async function getVolunteerLabelById(volunteerId: string): Promise<string | null> {
@@ -421,9 +389,7 @@ export async function listActividades(
   try {
     const warnings: string[] = [];
     const activities = await loadActivityRows();
-    const taskIds = uniqueNonEmpty(activities.map((item) => item.id_tarea));
-    const taskMap = await loadTaskMap(taskIds);
-    const projectIds = uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.id_proyecto));
+    const projectIds = uniqueNonEmpty(activities.map((item) => item.id_proyecto).filter(Boolean) as string[]);
     const locationIds = uniqueNonEmpty(
       activities.map((item) => item.id_ubicacion).filter(Boolean)
     );
@@ -448,10 +414,9 @@ export async function listActividades(
 
     const rows = activities
       .map((activity) => {
-        const task = taskMap.get(activity.id_tarea);
-        const project = task?.id_proyecto ? projectMap.get(task.id_proyecto) : undefined;
+        const project = activity.id_proyecto ? projectMap.get(activity.id_proyecto) : undefined;
         const location = activity.id_ubicacion ? locationMap.get(activity.id_ubicacion) : undefined;
-        return mapActivityRow(activity, task, project, location, assignments.get(activity.id) ?? [], volunteerLabels);
+        return mapActivityRow(activity, project, location, assignments.get(activity.id) ?? [], volunteerLabels);
       })
       .filter((row) => {
         if (filters.stateId !== "all" && row.statusId !== filters.stateId) {
@@ -500,10 +465,7 @@ export async function listActividades(
         value: project.id,
         label: `${project.codigo} - ${project.nombre_proyecto}`,
       })),
-      taskOptions: Array.from(taskMap.values()).map((task) => ({
-        value: task.id,
-        label: `${task.titulo} (${task.id_proyecto})`,
-      })),
+      taskOptions: [],
       locationOptions: locationCatalog.map((location) => ({
         value: location.id,
         label: location.label,
@@ -518,7 +480,7 @@ export async function listActividades(
 
 export async function getActividadById(activityId: string): Promise<ActivityDetailData> {
   try {
-    const { activity, task, project, location } = await resolveActivityContext(
+    const { activity, project, location } = await resolveActivityContext(
       sanitizeOptionalId(activityId) ?? ""
     );
     const volunteerOptions = await fetchVolunteerCatalog().catch(() => []);
@@ -546,7 +508,6 @@ export async function getActividadById(activityId: string): Promise<ActivityDeta
 
     const activityRow = mapActivityRow(
       activity,
-      task,
       project,
       location,
       assignments.map((item) => ({
@@ -621,7 +582,7 @@ export async function getResumenRelacionActividad(activityId: string): Promise<{
 
 export async function createActividad(input: ActivityCreateInput): Promise<ActivityDetailData> {
   try {
-    const taskId = sanitizeOptionalId(input.taskId);
+    const projectId = sanitizeOptionalId(input.projectId);
     const title = sanitizeText(input.name, 200);
     const description = sanitizeText(input.description ?? null, 4000) || null;
     const startAt = toDateOnly(input.startAt ?? null);
@@ -630,8 +591,8 @@ export async function createActividad(input: ActivityCreateInput): Promise<Activ
     const stateCode = normalizeActivityStateCode(resolveActivityStateCode(input.statusId ?? null));
     const actorId = await resolveCurrentUserId();
 
-    if (!taskId) {
-      throw new Error("La tarea es obligatoria.");
+    if (!projectId) {
+      throw new Error("El proyecto es obligatorio.");
     }
     if (!title) {
       throw new Error("El titulo de la actividad es obligatorio.");
@@ -646,13 +607,13 @@ export async function createActividad(input: ActivityCreateInput): Promise<Activ
     }
 
     const tenantId = await getRequiredTenantId();
-    await Promise.all([ensureTaskExists(taskId), ensureLocationExists(locationId)]);
+    await ensureLocationExists(locationId);
 
     const { data, error } = await ongSchema()
       .from("actividades")
       .insert({
         tenant_id: tenantId,
-        id_tarea: taskId,
+        id_proyecto: projectId,
         titulo: title,
         descripcion: description,
         codigo_estado: stateCode,
@@ -690,7 +651,7 @@ export async function updateActividad(
     const { data: activityRows, error } = await ongSchema()
       .from("actividades")
       .select(
-        "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at"
+        "id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, updated_at"
       )
       .eq("tenant_id", tenantId)
       .eq("id", sanitizedId)
@@ -705,8 +666,8 @@ export async function updateActividad(
       throw new Error("La actividad ya no existe.");
     }
 
-    const nextTaskId =
-      input.taskId !== undefined ? sanitizeOptionalId(input.taskId) : current.id_tarea;
+    const nextProjectId =
+      input.projectId !== undefined ? sanitizeOptionalId(input.projectId) : current.id_proyecto;
     const nextLocationId =
       input.locationId !== undefined
         ? sanitizeOptionalId(input.locationId)
@@ -716,17 +677,14 @@ export async function updateActividad(
     const nextEndAt =
       input.endAt !== undefined ? toDateOnly(input.endAt) : toDateOnly(current.fecha_fin);
 
-    if (!nextTaskId) {
-      throw new Error("La tarea es obligatoria.");
-    }
     if (nextStartAt && nextEndAt && nextEndAt < nextStartAt) {
       throw new Error("La fecha fin no puede ser menor a la fecha inicio.");
     }
 
     const updates: Record<string, string | number | null> = {};
 
-    if (input.taskId !== undefined) {
-      updates.id_tarea = nextTaskId;
+    if (input.projectId !== undefined) {
+      updates.id_proyecto = nextProjectId;
     }
     if (input.name !== undefined) {
       const title = sanitizeText(input.name, 200);
@@ -766,7 +724,7 @@ export async function updateActividad(
       throw new Error("No hay cambios para guardar.");
     }
 
-    await Promise.all([ensureTaskExists(nextTaskId), ensureLocationExists(nextLocationId)]);
+    await ensureLocationExists(nextLocationId);
 
     const actorId = await resolveCurrentUserId();
     const { error: updateError } = await ongSchema()

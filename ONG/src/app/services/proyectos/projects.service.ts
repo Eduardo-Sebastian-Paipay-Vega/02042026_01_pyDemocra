@@ -63,7 +63,7 @@ type ProjectStateDbRow = {
 
 type TaskDbRow = {
   id: string;
-  id_proyecto: string;
+  id_actividad: string | null;
   titulo: string;
   descripcion: string | null;
   estado: string | null;
@@ -76,7 +76,7 @@ type TaskDbRow = {
 
 type ActivityDbRow = {
   id: string;
-  id_tarea: string;
+  id_proyecto: string;
   titulo: string;
   descripcion: string | null;
   codigo_estado: string;
@@ -181,17 +181,19 @@ async function loadStateAndAreaMaps(tenantId: string) {
   return { states, areaById };
 }
 
-async function loadTasksByProject(
+async function loadActivitiesByProject(
   tenantId: string,
   projectIds: string[]
-): Promise<Map<string, TaskDbRow[]>> {
+): Promise<Map<string, ActivityDbRow[]>> {
   if (!projectIds.length) {
     return new Map();
   }
 
   const { data, error } = await ongSchema()
-    .from("tareas")
-    .select("id, id_proyecto, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
+    .from("actividades")
+    .select(
+      "id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, created_by, updated_at, updated_by"
+    )
     .eq("tenant_id", tenantId)
     .in("id_proyecto", projectIds)
     .order("created_at", { ascending: false });
@@ -200,8 +202,8 @@ async function loadTasksByProject(
     throw new Error(error.message);
   }
 
-  const grouped = new Map<string, TaskDbRow[]>();
-  for (const row of (data ?? []) as TaskDbRow[]) {
+  const grouped = new Map<string, ActivityDbRow[]>();
+  for (const row of (data ?? []) as ActivityDbRow[]) {
     const current = grouped.get(row.id_proyecto) ?? [];
     current.push(row);
     grouped.set(row.id_proyecto, current);
@@ -210,32 +212,31 @@ async function loadTasksByProject(
   return grouped;
 }
 
-async function loadActivitiesByTask(
+async function loadTasksByActivity(
   tenantId: string,
-  taskIds: string[]
-): Promise<Map<string, ActivityDbRow[]>> {
-  if (!taskIds.length) {
+  activityIds: string[]
+): Promise<Map<string, TaskDbRow[]>> {
+  if (!activityIds.length) {
     return new Map();
   }
 
   const { data, error } = await ongSchema()
-    .from("actividades")
-    .select(
-      "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at, created_by, updated_at, updated_by"
-    )
+    .from("tareas")
+    .select("id, id_actividad, titulo, descripcion, estado, fecha_limite, created_at, created_by, updated_at, updated_by")
     .eq("tenant_id", tenantId)
-    .in("id_tarea", taskIds)
+    .in("id_actividad", activityIds)
     .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const grouped = new Map<string, ActivityDbRow[]>();
-  for (const row of (data ?? []) as ActivityDbRow[]) {
-    const current = grouped.get(row.id_tarea) ?? [];
+  const grouped = new Map<string, TaskDbRow[]>();
+  for (const row of (data ?? []) as TaskDbRow[]) {
+    const actId = row.id_actividad ?? "";
+    const current = grouped.get(actId) ?? [];
     current.push(row);
-    grouped.set(row.id_tarea, current);
+    grouped.set(actId, current);
   }
 
   return grouped;
@@ -375,8 +376,7 @@ async function loadItemLabelMap(itemIds: string[]): Promise<Map<string, string>>
 
 function mapTaskRow(
   row: TaskDbRow,
-  projectName: string,
-  activityCount: number,
+  activityName: string | null,
   volunteerCount: number
 ): TaskRow {
   const normalizedState = (sanitizeText(row.estado ?? "pendiente", 40) ||
@@ -384,15 +384,14 @@ function mapTaskRow(
 
   return {
     id: row.id,
-    projectId: row.id_proyecto,
-    projectName,
+    activityId: row.id_actividad,
+    activityName,
     title: row.titulo,
     description: row.descripcion,
     statusCode: normalizedState,
     statusLabel: getTaskStatusLabel(normalizedState),
     statusKind: getTaskStatusKind(normalizedState),
     deadline: row.fecha_limite,
-    activityCount,
     volunteerCount,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -401,19 +400,17 @@ function mapTaskRow(
 
 function mapActivityRow(
   row: ActivityDbRow,
-  task: TaskDbRow,
   project: ProjectDbRow,
   location: LocationDbRow | undefined,
   assignedVolunteers: number,
   evidenceCount: number,
-  registeredHours: number
+  registeredHours: number,
+  taskCount: number
 ): ActivityRow {
   const statusCode = resolveActivityStatusCode(row.codigo_estado);
 
   return {
     id: row.id,
-    taskId: row.id_tarea,
-    taskName: task.titulo,
     projectId: project.id,
     projectName: `${project.codigo} - ${project.nombre_proyecto}`,
     title: row.titulo,
@@ -429,6 +426,7 @@ function mapActivityRow(
     assignedVolunteers,
     registeredHours,
     evidenceCount,
+    taskCount,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -501,16 +499,24 @@ export async function listProjects(
     const rows = (data ?? []) as ProjectDbRow[];
     const projectIds = rows.map((row) => row.id);
     const { states, areaById } = await loadStateAndAreaMaps(tenantId);
-    const [tasksByProject, assignmentsByProject, resourcesByProject] = await Promise.all([
-      loadTasksByProject(tenantId, projectIds),
+    const [activitiesByProject, assignmentsByProject, resourcesByProject] = await Promise.all([
+      loadActivitiesByProject(tenantId, projectIds),
       loadProjectVolunteerAssignments(tenantId, projectIds),
       loadProjectResourceAssignments(tenantId, projectIds),
     ]);
 
-    const taskIds = uniqueNonEmpty(
-      Array.from(tasksByProject.values()).flat().map((row) => row.id)
+    const activityIds = uniqueNonEmpty(
+      Array.from(activitiesByProject.values()).flat().map((row) => row.id)
     );
-    const activitiesByTask = await loadActivitiesByTask(tenantId, taskIds);
+    const tasksByActivity = await loadTasksByActivity(tenantId, activityIds);
+    const taskCountByProject = new Map<string, number>();
+    for (const [projectId, activities] of activitiesByProject.entries()) {
+      const count = activities.reduce(
+        (total, activity) => total + (tasksByActivity.get(activity.id)?.length ?? 0),
+        0
+      );
+      taskCountByProject.set(projectId, count);
+    }
 
     return rows
       .map((row) =>
@@ -518,11 +524,8 @@ export async function listProjects(
           row,
           states,
           areaById,
-          tasksByProject.get(row.id)?.length ?? 0,
-          Array.from(tasksByProject.get(row.id) ?? []).reduce(
-            (total, task) => total + (activitiesByTask.get(task.id)?.length ?? 0),
-            0
-          ),
+          taskCountByProject.get(row.id) ?? 0,
+          activitiesByProject.get(row.id)?.length ?? 0,
           (assignmentsByProject.get(row.id) ?? []).filter((item) => item.activo !== false).length,
           resourcesByProject.get(row.id)?.length ?? 0
         )
@@ -566,19 +569,19 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
 
     const project = data as ProjectDbRow;
     const { states, areaById } = await loadStateAndAreaMaps(tenantId);
-    const [tasksByProject, assignmentsByProject, resourcesByProject] = await Promise.all([
-      loadTasksByProject(tenantId, [project.id]),
+    const [activitiesByProject, assignmentsByProject, resourcesByProject] = await Promise.all([
+      loadActivitiesByProject(tenantId, [project.id]),
       loadProjectVolunteerAssignments(tenantId, [project.id]),
       loadProjectResourceAssignments(tenantId, [project.id]),
     ]);
 
-    const projectTasks = tasksByProject.get(project.id) ?? [];
-    const taskIds = projectTasks.map((row) => row.id);
-    const activitiesByTask = await loadActivitiesByTask(tenantId, taskIds);
-    const allActivities = Array.from(activitiesByTask.values()).flat();
+    const projectActivities = activitiesByProject.get(project.id) ?? [];
+    const activityIds = projectActivities.map((row) => row.id);
+    const tasksByActivity = await loadTasksByActivity(tenantId, activityIds);
+    const allTasks = Array.from(tasksByActivity.values()).flat();
     const locationMap = await loadLocationMap(
       tenantId,
-      allActivities.map((row) => row.id_ubicacion).filter(Boolean) as string[]
+      projectActivities.map((row) => row.id_ubicacion).filter(Boolean) as string[]
     );
 
     const volunteerAssignments = assignmentsByProject.get(project.id) ?? [];
@@ -592,13 +595,7 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       [project.created_by, project.updated_by].filter(Boolean) as string[]
     ).catch(() => new Map<string, string>());
 
-    const activityCountByTask = new Map<string, number>();
-    for (const activity of allActivities) {
-      activityCountByTask.set(
-        activity.id_tarea,
-        (activityCountByTask.get(activity.id_tarea) ?? 0) + 1
-      );
-    }
+    const activeVolunteerCount = volunteerAssignments.filter((item) => item.activo !== false).length;
 
     const projectAssignmentsRows: ProjectVolunteerAssignmentRow[] = volunteerAssignments.map((row) => ({
       id: row.id,
@@ -627,30 +624,21 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
       })
     );
 
-    const linkedTasks: TaskRow[] = projectTasks.map((row) =>
-      mapTaskRow(
+    const linkedActivities: ActivityRow[] = projectActivities.map((row) =>
+      mapActivityRow(
         row,
-        `${project.codigo} - ${project.nombre_proyecto}`,
-        activityCountByTask.get(row.id) ?? 0,
-        projectAssignmentsRows.filter((item) => item.active).length
-      )
-    );
-
-    const linkedActivities: ActivityRow[] = allActivities.map((row) => {
-      const parentTask = projectTasks.find((task) => task.id === row.id_tarea);
-      if (!parentTask) {
-        throw new Error("Se detecto una actividad sin tarea valida dentro del proyecto.");
-      }
-
-      return mapActivityRow(
-        row,
-        parentTask,
         project,
         row.id_ubicacion ? locationMap.get(row.id_ubicacion) : undefined,
         0,
         0,
-        0
-      );
+        0,
+        tasksByActivity.get(row.id)?.length ?? 0
+      )
+    );
+
+    const linkedTasks: TaskRow[] = allTasks.map((row) => {
+      const parentActivity = projectActivities.find((a) => a.id === row.id_actividad);
+      return mapTaskRow(row, parentActivity?.titulo ?? null, activeVolunteerCount);
     });
 
     return {
@@ -660,13 +648,13 @@ export async function getProjectDetail(projectId: string): Promise<ProjectDetail
         areaById,
         linkedTasks.length,
         linkedActivities.length,
-        projectAssignmentsRows.filter((item) => item.active).length,
+        activeVolunteerCount,
         resourceRows.length
       ),
       createdBy: project.created_by ? profileLabels.get(project.created_by) ?? project.created_by : null,
       updatedBy: project.updated_by ? profileLabels.get(project.updated_by) ?? project.updated_by : null,
-      linkedTasks,
       linkedActivities,
+      linkedTasks,
       volunteerAssignments: projectAssignmentsRows,
       resourceAssignments: resourceRows,
       warnings: [],

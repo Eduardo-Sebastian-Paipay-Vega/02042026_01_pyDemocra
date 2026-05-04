@@ -321,7 +321,7 @@ export function AdmissionDocuments() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Documentos de admision"
-        description="Gestion real sobre `rrhh.documentos_admision` con `verified_by` y `verified_at`."
+        description="Gestión y verificación de documentos del proceso de admisión de voluntarios."
         action={{ label: "Nuevo documento", onClick: openCreateModal }}
       />
 

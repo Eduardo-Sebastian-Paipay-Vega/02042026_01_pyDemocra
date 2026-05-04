@@ -73,13 +73,7 @@ type IdCardScanRow = {
 type ActivityLookup = {
   id: string;
   titulo: string;
-  id_tarea: string;
-};
-
-type TaskLookup = {
-  id: string;
-  id_proyecto: string;
-  titulo: string;
+  id_proyecto: string | null;
 };
 
 type ProjectLookup = {
@@ -260,13 +254,11 @@ async function ensureActivityExists(activityId: string, tenantId: string): Promi
 
 async function loadActivityLookups(activityIds: string[]): Promise<{
   activities: Map<string, ActivityLookup>;
-  tasks: Map<string, TaskLookup>;
   projects: Map<string, ProjectLookup>;
 }> {
   if (!activityIds.length) {
     return {
       activities: new Map(),
-      tasks: new Map(),
       projects: new Map(),
     };
   }
@@ -274,7 +266,7 @@ async function loadActivityLookups(activityIds: string[]): Promise<{
   const tenantId = await getRequiredTenantId();
   const { data: activityRows, error: activityError } = await ongSchema()
     .from("actividades")
-    .select("id, id_tarea, titulo")
+    .select("id, id_proyecto, titulo")
     .eq("tenant_id", tenantId)
     .in("id", activityIds);
 
@@ -289,34 +281,10 @@ async function loadActivityLookups(activityIds: string[]): Promise<{
     ])
   );
 
-  const taskIds = uniqueNonEmpty((activityRows ?? []).map((row) => row.id_tarea));
-  if (!taskIds.length) {
-    return {
-      activities,
-      tasks: new Map(),
-      projects: new Map(),
-    };
-  }
-
-  const { data: taskRows, error: taskError } = await ongSchema()
-    .from("tareas")
-    .select("id, id_proyecto, titulo")
-    .eq("tenant_id", tenantId)
-    .in("id", taskIds);
-
-  if (taskError) {
-    throw new Error(taskError.message);
-  }
-
-  const tasks = new Map<string, TaskLookup>(
-    ((taskRows ?? []) as TaskLookup[]).map((row): [string, TaskLookup] => [row.id, row])
-  );
-
-  const projectIds = uniqueNonEmpty((taskRows ?? []).map((row) => row.id_proyecto));
+  const projectIds = uniqueNonEmpty((activityRows ?? []).map((row) => row.id_proyecto));
   if (!projectIds.length) {
     return {
       activities,
-      tasks,
       projects: new Map(),
     };
   }
@@ -337,7 +305,6 @@ async function loadActivityLookups(activityIds: string[]): Promise<{
 
   return {
     activities,
-    tasks,
     projects,
   };
 }
@@ -361,8 +328,7 @@ function mapRow(
   volunteerLabels: Map<string, string>
 ): OperationAttendanceRow {
   const activity = lookups.activities.get(row.id_actividad);
-  const task = activity ? lookups.tasks.get(activity.id_tarea) : undefined;
-  const project = task ? lookups.projects.get(task.id_proyecto) : undefined;
+  const project = activity?.id_proyecto ? lookups.projects.get(activity.id_proyecto) : undefined;
   const status = resolveAttendanceStatus(row);
   const projectName = project
     ? `${project.codigo} - ${project.nombre_proyecto}`
@@ -375,7 +341,7 @@ function mapRow(
     id: row.id,
     volunteerId: row.id_voluntario,
     volunteerName,
-    projectId: task?.id_proyecto ?? null,
+    projectId: activity?.id_proyecto ?? null,
     projectName,
     activityId: row.id_actividad,
     activityName,

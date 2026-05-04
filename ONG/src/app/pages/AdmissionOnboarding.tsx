@@ -332,7 +332,7 @@ export function AdmissionOnboarding() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Onboarding de admision"
-        description="Ejecucion real de pasos sobre `rrhh.onboarding_pasos` y `rrhh.onboarding_voluntario`, incluyendo `evidencia_url`."
+        description="Seguimiento del proceso de onboarding: pasos completados y evidencias por voluntario."
         action={{ label: "Iniciar onboarding", onClick: () => void startOnboarding() }}
       />
 

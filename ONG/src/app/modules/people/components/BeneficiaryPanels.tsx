@@ -107,7 +107,7 @@ export function BeneficiaryFormModal({
     <ModalShell open={open} onClose={onClose} width="max-w-[980px]">
       <PeopleModalHeader
         title={mode === "edit" ? "Editar beneficiario" : "Nuevo beneficiario"}
-        description="Formulario conectado a ong.beneficiarios, clinico.perfil_nino y clinico.perfil_adulto_mayor."
+        description="Completa el perfil del beneficiario con sus datos personales y perfil clínico asociado."
         onClose={onClose}
       />
 
@@ -265,7 +265,7 @@ export function BeneficiaryFormModal({
         </PeopleSection>
 
         {profileKind === "child" && (
-          <PeopleSection title="Perfil nino" description="clinico.perfil_nino">
+          <PeopleSection title="Perfil nino" description="Datos del tutor y contexto escolar del beneficiario.">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <PeopleField label="Tutor" error={submitError ?? undefined}>
                 <PeopleTextInput placeholder="Nombre del tutor" {...register("tutorName")} />
@@ -284,7 +284,7 @@ export function BeneficiaryFormModal({
         )}
 
         {profileKind === "senior" && (
-          <PeopleSection title="Perfil adulto mayor" description="clinico.perfil_adulto_mayor">
+          <PeopleSection title="Perfil adulto mayor" description="Datos de autonomía y contacto de emergencia del beneficiario.">
             <div className="space-y-3">
               <div className="flex flex-wrap gap-4">
                 <label className="flex items-center gap-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>

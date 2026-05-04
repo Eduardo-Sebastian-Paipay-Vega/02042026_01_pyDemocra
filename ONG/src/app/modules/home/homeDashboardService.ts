@@ -21,13 +21,11 @@ import {
   formatWeekDayLabel,
   getProjectNameMap,
   getRequiredTenantId,
-  getTaskMap,
   getVolunteerNameMap,
   hasCorePermission,
   mapAdmissionStatus,
   mapHourStatusLabel,
   mapHoursStatus,
-  mapTaskStatusLabel,
   safeGetCurrentUser,
   sumHours,
   toFriendlyError,
@@ -474,17 +472,15 @@ export async function fetchDashboardRecentHours(limit = 5): Promise<DashboardHou
 
   const [volunteerMap, activitiesResult] = await Promise.all([
     getVolunteerNameMap(uniqueNonEmpty(rows.map((row) => row.id_voluntario)), tenantId),
-    db.schema("ong").from("actividades").select("id, id_tarea, titulo").eq("tenant_id", tenantId).in("id", uniqueNonEmpty(rows.map((row) => row.id_actividad))),
+    db.schema("ong").from("actividades").select("id, id_proyecto, titulo").eq("tenant_id", tenantId).in("id", uniqueNonEmpty(rows.map((row) => row.id_actividad))),
   ]);
   if (activitiesResult.error) throw new Error("No se pudo resolver el nombre de las actividades.");
   const activityRows = activitiesResult.data ?? [];
-  const taskMap = await getTaskMap(uniqueNonEmpty(activityRows.map((row) => row.id_tarea)), tenantId);
-  const projectMap = await getProjectNameMap(uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.projectId)), tenantId);
+  const projectMap = await getProjectNameMap(uniqueNonEmpty(activityRows.map((row) => row.id_proyecto)), tenantId);
   const activityById = new Map(activityRows.map((row) => [row.id, row]));
 
   return rows.map((row) => {
     const activity = activityById.get(row.id_actividad);
-    const task = activity ? taskMap.get(activity.id_tarea) : null;
     return {
       id: row.id,
       volunteerName: volunteerMap.get(row.id_voluntario) ?? "Voluntario",
@@ -495,7 +491,7 @@ export async function fetchDashboardRecentHours(limit = 5): Promise<DashboardHou
       statusLabel: mapHourStatusLabel(row.estado_aprobacion),
       volunteerId: row.id_voluntario,
       activityId: row.id_actividad,
-      projectName: task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto",
+      projectName: activity?.id_proyecto ? projectMap.get(activity.id_proyecto) ?? "Proyecto" : "Proyecto",
     };
   });
 }
@@ -506,7 +502,7 @@ export async function fetchDashboardRecentActivities(limit = 5): Promise<Dashboa
     .schema("ong")
     .from("actividades")
     .select(
-      "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at"
+      "id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at"
     )
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
@@ -516,8 +512,8 @@ export async function fetchDashboardRecentActivities(limit = 5): Promise<Dashboa
   const rows = data ?? [];
   if (!rows.length) return [];
 
-  const [taskMap, locationMap, assignmentResult] = await Promise.all([
-    getTaskMap(uniqueNonEmpty(rows.map((row) => row.id_tarea)), tenantId),
+  const [projectMap, locationMap, assignmentResult] = await Promise.all([
+    getProjectNameMap(uniqueNonEmpty(rows.map((row) => row.id_proyecto)), tenantId),
     getLocationNameMap(
       uniqueNonEmpty(rows.map((row) => row.id_ubicacion)),
       tenantId
@@ -529,10 +525,6 @@ export async function fetchDashboardRecentActivities(limit = 5): Promise<Dashboa
       .eq("tenant_id", tenantId)
       .in("id_actividad", rows.map((row) => row.id)),
   ]);
-  const projectMap = await getProjectNameMap(
-    uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.projectId)),
-    tenantId
-  );
   const { data: assignmentRows, error: assignmentError } = assignmentResult;
   if (assignmentError) throw new Error(assignmentError.message);
 
@@ -542,8 +534,7 @@ export async function fetchDashboardRecentActivities(limit = 5): Promise<Dashboa
   }
 
   return rows.map((row) => {
-    const task = taskMap.get(row.id_tarea);
-    const projectName = task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto";
+    const projectName = row.id_proyecto ? projectMap.get(row.id_proyecto) ?? "Proyecto" : "Proyecto";
     const statusCode = normalizeActivityStatusCode(row.codigo_estado);
     return {
       id: row.id,
@@ -559,9 +550,9 @@ export async function fetchDashboardRecentActivities(limit = 5): Promise<Dashboa
       endAt: row.fecha_fin,
       locationId: row.id_ubicacion,
       locationName: row.id_ubicacion ? locationMap.get(row.id_ubicacion) ?? null : null,
-      taskId: row.id_tarea,
-      taskName: task?.title ?? "Tarea",
-      taskStatus: mapTaskStatusLabel(task?.status),
+      taskId: undefined,
+      taskName: undefined,
+      taskStatus: undefined,
       estimatedHours: row.horas_estimadas === null ? null : Math.round(Number(row.horas_estimadas) * 10) / 10,
     };
   });
@@ -666,7 +657,7 @@ export async function fetchImpactKpis(): Promise<ImpactKpis> {
   const [beneficiariesResult, hoursResult, projectsResult] = await Promise.allSettled([
     db.schema("ong").from("beneficiarios").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
     db.schema("ong").from("horas_actividad").select("horas_registradas").eq("tenant_id", tenantId).eq("estado_aprobacion", "aprobada"),
-    db.schema("ong").from("proyectos").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("estado", "completado"),
+    db.schema("ong").from("proyectos").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("codigo_estado", "completado"),
   ]);
 
   const beneficiaries = beneficiariesResult.status === "fulfilled" ? (beneficiariesResult.value.count ?? 0) : 0;
@@ -685,7 +676,7 @@ export async function fetchTodayTimeline(limit = 6): Promise<DashboardTimelineIt
   const { data: activities, error: activityError } = await db
     .schema("ong")
     .from("actividades")
-    .select("id, id_tarea, titulo, codigo_estado, fecha_inicio, fecha_fin, created_at")
+    .select("id, id_proyecto, titulo, codigo_estado, fecha_inicio, fecha_fin, created_at")
     .eq("tenant_id", tenantId)
     .order("fecha_inicio", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
@@ -704,19 +695,18 @@ export async function fetchTodayTimeline(limit = 6): Promise<DashboardTimelineIt
     return [];
   }
 
-  const taskMap = await getTaskMap(uniqueNonEmpty(rows.map((activity) => activity.id_tarea)), tenantId);
   const projectMap = await getProjectNameMap(
-    uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.projectId)),
+    uniqueNonEmpty(rows.map((activity) => activity.id_proyecto)),
     tenantId
   );
 
   return rows.slice(0, limit).map((activity) => {
-    const task = taskMap.get(activity.id_tarea);
+    const projectName = activity.id_proyecto ? projectMap.get(activity.id_proyecto) ?? "Proyecto" : "Proyecto";
     const status = mapActivityStatus(activity.codigo_estado);
     return {
       id: activity.id,
       title: activity.titulo,
-      subtitle: `${task?.title ?? "Tarea"} - ${task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto"}`,
+      subtitle: projectName,
       time: activity.fecha_inicio ?? activity.fecha_fin ?? "Hoy",
       dotColor: dotColorByStatus[status],
     };
@@ -751,25 +741,20 @@ export async function fetchActivityTaskOptions(limit = 300): Promise<DashboardTa
   const tenantId = await getRequiredTenantId();
   const { data, error } = await db
     .schema("ong")
-    .from("tareas")
-    .select("id, id_proyecto, titulo, estado, fecha_limite, created_at")
+    .from("proyectos")
+    .select("id, codigo, nombre_proyecto, codigo_estado, created_at")
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .limit(limit);
-  if (error) throw new Error(toFriendlyError(error, "No se pudo cargar el catalogo de tareas."));
-  const tasks = data ?? [];
-  const projectMap = await getProjectNameMap(uniqueNonEmpty(tasks.map((task) => task.id_proyecto)), tenantId);
-  return tasks.map((task) => {
-    const projectName = projectMap.get(task.id_proyecto) ?? "Proyecto";
-    return {
-      value: task.id,
-      label: `${task.titulo} (${projectName})`,
-      taskTitle: task.titulo,
-      projectName,
-      taskStatus: mapTaskStatusLabel(task.estado),
-      dueDate: task.fecha_limite,
-    };
-  });
+  if (error) throw new Error(toFriendlyError(error, "No se pudo cargar el catalogo de proyectos."));
+  return (data ?? []).map((project) => ({
+    value: project.id,
+    label: `${project.codigo} - ${project.nombre_proyecto}`,
+    taskTitle: project.nombre_proyecto,
+    projectName: `${project.codigo} - ${project.nombre_proyecto}`,
+    taskStatus: project.codigo_estado ?? "",
+    dueDate: null,
+  }));
 }
 
 export async function fetchActivityLocationOptions(): Promise<
@@ -819,7 +804,7 @@ export async function createDashboardActivity(
 ): Promise<DashboardActivityDetail> {
   const tenantId = await getRequiredTenantId();
   const currentUser = await safeGetCurrentUser();
-  const taskId = sanitizeText(input.taskId, 80);
+  const projectId = sanitizeText(input.projectId, 80);
   const title = sanitizeText(input.title, 200);
   const description = sanitizeText(input.description, 4000) || "";
   const statusCode = normalizeActivityStatusCode(input.statusCode);
@@ -827,7 +812,7 @@ export async function createDashboardActivity(
   const endAt = sanitizeText(input.endAt ?? "", 40) || null;
   const locationId = sanitizeText(input.locationId ?? "", 80) || null;
 
-  if (!taskId) throw new Error("Selecciona una tarea para crear la actividad.");
+  if (!projectId) throw new Error("Selecciona un proyecto para crear la actividad.");
   if (!title) throw new Error("El titulo de la actividad es obligatorio.");
   if (input.estimatedHours !== null && (!Number.isFinite(input.estimatedHours) || input.estimatedHours <= 0)) {
     throw new Error("Las horas estimadas deben ser mayores a cero.");
@@ -836,16 +821,16 @@ export async function createDashboardActivity(
     throw new Error("La fecha fin no puede ser menor a la fecha inicio.");
   }
 
-  const { data: taskRows, error: taskError } = await db
+  const { data: projectRows, error: projectError } = await db
     .schema("ong")
-    .from("tareas")
+    .from("proyectos")
     .select("id, estado")
     .eq("tenant_id", tenantId)
-    .eq("id", taskId)
+    .eq("id", projectId)
     .limit(1);
-  if (taskError) throw new Error(taskError.message);
-  if (!taskRows?.length) throw new Error("La tarea seleccionada ya no existe.");
-  if (taskRows[0].estado === "cancelada") throw new Error("No se puede crear actividad sobre una tarea cancelada.");
+  if (projectError) throw new Error(projectError.message);
+  if (!projectRows?.length) throw new Error("El proyecto seleccionado ya no existe.");
+  if (projectRows[0].estado === "cancelado") throw new Error("No se puede crear actividad en un proyecto cancelado.");
   await ensureActivityLocationExists(tenantId, locationId);
 
   const { data: insertedRows, error: insertError } = await db
@@ -853,7 +838,7 @@ export async function createDashboardActivity(
     .from("actividades")
     .insert({
       tenant_id: tenantId,
-      id_tarea: taskId,
+      id_proyecto: projectId,
       titulo: title,
       descripcion: description || null,
       codigo_estado: statusCode,
@@ -880,7 +865,7 @@ export async function updateDashboardActivity(
   const tenantId = await getRequiredTenantId();
   const currentUser = await safeGetCurrentUser();
   const sanitizedActivityId = sanitizeText(activityId, 80);
-  const taskId = sanitizeText(input.taskId, 80);
+  const projectId = sanitizeText(input.projectId, 80);
   const title = sanitizeText(input.title, 200);
   const description = sanitizeText(input.description, 4000) || "";
   const statusCode = normalizeActivityStatusCode(input.statusCode);
@@ -889,22 +874,12 @@ export async function updateDashboardActivity(
   const locationId = sanitizeText(input.locationId ?? "", 80) || null;
 
   if (!sanitizedActivityId) throw new Error("No se encontro la actividad a actualizar.");
-  if (!taskId) throw new Error("Selecciona una tarea valida.");
+  if (!projectId) throw new Error("Selecciona un proyecto valido.");
   if (!title) throw new Error("El titulo de la actividad es obligatorio.");
   if (startAt && endAt && new Date(endAt).getTime() < new Date(startAt).getTime()) {
     throw new Error("La fecha fin no puede ser menor a la fecha inicio.");
   }
 
-  const { data: taskRows, error: taskError } = await db
-    .schema("ong")
-    .from("tareas")
-    .select("id, estado")
-    .eq("tenant_id", tenantId)
-    .eq("id", taskId)
-    .limit(1);
-  if (taskError) throw new Error(taskError.message);
-  if (!taskRows?.length) throw new Error("La tarea seleccionada ya no existe.");
-  if (taskRows[0].estado === "cancelada") throw new Error("No se puede mover una actividad a una tarea cancelada.");
   await ensureActivityLocationExists(tenantId, locationId);
 
   const { data: existsRows, error: existsError } = await db
@@ -921,7 +896,7 @@ export async function updateDashboardActivity(
     .schema("ong")
     .from("actividades")
     .update({
-      id_tarea: taskId,
+      id_proyecto: projectId,
       titulo: title,
       descripcion: description || null,
       codigo_estado: statusCode,
@@ -967,7 +942,7 @@ export async function fetchDashboardActivityDetail(
     .schema("ong")
     .from("actividades")
     .select(
-      "id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at"
+      "id, id_proyecto, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion, horas_estimadas, created_at"
     )
     .eq("tenant_id", tenantId)
     .eq("id", sanitizedActivityId)
@@ -977,8 +952,8 @@ export async function fetchDashboardActivityDetail(
   const activity = activityRows?.[0] ?? null;
   if (!activity) throw new Error("La actividad ya no existe.");
 
-  const [taskMap, locationMap, assignmentsResult, evidenceResult, registeredHours] = await Promise.all([
-    getTaskMap([activity.id_tarea], tenantId),
+  const [projectMap, locationMap, assignmentsResult, evidenceResult, registeredHours] = await Promise.all([
+    getProjectNameMap(activity.id_proyecto ? [activity.id_proyecto] : [], tenantId),
     getLocationNameMap(activity.id_ubicacion ? [activity.id_ubicacion] : [], tenantId),
     db.schema("ong").from("asignaciones_actividad").select("id, id_voluntario, rol_en_actividad").eq("tenant_id", tenantId).eq("id_actividad", activity.id),
     db.schema("ong").from("evidencias_actividad").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("id_actividad", activity.id),
@@ -988,9 +963,7 @@ export async function fetchDashboardActivityDetail(
   if (assignmentsResult.error) throw new Error(assignmentsResult.error.message);
   if (evidenceResult.error) throw new Error(evidenceResult.error.message);
 
-  const task = taskMap.get(activity.id_tarea);
-  if (!task) throw new Error("No se pudo resolver la tarea relacionada.");
-  const projectMap = await getProjectNameMap([task.projectId], tenantId);
+  const projectName = activity.id_proyecto ? projectMap.get(activity.id_proyecto) ?? "Proyecto" : "Proyecto";
   const volunteerMap = await getVolunteerNameMap(uniqueNonEmpty((assignmentsResult.data ?? []).map((row) => row.id_voluntario)), tenantId);
 
   return {
@@ -1006,11 +979,11 @@ export async function fetchDashboardActivityDetail(
     endAt: activity.fecha_fin,
     locationId: activity.id_ubicacion,
     locationName: activity.id_ubicacion ? locationMap.get(activity.id_ubicacion) ?? null : null,
-    taskId: task.id,
-    taskTitle: task.title,
-    taskStatus: mapTaskStatusLabel(task.status),
-    taskDueDate: task.dueDate,
-    projectName: projectMap.get(task.projectId) ?? "Proyecto",
+    taskId: activity.id_proyecto ?? "",
+    taskTitle: projectName,
+    taskStatus: "",
+    taskDueDate: null,
+    projectName,
     assignments: (assignmentsResult.data ?? []).map((assignment) => ({
       id: assignment.id,
       volunteerName: volunteerMap.get(assignment.id_voluntario) ?? assignment.id_voluntario,
@@ -1040,7 +1013,7 @@ export async function fetchDashboardHourDetail(hourId: string): Promise<Dashboar
 
   const [volunteerMap, activityResult, profileResult] = await Promise.all([
     getVolunteerNameMap([row.id_voluntario], tenantId),
-    db.schema("ong").from("actividades").select("id, id_tarea, titulo").eq("tenant_id", tenantId).eq("id", row.id_actividad).limit(1),
+    db.schema("ong").from("actividades").select("id, id_proyecto, titulo").eq("tenant_id", tenantId).eq("id", row.id_actividad).limit(1),
     row.aprobado_por
       ? db.schema("public").from("profiles").select("id, full_name").eq("tenant_id", tenantId).eq("id", row.aprobado_por).limit(1)
       : Promise.resolve({ data: [] as Array<{ id: string; full_name: string | null }>, error: null }),
@@ -1052,16 +1025,14 @@ export async function fetchDashboardHourDetail(hourId: string): Promise<Dashboar
   const activity = activityResult.data?.[0] ?? null;
   if (!activity) throw new Error("No se pudo resolver la actividad asociada.");
 
-  const taskMap = await getTaskMap([activity.id_tarea], tenantId);
-  const task = taskMap.get(activity.id_tarea);
-  const projectMap = await getProjectNameMap(task ? [task.projectId] : [], tenantId);
+  const projectMap = await getProjectNameMap(activity.id_proyecto ? [activity.id_proyecto] : [], tenantId);
   const approvedBy = row.aprobado_por && profileResult.data?.[0] ? profileResult.data[0].full_name || row.aprobado_por : row.aprobado_por;
   const approvalRecord = await resolveHourApprovalRecord(tenantId, row.id, row.id_aprobacion);
 
   return {
     id: row.id,
     activityName: activity.titulo,
-    projectName: task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto",
+    projectName: activity.id_proyecto ? projectMap.get(activity.id_proyecto) ?? "Proyecto" : "Proyecto",
     volunteerName: volunteerMap.get(row.id_voluntario) ?? row.id_voluntario,
     date: row.fecha,
     hoursRegistered: Math.round(Number(row.horas_registradas ?? 0) * 10) / 10,

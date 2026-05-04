@@ -114,7 +114,7 @@ export interface DashboardLocationOption {
 }
 
 export interface DashboardActivityFormInput {
-  taskId: string;
+  projectId: string;
   title: string;
   description: string;
   statusCode: string;
@@ -125,7 +125,7 @@ export interface DashboardActivityFormInput {
 }
 
 export interface DashboardActivityFormErrors {
-  taskId?: string;
+  projectId?: string;
   title?: string;
   statusCode?: string;
   dateOrder?: string;

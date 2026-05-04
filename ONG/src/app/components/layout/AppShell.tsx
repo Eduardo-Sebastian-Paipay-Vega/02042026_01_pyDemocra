@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette, useCommandPalette } from "../ui/command-palette";
 import { HelpAssistant } from "../ui/help-assistant";
+import { ProjectHierarchySteps } from "../shared/ProjectHierarchySteps";
 import { useGlobalShortcuts } from "../../lib/useGlobalShortcuts";
 import { ThemeProvider, useTheme } from "../../lib/theme-context";
 import { useHomeNotifications } from "../../modules/home/useHomeNotifications";
@@ -157,6 +158,11 @@ function AppShellInner() {
     title: tenantContext?.tenant.name ?? "Admin",
   };
 
+  useEffect(() => {
+    const pageTitle = routeMeta?.title ?? tenantContext?.tenant.name ?? "Admin";
+    document.title = `${pageTitle} · Democra ONG`;
+  }, [routeMeta, tenantContext?.tenant.name]);
+
   return (
     <div
       className="relative min-h-screen overflow-x-clip transition-[background-color] duration-150 ease-out"
@@ -249,6 +255,7 @@ function AppShellInner() {
           <main className="mx-auto flex w-full max-w-[1240px] flex-1 px-5 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
               <TenantFinancialBanner context={tenantContext} />
+              <ProjectHierarchySteps />
               <Outlet />
             </div>
           </main>

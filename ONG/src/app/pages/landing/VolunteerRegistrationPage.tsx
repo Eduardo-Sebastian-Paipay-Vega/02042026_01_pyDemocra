@@ -362,10 +362,7 @@ export function VolunteerRegistrationPage() {
               Registro de <GradientText>voluntariado por codigo</GradientText>
             </h1>
             <p className="mt-3 max-w-2xl text-[14px] leading-[1.7] text-[#A7A7A7]">
-              Este flujo valida el codigo unico en <code>rrhh.codigos_registro_voluntario</code>,
-              registra documentos en <code>rrhh.registro_documentos_postulante</code> y enlaza de
-              forma real <code>auth.users</code>, <code>public.profiles</code> y{" "}
-              <code>ong.voluntarios</code>.
+              Valida tu código único de registro, carga tus documentos y completa tu incorporación como voluntario.
             </p>
           </div>
           <GlassCard className="px-4 py-3">

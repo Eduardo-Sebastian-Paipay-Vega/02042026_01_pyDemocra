@@ -2,357 +2,42 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      html {
-        visibility: hidden;
-        background: #050505;
-      }
-
-      html.loaded {
-        visibility: visible;
-      }
-    </style>
-    <noscript><style>html { visibility: visible !important; }</style></noscript>
 
     <title>Solaris Studio</title>
     <meta
       name="description"
-      content="Solaris Studio: estudio conceptual de sistemas, procesos y diseño. Menos ruido. Más criterio."
+      content="Solaris Studio: estudio conceptual de sistemas, procesos y diseÃ±o. Menos ruido. MÃ¡s criterio."
     />
     <meta name="theme-color" content="#050505" />
 
-    <!-- Open Graph / Social -->
+    <!-- Open Graph -->
     <meta property="og:title" content="Solaris Studio" />
     <meta
       property="og:description"
-      content="Sistemas en calma. Futuro con intención. Estudio conceptual de tecnología, procesos y diseño."
+      content="Sistemas en calma. Futuro con intenciÃ³n. Estudio conceptual de tecnologÃ­a, procesos y diseÃ±o."
     />
     <meta property="og:type" content="website" />
 
-    <!-- Tipografía: Space Grotesk -->
+    <!-- TipografÃ­a (cargada en head para que los componentes la tengan disponible) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
-
-    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet">
-
+    <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
 
     <!-- Favicon -->
     <link rel="icon" href="./Imagen/Iconos/logo_cua1.png" type="image/png" />
     <link rel="apple-touch-icon" href="./Imagen/Iconos/logo_negro.png" />
 
-    <!-- CSS crítico -->
-    <link rel="preload" href="/src/styles/styles.css" as="style" />
-    <link rel="preload" href="/src/styles/animations.css" as="style" />
-    <link rel="preload" href="/src/styles/theme.css" as="style" />
-    <link rel="stylesheet" href="/src/styles/styles.css" />
-    <link rel="stylesheet" href="/src/styles/animations.css" />
-    <link rel="stylesheet" href="/src/styles/theme.css" />
-
-
-    <style>
-      /* Aplicando Satoshi Black específicamente al título del Hero */
-      .studio-hero__title {
-        font-family: 'Satoshi', sans-serif;
-        font-weight: 900; /* Peso Black */
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-      }
-    </style>
-
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=about:blank" />
+    </noscript>
   </head>
-
   <body>
-    <div id="top"></div>
-    <!-- Mobile progress (móvil) -->
-    <div class="mobile-progress" aria-hidden="true">
-      <span class="mobile-progress-fill"></span>
-    </div>
-
-    <!-- HEADER -->
-    <header class="header">
-      <div class="container header-inner">
-
-        <a class="brand" href="./index.html" aria-label="Solaris Home">
-          <img src="./Imagen/Iconos/logo_cua1.png" alt="Logo Solaris" class="brand-logo-img" />
-          <span>SOLARIS</span>
-        </a>
-
-        <nav class="nav" aria-label="Navegación principal">
-          <a class="nav-link" href="./index.html#enfoque">Enfoque</a>
-          <a class="nav-link" href="./studio.html">Archivo</a>
-          <a class="nav-link" href="./nosotros.html">Nosotros</a>
-          <div class="nav-login" aria-label="Login">
-            <span class="nav-login__label">Login</span>
-            <a class="nav-login__link" href="/login.html">Ingresar</a>
-            <a class="nav-login__link" href="/register.html">Registrarse</a>
-          </div>
-          <button class="nav-contact" type="button" data-open-contact>Contacto</button>
-        </nav>
-
-        <div class="mobile-simple-menu" aria-label="Menu de acceso">
-          <span class="mobile-simple-menu__label">Login</span>
-          <a class="mobile-simple-menu__link" href="/login.html">Ingresar</a>
-          <a class="mobile-simple-menu__link" href="/register.html">Registrarse</a>
-        </div>
-      </div>
-    </header>
-
-    <main>
-
-      
-      <!-- HERO -->
-      <section class="hero" id="hero" aria-label="Solaris Hero">
-        <div class="container hero-inner">
-          <!-- Logo -->
-          <div
-            class="logo reveal reveal--fast logo-parallax logo-micro has-glow"
-            aria-hidden="true"
-          >
-            <img src="./Imagen/Iconos/logo_cobre.png" alt="Solaris symbol" />
-          </div>
-
-          <!-- Hero copy -->
-          <div class="hero-copy stagger">
-            <!--<h1 class="hero-title">
-              Sistemas con silencio.<br />
-              Futuro con intención.
-            </h1> -->
-
-            <h1 class="studio-hero__title">Sueña lo que piensas<br />
-              Futuro con intención.</h1>
-
-            <p class="hero-subtitle">
-              Haz más con nosotros, menos por tu cuenta.
-            </p>
-
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="./studio.html">Que Ofrecemos?</a>
-              <a class="btn btn-ghost" href="#enfoque">Enfoque</a>
-              <a class="btn btn-ghost" href="#enfoque">Conócenos</a>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="hero-fade" aria-hidden="true"></div>
-      </section>
-
-      <!-- ABOUT -->
-      <section class="section" id="about" aria-label="Acerca de Solaris">
-        <div class="container section-inner">
-          <h2 class="section-title reveal">Solaris</h2>
-
-          <p class="section-text reveal reveal--soft">
-            Sabemos tus necesidades. Te ayudamos a lograr más con menos esfuerzo.
-            Somos un estudio conceptual especializado en sistemas, procesos y diseño.
-          </p>
-
-          
-
-
-          <div class="meta-grid reveal reveal--soft">
-
-            <div class="meta-card">
-            <span class="meta-kicker">Enfoque</span>
-            <p class="meta-value">
-                Resolvemos problemas, pero primero tenemos que entenderte y encontrar el problema real.
-            </p>
-
-            <div class="meta-icon">
-              <img src="./Imagen/use/logo_wa.png" alt="Solaris symbol" />
-            </div>
-          </div>
-
-
-            <div class="meta-card">
-              <span class="meta-kicker">Lenguaje</span>
-              <p class="meta-value">Sencillo, preciso y humano.</p>
-
-              <div class="meta-icon">
-              <img src="./Imagen/use/forma-abstracta.png" alt="Solaris symbol" />
-            </div>
-
-            </div>
-            <div class="meta-card">
-              <span class="meta-kicker">Resultado</span>
-              <p class="meta-value">Sistemas claros, procesos eficientes y diseño intuitivo.</p>
-
-              <div class="meta-icon">
-              <img src="./Imagen/use/forma (1).png" alt="Solaris symbol" />
-
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- WORK -->
-      <section class="section" id="enfoque" aria-label="Enfoque de trabajo">
-        <div class="container section-inner">
-          <h2 class="section-title reveal">Enfoque</h2>
-
-          <p class="section-text reveal reveal--soft">Tres capas. Una sola dirección.</p>
-
-          <div class="cards reveal reveal--soft">
-            <article class="card">
-              <h3 class="card-title">Sistemas</h3>
-              <p class="card-text">
-                Núcleo claro. Dependencias limpias. Decisiones justificadas.
-              </p>
-            </article>
-
-            <article class="card">
-              <h3 class="card-title">Procesos</h3>
-              <p class="card-text">
-                Flujo real. Menos fricción. Control donde importa.
-              </p>
-            </article>
-
-            <article class="card">
-              <h3 class="card-title">Diseño</h3>
-              <p class="card-text">
-                Jerarquía, tipografía y espacio. Lo esencial se ve.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-   
-
-      <section id="archivo" class="section container reveal">
-        <div class="section-head">
-          <h2 class="section-title">Archivo</h2>
-          <p class="section-subtitle">Piezas curadas: ideas, flujos y sistemas. Formato estudio.</p>
-        </div>
-      
-        <div class="studio-preview-grid">
-          <div class="preview-card">
-            <div class="preview-kicker">Journal</div>
-            <div class="preview-title">Silencio en sistemas</div>
-            <div class="preview-desc">Reducir complejidad sin perder potencia.</div>
-          </div>
-      
-          <div class="preview-card">
-            <div class="preview-kicker">Workflows</div>
-            <div class="preview-title">Flow: diagnóstico Solaris</div>
-            <div class="preview-desc">Entrada ? análisis ? propuesta ? decisión.</div>
-          </div>
-      
-          <div class="preview-card">
-            <div class="preview-kicker">Note</div>
-            <div class="preview-title">Futuro, pero con bordes</div>
-            <div class="preview-desc">Visión con límites: producto.</div>
-          </div>
-        </div>
-      
-        <div class="studio-preview-actions">
-          <a class="btn btn--solid" href="./studio.html">Abrir archivo</a>
-          
-
-        </div>
-      </section>
-      
-
-    </main>
-
-    <!-- FOOTER -->
-     <footer class="section" style="padding: 4rem 0; border-top: 1px solid var(--border);">
-        <div class="container" style="text-align: center;">
-            <p class="brand" style="margin-bottom: 1rem;">© 2026 Solaris Studio</p>
-            <p style="color: var(--muted-2); font-size: 0.8rem;">Perú</p>
-        </div>
-    </footer>
-
-    <!-- SECTION INDICATOR -->
-    <nav class="section-indicator" aria-label="Section indicator">
-      <span class="dot" data-target="#top" data-label="Inicio"></span>
-      <span class="dot" data-target="#about" data-label="Solaris"></span>
-      <span class="dot" data-target="#enfoque" data-label="Enfoque"></span>
-    </nav>
-
-    <!-- Left progress rail -->
-    <div class="progress-rail" aria-hidden="true">
-      <span class="progress-fill"></span>
-    </div>
-    
-    <div class="modal" id="contactModal" aria-hidden="true">
-    <div class="modal__backdrop" data-close-contact></div>
-    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Contacto">
-        <div class="modal__head">
-            <div class="modal__kicker">Conectemos</div>
-            <button class="modal__close" type="button" data-close-contact aria-label="Cerrar">×</button>
-        </div>
-
-        <h2 class="modal__title">Impulsa tu proyecto</h2>
-        <p class="modal__desc">
-            Acceso directo a consultoría especializada. Sin intermediarios.
-        </p>
-
-        <div class="contact-premium">
-            <div class="contact-premium__grid">
-                <div class="contact-premium__block">
-                    <div class="contact-premium__label">E-mail Corporativo</div>
-                    <button class="contact-premium__value" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
-                        tu-correo@ejemplo.com
-                    </button>
-                    <div class="contact-premium__hint">Clic para copiar correo</div>
-                </div>
-
-                <div class="contact-premium__block">
-                    <div class="contact-premium__label">Línea de Consultoría</div>
-                    <button class="contact-premium__value" type="button" onclick="copyValue('https://wa.me/51953714752', this)">
-                        wa.me/51953714752
-                    </button>
-                    <a href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
-                       target="_blank" class="contact-premium__hint" style="color: #25D366; text-decoration: underline;">
-                        Click para ir directamente
-                    </a>
-                </div>
-            </div>
-
-            <div class="contact-premium__qrRow">
-                <div class="contact-premium__qr">
-                    <img class="qr-img" src="./Imagen/Line/qr_placeholder.png" alt="QR de contacto" />
-                </div>
-
-                <div class="contact-premium__cta">
-                    <div class="contact-premium__title">Soluciones a medida</div>
-                    <div class="contact-premium__text">
-                        Escanea el código para una respuesta inmediata vía WhatsApp o utiliza nuestros accesos rápidos.
-                    </div>
-
-                    <div class="contact-premium__actions">
-                        <button class="btn btn--ghost btn--small" type="button" onclick="copyValue('tu-correo@ejemplo.com', this)">
-                            Copiar correo
-                        </button>
-                        <a class="btn btn--solid btn--small" 
-                           href="https://wa.me/51953714752?text=Hola,%20me%20gustar%C3%ADa%20recibir%20asesor%C3%ADa%20sobre%20soluciones%20tecnol%C3%B3gicas." 
-                           target="_blank">
-                            Iniciar Chat
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Micro sound (solo una vez) -->
-    <audio id="ui-sound" src="./assets/sound/ui-soft.mp3" preload="auto"></audio>
-
-    <!-- JS -->
-    <script>
-      window.addEventListener("load", function () {
-        document.documentElement.classList.add("loaded");
-      });
-    </script>
-    <script type="module" src="/src/main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

@@ -1,7 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
-import { Activities } from "./pages/Activities";
+import { Login } from "./pages/Login";
+import { AuthCallback } from "./pages/AuthCallback";
 import { AuditLog } from "./pages/AuditLog";
 import { AdmissionDocuments } from "./pages/AdmissionDocuments";
 import { AdmissionInterviews } from "./pages/AdmissionInterviews";
@@ -63,6 +64,10 @@ function RootEntryRedirect() {
     return <TenantBootstrapLoadingScreen />;
   }
 
+  if (status === "unauthenticated") {
+    return <Navigate to="/login" replace />;
+  }
+
   if (!context || status !== "ready") {
     return <TenantStatusScreen status={status} message={message} context={context} />;
   }
@@ -87,6 +92,10 @@ function ShellIndexRedirect() {
     return <TenantBootstrapLoadingScreen />;
   }
 
+  if (status === "unauthenticated") {
+    return <Navigate to="/login" replace />;
+  }
+
   if (!context || status !== "ready") {
     return <TenantStatusScreen status={status} message={message} context={context} />;
   }
@@ -109,6 +118,10 @@ function ProtectedTenantShell() {
 
   if (loading) {
     return <TenantBootstrapLoadingScreen />;
+  }
+
+  if (status === "unauthenticated") {
+    return <Navigate to="/login" replace />;
   }
 
   if (!context || status !== "ready") {
@@ -160,6 +173,10 @@ function LegacyAdminRedirect() {
     return <TenantBootstrapLoadingScreen />;
   }
 
+  if (status === "unauthenticated") {
+    return <Navigate to="/login" replace />;
+  }
+
   if (!context || status !== "ready") {
     return <TenantStatusScreen status={status} message={message} context={context} />;
   }
@@ -202,6 +219,16 @@ export const router = createBrowserRouter(
       element: <RootEntryRedirect />,
     },
     {
+      path: "/login",
+      Component: Login,
+    },
+    {
+      // Receives cross-port token relay from localhost:5173/login
+      // Supabase picks up #access_token from the URL hash automatically (detectSessionInUrl: true)
+      path: "/auth/callback",
+      Component: AuthCallback,
+    },
+    {
       path: "/landing",
       Component: LandingPage,
     },
@@ -224,10 +251,6 @@ export const router = createBrowserRouter(
         {
           path: "search",
           ...protectedPage("search", <GlobalSearch />),
-        },
-        {
-          path: "operation/activities",
-          ...protectedPage("operation-activities", <Activities />),
         },
         {
           path: "operation/attendance",

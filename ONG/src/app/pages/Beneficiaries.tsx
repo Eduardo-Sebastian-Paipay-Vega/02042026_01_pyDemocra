@@ -179,7 +179,7 @@ export function Beneficiaries() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Beneficiarios"
-          description="Gestion real de perfiles y relaciones asociadas de beneficiarios en la nueva BD multi-esquema."
+          description="Gestiona los perfiles de beneficiarios y sus datos clínicos asociados."
           action={{ label: "Actualizar", onClick: beneficiaries.refresh }}
         />
       </motion.div>

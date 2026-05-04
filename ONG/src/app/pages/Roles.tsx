@@ -299,7 +299,7 @@ export function Roles() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Roles y permisos"
-          description="Administra roles reales en public.roles, asigna permisos desde public.cat_permissions y sincroniza public.role_permissions sin inventar modulos ni acciones."
+          description="Administra los roles de la organización y sus permisos asignados por módulo."
           action={
             data.access.canManageRoles
               ? { label: "Nuevo rol", onClick: openCreateModal }
@@ -348,7 +348,7 @@ export function Roles() {
           <SettingsSummaryField label="Roles totales" value={String(summary.totalRoles)} />
           <SettingsSummaryField label="Roles custom" value={String(summary.customRoles)} />
           <SettingsSummaryField label="Roles sistema" value={String(summary.systemRoles)} />
-          <SettingsSummaryField label="Permisos reales" value={String(summary.permissions)} />
+          <SettingsSummaryField label="Permisos disponibles" value={String(summary.permissions)} />
         </div>
       </motion.div>
 
@@ -357,7 +357,7 @@ export function Roles() {
           <SettingsErrorBlock
             message={
               error ??
-              "La lectura de roles requiere `settings.roles.read`, `settings.roles.manage` o compatibilidad legacy `iam.user_roles.manage` / tenant admin."
+              "No tienes los permisos necesarios para visualizar los roles. Contacta al administrador."
             }
             onRetry={refresh}
           />
@@ -389,7 +389,7 @@ export function Roles() {
               columns={roleColumns}
               data={data.access.canReadRoles ? filteredRoles : []}
               loading={loading}
-              emptyMessage="No se encontraron roles reales para los filtros seleccionados."
+              emptyMessage="No se encontraron roles para los filtros seleccionados."
               actions={
                 data.access.canManageRoles
                   ? [
@@ -422,7 +422,7 @@ export function Roles() {
           <div className="mb-4 flex items-center gap-2">
             <ListChecks className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <h2 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Catalogo de permisos reales
+              Catálogo de permisos
             </h2>
           </div>
 
@@ -437,7 +437,7 @@ export function Roles() {
               columns={permissionColumns}
               data={data.access.canReadPermissions ? filteredPermissions : []}
               loading={loading}
-              emptyMessage="No se encontraron permisos reales para el filtro actual."
+              emptyMessage="No se encontraron permisos para el filtro actual."
               actions={[]}
             />
           </div>
@@ -453,7 +453,7 @@ export function Roles() {
                 Detalle del rol
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.roles + public.role_permissions + public.user_roles_sedes
+                Permisos asignados y usuarios vinculados al rol.
               </p>
             </div>
           </div>
@@ -555,7 +555,7 @@ export function Roles() {
                 {editingRole ? "Editar rol" : "Nuevo rol"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La configuracion sincroniza public.roles y public.role_permissions.
+                Configura el nombre, nivel y permisos del rol.
               </p>
             </div>
             <button
@@ -612,7 +612,7 @@ export function Roles() {
             style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
           >
             <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-              Los permisos disponibles provienen de public.cat_permissions. Los checkboxes cambian el estado real de public.role_permissions.
+              Activa o desactiva los permisos disponibles para este rol.
             </p>
           </div>
 

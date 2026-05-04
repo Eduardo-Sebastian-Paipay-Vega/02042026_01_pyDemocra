@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
 import { DataTable, type Column } from "../components/shared/DataTable";
@@ -42,6 +42,7 @@ type AttendanceFormMode = "create" | "edit";
 type AttendanceFormState = {
   attendanceId: string | null;
   volunteerId: string;
+  projectId: string;
   activityId: string;
   date: string;
   entryTime: string;
@@ -127,6 +128,7 @@ function buildDefaultForm(): AttendanceFormState {
   return {
     attendanceId: null,
     volunteerId: "all",
+    projectId: "all",
     activityId: "all",
     date: new Date().toISOString().slice(0, 10),
     entryTime: "",
@@ -168,6 +170,7 @@ export function Attendance() {
   const [scanForm, setScanForm] = useState<AttendanceScanForm>({ activityId: "", qrPayload: "" });
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<AttendanceScanResult | null>(null);
+
   const {
     loading,
     error,
@@ -176,6 +179,7 @@ export function Attendance() {
     stats,
     refresh,
     volunteerOptions,
+    projectOptions,
     activityOptions,
     isRegisteringEntry,
     isRegisteringExit,
@@ -197,20 +201,69 @@ export function Attendance() {
     dateFrom: dateFrom || null,
     dateTo: dateTo || null,
   });
+
   const {
     detail,
     loading: detailLoading,
     error: detailError,
     refresh: refreshDetail,
   } = useAsistenciaDetail(isDetailOpen ? detailAttendanceId : null);
+
   const tenantBootstrap = useTenantBootstrap();
-  const canManageAttendance = tenantBootstrap.hasAnyPermission([
-    "operation.attendance.manage",
-  ]);
+  const canManageAttendance = tenantBootstrap.hasAnyPermission(["operation.attendance.manage"]);
   const canScanAttendance = tenantBootstrap.hasAnyPermission([
     "attendance.scan",
     "operation.attendance.manage",
   ]);
+
+  // ── Cascading filter logic: volunteer → project → activity ──────────────────
+
+  // Derive projects for the selected volunteer from the activity options metadata
+  // `projectOptions` comes from the hook and lists all projects in the tenant
+  const volunteerProjectOptions = useMemo(() => {
+    if (!formState.volunteerId || formState.volunteerId === "all") {
+      return projectOptions;
+    }
+    // Filter activities that include this volunteer, then collect their projectIds
+    const relevantProjectIds = new Set(
+      rows
+        .filter((r) => r.volunteerId === formState.volunteerId)
+        .map((r) => r.projectId)
+        .filter(Boolean)
+    );
+    if (relevantProjectIds.size === 0) {
+      return projectOptions;
+    }
+    return projectOptions.filter((p) => relevantProjectIds.has(p.value));
+  }, [formState.volunteerId, rows, projectOptions]);
+
+  // Auto-select project if only one available for the volunteer
+  useEffect(() => {
+    if (volunteerProjectOptions.length === 1 && formState.projectId === "all") {
+      setFormState((s) => ({
+        ...s,
+        projectId: volunteerProjectOptions[0].value,
+        activityId: "all",
+      }));
+    }
+  }, [volunteerProjectOptions, formState.projectId]);
+
+  // Filter activities based on selected project
+  const filteredActivityOptions = useMemo(() => {
+    if (!formState.projectId || formState.projectId === "all") {
+      return activityOptions;
+    }
+    // Match activities whose label includes the project name or use projectId metadata
+    // Since SelectOption only has {value, label}, we rely on the rows to map activityId→projectId
+    const projectActivityIds = new Set(
+      rows
+        .filter((r) => r.projectId === formState.projectId)
+        .map((r) => r.activityId)
+        .filter(Boolean)
+    );
+    const filtered = activityOptions.filter((a) => projectActivityIds.has(a.value));
+    return filtered.length > 0 ? filtered : activityOptions;
+  }, [formState.projectId, activityOptions, rows]);
 
   const filters = useMemo(
     () => [
@@ -234,7 +287,6 @@ export function Attendance() {
     if (!isScanOpen) {
       return;
     }
-
     window.setTimeout(() => scanInputRef.current?.focus(), 0);
   }, [isScanOpen]);
 
@@ -262,6 +314,7 @@ export function Attendance() {
     setFormState({
       attendanceId: row.id,
       volunteerId: row.volunteerId,
+      projectId: row.projectId ?? "all",
       activityId: row.activityId ?? "all",
       date: row.rawDate,
       entryTime: toTimeInputValue(row.rawEntry),
@@ -287,7 +340,7 @@ export function Attendance() {
       return;
     }
     if (formState.entryTime && formState.exitTime && formState.exitTime < formState.entryTime) {
-      setFormError("La salida no puede ser anterior a la entrada.");
+      setFormError("La hora de salida no puede ser anterior a la de entrada.");
       return;
     }
 
@@ -315,7 +368,7 @@ export function Attendance() {
           exitTime: formState.exitTime || undefined,
           observation: formState.observation || undefined,
         });
-        toast.success("Asistencia manual registrada.");
+        toast.success("Asistencia registrada correctamente.");
       }
       setIsFormOpen(false);
       resetForm();
@@ -327,9 +380,7 @@ export function Attendance() {
   }
 
   async function submitClose() {
-    if (!closingAttendanceId) {
-      return;
-    }
+    if (!closingAttendanceId) return;
     try {
       await registerExit({
         attendanceId: closingAttendanceId,
@@ -375,12 +426,10 @@ export function Attendance() {
   }
 
   async function submitRemove() {
-    if (!removeAttendanceId) {
-      return;
-    }
+    if (!removeAttendanceId) return;
     try {
       await removeAttendance(removeAttendanceId);
-      toast.success("Asistencia eliminada logicamente.");
+      toast.success("Asistencia eliminada.");
       setIsRemoveOpen(false);
       setRemoveAttendanceId(null);
       setRemoveError(null);
@@ -390,9 +439,7 @@ export function Attendance() {
       }
     } catch (actionError) {
       setRemoveError(
-        actionError instanceof Error
-          ? actionError.message
-          : "No se pudo eliminar logicamente la asistencia."
+        actionError instanceof Error ? actionError.message : "No se pudo eliminar la asistencia."
       );
     }
   }
@@ -411,9 +458,7 @@ export function Attendance() {
         activityId: scanForm.activityId,
         qrPayload: scanForm.qrPayload.trim(),
       });
-      if (!result) {
-        return;
-      }
+      if (!result) return;
       toast.success(result.confirmationTitle);
       setScanResult(result);
       setScanForm((current) => ({ ...current, qrPayload: "" }));
@@ -437,7 +482,7 @@ export function Attendance() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Asistencias"
-          description="Operacion real sobre `ong.asistencias`; la UI expone alta manual, detalle, cierre, incidencia, borrado logico y QR."
+          description="Registra y gestiona la asistencia de voluntarios a actividades: entrada, salida, incidencias y control por QR."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -560,7 +605,7 @@ export function Attendance() {
                     },
                   },
                   {
-                    label: "Eliminar logico",
+                    label: "Eliminar",
                     onClick: (item: OperationAttendanceRow) => {
                       setRemoveAttendanceId(item.id);
                       setRemoveError(null);
@@ -571,58 +616,161 @@ export function Attendance() {
                 ]
               : []),
           ]}
-          emptyMessage="No hay asistencias para el tenant actual con los filtros activos"
+          emptyMessage="No hay asistencias con los filtros activos"
         />
       </motion.div>
 
+      {/* ── Registro manual ─────────────────────────────────────────────────────── */}
       <ModalShell open={isFormOpen} onClose={() => setIsFormOpen(false)} width="max-w-[860px]">
-        <div className="space-y-3 p-4">
+        <div className="space-y-4 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                {formMode === "edit" ? "Editar asistencia" : "Registrar asistencia manual"}
+                {formMode === "edit" ? "Editar asistencia" : "Registrar asistencia"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                Persistencia directa sobre `ong.asistencias`.
+                Selecciona voluntario, luego proyecto y actividad. Registra hora de entrada y salida.
               </p>
             </div>
-            <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsFormOpen(false)}>X</button>
+            <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsFormOpen(false)}>✕</button>
           </div>
+
           {formError && <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>{formError}</p>}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <select value={formState.volunteerId} onChange={(event) => { setFormState((current) => ({ ...current, volunteerId: event.target.value })); setFormError(null); }} className="h-9 rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE}>
+
+          {/* Step 1: Voluntario */}
+          <div
+            className="rounded-xl p-3"
+            style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+          >
+            <p className="mb-2 text-[11px] font-medium" style={{ color: "var(--t-text-dim)" }}>
+              1. Voluntario
+            </p>
+            <select
+              value={formState.volunteerId}
+              onChange={(event) => {
+                setFormState((s) => ({ ...s, volunteerId: event.target.value, projectId: "all", activityId: "all" }));
+                setFormError(null);
+              }}
+              className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+              style={INPUT_STYLE}
+            >
               <option value="all">Selecciona un voluntario</option>
               {volunteerOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
-            <select value={formState.activityId} onChange={(event) => { setFormState((current) => ({ ...current, activityId: event.target.value })); setFormError(null); }} className="h-9 rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE}>
-              <option value="all">Selecciona una actividad</option>
-              {activityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </select>
-            <input type="date" value={formState.date} onChange={(event) => { setFormState((current) => ({ ...current, date: event.target.value })); setFormError(null); }} className="h-9 rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
-            <input type="time" value={formState.entryTime} onChange={(event) => { setFormState((current) => ({ ...current, entryTime: event.target.value })); setFormError(null); }} className="h-9 rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
-            <input type="time" value={formState.exitTime} onChange={(event) => { setFormState((current) => ({ ...current, exitTime: event.target.value })); setFormError(null); }} className="h-9 rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
           </div>
-          <textarea value={formState.observation} onChange={(event) => { setFormState((current) => ({ ...current, observation: event.target.value })); setFormError(null); }} rows={3} placeholder="Observacion" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />
+
+          {/* Step 2: Proyecto (visible cuando hay voluntario seleccionado) */}
+          {formState.volunteerId !== "all" && (
+            <div
+              className="rounded-xl p-3"
+              style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+            >
+              <p className="mb-2 text-[11px] font-medium" style={{ color: "var(--t-text-dim)" }}>
+                2. Proyecto
+                {volunteerProjectOptions.length === 1 && (
+                  <span className="ml-2 rounded px-1.5 py-0.5 text-[10px]" style={{ background: "rgba(99,102,241,0.15)", color: "rgba(99,102,241,1)" }}>
+                    Auto-seleccionado
+                  </span>
+                )}
+              </p>
+              <select
+                value={formState.projectId}
+                onChange={(event) => {
+                  setFormState((s) => ({ ...s, projectId: event.target.value, activityId: "all" }));
+                  setFormError(null);
+                }}
+                className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+                style={INPUT_STYLE}
+              >
+                <option value="all">Selecciona un proyecto</option>
+                {volunteerProjectOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Step 3: Actividad (visible cuando hay proyecto) */}
+          {formState.projectId !== "all" && (
+            <div
+              className="rounded-xl p-3"
+              style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+            >
+              <p className="mb-2 text-[11px] font-medium" style={{ color: "var(--t-text-dim)" }}>
+                3. Actividad
+              </p>
+              <select
+                value={formState.activityId}
+                onChange={(event) => { setFormState((s) => ({ ...s, activityId: event.target.value })); setFormError(null); }}
+                className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+                style={INPUT_STYLE}
+              >
+                <option value="all">Selecciona una actividad</option>
+                {filteredActivityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Step 4: Fecha y horas */}
+          {formState.activityId !== "all" && (
+            <div
+              className="rounded-xl p-3"
+              style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+            >
+              <p className="mb-2 text-[11px] font-medium" style={{ color: "var(--t-text-dim)" }}>
+                4. Fecha y horario
+              </p>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div>
+                  <p className="mb-1 text-[10px]" style={{ color: "var(--t-text-dim)" }}>Fecha</p>
+                  <input type="date" value={formState.date} onChange={(event) => { setFormState((s) => ({ ...s, date: event.target.value })); setFormError(null); }} className="h-9 w-full rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
+                </div>
+                <div>
+                  <p className="mb-1 text-[10px]" style={{ color: "var(--t-text-dim)" }}>Hora entrada</p>
+                  <input type="time" value={formState.entryTime} onChange={(event) => { setFormState((s) => ({ ...s, entryTime: event.target.value })); setFormError(null); }} className="h-9 w-full rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
+                </div>
+                <div>
+                  <p className="mb-1 text-[10px]" style={{ color: "var(--t-text-dim)" }}>Hora salida</p>
+                  <input type="time" value={formState.exitTime} onChange={(event) => { setFormState((s) => ({ ...s, exitTime: event.target.value })); setFormError(null); }} className="h-9 w-full rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <textarea
+            value={formState.observation}
+            onChange={(event) => { setFormState((s) => ({ ...s, observation: event.target.value })); setFormError(null); }}
+            rows={3}
+            placeholder="Observacion (opcional)"
+            className="w-full rounded-xl px-3 py-2 text-[12px] outline-none"
+            style={INPUT_STYLE}
+          />
           {formMode === "edit" && (
-            <textarea value={formState.correctionReason} onChange={(event) => { setFormState((current) => ({ ...current, correctionReason: event.target.value })); setFormError(null); }} rows={3} placeholder="Motivo de correccion" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />
+            <textarea
+              value={formState.correctionReason}
+              onChange={(event) => { setFormState((s) => ({ ...s, correctionReason: event.target.value })); setFormError(null); }}
+              rows={3}
+              placeholder="Motivo de corrección"
+              className="w-full rounded-xl px-3 py-2 text-[12px] outline-none"
+              style={INPUT_STYLE}
+            />
           )}
           <div className="flex gap-2">
             <GradientButton size="sm" onClick={() => void submitForm()} disabled={isRegisteringEntry || isUpdating}>
-              {formMode === "edit" ? (isUpdating ? "Guardando..." : "Guardar cambios") : (isRegisteringEntry ? "Registrando..." : "Registrar manual")}
+              {formMode === "edit" ? (isUpdating ? "Guardando..." : "Guardar cambios") : (isRegisteringEntry ? "Registrando..." : "Registrar")}
             </GradientButton>
             <OutlineButton size="sm" onClick={() => setIsFormOpen(false)} disabled={isRegisteringEntry || isUpdating}>Cancelar</OutlineButton>
           </div>
         </div>
       </ModalShell>
 
+      {/* ── Detalle ─────────────────────────────────────────────────────────────── */}
       <ModalShell open={isDetailOpen} onClose={() => setIsDetailOpen(false)} width="max-w-[920px]">
         <div className="space-y-3 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Detalle de asistencia</h3>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Lectura real de `ong.asistencias`.</p>
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Información completa del registro de asistencia.</p>
             </div>
-            <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsDetailOpen(false)}>X</button>
+            <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsDetailOpen(false)}>✕</button>
           </div>
           {detailLoading && <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Cargando detalle...</p>}
           {!detailLoading && detailError && <p className="text-[12px]" style={{ color: "var(--t-danger, #ef4444)" }}>{detailError}</p>}
@@ -648,23 +796,26 @@ export function Attendance() {
         </div>
       </ModalShell>
 
+      {/* ── Registrar salida ─────────────────────────────────────────────────────── */}
       <ModalShell open={isCloseOpen} onClose={() => setIsCloseOpen(false)} width="max-w-[560px]">
         <div className="space-y-3 p-4">
           <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Registrar salida</h3>
+          <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Indica la hora de salida del voluntario.</p>
           <input type="time" value={closingExitTime} onChange={(event) => { setClosingExitTime(event.target.value); setClosingError(null); }} className="h-9 w-full rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE} />
           <textarea value={closingObservation} onChange={(event) => { setClosingObservation(event.target.value); setClosingError(null); }} rows={3} placeholder="Observacion opcional" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />
           {closingError && <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>{closingError}</p>}
           <div className="flex gap-2">
-            <GradientButton size="sm" onClick={() => void submitClose()} disabled={isRegisteringExit}>{isRegisteringExit ? "Guardando..." : "Confirmar"}</GradientButton>
+            <GradientButton size="sm" onClick={() => void submitClose()} disabled={isRegisteringExit}>{isRegisteringExit ? "Guardando..." : "Confirmar salida"}</GradientButton>
             <OutlineButton size="sm" onClick={() => setIsCloseOpen(false)} disabled={isRegisteringExit}>Cancelar</OutlineButton>
           </div>
         </div>
       </ModalShell>
 
+      {/* ── Incidencia ───────────────────────────────────────────────────────────── */}
       <ModalShell open={isIncidenceOpen} onClose={() => setIsIncidenceOpen(false)} width="max-w-[560px]">
         <div className="space-y-3 p-4">
           <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Marcar incidencia</h3>
-          <textarea value={incidenceReason} onChange={(event) => { setIncidenceReason(event.target.value); setIncidenceError(null); }} rows={4} placeholder="Motivo" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />
+          <textarea value={incidenceReason} onChange={(event) => { setIncidenceReason(event.target.value); setIncidenceError(null); }} rows={4} placeholder="Describe el motivo de la incidencia" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={INPUT_STYLE} />
           {incidenceError && <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>{incidenceError}</p>}
           <div className="flex gap-2">
             <GradientButton size="sm" onClick={() => void submitIncidence()} disabled={isUpdating}>{isUpdating ? "Guardando..." : "Guardar"}</GradientButton>
@@ -673,111 +824,344 @@ export function Attendance() {
         </div>
       </ModalShell>
 
+      {/* ── Eliminar ─────────────────────────────────────────────────────────────── */}
       <ModalShell open={isRemoveOpen} onClose={() => setIsRemoveOpen(false)} width="max-w-[520px]">
         <div className="space-y-3 p-4">
-          <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Eliminar logico</h3>
-          <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>La accion actualiza `is_deleted`, `deleted_at` y `deleted_by`.</p>
+          <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Eliminar registro</h3>
+          <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+            El registro será marcado como eliminado y no aparecerá en la lista. Esta acción es reversible desde Gobernanza.
+          </p>
           {removeError && <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>{removeError}</p>}
           <div className="flex gap-2">
-            <GradientButton size="sm" onClick={() => void submitRemove()} disabled={isRemoving}>{isRemoving ? "Eliminando..." : "Confirmar"}</GradientButton>
+            <GradientButton size="sm" onClick={() => void submitRemove()} disabled={isRemoving}>{isRemoving ? "Eliminando..." : "Confirmar eliminación"}</GradientButton>
             <OutlineButton size="sm" onClick={() => setIsRemoveOpen(false)} disabled={isRemoving}>Cancelar</OutlineButton>
           </div>
         </div>
       </ModalShell>
 
-      <ModalShell open={isScanOpen} onClose={() => setIsScanOpen(false)} width="max-w-[760px]">
-        <div className="space-y-4 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Registrar asistencia por QR</h3>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>La RPC `ong.fn_register_attendance_scan` decide si registra check-in o check-out sobre `ong.asistencias` usando `ong.id_cards.qr_payload`.</p>
-            </div>
-            <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsScanOpen(false)}>X</button>
-          </div>
-          {scanError && (
-            <div
-              className="rounded-2xl px-4 py-3"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-            >
-              <div className="flex items-center gap-2">
-                <StatusDot variant={resolveScanErrorVariant(scanError)}>
-                  Credencial rechazada
-                </StatusDot>
-              </div>
-              <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                {scanError}
-              </p>
-            </div>
-          )}
-          <select value={scanForm.activityId} onChange={(event) => { setScanForm((current) => ({ ...current, activityId: event.target.value })); setScanError(null); }} className="h-9 w-full rounded-xl px-3 text-[12px] outline-none" style={INPUT_STYLE}>
-            <option value="">Selecciona una actividad</option>
-            {activityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-          </select>
-          <div className="space-y-2">
-            <input
-              ref={scanInputRef}
-              value={scanForm.qrPayload}
-              onChange={(event) => { setScanForm((current) => ({ ...current, qrPayload: event.target.value })); setScanError(null); }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  void submitScan();
-                }
-              }}
-              placeholder="Escanea o pega aqui el payload QR y presiona Enter"
-              className="h-11 w-full rounded-xl px-3 text-[12px] outline-none"
-              style={INPUT_STYLE}
-            />
-            <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-              Si el lector QR actua como teclado, este campo queda listo para captura continua.
+      {/* ── QR Scanner ───────────────────────────────────────────────────────────── */}
+      <QrScanModal
+        open={isScanOpen}
+        onClose={() => setIsScanOpen(false)}
+        scanForm={scanForm}
+        setScanForm={setScanForm}
+        scanError={scanError}
+        setScanError={setScanError}
+        scanResult={scanResult}
+        setScanResult={setScanResult}
+        activityOptions={activityOptions}
+        isScanning={isScanning}
+        scanInputRef={scanInputRef}
+        onSubmitScan={submitScan}
+        inputStyle={INPUT_STYLE}
+      />
+    </motion.div>
+  );
+}
+
+// ── QR Scan Modal con cámara ─────────────────────────────────────────────────
+
+const QR_CAMERA_PREF_KEY = "democra_qr_camera_allowed";
+
+function QrScanModal({
+  open,
+  onClose,
+  scanForm,
+  setScanForm,
+  scanError,
+  setScanError,
+  scanResult,
+  setScanResult,
+  activityOptions,
+  isScanning,
+  scanInputRef,
+  onSubmitScan,
+  inputStyle,
+}: {
+  open: boolean;
+  onClose: () => void;
+  scanForm: AttendanceScanForm;
+  setScanForm: Dispatch<SetStateAction<AttendanceScanForm>>;
+  scanError: string | null;
+  setScanError: (e: string | null) => void;
+  scanResult: AttendanceScanResult | null;
+  setScanResult: (r: AttendanceScanResult | null) => void;
+  activityOptions: { value: string; label: string }[];
+  isScanning: boolean;
+  scanInputRef: RefObject<HTMLInputElement | null>;
+  onSubmitScan: () => Promise<void>;
+  inputStyle: React.CSSProperties;
+}) {
+  const [cameraMode, setCameraMode] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const savedPref = typeof window !== "undefined"
+    ? localStorage.getItem(QR_CAMERA_PREF_KEY)
+    : null;
+
+  // Start camera
+  async function startCamera() {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+      setCameraStream(stream);
+      localStorage.setItem(QR_CAMERA_PREF_KEY, "true");
+      setCameraMode(true);
+    } catch {
+      setCameraError("No se pudo acceder a la cámara. Usa el campo de texto para escanear.");
+    }
+  }
+
+  // Attach stream to video element
+  useEffect(() => {
+    if (!cameraMode || !cameraStream || !videoRef.current) return;
+    videoRef.current.srcObject = cameraStream;
+    videoRef.current.play().catch(() => null);
+  }, [cameraMode, cameraStream]);
+
+  // QR frame detection loop using BarcodeDetector if available
+  useEffect(() => {
+    if (!cameraMode || !videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let active = true;
+
+    async function detectFrame() {
+      if (!active || !video || !canvas || !ctx) return;
+      if (video.readyState < 2) {
+        rafRef.current = requestAnimationFrame(detectFrame);
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Use BarcodeDetector if available (Chrome/Edge)
+      if ("BarcodeDetector" in window) {
+        try {
+          // @ts-expect-error BarcodeDetector is not in TS types
+          const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+          const barcodes = await detector.detect(canvas);
+          if (barcodes.length > 0 && barcodes[0].rawValue) {
+            setScanForm((s) => ({ ...s, qrPayload: barcodes[0].rawValue as string }));
+            setScanError(null);
+            stopCamera();
+            return;
+          }
+        } catch {
+          // BarcodeDetector unavailable, fall through
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(detectFrame);
+    }
+
+    rafRef.current = requestAnimationFrame(detectFrame);
+    return () => {
+      active = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [cameraMode, setScanForm, setScanError]);
+
+  function stopCamera() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    cameraStream?.getTracks().forEach((t) => t.stop());
+    setCameraStream(null);
+    setCameraMode(false);
+  }
+
+  // Stop camera when modal closes
+  useEffect(() => {
+    if (!open) stopCamera();
+  }, [open]);
+
+  return (
+    <ModalShell open={open} onClose={() => { stopCamera(); onClose(); }} width="max-w-[760px]">
+      <div className="space-y-4 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Registrar asistencia por QR</h3>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
+              Escanea la credencial QR del voluntario para registrar entrada o salida automáticamente.
             </p>
           </div>
-          {scanResult && (
-            <div
-              className="rounded-2xl px-4 py-4"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusDot variant="success">{scanResult.outcomeLabel} confirmado</StatusDot>
-                <StatusDot variant="secondary">{scanResult.cardCode}</StatusDot>
-              </div>
-              <p className="mt-3 text-[13px]" style={{ color: "var(--t-text)" }}>
-                {scanResult.confirmationMessage}
-              </p>
-              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
-                  <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Voluntario</p>
-                  <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.attendance.volunteerName}</p>
-                </div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
-                  <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</p>
-                  <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.attendance.activityName}</p>
-                </div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
-                  <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Hora</p>
-                  <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.scannedAtLabel}</p>
-                </div>
+          <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => { stopCamera(); onClose(); }}>✕</button>
+        </div>
+
+        {/* Activity selector */}
+        <select
+          value={scanForm.activityId}
+          onChange={(event) => { setScanForm((s) => ({ ...s, activityId: event.target.value })); setScanError(null); }}
+          className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+          style={inputStyle}
+        >
+          <option value="">Selecciona una actividad</option>
+          {activityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+        </select>
+
+        {/* Camera preview */}
+        {cameraMode ? (
+          <div className="relative overflow-hidden rounded-2xl" style={{ background: "#000", aspectRatio: "4/3" }}>
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            />
+            <canvas ref={canvasRef} className="hidden" />
+            {/* QR guide overlay */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div
+                style={{
+                  width: "55%",
+                  aspectRatio: "1",
+                  border: "2px solid rgba(99,102,241,0.9)",
+                  borderRadius: 12,
+                  boxShadow: "0 0 0 9999px rgba(0,0,0,0.45)",
+                }}
+              >
+                {/* Corner indicators */}
+                {[["top", "left"], ["top", "right"], ["bottom", "left"], ["bottom", "right"]].map(([v, h]) => (
+                  <div
+                    key={`${v}-${h}`}
+                    style={{
+                      position: "absolute",
+                      [v]: -2,
+                      [h]: -2,
+                      width: 20,
+                      height: 20,
+                      borderTop: v === "top" ? "3px solid rgba(99,102,241,1)" : "none",
+                      borderBottom: v === "bottom" ? "3px solid rgba(99,102,241,1)" : "none",
+                      borderLeft: h === "left" ? "3px solid rgba(99,102,241,1)" : "none",
+                      borderRight: h === "right" ? "3px solid rgba(99,102,241,1)" : "none",
+                      borderTopLeftRadius: v === "top" && h === "left" ? 4 : 0,
+                      borderTopRightRadius: v === "top" && h === "right" ? 4 : 0,
+                      borderBottomLeftRadius: v === "bottom" && h === "left" ? 4 : 0,
+                      borderBottomRightRadius: v === "bottom" && h === "right" ? 4 : 0,
+                    }}
+                  />
+                ))}
               </div>
             </div>
-          )}
-          <div className="flex gap-2">
-            <GradientButton size="sm" onClick={() => void submitScan()} disabled={isScanning}>{isScanning ? "Procesando..." : "Confirmar"}</GradientButton>
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center">
+              <p className="rounded-full px-3 py-1 text-[11px] text-white" style={{ background: "rgba(0,0,0,0.55)" }}>
+                Centra el código QR en el recuadro
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={stopCamera}
+              className="absolute right-3 top-3 rounded-lg px-2.5 py-1 text-[11px] font-medium text-white"
+              style={{ background: "rgba(0,0,0,0.6)" }}
+            >
+              Cerrar cámara
+            </button>
+          </div>
+        ) : (
+          <div
+            className="flex flex-col items-center justify-center gap-3 rounded-2xl py-6"
+            style={{ background: "var(--t-hover)", border: "1px dashed var(--t-border)" }}
+          >
+            {cameraError && (
+              <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>{cameraError}</p>
+            )}
             <OutlineButton
               size="sm"
+              type="button"
               onClick={() => {
-                setScanResult(null);
-                setScanError(null);
-                setScanForm((current) => ({ ...current, qrPayload: "" }));
-                window.setTimeout(() => scanInputRef.current?.focus(), 0);
+                if (savedPref === "true") {
+                  void startCamera();
+                } else {
+                  void startCamera();
+                }
               }}
-              disabled={isScanning}
             >
-              Limpiar
+              📷 Activar cámara
             </OutlineButton>
-            <OutlineButton size="sm" onClick={() => setIsScanOpen(false)} disabled={isScanning}>Cerrar</OutlineButton>
+            <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+              {savedPref === "true" ? "Cámara ya autorizada" : "Se solicitará permiso de cámara una sola vez"}
+            </p>
           </div>
+        )}
+
+        {scanError && (
+          <div className="rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex items-center gap-2">
+              <StatusDot variant={resolveScanErrorVariant(scanError)}>Credencial rechazada</StatusDot>
+            </div>
+            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanError}</p>
+          </div>
+        )}
+
+        {/* Manual input fallback */}
+        <div className="space-y-2">
+          <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>O ingresa el payload QR manualmente:</p>
+          <input
+            ref={scanInputRef}
+            value={scanForm.qrPayload}
+            onChange={(event) => { setScanForm((s) => ({ ...s, qrPayload: event.target.value })); setScanError(null); }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") { event.preventDefault(); void onSubmitScan(); }
+            }}
+            placeholder="Pega o escanea el payload QR y presiona Enter"
+            className="h-11 w-full rounded-xl px-3 text-[12px] outline-none"
+            style={inputStyle}
+          />
         </div>
-      </ModalShell>
-    </motion.div>
+
+        {/* Scan result panel */}
+        {scanResult && (
+          <div className="rounded-2xl px-4 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusDot variant="success">{scanResult.outcomeLabel} confirmado</StatusDot>
+              <StatusDot variant="secondary">{scanResult.cardCode}</StatusDot>
+            </div>
+            <p className="mt-3 text-[13px]" style={{ color: "var(--t-text)" }}>{scanResult.confirmationMessage}</p>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Voluntario</p>
+                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.attendance.volunteerName}</p>
+              </div>
+              <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</p>
+                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.attendance.activityName}</p>
+              </div>
+              <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Hora</p>
+                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{scanResult.scannedAtLabel}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <GradientButton size="sm" onClick={() => void onSubmitScan()} disabled={isScanning}>{isScanning ? "Procesando..." : "Confirmar"}</GradientButton>
+          <OutlineButton
+            size="sm"
+            onClick={() => {
+              setScanResult(null);
+              setScanError(null);
+              setScanForm((s) => ({ ...s, qrPayload: "" }));
+              window.setTimeout(() => scanInputRef.current?.focus(), 0);
+            }}
+            disabled={isScanning}
+          >
+            Limpiar
+          </OutlineButton>
+          <OutlineButton size="sm" onClick={() => { stopCamera(); onClose(); }} disabled={isScanning}>Cerrar</OutlineButton>
+        </div>
+      </div>
+    </ModalShell>
   );
 }

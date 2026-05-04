@@ -167,7 +167,7 @@ export function NotificationHistory() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Historial"
-        description="Consulta comunicaciones.historial_notificaciones con sus metadatos reales: codigo_canal, estado_entrega, error_mensaje, id_plantilla y payload."
+        description="Consulta el historial de notificaciones enviadas con sus metadatos: canal, estado de entrega y plantilla utilizada."
         action={{ label: "Actualizar", onClick: refresh }}
       />
 

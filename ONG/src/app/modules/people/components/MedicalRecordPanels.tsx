@@ -89,7 +89,7 @@ export function SensitiveAccessGateModal({
             className="rounded-2xl px-4 py-3 text-[12px]"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            La bitacora automatica no puede persistirse sobre esta ficha porque el log disponible solo referencia `clinico.fichas_medicas(id)`.
+            El acceso a esta ficha quedará registrado en la bitácora de accesos sensibles.
           </div>
         )}
 
@@ -160,7 +160,7 @@ export function SensitiveMedicalFormModal({
     <ModalShell open={open} onClose={onClose} width="max-w-[820px]">
       <PeopleModalHeader
         title={detail?.hasRecord ? "Editar ficha sensible" : "Registrar ficha sensible"}
-        description="La actualizacion se ejecuta contra las tablas clinicas reales del tenant."
+        description="Actualiza los datos clínicos sensibles del voluntario o beneficiario."
         onClose={onClose}
       />
 
@@ -170,7 +170,7 @@ export function SensitiveMedicalFormModal({
           <PeopleErrorBlock message="No se encontro la ficha a editar." />
         ) : detail.scope === "beneficiaries" ? (
           <>
-            <PeopleSection title="Ficha medica" description="clinico.fichas_medicas">
+            <PeopleSection title="Ficha medica" description="Datos médicos generales del beneficiario.">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <PeopleField label="Tipo de sangre">
                   <PeopleTextInput placeholder="Ej: O+" {...register("bloodType")} />
@@ -308,7 +308,7 @@ export function SensitiveMedicalDetailModal({
 
             {detail.scope === "beneficiaries" ? (
               <>
-                <PeopleSection title="Ficha medica" description="clinico.fichas_medicas">
+                <PeopleSection title="Ficha medica" description="Datos médicos generales del beneficiario.">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <PeopleDetailField label="Tipo de sangre" value={formatPeopleText(detail.bloodType)} />
                     <PeopleDetailField label="Alergias" value={formatPeopleText(detail.allergies)} />
@@ -356,7 +356,7 @@ export function SensitiveMedicalDetailModal({
                 </PeopleSection>
               </>
             ) : (
-              <PeopleSection title="Ficha sensible de voluntario" description="clinico.ficha_sensible_voluntario">
+              <PeopleSection title="Ficha sensible de voluntario" description="Información clínica sensible del voluntario.">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <PeopleDetailField label="Estado voluntario" value={formatPeopleText(detail.stateLabel)} />
                   <PeopleDetailField

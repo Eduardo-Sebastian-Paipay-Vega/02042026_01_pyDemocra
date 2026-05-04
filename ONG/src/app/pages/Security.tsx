@@ -414,7 +414,7 @@ export function Security() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Seguridad de sesion"
-          description="Operacion real sobre public.sessions, public.devices, public.terminals y public.auth_events. `settings.sessions.read` habilita monitoreo y `settings.sessions.terminate` habilita cierre remoto y revocacion masiva por usuario."
+          description="Monitorea las sesiones activas, dispositivos confiables, terminales y eventos de autenticación del tenant."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -457,7 +457,7 @@ export function Security() {
             </p>
           )}
           <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            `settings.sessions.read` es el permiso base para ver sesiones. `settings.sessions.terminate` agrega cierre remoto por sesion y se reutiliza en la revocacion masiva desde Usuarios del sistema.
+            El permiso de lectura de sesiones es el mínimo requerido para el monitoreo. El permiso de terminación habilita el cierre remoto individual y masivo.
           </p>
           {data.unsupportedFlows.map((item) => (
             <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
@@ -496,7 +496,7 @@ export function Security() {
 
           {!data.access.canReadSessions && !loading ? (
             <SettingsErrorBlock
-              message="La lectura de sesiones requiere `settings.sessions.read` o tenant admin. `settings.sessions.terminate` amplía ese acceso con cierre remoto. Los recursos `devices` y `terminals` mantienen compatibilidad legacy mientras el Core no publique permisos nuevos dedicados."
+              message="No tienes permisos para visualizar las sesiones activas. Contacta al administrador."
               onRetry={refresh}
             />
           ) : (
@@ -528,7 +528,7 @@ export function Security() {
                   columns={sessionColumns}
                   data={filteredSessions}
                   loading={loading}
-                  emptyMessage="No se encontraron sesiones reales para el filtro actual."
+                  emptyMessage="No se encontraron sesiones para el filtro actual."
                   actions={
                     data.access.canManageSessions
                       ? [
@@ -569,7 +569,7 @@ export function Security() {
                 Detalle de sesion
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.sessions
+                Información de la sesión activa o histórica.
               </p>
             </div>
           </div>
@@ -605,7 +605,7 @@ export function Security() {
                 Detalle del dispositivo
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.devices
+                Información del dispositivo registrado.
               </p>
             </div>
           </div>
@@ -655,7 +655,7 @@ export function Security() {
                 {editingTerminal ? "Editar terminal" : "Nuevo terminal"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La operacion escribe en public.terminals.
+                Registra o actualiza un terminal de acceso del tenant.
               </p>
             </div>
             <button
@@ -713,7 +713,7 @@ export function Security() {
         <div className="space-y-3 p-4">
           <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
             {removeTerminal
-              ? `Eliminar el terminal ${removeTerminal.name}? Las sesiones historicas quedaran con terminal_id nulo por ON DELETE SET NULL.`
+              ? `¿Eliminar el terminal ${removeTerminal.name}? Las sesiones históricas asociadas quedarán sin terminal asignado.`
               : "Confirma la eliminacion del terminal."}
           </p>
           <div className="flex gap-2">
@@ -746,7 +746,7 @@ export function Security() {
               Cerrar sesion
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              La operacion ejecuta `public.fn_remote_revoke_app_session` y sincroniza `revoked_at` y `revoke_reason` en `public.sessions`.
+              Cierra la sesión de forma remota e inmediata. El usuario deberá autenticarse nuevamente.
             </p>
           </div>
 
@@ -798,7 +798,7 @@ export function Security() {
                 Detalle de auth event
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                public.auth_events
+                Información del evento de autenticación registrado.
               </p>
             </div>
           </div>

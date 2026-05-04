@@ -568,7 +568,7 @@ export function AdmissionRequests() {
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Generar codigo de registro</h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              La emision usa `rrhh.fn_generate_registration_code` y el consumo publico queda cerrado por la Edge Function `consume-volunteer-registration-code`.
+              Genera un código de acceso único para que el postulante complete su registro en la plataforma.
             </p>
           </div>
           <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setRegistrationTarget(null)}>X</button>
@@ -651,7 +651,7 @@ export function AdmissionRequests() {
                   value={generatedRegistrationLink || "No se pudo construir el enlace publico."}
                 />
                 <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                  Comparte este enlace para que el postulante consuma el codigo, cargue sus documentos y se vincule de forma real con `auth.users`, `public.profiles` y `ong.voluntarios`.
+                  Comparte este enlace con el postulante para que complete su registro, cargue sus documentos y sea incorporado como voluntario.
                 </p>
               </div>
             </div>

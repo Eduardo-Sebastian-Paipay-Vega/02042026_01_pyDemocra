@@ -260,7 +260,7 @@ const metricCards: Array<{
 ];
 
 interface ActivityFormDraft {
-  taskId: string;
+  projectId: string;
   title: string;
   description: string;
   statusCode: string;
@@ -288,9 +288,9 @@ type ResolutionTarget =
       row: DashboardAdmissionRow;
     };
 
-function createEmptyActivityDraft(defaultTaskId = ""): ActivityFormDraft {
+function createEmptyActivityDraft(defaultProjectId = ""): ActivityFormDraft {
   return {
-    taskId: defaultTaskId,
+    projectId: defaultProjectId,
     title: "",
     description: "",
     statusCode: "pendiente",
@@ -569,8 +569,8 @@ export function Dashboard() {
   );
 
   const selectedTaskOption = useMemo(() => {
-    return taskOptions.find((task) => task.value === activityFormDraft.taskId) ?? null;
-  }, [activityFormDraft.taskId, taskOptions]);
+    return taskOptions.find((task) => task.value === activityFormDraft.projectId) ?? null;
+  }, [activityFormDraft.projectId, taskOptions]);
 
   const tabError =
     activeTab === "hours"
@@ -587,9 +587,9 @@ export function Dashboard() {
       return;
     }
 
-    const defaultTaskId = taskOptions[0]?.value ?? "";
+    const defaultProjectId = taskOptions[0]?.value ?? "";
     setActivityFormState({ open: true, mode: "create", activityId: null });
-    setActivityFormDraft(createEmptyActivityDraft(defaultTaskId));
+    setActivityFormDraft(createEmptyActivityDraft(defaultProjectId));
     setActivityFormErrors({});
     setActivityFormSubmitError(null);
   }, [canManageActivities, taskOptions]);
@@ -597,7 +597,7 @@ export function Dashboard() {
   const openActivityEditModal = useCallback(
     (activity: {
       activityId: string;
-      taskId: string;
+      projectId: string;
       title: string;
       description: string;
       statusCode: string;
@@ -617,7 +617,7 @@ export function Dashboard() {
         activityId: activity.activityId,
       });
       setActivityFormDraft({
-        taskId: activity.taskId,
+        projectId: activity.projectId,
         title: activity.title,
         description: activity.description,
         statusCode: activity.statusCode,
@@ -650,7 +650,7 @@ export function Dashboard() {
     const parsedEstimated = parseNullablePositiveNumber(activityFormDraft.estimatedHoursText);
 
     const input: DashboardActivityFormInput = {
-      taskId: activityFormDraft.taskId,
+      projectId: activityFormDraft.projectId,
       title: activityFormDraft.title,
       description: activityFormDraft.description,
       statusCode: activityFormDraft.statusCode,
@@ -981,7 +981,7 @@ export function Dashboard() {
         onClick: (item) =>
           openActivityEditModal({
             activityId: item.id,
-            taskId: item.taskId ?? "",
+            projectId: item.projectId ?? "",
             title: item.name,
             description: item.description,
             statusCode: item.statusCode,
@@ -1513,13 +1513,13 @@ export function Dashboard() {
                 Tarea
               </label>
               <select
-                value={activityFormDraft.taskId}
+                value={activityFormDraft.projectId}
                 onChange={(event) => {
                   setActivityFormDraft((current) => ({
                     ...current,
-                    taskId: event.target.value,
+                    projectId: event.target.value,
                   }));
-                  setActivityFormErrors((current) => ({ ...current, taskId: undefined }));
+                  setActivityFormErrors((current) => ({ ...current, projectId: undefined }));
                 }}
                 disabled={isSavingActivity}
                 className="h-10 w-full rounded-xl px-3 text-[13px] outline-none"
@@ -1529,14 +1529,14 @@ export function Dashboard() {
                   color: "var(--t-text)",
                 }}
               >
-                <option value="">Selecciona una tarea</option>
+                <option value="">Selecciona un proyecto</option>
                 {taskOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
-              <FieldError message={activityFormErrors.taskId} />
+              <FieldError message={activityFormErrors.projectId} />
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
@@ -1869,7 +1869,7 @@ export function Dashboard() {
                       closeActivityDetailModal();
                       openActivityEditModal({
                         activityId: activityDetail.id,
-                        taskId: activityDetail.taskId,
+                        projectId: activityDetail.taskId,
                         title: activityDetail.title,
                         description: activityDetail.description,
                         statusCode: activityDetail.statusCode,
