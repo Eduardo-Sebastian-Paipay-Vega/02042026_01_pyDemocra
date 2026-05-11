@@ -1,4 +1,4 @@
-﻿-- 20260305_rls_hardening.sql
+-- 20260305_rls_hardening.sql
 -- Base de referencia: audit/AUDIT-07-rls-recomendado.sql
 -- Prioridad: P0 (audit/AUDIT-06-gaps-y-parches.md)
 -- Importante: migración idempotente, segura y compatible con multi-tenant.

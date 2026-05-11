@@ -1,4 +1,4 @@
-﻿-- GAP-002 RLS hardening P0
+-- GAP-002 RLS hardening P0
 -- Fecha: 2026-03-05
 -- Base: audit/AUDIT-07-rls-recomendado.sql, audit/AUDIT-08-rls-informe.md
 

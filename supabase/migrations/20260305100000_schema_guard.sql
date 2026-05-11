@@ -1,4 +1,4 @@
-﻿-- GAP-001 schema_guard
+-- GAP-001 schema_guard
 -- Fecha: 2026-03-05
 -- Objetivo: fallar despliegue si faltan objetos críticos del baseline de seguridad/onboarding.
 

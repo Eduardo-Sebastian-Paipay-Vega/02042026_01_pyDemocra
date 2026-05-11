@@ -1,6 +1,6 @@
 # 📂 DOCUMENTACIÓN MAESTRA DE BASE DE DATOS: Democra ONG Platform
 
-> **Versión consolidada:** 2026-05-03 | **Motor:** PostgreSQL 16 (Supabase) | **Autor consolidación:** Claude Sonnet 4.6
+> **Versión consolidada:** 2026-05-10 | **Motor:** PostgreSQL 16 (Supabase) | **Autor consolidación:** Claude Sonnet 4.6
 >
 > Este documento es la **fuente única de verdad** del modelo de datos. Fue generado por ingeniería inversa sobre: scripts SQL maestros, migraciones versionadas, tipos TypeScript `app-database.ts` y auditorías técnicas (AUDIT-02 a AUDIT-08).
 
@@ -10,7 +10,7 @@
 
 1. [Resumen del Sistema](#1-resumen-del-sistema)
 2. [Diccionario de Datos](#2-diccionario-de-datos)
-   - 2.1 [Schema `public` — Core Multi-Tenant / IAM / Billing](#21-schema-public)
+   - 2.1 [Schema `public` — Core Multi-Tenant / IAM / Billing / ACE](#21-schema-public)
    - 2.2 [Schema `ong` — Operaciones de la ONG](#22-schema-ong)
    - 2.3 [Schema `rrhh` — Recursos Humanos / Admisión](#23-schema-rrhh)
    - 2.4 [Schema `finanzas` — Gestión Financiera](#24-schema-finanzas)
@@ -38,6 +38,7 @@
 |--------|--------|-------------|
 | IAM + Core | `public` | Autenticación, sesiones, roles, permisos, sedes, auditoría forense |
 | Suscripciones | `public` | Contratos, facturas, pagos, entitlements por plan |
+| ACE — Access & Context Engine | `public` | Links de acceso, membresías contextuales, formularios dinámicos, permisos granulares |
 | Operaciones ONG | `ong` | Voluntarios, beneficiarios, proyectos, actividades, asistencias, credenciales ID |
 | RRHH / Admisión | `rrhh` | Proceso de admisión lineal, habilidades, documentos, onboarding |
 | Finanzas | `finanzas` | Cuentas, transacciones, comprobantes, aprobaciones |
@@ -507,6 +508,95 @@
 | `activated_at` | `timestamptz` NOT NULL | Fecha de activación |
 | `created_at` / `updated_at` | `timestamptz` | — |
 | `created_by` / `updated_by` | `uuid` NULL | Trazabilidad |
+
+---
+
+#### Access & Context Engine (ACE) — Módulo `ace`
+
+> Implementado en migración `20260510000000_ace_fase0_base_structures.sql`. Provee vinculación inteligente por links, membresías contextuales polimórficas y permisos granulares por módulo y campo. Compatible con el modelo multi-tenant existente (RLS completo en FASE 3).
+
+##### `public.access_links`
+| Columna | Tipo | Default | Constraints | Descripción |
+|---------|------|---------|-------------|-------------|
+| `id` | `uuid` | `gen_random_uuid()` | PK | — |
+| `tenant_id` | `uuid` | — | NOT NULL, FK `tenants` ON DELETE CASCADE | Aislamiento multi-tenant |
+| `code` | `text` | — | NOT NULL, UNIQUE | Código único del link (ej. `INV-2026-ABCD`) |
+| `slug` | `text` | NULL | — | Slug amigable opcional |
+| `type` | `text` | — | NOT NULL, CHECK(`VOLUNTEER_JOIN`,`STAFF_JOIN`,`BENEFICIARY_JOIN`,`GENERIC`) | Tipo de flujo de vinculación |
+| `target_type` | `text` | — | NOT NULL, CHECK(`PROJECT`,`PROGRAM`,`ACTIVITY`,`SEDE`,`GLOBAL`) | Entidad destino del link |
+| `target_id` | `uuid` | NULL | — | PK de la entidad destino (NULL si `GLOBAL`) |
+| `assigned_role_id` | `uuid` | NULL | FK `roles` ON DELETE SET NULL | Rol a asignar automáticamente al unirse |
+| `assigned_sede_id` | `uuid` | NULL | FK `sedes` ON DELETE SET NULL | Sede a asignar automáticamente |
+| `onboarding_flow` | `text` | NULL | — | ID del flujo de onboarding a ejecutar |
+| `max_uses` | `int` | `1` | NOT NULL, CHECK(≥1) | Límite de usos del link |
+| `used_count` | `int` | `0` | NOT NULL, CHECK(≥0) | Usos acumulados |
+| `expires_at` | `timestamptz` | NULL | — | Expiración (NULL = sin límite) |
+| `is_active` | `boolean` | `true` | NOT NULL | Estado del link |
+| `metadata` | `jsonb` | `{}` | NOT NULL | Datos adicionales libres |
+| `created_at` | `timestamptz` | `now()` | NOT NULL | — |
+| `updated_at` | `timestamptz` | `now()` | NOT NULL, trigger | — |
+| `created_by` / `updated_by` | `uuid` | NULL | FK `auth.users` ON DELETE SET NULL | Trazabilidad |
+
+> **Índices:** `(tenant_id)`, `(code)`, `(tenant_id, is_active)` WHERE `is_active=true`, `(tenant_id, target_type, target_id)`.
+
+##### `public.memberships`
+| Columna | Tipo | Default | Constraints | Descripción |
+|---------|------|---------|-------------|-------------|
+| `id` | `uuid` | `gen_random_uuid()` | PK | — |
+| `tenant_id` | `uuid` | — | NOT NULL, FK `tenants` ON DELETE CASCADE | — |
+| `user_id` | `uuid` | — | NOT NULL, FK `profiles` ON DELETE CASCADE | Usuario miembro |
+| `context_type` | `text` | — | NOT NULL, CHECK(`PROYECTO`,`SEDE`,`PROGRAMA`,`ACTIVIDAD`) | Tipo de contexto polimórfico |
+| `context_id` | `uuid` | — | NOT NULL | PK del contexto (proyecto, sede, etc.) |
+| `role_id` | `uuid` | NULL | FK `roles` ON DELETE SET NULL | Rol efectivo dentro del contexto |
+| `status` | `text` | `'active'` | NOT NULL, CHECK(`active`,`inactive`,`pending`) | Estado de la membresía |
+| `joined_at` | `timestamptz` | `now()` | NOT NULL | Fecha de ingreso al contexto |
+| `created_at` | `timestamptz` | `now()` | NOT NULL | — |
+| `updated_at` | `timestamptz` | `now()` | NOT NULL, trigger | — |
+| `created_by` | `uuid` | NULL | FK `auth.users` ON DELETE SET NULL | — |
+
+> **UNIQUE:** `(tenant_id, user_id, context_type, context_id)` — un usuario tiene como máximo una membresía activa por contexto.
+> **Índices:** `(tenant_id)`, `(tenant_id, user_id)`, `(tenant_id, context_type, context_id)`, `(tenant_id, status)` WHERE `status='active'`.
+
+##### `public.dynamic_forms`
+| Columna | Tipo | Default | Constraints | Descripción |
+|---------|------|---------|-------------|-------------|
+| `id` | `uuid` | `gen_random_uuid()` | PK | — |
+| `tenant_id` | `uuid` | — | NOT NULL, FK `tenants` ON DELETE CASCADE | — |
+| `name` | `text` | — | NOT NULL | Nombre descriptivo del formulario |
+| `context_type` | `text` | NULL | — | Contexto de uso (ej. `VOLUNTEER_JOIN`, `ADMISSION`) |
+| `form_schema` | `jsonb` | `{}` | NOT NULL | JSON Schema para renderizado en frontend |
+| `is_active` | `boolean` | `true` | NOT NULL | — |
+| `created_at` | `timestamptz` | `now()` | NOT NULL | — |
+| `updated_at` | `timestamptz` | `now()` | NOT NULL, trigger | — |
+| `created_by` / `updated_by` | `uuid` | NULL | FK `auth.users` ON DELETE SET NULL | — |
+
+##### `public.role_module_access`
+| Columna | Tipo | Default | Constraints | Descripción |
+|---------|------|---------|-------------|-------------|
+| `tenant_id` | `uuid` | — | NOT NULL, FK `tenants` ON DELETE CASCADE | Aislamiento RLS |
+| `role_id` | `uuid` | — | PK(part), FK `roles` ON DELETE CASCADE | Rol configurado |
+| `module_code` | `text` | — | PK(part) | Código de módulo (ej. `ong`, `finanzas`, `clinico`) |
+| `can_view` | `boolean` | `false` | NOT NULL | Puede ver recursos del módulo |
+| `can_create` | `boolean` | `false` | NOT NULL | Puede crear recursos |
+| `can_edit` | `boolean` | `false` | NOT NULL | Puede editar recursos |
+| `can_delete` | `boolean` | `false` | NOT NULL | Puede eliminar recursos |
+
+> **PK:** `(role_id, module_code)`. RLS vía `tenant_id` directo. Índices: `(tenant_id)`, `(role_id)`.
+
+##### `public.role_field_permissions`
+| Columna | Tipo | Default | Constraints | Descripción |
+|---------|------|---------|-------------|-------------|
+| `id` | `uuid` | `gen_random_uuid()` | PK | — |
+| `tenant_id` | `uuid` | — | NOT NULL, FK `tenants` ON DELETE CASCADE | Aislamiento RLS |
+| `role_id` | `uuid` | — | NOT NULL, FK `roles` ON DELETE CASCADE | Rol configurado |
+| `entity_name` | `text` | — | NOT NULL | Entidad en formato `schema.tabla` (ej. `ong.voluntarios`) |
+| `field_name` | `text` | — | NOT NULL | Nombre del campo de la entidad |
+| `can_view` | `boolean` | `true` | NOT NULL | El rol puede leer este campo |
+| `can_edit` | `boolean` | `false` | NOT NULL | El rol puede modificar este campo |
+
+> **UNIQUE:** `(role_id, entity_name, field_name)`. Índices: `(tenant_id)`, `(role_id)`, `(role_id, entity_name)`.
+
+> **Permisos ACE en `cat_permissions`:** `ace.access_links.read`, `ace.access_links.manage`, `ace.memberships.read`, `ace.memberships.manage`, `ace.forms.read`, `ace.forms.manage`, `ace.perms.read`, `ace.perms.manage`.
 
 ---
 
@@ -1116,3 +1206,19 @@
 | `verified_by` / `verified_at` | `uuid` / `timestamptz` | NULL | — |
 | `created_at` / `updated_at` | `timestamptz` | NOT NULL | — |
 | `created_by` / `updated_by` | `uuid` | NULL | — |
+
+---
+
+## 5. REGISTRO DE MEJORAS Y CAMBIOS
+
+| Fecha | Migración | Descripción | Autor |
+|-------|-----------|-------------|-------|
+| 2026-03-01 | `20260301120000_ai_security_copilot` | Columnas de seguridad en `profiles` (`pin_failed_attempts`, `pin_blocked_until`, `risk_blocked_until`). Tabla `mfa_challenges`. | Claude Sonnet 4.6 |
+| 2026-03-02 | `20260302125000_fix_bootstrap_audit_tenant_null` | `fn_current_tenant_id` segura, `fn_trigger_audit_universal` tolerante a tenant null, `fn_bootstrap_tenant` robusto. | Claude Sonnet 4.6 |
+| 2026-03-05 | `20260305100000_schema_guard` | Guard de prereqs críticos para despliegues seguros. | Claude Sonnet 4.6 |
+| 2026-03-05 | `20260305110000_rls_hardening_p0` | RLS estricta en `profiles` y `user_roles_sedes`. `tenant_id` NOT NULL + FK en `user_roles_sedes`. Catálogos read-only para `authenticated`. | Claude Sonnet 4.6 |
+| 2026-05-10 | `20260510000000_ace_fase0_base_structures` | **ACE FASE 0:** Tablas `access_links`, `memberships`, `dynamic_forms`, `role_module_access`, `role_field_permissions`. Triggers `updated_at` + auditoría forense. RLS habilitada (políticas en FASE 3). Seeds `cat_permissions` módulo `ace`. | Claude Sonnet 4.6 |
+| 2026-05-10 | `20260510100000_ace_fase1_onboarding_rpc` | **ACE FASE 1:** Función `fn_complete_access_onboarding(text, jsonb)`. Procesa link de acceso, upsert de perfil, membresía contextual, IAM (`user_roles_sedes`), registro operativo (`ong.voluntarios` o `rrhh.solicitudes_admision`), auditoría en `public.audit_logs`. Grant a `authenticated` + `service_role`. | Claude Sonnet 4.6 |
+| 2026-05-10 | `20260510200000_ace_fase2_legacy_sync` | **ACE FASE 2:** Snapshot `user_roles_sedes → memberships` (DISTINCT ON hierarchy_level). Trigger `tr_sync_user_roles_sedes` + `fn_sync_urs_to_membership` (INSERT/UPDATE/DELETE con rol heredero). Migración `rrhh.codigos_registro_voluntario → access_links` (metadata preserva campos de admisión). | Claude Sonnet 4.6 |
+| 2026-05-10 | `20260510210000_ace_fase3_rls_policies` | **ACE FASE 3:** Políticas RLS por operación (SELECT/INSERT/UPDATE/DELETE) para las 5 tablas ACE usando `fn_has_permission` + `fn_is_tenant_admin`. Función `fn_validate_access_code(text)` SECURITY DEFINER para validación anónima de links. Grant `anon` en ambas RPCs ACE. Índice `idx_memberships_user_active`. | Claude Sonnet 4.6 |
+| 2026-05-10 | `20260510220000_ace_fase4_optimization` | **ACE FASE 4:** Índices `idx_memberships_active_lookup(tenant_id,user_id,context_id)` e `idx_access_links_available(code) WHERE activo+disponible`. Función `fn_has_context_access(uuid,uuid)` STABLE+SECURITY DEFINER para políticas RLS de tablas operativas. Vista `v_user_session_context` con `security_invoker=true` y `WHERE p.id=auth.uid()`. | Claude Sonnet 4.6 |
