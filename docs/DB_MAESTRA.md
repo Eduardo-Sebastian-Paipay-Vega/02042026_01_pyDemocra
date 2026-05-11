@@ -25,6 +25,7 @@
    - 3.4 [Grants y Permisos por Rol](#34-grants-y-permisos-por-rol)
 4. [Script SQL de Despliegue (Single File)](#4-script-sql-de-despliegue)
 5. [Registro de Mejoras y Cambios](#5-registro-de-mejoras-y-cambios)
+6. [ACE — Arquitectura Técnica y Guía Operativa](#6-ace--arquitectura-técnica-y-guía-operativa)
 
 ---
 
@@ -1222,3 +1223,139 @@
 | 2026-05-10 | `20260510200000_ace_fase2_legacy_sync` | **ACE FASE 2:** Snapshot `user_roles_sedes → memberships` (DISTINCT ON hierarchy_level). Trigger `tr_sync_user_roles_sedes` + `fn_sync_urs_to_membership` (INSERT/UPDATE/DELETE con rol heredero). Migración `rrhh.codigos_registro_voluntario → access_links` (metadata preserva campos de admisión). | Claude Sonnet 4.6 |
 | 2026-05-10 | `20260510210000_ace_fase3_rls_policies` | **ACE FASE 3:** Políticas RLS por operación (SELECT/INSERT/UPDATE/DELETE) para las 5 tablas ACE usando `fn_has_permission` + `fn_is_tenant_admin`. Función `fn_validate_access_code(text)` SECURITY DEFINER para validación anónima de links. Grant `anon` en ambas RPCs ACE. Índice `idx_memberships_user_active`. | Claude Sonnet 4.6 |
 | 2026-05-10 | `20260510220000_ace_fase4_optimization` | **ACE FASE 4:** Índices `idx_memberships_active_lookup(tenant_id,user_id,context_id)` e `idx_access_links_available(code) WHERE activo+disponible`. Función `fn_has_context_access(uuid,uuid)` STABLE+SECURITY DEFINER para políticas RLS de tablas operativas. Vista `v_user_session_context` con `security_invoker=true` y `WHERE p.id=auth.uid()`. | Claude Sonnet 4.6 |
+| 2026-05-10 | *(documentación)* | **ACE FASE 5:** Mapa técnico completo, flujo de onboarding, estrategia de rollback y recomendaciones futuras integrados en `DB_MAESTRA.md` §6. | Claude Sonnet 4.6 |
+
+---
+
+## 6. ACE — Arquitectura Técnica y Guía Operativa
+
+> **Access & Context Engine™ (ACE)** — Implementado en FASES 0–4 (2026-05-10).
+> Reemplaza el modelo estático de acceso por sede con un sistema de **Identidad Adaptativa** basado en membresías contextuales dinámicas.
+
+---
+
+### 6.1 Capas del Sistema
+
+| Capa | Tabla(s) | Responsabilidad |
+|------|----------|-----------------|
+| **Identidad** | `auth.users` | Autenticación pura de Supabase. Fuente de identidad global. |
+| **Perfil** | `public.profiles` | Datos maestros del usuario. Fuente de verdad de identidad dentro del tenant. |
+| **Acceso** | `public.access_links` | Motor de entrada y vinculación inteligente. Genera membresías y registros operativos. |
+| **Contextual** | `public.memberships` | Define *dónde* está el usuario (Proyecto, Sede, Programa, Actividad). Reemplaza el acceso estático por sede. |
+| **Operativa** | `ong.voluntarios`, `rrhh.solicitudes_admision` | Datos específicos de la labor que realiza el usuario en el sistema. |
+| **Visibilidad** | `public.role_module_access`, `public.role_field_permissions` | Define *qué ve* exactamente el usuario dentro de cada contexto (módulos y campos). |
+
+---
+
+### 6.2 Mapa Relacional del Motor ACE
+
+```
+public.tenants
+  ├── posee ──────────→ public.access_links
+  │                         │
+  │                         └─ genera ──→ public.memberships
+  │                         └─ genera ──→ public.profiles (upsert)
+  │                         └─ genera ──→ ong.voluntarios / rrhh.solicitudes_admision
+  │
+  ├── posee ──────────→ public.memberships
+  │                         │
+  │                         ├─ vincula ─→ public.profiles  (user_id)
+  │                         ├─ vincula ─→ public.roles     (role_id)
+  │                         └─ apunta ──→ ong.proyectos / public.sedes / ...  (context_id polimórfico)
+  │
+  └── posee ──────────→ public.roles
+                            │
+                            ├─ gobierna → public.role_module_access   (permisos de módulo)
+                            ├─ gobierna → public.role_field_permissions (permisos de campo)
+                            └─ gobierna → public.role_permissions      (permisos cat_permissions)
+```
+
+**Compatibilidad legacy (FASE 2):**
+```
+public.user_roles_sedes  ──(trigger tr_sync_urs_to_membership)──→  public.memberships
+rrhh.codigos_registro_voluntario  ──(migración snapshot)──→  public.access_links
+```
+
+---
+
+### 6.3 Flujo de Onboarding Completo
+
+```
+[Admin]  →  INSERT access_links (type=VOLUNTEER_JOIN, target_id=ID_PROYECTO)
+               │
+               ▼
+[Usuario no autenticado]
+  →  SELECT fn_validate_access_code('VOL-2026-XXXX')
+       Devuelve: {valid: true, type: VOLUNTEER_JOIN, expires_at: ...}
+               │
+               ▼
+[Usuario se registra en Supabase Auth]  →  auth.uid() disponible
+               │
+               ▼
+[Usuario autenticado]
+  →  RPC fn_complete_access_onboarding('VOL-2026-XXXX', {full_name, numero_documento, ...})
+       Paso 1: Bloquea el link (SELECT FOR UPDATE) — previene condición de carrera
+       Paso 2: Valida: is_active, expires_at, used_count < max_uses
+       Paso 3: UPSERT public.profiles (tenant_id, full_name, tipo_documento)
+       Paso 4: UPSERT public.memberships (context_type=PROYECTO, context_id=ID_PROYECTO)
+       Paso 5: INSERT public.user_roles_sedes (si link trae assigned_role + assigned_sede)
+       Paso 6: INSERT ong.voluntarios (nombre, apellido, codigo_estado='en_proceso')
+       Paso 7: UPDATE access_links (used_count++, is_active según límite)
+       Paso 8: INSERT public.audit_logs (evento ONBOARDING_COMPLETED)
+       Devuelve: {success: true, membership_id, entity_id, tenant_id}
+               │
+               ▼
+[Dashboard]
+  →  SELECT public.v_user_session_context
+       Devuelve: perfil + active_memberships [{PROYECTO, ID_PROYECTO, role_name}]
+  →  RLS en ong.proyectos usa fn_has_context_access(auth.uid(), id)
+       Solo muestra el Proyecto Ayacucho al que el usuario tiene membresía activa.
+```
+
+---
+
+### 6.4 RPCs Disponibles (ACE)
+
+| Función | Roles | Propósito |
+|---------|-------|-----------|
+| `fn_validate_access_code(code text)` | `anon`, `authenticated` | Validar link antes de registrarse. No devuelve datos sensibles. |
+| `fn_complete_access_onboarding(code, metadata)` | `anon`, `authenticated` | Onboarding atómico completo. Requiere `auth.uid()` válido. |
+| `fn_has_context_access(user_id, context_id)` | `authenticated`, `service_role` | Verificar membresía activa. Usada en futuros predicados RLS de tablas operativas. |
+
+---
+
+### 6.5 Estrategia de Rollback y Seguridad
+
+| Escenario | Acción | Impacto |
+|-----------|--------|---------|
+| Link comprometido | `UPDATE access_links SET is_active = false WHERE id = '...'` | Inmediato; sin afectar membresías existentes |
+| Membresía incorrecta | `UPDATE memberships SET status = 'inactive'` | El usuario pierde acceso; perfil y voluntario intactos |
+| Rollback total ACE | DROP triggers + DROP tablas ACE | Las tablas `user_roles_sedes`, `ong.voluntarios` y `rrhh.codigos_registro_voluntario` permanecen intactas |
+| Auditoría | `SELECT * FROM public.audit_logs WHERE event_type = 'ONBOARDING_COMPLETED'` | Trazabilidad completa de quién usó cada link |
+
+> **Nota:** La auditoría se registra en `public.audit_logs` (tabla real del sistema). No existe `auditoria.logs_accesos`.
+
+---
+
+### 6.6 Recomendaciones Futuras
+
+| Prioridad | Mejora | Descripción |
+|-----------|--------|-------------|
+| Alta | Membresías temporales | Agregar `valid_from timestamptz` y `valid_to timestamptz` a `public.memberships` para accesos que expiren automáticamente |
+| Alta | RLS en tablas operativas | Implementar `USING (fn_has_context_access(auth.uid(), id_proyecto))` en `ong.proyectos`, `ong.actividades`, etc. |
+| Media | Integración comunicaciones | Envío automático del link vía schema `comunicaciones` (WhatsApp/Email) al crear `access_links` |
+| Media | Motor de riesgo en formularios | Función que analice `dynamic_forms` completados y alerte si el perfil no cumple requisitos mínimos |
+| Baja | Particionado de audit_logs | Particionar `public.audit_logs` por `created_at` (mensual) para tenants con alto volumen |
+
+---
+
+### 6.7 Estado del Proyecto ACE
+
+| Fase | Estado | Migración | Descripción |
+|------|--------|-----------|-------------|
+| 0 | ✅ Completa | `20260510000000` | Estructura de base de datos: 5 tablas, triggers, RLS habilitada, seeds |
+| 1 | ✅ Completa | `20260510100000` | RPC `fn_complete_access_onboarding` — onboarding atómico ACID |
+| 2 | ✅ Completa | `20260510200000` | Sincronización legacy: user_roles_sedes ↔ memberships, RRHH → access_links |
+| 3 | ✅ Completa | `20260510210000` | Seguridad RLS: 20 políticas, `fn_validate_access_code`, grants anon |
+| 4 | ✅ Completa | `20260510220000` | Optimización: índices parciales, `fn_has_context_access`, vista de sesión |
+| 5 | ✅ Completa | *(docs)* | Documentación técnica, mapa relacional y guía operativa |
