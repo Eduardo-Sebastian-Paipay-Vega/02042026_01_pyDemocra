@@ -54,6 +54,7 @@ export interface TenantModulesState {
   settings: boolean;
   idcards: boolean;
   people: boolean;
+  ace: boolean;
 }
 
 export interface TenantFinancialPolicy {
@@ -123,6 +124,7 @@ const ONG_CHILD_MODULE_KEYS = new Set<keyof TenantModulesState>([
   "settings",
   "idcards",
   "people",
+  "ace",
 ]);
 
 const MODULE_ALIASES: Record<keyof TenantModulesState, string[]> = {
@@ -143,6 +145,7 @@ const MODULE_ALIASES: Record<keyof TenantModulesState, string[]> = {
   settings: ["settings", "configuracion", "iam"],
   idcards: ["idcards", "idcard", "idcardsmodule", "credenciales", "credentials"],
   people: ["people", "personas", "volunteers", "beneficiaries"],
+  ace: ["ace", "access", "accesscontrol", "accessengine"],
 };
 
 const EMPTY_MODULES: TenantModulesState = {
@@ -163,6 +166,7 @@ const EMPTY_MODULES: TenantModulesState = {
   settings: false,
   idcards: false,
   people: false,
+  ace: false,
 };
 
 const INDUSTRY_DEFAULT_MODULES: Record<string, Partial<TenantModulesState>> = {
@@ -184,6 +188,7 @@ const INDUSTRY_DEFAULT_MODULES: Record<string, Partial<TenantModulesState>> = {
     settings: true,
     idcards: true,
     people: true,
+    ace: true,
   },
   gym: {
     home: true,
@@ -267,6 +272,14 @@ export const TENANT_PERMISSION_CANDIDATES = [
   "iam.sessions.terminate",
   "iam.audit.read",
   "iam.user_roles.manage",
+  "ace.access_links.read",
+  "ace.access_links.manage",
+  "ace.memberships.read",
+  "ace.memberships.manage",
+  "ace.forms.read",
+  "ace.forms.manage",
+  "ace.perms.read",
+  "ace.perms.manage",
 ] as const;
 
 function publicSchema() {
@@ -501,18 +514,44 @@ async function resolvePermissionMap(warnings: string[]) {
 }
 
 async function resolveRoleAssignments(userId: string, tenantId: string) {
-  const { data: assignmentRows, error: assignmentError } = await publicSchema()
-    .from("user_roles_sedes")
-    .select("role_id, sede_id")
-    .eq("tenant_id", tenantId)
-    .eq("user_id", userId)
-    .limit(1000);
+  const [ursResult, membershipResult] = await Promise.all([
+    publicSchema()
+      .from("user_roles_sedes")
+      .select("role_id, sede_id")
+      .eq("tenant_id", tenantId)
+      .eq("user_id", userId)
+      .limit(1000),
+    publicSchema()
+      .from("memberships")
+      .select("role_id, context_id")
+      .eq("tenant_id", tenantId)
+      .eq("user_id", userId)
+      .eq("context_type", "SEDE")
+      .eq("status", "active")
+      .limit(1000),
+  ]);
 
-  if (assignmentError) {
-    throw new Error(assignmentError.message);
+  if (ursResult.error) {
+    throw new Error(ursResult.error.message);
   }
 
-  const assignments = (assignmentRows ?? []) as PublicUserRoleSedeRow[];
+  const ursAssignments = (ursResult.data ?? []) as PublicUserRoleSedeRow[];
+
+  // Merge ACE memberships (SEDE context only), deduplicating against user_roles_sedes
+  const seenKey = new Set(ursAssignments.map((r) => `${r.role_id}:${r.sede_id}`));
+  const aceSedeAssignments: PublicUserRoleSedeRow[] = [];
+  if (!membershipResult.error) {
+    for (const m of membershipResult.data ?? []) {
+      if (!m.role_id) continue;
+      const key = `${m.role_id}:${m.context_id}`;
+      if (!seenKey.has(key)) {
+        seenKey.add(key);
+        aceSedeAssignments.push({ role_id: m.role_id, sede_id: m.context_id } as PublicUserRoleSedeRow);
+      }
+    }
+  }
+
+  const assignments = [...ursAssignments, ...aceSedeAssignments];
   if (!assignments.length) {
     return [];
   }

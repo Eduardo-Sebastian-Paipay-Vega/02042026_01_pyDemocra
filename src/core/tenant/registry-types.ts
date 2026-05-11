@@ -41,6 +41,7 @@ export const TENANT_ROUTE_IDS = [
   "system-users",
   "roles",
   "security",
+  "access-control",
 ] as const;
 
 export type TenantRouteId = (typeof TENANT_ROUTE_IDS)[number];

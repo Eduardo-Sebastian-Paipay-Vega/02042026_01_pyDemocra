@@ -17,6 +17,7 @@ import {
   Settings,
   Shield,
   ShieldAlert,
+  ShieldCheck,
   Trash2,
   Upload,
   UserCog,
@@ -25,6 +26,7 @@ import {
   Video,
 } from "lucide-react";
 import type { RegisteredModuleDefinition } from "../../core/tenant/registry-types";
+import { AccessControl } from "../../modules/ong/app/pages/AccessControl";
 import { Activities } from "../../modules/ong/app/pages/Activities";
 import { AdmissionDocuments } from "../../modules/ong/app/pages/AdmissionDocuments";
 import { AdmissionInterviews } from "../../modules/ong/app/pages/AdmissionInterviews";
@@ -74,6 +76,7 @@ const GROUPS = {
   notificaciones: { id: "notificaciones", label: "Notificaciones", icon: Bell },
   gobernanza: { id: "gobernanza", label: "Gobernanza", icon: Database },
   configuracion: { id: "configuracion", label: "Configuracion", icon: Settings },
+  ace: { id: "ace", label: "Control de acceso", icon: ShieldCheck },
 } as const;
 
 export const ONG_MODULE_IDS = [
@@ -91,6 +94,7 @@ export const ONG_MODULE_IDS = [
   "settings.users",
   "settings.roles",
   "settings.sessions",
+  "settings.ace",
 ] as const;
 
 export const ongModuleDefinitions: RegisteredModuleDefinition[] = [
@@ -695,6 +699,32 @@ export const ongModuleDefinitions: RegisteredModuleDefinition[] = [
         moduleKeys: ["settings", "ong"],
         anyPermissions: ["settings.sessions.read"],
         element: <Security />,
+      },
+    ],
+  },
+  {
+    moduleId: "settings.ace",
+    industryIds: ["ong"],
+    basePath: SETTINGS_BASE_PATH,
+    menuGroup: GROUPS.ace,
+    menuLabel: "Control de acceso",
+    icon: ShieldCheck,
+    requiredPermissions: ["ace.access_links.read", "ace.memberships.read"],
+    moduleKeys: ["ace", "settings", "ong"],
+    defaultRouteId: "access-control",
+    routes: [
+      {
+        id: "access-control",
+        label: "Control de acceso",
+        title: "Control de acceso (ACE)",
+        breadcrumb: "Configuracion",
+        path: `${SETTINGS_BASE_PATH}/access-control`,
+        legacyPath: "/admin/access-control",
+        aliases: [`${ONG_BASE_PATH}/settings/access-control`],
+        icon: ShieldCheck,
+        moduleKeys: ["ace", "settings", "ong"],
+        anyPermissions: ["ace.access_links.read", "ace.memberships.read"],
+        element: <AccessControl />,
       },
     ],
   },

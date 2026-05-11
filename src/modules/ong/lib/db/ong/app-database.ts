@@ -1062,6 +1062,95 @@ interface ComunicacionPlantillaNotificacionRow {
   updated_by: Uuid | null;
 }
 
+// ── ACE: Access & Context Engine ─────────────────────────────
+
+interface PublicAccessLinkRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  code: string;
+  slug: string | null;
+  type: "VOLUNTEER_JOIN" | "STAFF_JOIN" | "BENEFICIARY_JOIN" | "GENERIC";
+  target_type: "PROJECT" | "PROGRAM" | "ACTIVITY" | "SEDE" | "GLOBAL";
+  target_id: Uuid | null;
+  assigned_role_id: Uuid | null;
+  assigned_sede_id: Uuid | null;
+  onboarding_flow: string | null;
+  max_uses: number;
+  used_count: number;
+  expires_at: IsoDateTime | null;
+  is_active: boolean;
+  metadata: JsonObject;
+  created_at: IsoDateTime;
+  updated_at: IsoDateTime;
+  created_by: Uuid | null;
+  updated_by: Uuid | null;
+}
+
+interface PublicMembershipRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  user_id: Uuid;
+  context_type: "PROYECTO" | "SEDE" | "PROGRAMA" | "ACTIVIDAD";
+  context_id: Uuid;
+  role_id: Uuid | null;
+  status: "active" | "inactive" | "pending";
+  joined_at: IsoDateTime;
+  created_at: IsoDateTime;
+  updated_at: IsoDateTime;
+  created_by: Uuid | null;
+}
+
+interface PublicDynamicFormRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  name: string;
+  context_type: string | null;
+  form_schema: JsonObject;
+  is_active: boolean;
+  created_at: IsoDateTime;
+  updated_at: IsoDateTime;
+  created_by: Uuid | null;
+  updated_by: Uuid | null;
+}
+
+interface PublicRoleModuleAccessRow {
+  tenant_id: Uuid;
+  role_id: Uuid;
+  module_code: string;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+}
+
+interface PublicRoleFieldPermissionRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  role_id: Uuid;
+  entity_name: string;
+  field_name: string;
+  can_view: boolean;
+  can_edit: boolean;
+}
+
+interface PublicVUserSessionContextRow {
+  user_id: Uuid;
+  tenant_id: Uuid | null;
+  full_name: string | null;
+  tipo_documento: string | null;
+  numero_documento: string | null;
+  genero: string | null;
+  active_memberships: Array<{
+    context_type: string;
+    context_id: Uuid;
+    role_id: Uuid | null;
+    role_name: string | null;
+    joined_at: IsoDateTime;
+  }> | null;
+}
+
+// ─────────────────────────────────────────────────────────────
+
 interface AuditoriaAuditLogRow {
   id_audit: Uuid;
   tenant_id: Uuid;
@@ -1086,6 +1175,7 @@ type PublicFunctions = {
   fn_has_permission: {
     Args: {
       p_permission: string;
+      p_context_id?: Uuid | null;
     };
     Returns: boolean;
   };
@@ -1099,6 +1189,26 @@ type PublicFunctions = {
       p_reason: string;
     };
     Returns: PublicSessionRow;
+  };
+  fn_validate_access_code: {
+    Args: {
+      p_code: string;
+    };
+    Returns: JsonObject;
+  };
+  fn_complete_access_onboarding: {
+    Args: {
+      p_access_code: string;
+      p_metadata?: JsonObject | null;
+    };
+    Returns: JsonObject;
+  };
+  fn_has_context_access: {
+    Args: {
+      p_user_id: Uuid;
+      p_context_id: Uuid;
+    };
+    Returns: boolean;
   };
 };
 
@@ -1149,12 +1259,21 @@ type PublicTables = {
   audit_logs: GenericTable<PublicAuditLogRow>;
   system_modules: GenericTable<PublicSystemModuleRow>;
   tenant_modules: GenericTable<PublicTenantModuleRow>;
+  access_links: GenericTable<PublicAccessLinkRow>;
+  memberships: GenericTable<PublicMembershipRow>;
+  dynamic_forms: GenericTable<PublicDynamicFormRow>;
+  role_module_access: GenericTable<PublicRoleModuleAccessRow>;
+  role_field_permissions: GenericTable<PublicRoleFieldPermissionRow>;
 };
 
 export interface AppDatabase {
   public: {
     Tables: PublicTables;
-    Views: Record<string, never>;
+    Views: {
+      v_user_session_context: {
+        Row: PublicVUserSessionContextRow;
+      };
+    };
     Functions: PublicFunctions;
   };
   ong: {
