@@ -1,22 +1,84 @@
+@import "tailwindcss";
+
 /*
-  Critical global styles loaded before React renders.
-  Imported by src/main.tsx so Vite injects them as the first stylesheet.
+  Global styles for democra.pro landing.
+  Imported by src/main.tsx — first stylesheet in the cascade.
 */
 
-/* Flash-of-invisible-content guard — main.tsx adds html.loaded after first render */
 html {
   visibility: hidden;
-  background: #050505;
+  background: #000000;
 }
 
 html.loaded {
   visibility: visible;
 }
 
-/* Hero title font — declared globally because it targets a class rendered by LandingPage */
-.studio-hero__title {
-  font-family: "Satoshi", sans-serif;
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+/* ── Design tokens ────────────────────────────── */
+:root {
+  --t-fast:   0.18s;
+  --t-smooth: 0.38s;
+  --t-slow:   0.8s;
+  --ease-out: cubic-bezier(0.25, 0.4, 0.25, 1);
+  --blue:     #0055FF;
+  --violet:   #7000FF;
+  --body-fg:  #888888;
+}
+
+/* ── Typography ──────────────────────────────── */
+.font-display {
+  font-family: 'Inter Tight', 'Inter', -apple-system, sans-serif;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+/* ── Glassmorphism border ─────────────────────── */
+.glass-border { position: relative; }
+.glass-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    transparent          0%,
+    rgba(255,255,255,0.1) 50%,
+    transparent          100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Glow text utility ────────────────────────── */
+.text-glow {
+  text-shadow:
+    0 0 60px  rgba(0, 85, 255, 0.45),
+    0 0 120px rgba(112, 0, 255, 0.2);
+}
+
+/* ── Keyframes ────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes grainShift {
+  0%, 100% { transform: translate(0,   0); }
+  25%       { transform: translate(-2px, 1px); }
+  50%       { transform: translate(1px, -2px); }
+  75%       { transform: translate(2px,  1px); }
+}
+
+@keyframes scrollLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
 }
