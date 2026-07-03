@@ -209,7 +209,7 @@ async function resolveCurrentTenantId(): Promise<string> {
     throw new Error(`No se pudo resolver el tenant actual: ${error.message}`);
   }
 
-  const tenantId = typeof data === "string" ? data.trim() : "";
+  const tenantId = typeof data === "string" ? (data as string).trim() : "";
   if (!tenantId) {
     throw new Error("No se pudo resolver el tenant actual.");
   }

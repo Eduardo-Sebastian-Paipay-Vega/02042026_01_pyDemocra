@@ -156,7 +156,7 @@ export async function getRequiredTenantId(): Promise<string> {
     throw new Error(error.message);
   }
 
-  if (typeof data !== "string" || !data.trim()) {
+  if (typeof data !== "string" || !(data as string).trim()) {
     throw new Error("No se pudo resolver el tenant actual.");
   }
 
@@ -260,7 +260,7 @@ async function hasPermission(permission: string): Promise<boolean> {
   try {
     const { data, error } = await peopleDb.rpc("fn_has_permission", {
       p_permission: normalizedPermission,
-    });
+    } as any);
     return !error && data === true;
   } catch {
     return false;

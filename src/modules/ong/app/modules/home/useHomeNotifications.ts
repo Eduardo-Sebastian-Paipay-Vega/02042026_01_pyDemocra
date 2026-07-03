@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getNotificationTopbarItems } from "../../services/notificaciones/history.service";
+import { useNotificationsRealtime } from "../notifications/hooks/useNotificationsRealtime";
 import { toFriendlyError } from "./homeService";
 import type { HomeNotificationItem } from "./types";
 
@@ -19,6 +20,8 @@ export function useHomeNotifications(): UseHomeNotificationsResult {
   const refresh = useCallback(() => {
     setReloadToken((current) => current + 1);
   }, []);
+
+  useNotificationsRealtime(refresh);
 
   useEffect(() => {
     let isActive = true;

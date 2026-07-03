@@ -186,7 +186,7 @@ export async function getRequiredTenantId(): Promise<string> {
     throw new Error(error.message);
   }
 
-  if (typeof data !== "string" || !data.trim()) {
+  if (typeof data !== "string" || !(data as string).trim()) {
     throw new Error("No se pudo resolver el tenant actual.");
   }
 
@@ -248,7 +248,7 @@ async function hasPermission(permission: string, warnings: string[]): Promise<bo
   try {
     const { data, error } = await governanceDb.rpc("fn_has_permission", {
       p_permission: permission,
-    });
+    } as any);
 
     if (error) {
       warnings.push(

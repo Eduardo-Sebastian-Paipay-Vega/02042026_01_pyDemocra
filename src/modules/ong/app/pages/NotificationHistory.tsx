@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useSearchParams } from "react-router";
-import { Bell, Clock3, Eye, FileJson, MessageSquare, TriangleAlert } from "lucide-react";
+import { Bell, Clock3, Eye, FileJson, MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
@@ -18,6 +19,8 @@ import {
 } from "../modules/notifications/components/notifications-shared";
 import { useNotificationHistory } from "../modules/notifications/hooks/useNotificationHistory";
 import { useNotificationHistoryDetail } from "../modules/notifications/hooks/useNotificationHistoryDetail";
+import { useNotificationHistoryMutations } from "../modules/notifications/hooks/useNotificationHistoryMutations";
+import { useNotificationsRealtime } from "../modules/notifications/hooks/useNotificationsRealtime";
 import type {
   NotificationHistoryReadState,
   NotificationHistoryRow,
@@ -106,6 +109,9 @@ export function NotificationHistory() {
     pageSize: PAGE_SIZE,
   });
   const detail = useNotificationHistoryDetail(detailNotificationId);
+  const mutations = useNotificationHistoryMutations(refresh);
+
+  useNotificationsRealtime(refresh);
 
   useEffect(() => {
     if (!notificationIdParam) {
@@ -114,6 +120,15 @@ export function NotificationHistory() {
 
     setDetailNotificationId(notificationIdParam);
   }, [notificationIdParam]);
+
+  async function handleMarkAsRead(notificationId: string) {
+    try {
+      await mutations.markAsRead(notificationId);
+      toast.success("Notificación marcada como leída.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo marcar como leída.");
+    }
+  }
 
   function openDetailModal(notificationId: string) {
     setDetailNotificationId(notificationId);
@@ -167,7 +182,7 @@ export function NotificationHistory() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Historial"
-        description="Consulta comunicaciones.historial_notificaciones con sus metadatos reales: codigo_canal, estado_entrega, error_mensaje, id_plantilla y payload."
+        description="Historial de notificaciones enviadas al usuario. Filtra por estado de lectura, canal, entrega o fecha. Las nuevas notificaciones aparecen en tiempo real."
         action={{ label: "Actualizar", onClick: refresh }}
       />
 
@@ -310,7 +325,13 @@ export function NotificationHistory() {
             data={data.access.canReadHistory ? data.rows : []}
             loading={loading}
             emptyMessage="No se encontraron eventos reales de notificacion con los filtros actuales."
-            actions={[{ label: "Ver detalle", onClick: (row) => openDetailModal(row.id) }]}
+            actions={[
+              { label: "Ver detalle", onClick: (row) => openDetailModal(row.id) },
+              {
+                label: (row) => (row.isRead ? "Ya leída" : "Marcar como leída"),
+                onClick: (row) => { if (!row.isRead) void handleMarkAsRead(row.id); },
+              },
+            ]}
           />
         </div>
 
@@ -345,7 +366,7 @@ export function NotificationHistory() {
                 Detalle del historial
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                comunicaciones.historial_notificaciones
+                Estado actual y contexto de la notificación.
               </p>
             </div>
           </div>
@@ -429,20 +450,17 @@ export function NotificationHistory() {
                 <NotificationsCodePreview value={detail.data.payloadJson} />
               </div>
 
-              <div
-                className="rounded-2xl px-4 py-3"
-                style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-              >
-                <div className="mb-2 flex items-center gap-2">
-                  <TriangleAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-                  <h4 className="text-[13px]" style={{ color: "var(--t-text)" }}>
-                    Alcance del modelo
-                  </h4>
+              {!detail.data.isRead && (
+                <div className="flex">
+                  <OutlineButton
+                    size="sm"
+                    onClick={() => void handleMarkAsRead(detail.data!.id)}
+                    disabled={mutations.isMarkingRead}
+                  >
+                    {mutations.isMarkingRead ? "Marcando..." : "Marcar como leída"}
+                  </OutlineButton>
                 </div>
-                <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                  El detalle refleja exactamente el historial persistido en la BD. No se inventan reintentos, proveedores externos ni automatizaciones no documentadas.
-                </p>
-              </div>
+              )}
             </>
           )}
         </div>

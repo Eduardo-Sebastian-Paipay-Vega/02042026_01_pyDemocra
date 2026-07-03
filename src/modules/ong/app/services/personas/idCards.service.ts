@@ -217,7 +217,7 @@ async function hasPermission(permission: string, warnings: string[]): Promise<bo
   try {
     const { data, error } = await peopleDb.rpc("fn_has_permission", {
       p_permission: permission,
-    });
+    } as any);
 
     if (error) {
       warnings.push(`No se pudo validar el permiso ${permission} con public.fn_has_permission().`);

@@ -244,7 +244,7 @@ export function NotificationTemplates() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Plantillas"
-        description="Gestiona registros reales en comunicaciones.plantillas_notificacion, incluyendo codigo_evento y variables JSON, sin inventar motores de disparo o render."
+        description="Crea y administra plantillas de notificación por canal. Cada plantilla puede tener variables JSON y un código de evento para disparos automáticos."
         action={
           data.access.canManageTemplates
             ? { label: "Nueva plantilla", onClick: openCreateModal }
@@ -369,7 +369,7 @@ export function NotificationTemplates() {
                 Detalle de plantilla
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                comunicaciones.plantillas_notificacion
+                Campos completos de la plantilla seleccionada.
               </p>
             </div>
           </div>
@@ -455,7 +455,7 @@ export function NotificationTemplates() {
                 {editingTemplate ? "Editar plantilla" : "Nueva plantilla"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La BD real persiste `codigo_canal`, `nombre_plantilla`, `asunto`, `cuerpo_html`, `cuerpo_texto`, `variables`, `codigo_evento` y `activa`.
+                {editingTemplate ? "Modifica los campos de la plantilla existente." : "Completa los campos para crear una nueva plantilla de notificación."}
               </p>
             </div>
             <button
@@ -623,15 +623,6 @@ export function NotificationTemplates() {
                 style={INPUT_STYLE}
               />
             </div>
-          </div>
-
-          <div
-            className="rounded-2xl px-4 py-3"
-            style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-          >
-            <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-              La pantalla persiste `variables` y `codigo_evento` como metadata real de la tabla. No existe motor documental de disparo, render ni envio desde frontend.
-            </p>
           </div>
 
           <div className="flex gap-2">

@@ -577,6 +577,29 @@ export async function getNotificationTopbarItems(
   }
 }
 
+export async function markNotificationAsRead(notificationId: string): Promise<void> {
+  const access = await resolveNotificationCapabilities();
+  if (!access.currentUserId || !access.tenantId) {
+    throw new Error("No tienes sesión activa.");
+  }
+
+  const sanitizedId = sanitizeOptionalId(notificationId);
+  if (!sanitizedId) {
+    throw new Error("ID de notificación inválido.");
+  }
+
+  const { error } = await comunicacionesSchema()
+    .from("historial_notificaciones")
+    .update({ leida: true, updated_by: access.currentUserId })
+    .eq("tenant_id", access.tenantId)
+    .eq("id", sanitizedId)
+    .eq("id_usuario", access.currentUserId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function getNotificationHistoryEntryById(
   notificationId: string
 ): Promise<NotificationHistoryRow> {

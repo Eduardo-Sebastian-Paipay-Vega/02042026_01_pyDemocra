@@ -495,7 +495,7 @@ async function resolvePermissionMap(warnings: string[]) {
       try {
         const { data, error } = await supabase.rpc("fn_has_permission", {
           p_permission: permission,
-        });
+        } as any);
 
         if (error) {
           warnings.push(`No se pudo validar el permiso ${permission}.`);

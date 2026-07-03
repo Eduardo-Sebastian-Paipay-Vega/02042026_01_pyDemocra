@@ -18,7 +18,7 @@ async function getRequiredTenantId(): Promise<string> {
   }
   const { data, error } = await supabase.rpc("fn_current_tenant_id");
   if (error) throw new Error(error.message);
-  if (typeof data !== "string" || !data.trim()) {
+  if (typeof data !== "string" || !(data as string).trim()) {
     throw new Error("No se pudo resolver el tenant actual.");
   }
   tenantCache = { value: data, at: Date.now() };
@@ -224,7 +224,7 @@ export interface AccessCodeValidation {
 }
 
 export async function validateAccessCode(code: string): Promise<AccessCodeValidation> {
-  const { data, error } = await supabase.rpc("fn_validate_access_code", { p_code: code });
+  const { data, error } = await supabase.rpc("fn_validate_access_code", { p_code: code } as any);
   if (error) throw new Error(error.message);
   const payload = data as Record<string, unknown>;
   return {
