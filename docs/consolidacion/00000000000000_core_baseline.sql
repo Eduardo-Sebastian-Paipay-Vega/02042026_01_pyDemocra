@@ -428,26 +428,52 @@ CREATE POLICY p_urs_select ON public.user_roles_sedes
 
 
 -- =============================================================================
--- 10. fn_trigger_audit_universal() — trigger de auditoría universal (modelo moderno)
+-- 10. fn_trigger_audit_universal() — trigger de auditoría universal (multi-esquema, multi-tenant)
 -- =============================================================================
--- [AUDIT-OK] Extraída literal de supabase/migrations/
--- 20260302125000_fix_bootstrap_audit_tenant_null.sql. Recibe el nombre de la
--- columna de tenant vía TG_ARGV[0] (no hardcodeado), tolera tenant_id NULL
--- (pre-onboarding: retorna sin auditar en vez de fallar) y usa el modelo de
--- columnas moderno (event_type/resource_name/payload_before/payload_after/
--- actor_id/retention_until) — reemplaza la versión legacy con columnas
--- schema_name/table_name/operation/old_data/new_data/changed_by (Parte 1,
--- ver AUDIT_REPORT_S1 §4).
+-- [AUDIT-OK] Reescritura sobre la base literal de supabase/migrations/
+-- 20260302125000_fix_bootstrap_audit_tenant_null.sql, evolucionada para
+-- servir de forma transparente a AMBOS sistemas concurrentes sobre el mismo
+-- core: Sistema 1 (ONG — esquemas 'ong'/'rrhh'/'finanzas'/'comunicaciones') y
+-- Sistema 2 (GYMsos — esquema 'gym'). Cambios frente a la versión anterior:
 --
--- [AUDIT-GAP] Esta función referencia public.audit_logs (destino del INSERT)
--- y public.plan_policies (vía join a tenants.plan_id, para calcular
--- retention_until). NINGUNA de las dos está en el alcance "Core Compartido e
--- Identidad" de este script. Al ser LANGUAGE plpgsql, el CREATE FUNCTION se
--- ejecuta sin error aunque esas tablas no existan (el cuerpo no se valida
--- contra el catálogo hasta la primera invocación real de un trigger que la
--- use) — pero CUALQUIER trigger que dispare esta función FALLARÁ en tiempo de
--- ejecución hasta que audit_logs y plan_policies existan. No se crean aquí
--- por ser explícitamente ajenas a la lista de tablas pedida.
+--   1. YA NO depende de TG_ARGV[0] (nombre de columna de tenant pasado como
+--      argumento del trigger). Triggers ya existentes que aún pasen un
+--      argumento (p. ej. `EXECUTE FUNCTION fn_trigger_audit_universal('tenant_id')`)
+--      siguen funcionando sin error — el argumento queda simplemente sin uso —
+--      y las tablas nuevas (incluidas las de 'gym') ya no necesitan declarar
+--      ninguno: `CREATE TRIGGER ... EXECUTE FUNCTION fn_trigger_audit_universal();`
+--   2. Captura TG_TABLE_SCHEMA además de TG_TABLE_NAME y TG_OP. El modelo
+--      VIGENTE de audit_logs (columnas event_type/resource_name/payload_*,
+--      ver DATABASE_MASTER_SCRIPT_S1.md §5) NO tiene una columna dedicada
+--      `schema_name` (esa pertenece al modelo LEGACY, ver AUDIT_REPORT_S1 §4),
+--      así que el esquema de origen se codifica en resource_name como
+--      'esquema.tabla' (ej. 'gym.members', 'ong.activities'). Esto evita un
+--      ALTER TABLE audit_logs fuera del alcance de esta tarea, y permite
+--      distinguir de qué sistema vino cada evento con una simple consulta
+--      `WHERE resource_name LIKE 'gym.%'`.
+--   3. Resolución de tenant_id ahora se auto-detecta por fila, sin que quien
+--      declara el trigger necesite conocer el nombre de la columna:
+--        a) Lee 'tenant_id' directamente del payload JSONB ya serializado
+--           (NEW primero; OLD como respaldo, relevante en DELETE). El
+--           operador ->> retorna NULL si la clave no existe, en vez de
+--           lanzar el error "record has no field" que ocurriría accediendo a
+--           NEW.tenant_id/OLD.tenant_id directamente en una tabla que no
+--           tenga esa columna (caso esperable en tablas nuevas de 'gym').
+--        b) Si (a) no resolvió nada (columna ausente o valor NULL), hace
+--           fallback a public.profiles vía auth.uid() — igual criterio que
+--           fn_current_tenant_id() — para que ningún log quede huérfano de
+--           inquilino.
+--   4. Mantiene la salvaguarda de la versión anterior: audit_logs.tenant_id
+--      es NOT NULL; si tras (a) y (b) el tenant sigue sin resolverse (p. ej.
+--      pre-onboarding sin profile aún asignado), la función omite el
+--      registro (RETURN NULL) en vez de abortar la transacción del llamador
+--      — el mismo bug que corrigió 20260302125000_fix_bootstrap_audit_tenant_null.sql.
+--
+-- [AUDIT-GAP] (heredado, sin cambios): esta función sigue referenciando
+-- public.audit_logs y public.plan_policies, ninguna en el alcance "Core
+-- Compartido e Identidad" de este script. CREATE FUNCTION es válido (plpgsql,
+-- cuerpo no validado hasta la primera ejecución), pero cualquier trigger que
+-- la dispare FALLARÁ en tiempo de ejecución hasta que ambas tablas existan.
 CREATE OR REPLACE FUNCTION public.fn_trigger_audit_universal()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -455,21 +481,41 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_tenant_col text := TG_ARGV[0];
-  v_tenant_id uuid;
+  v_actor_id       uuid := auth.uid();
+  v_payload_before jsonb;
+  v_payload_after  jsonb;
+  v_tenant_id      uuid;
+  v_resource_name  text := format('%I.%I', TG_TABLE_SCHEMA, TG_TABLE_NAME);
 BEGIN
-  IF v_tenant_col IS NULL THEN
-    RAISE EXCEPTION 'Audit trigger requires tenant column name in TG_ARGV[0]';
+  -- Serialización universal OLD/NEW a JSONB: to_jsonb() funciona igual sin
+  -- importar de qué esquema/tabla venga la fila (ong, rrhh, gym, ...) — por
+  -- eso una SOLA función puede ser reusada como trigger por ambos sistemas.
+  v_payload_before := CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE to_jsonb(OLD) END;
+  v_payload_after  := CASE WHEN TG_OP = 'DELETE' THEN NULL ELSE to_jsonb(NEW) END;
+
+  -- (a) Intento directo: leer 'tenant_id' del payload JSONB ya serializado
+  -- (NEW primero; en DELETE, payload_after es NULL y cae a payload_before/OLD).
+  -- ->> retorna NULL en vez de lanzar error si la tabla no tiene esa columna,
+  -- lo que permite auto-detectar tablas de 'gym' sin columna tenant_id propia.
+  v_tenant_id := COALESCE(
+    v_payload_after  ->> 'tenant_id',
+    v_payload_before ->> 'tenant_id'
+  )::uuid;
+
+  -- (b) Fallback multi-tenant: la tabla de origen no tiene tenant_id propio
+  -- -> resolver vía profiles usando el actor autenticado, igual criterio que
+  -- fn_current_tenant_id(). Así ningún log queda huérfano de inquilino.
+  IF v_tenant_id IS NULL THEN
+    SELECT p.tenant_id
+      INTO v_tenant_id
+    FROM public.profiles p
+    WHERE p.id = v_actor_id
+    LIMIT 1;
   END IF;
 
-  IF TG_OP IN ('INSERT','UPDATE') THEN
-    EXECUTE format('SELECT ($1).%I::uuid', v_tenant_col) INTO v_tenant_id USING NEW;
-  ELSE
-    EXECUTE format('SELECT ($1).%I::uuid', v_tenant_col) INTO v_tenant_id USING OLD;
-  END IF;
-
-  -- Durante pre-onboarding puede existir profile con tenant_id null.
-  -- No forzamos escritura en audit_logs para no romper transacciones.
+  -- Salvaguarda heredada: audit_logs.tenant_id es NOT NULL. Si ni (a) ni (b)
+  -- resolvieron un tenant (p. ej. pre-onboarding sin profile asignado aún),
+  -- se omite el registro en vez de romper la transacción del llamador.
   IF v_tenant_id IS NULL THEN
     RETURN NULL;
   END IF;
@@ -487,11 +533,11 @@ BEGIN
   )
   VALUES (
     v_tenant_id,
-    auth.uid(),
-    TG_OP,
-    TG_TABLE_NAME,
-    CASE WHEN TG_OP = 'INSERT' THEN NULL ELSE to_jsonb(OLD) END,
-    CASE WHEN TG_OP = 'DELETE' THEN NULL ELSE to_jsonb(NEW) END,
+    v_actor_id,
+    TG_OP,            -- 'INSERT' | 'UPDATE' | 'DELETE'
+    v_resource_name,  -- 'esquema.tabla', ej. 'gym.members' u 'ong.activities'
+    v_payload_before,
+    v_payload_after,
     NULL,
     NULL,
     now() + make_interval(days =>
