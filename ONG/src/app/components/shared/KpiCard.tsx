@@ -11,9 +11,10 @@ interface KpiCardProps {
     positive: boolean;
   };
   className?: string;
+  iconColor?: string;
 }
 
-export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardProps) {
+export function KpiCard({ title, value, icon: Icon, trend, className, iconColor = "var(--t-text-dim)" }: KpiCardProps) {
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -43,7 +44,7 @@ export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardP
           className="rounded-xl p-2.5 transition-colors duration-300"
           style={{ background: "var(--t-input-bg)" }}
         >
-          <Icon className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
+          <Icon className="h-4 w-4" style={{ color: iconColor }} />
         </div>
       </div>
     </motion.div>

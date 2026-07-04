@@ -82,15 +82,19 @@ select optgroup,
   display: none;
 }
 
-/* ─── Fichas médicas: paleta oscura dedicada ───
- * Alcance: SOLO el sistema de fichas médicas sensibles (MedicalRecords.tsx
- * y sus modales en MedicalRecordPanels.tsx), y SOLO cuando el tema activo
- * es "oscuro" (data-app-theme="oscuro" en <html>, puesto por
- * ThemeProvider). No afecta modo claro ni ningún otro módulo: las
- * variables --t-* solo se sobrescriben dentro de .fichas-medicas-theme,
- * que se aplica exclusivamente a esas pantallas.
+/* ─── Paleta oscura "landing" (navy/cyan): base compartida ───
+ * Alcance: SOLO las pantallas cuyo contenedor raíz lleva una de las
+ * clases de scope listadas abajo, y SOLO cuando el tema activo es
+ * "oscuro" (data-app-theme="oscuro" en <html>, puesto por ThemeProvider).
+ * No afecta modo claro ni ningún otro módulo — las variables --t-* solo
+ * se sobrescriben dentro de estas clases de scope.
+ *
+ * Scopes activos:
+ * - .fichas-medicas-theme  → MedicalRecords.tsx + modales en MedicalRecordPanels.tsx
+ * - .panel-principal-theme → Dashboard.tsx (panel principal / home)
  */
-[data-app-theme="oscuro"] .fichas-medicas-theme {
+[data-app-theme="oscuro"] .fichas-medicas-theme,
+[data-app-theme="oscuro"] .panel-principal-theme {
   --t-bg: #0a0e27;
   --t-board: #0a0e27;
   --t-surface: #1a1f3a;
@@ -116,13 +120,29 @@ select optgroup,
   --t-input-bg: #1a1f3a;
 }
 
+/* Panel principal: estados de advertencia/crítico piden un tono exacto
+   distinto al de fichas médicas (que no especificó estos dos). */
+[data-app-theme="oscuro"] .panel-principal-theme {
+  --t-warning: #ffa500;
+  --t-danger: #ff6b6b;
+}
+
 /* StatusDot "info" usa un morado fijo (bg-[#9B7AEA]) que no pertenece a
    ninguna paleta del proyecto; es un componente compartido usado por
    muchos módulos, así que no se toca globalmente — se corrige solo
-   dentro del alcance de fichas médicas, en modo oscuro. */
-[data-app-theme="oscuro"] .fichas-medicas-theme .bg-\[\#9B7AEA\] {
+   dentro de los scopes de arriba, en modo oscuro. */
+[data-app-theme="oscuro"] .fichas-medicas-theme .bg-\[\#9B7AEA\],
+[data-app-theme="oscuro"] .panel-principal-theme .bg-\[\#9B7AEA\] {
   background-color: #4a9fd8;
 }
-[data-app-theme="oscuro"] .fichas-medicas-theme .text-\[\#9B7AEA\]\/80 {
+[data-app-theme="oscuro"] .fichas-medicas-theme .text-\[\#9B7AEA\]\/80,
+[data-app-theme="oscuro"] .panel-principal-theme .text-\[\#9B7AEA\]\/80 {
   color: #4a9fd8;
+}
+
+/* Panel principal: botones terciarios (GhostButton) llevan un fondo de
+   relleno sutil en este panel, solo en modo oscuro (en claro y en el
+   resto de la app siguen siendo transparentes por defecto). */
+[data-app-theme="oscuro"] .panel-principal-theme .panel-principal-tertiary-btn {
+  background-color: var(--t-border);
 }

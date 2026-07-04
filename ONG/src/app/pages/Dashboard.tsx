@@ -1051,7 +1051,7 @@ export function Dashboard() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="panel-principal-theme space-y-8"
     >
       <motion.div
         variants={fadeUp}
@@ -1097,6 +1097,7 @@ export function Dashboard() {
               title={card.title}
               value={metricsLoading ? "..." : formatMetricValue(card.key, metrics[card.key])}
               icon={card.icon}
+              iconColor="var(--t-primary)"
             />
             {metricErrors[card.key] && (
               <p className="mt-1 px-1 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
@@ -1146,7 +1147,7 @@ export function Dashboard() {
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
           <div className="mb-3 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-amber-400/70" />
+            <Clock className="h-4 w-4 text-[var(--t-warning)]/70" />
             <span
               className="text-[11px] uppercase tracking-[0.1em]"
               style={{ color: "var(--t-text-dim)" }}
@@ -1179,7 +1180,7 @@ export function Dashboard() {
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
           <div className="mb-3 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-400/70" />
+            <AlertTriangle className="h-4 w-4 text-[var(--t-danger)]/70" />
             <span
               className="text-[11px] uppercase tracking-[0.1em]"
               style={{ color: "var(--t-text-dim)" }}
@@ -1223,17 +1224,18 @@ export function Dashboard() {
         </OutlineButton>
         <GhostButton
           size="sm"
+          className="panel-principal-tertiary-btn"
           onClick={openActivityCreateModal}
           disabled={!canManageActivities || taskOptions.length === 0}
         >
           <Plus className="h-3.5 w-3.5 opacity-40" />
           Crear actividad
         </GhostButton>
-        <GhostButton size="sm" onClick={() => navigate("/admin/activities")}>
+        <GhostButton size="sm" className="panel-principal-tertiary-btn" onClick={() => navigate("/admin/activities")}>
           <ClipboardCheck className="h-3.5 w-3.5 opacity-40" />
           Ver actividades
         </GhostButton>
-        <GhostButton size="sm" onClick={() => navigate("/admin/admission/requests")}>
+        <GhostButton size="sm" className="panel-principal-tertiary-btn" onClick={() => navigate("/admin/admission/requests")}>
           <Upload className="h-3.5 w-3.5 opacity-40" />
           Revisar admision
         </GhostButton>
@@ -1331,7 +1333,7 @@ export function Dashboard() {
                   {monthlyHours.data.map((_, index) => (
                     <Cell
                       key={index}
-                      fill={index === monthlyHours.data.length - 1 ? "#4A7BA7" : "rgba(74,123,167,0.35)"}
+                      fill={index === monthlyHours.data.length - 1 ? "var(--t-primary)" : "var(--t-primary-soft)"}
                     />
                   ))}
                 </Bar>
@@ -1359,7 +1361,7 @@ export function Dashboard() {
                     layoutId="tab-indicator"
                     className="absolute bottom-0 left-0 right-0 h-[1px]"
                     style={{
-                      background: "linear-gradient(90deg, transparent, #4A7BA7, transparent)",
+                      background: "linear-gradient(90deg, transparent, var(--t-primary), transparent)",
                     }}
                     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   />
@@ -1497,6 +1499,7 @@ export function Dashboard() {
         open={activityFormState.open}
         onClose={closeActivityFormModal}
         width="max-w-[780px]"
+        className="panel-principal-theme"
       >
         <ModalHeader
           title={activityFormState.mode === "create" ? "Nueva actividad" : "Editar actividad"}
@@ -1768,7 +1771,7 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      <ModalShell open={isActivityDetailOpen} onClose={closeActivityDetailModal} width="max-w-[940px]">
+      <ModalShell open={isActivityDetailOpen} onClose={closeActivityDetailModal} width="max-w-[940px]" className="panel-principal-theme">
         <ModalHeader
           title="Detalle de actividad"
           description="Consulta estado, fechas, ubicacion, asignaciones, horas y evidencias registradas."
@@ -1919,7 +1922,7 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      <ModalShell open={isHourDetailOpen} onClose={closeHourDetailModal} width="max-w-[920px]">
+      <ModalShell open={isHourDetailOpen} onClose={closeHourDetailModal} width="max-w-[920px]" className="panel-principal-theme">
         <ModalHeader
           title="Detalle de horas"
           description="Consulta trazabilidad, aprobador y estado del registro de horas."
@@ -2038,6 +2041,7 @@ export function Dashboard() {
         open={isAdmissionDetailOpen}
         onClose={closeAdmissionDetailModal}
         width="max-w-[940px]"
+        className="panel-principal-theme"
       >
         <ModalHeader
           title="Detalle de solicitud"
@@ -2205,6 +2209,7 @@ export function Dashboard() {
           }
         }}
         width="max-w-[560px]"
+        className="panel-principal-theme"
       >
         <ModalHeader
           title="Cancelar actividad"
@@ -2246,6 +2251,7 @@ export function Dashboard() {
         open={Boolean(resolutionTarget)}
         onClose={closeResolutionModal}
         width="max-w-[560px]"
+        className="panel-principal-theme"
       >
         <ModalHeader
           title={toResolutionTitle(resolutionTarget)}
