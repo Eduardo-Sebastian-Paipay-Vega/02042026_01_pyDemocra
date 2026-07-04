@@ -1267,8 +1267,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             to={SECTION_META[item].path}
             className="rounded-full border px-3 py-1 text-[12px] transition-colors"
             style={{
-              borderColor: item === section ? "rgba(61,107,255,0.4)" : "var(--t-border)",
-              background: item === section ? "rgba(61,107,255,0.12)" : "var(--t-input-bg)",
+              borderColor: item === section ? "rgba(74,123,167,0.4)" : "var(--t-border)",
+              background: item === section ? "rgba(74,123,167,0.12)" : "var(--t-input-bg)",
               color: item === section ? "var(--t-text)" : "var(--t-text-secondary)",
             }}
           >

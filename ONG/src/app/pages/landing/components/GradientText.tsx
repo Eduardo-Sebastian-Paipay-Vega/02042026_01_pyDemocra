@@ -16,7 +16,7 @@ export function GradientText({
       className={`bg-clip-text text-transparent ${className}`}
       style={{
         backgroundImage:
-          "linear-gradient(90deg, #3D6BFF 0%, #2DBFB0 100%)",
+          "linear-gradient(90deg, #4A7BA7 0%, #4D9B8F 100%)",
       }}
     >
       {children}

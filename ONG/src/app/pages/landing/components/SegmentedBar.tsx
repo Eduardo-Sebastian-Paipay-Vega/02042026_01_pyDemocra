@@ -1,6 +1,6 @@
 /**
  * SegmentedBar — thin horizontal row of vertical "pill" segments.
- * Filled segments follow the brand gradient (#3D6BFF → #2DBFB0).
+ * Filled segments follow the brand gradient (#4A7BA7 → #4D9B8F).
  * Unfilled segments use the token dark pill color.
  */
 interface SegmentedBarProps {
@@ -8,12 +8,12 @@ interface SegmentedBarProps {
   segments?: number;
 }
 
-// Linear interpolation between the brand primary (#3D6BFF) and tertiary (#2DBFB0)
+// Linear interpolation between the brand primary (#4A7BA7) and secondary (#4D9B8F)
 function gradientColor(t: number): string {
   // t ∈ [0, 1] along the filled portion
-  const r = Math.round(61 + (45 - 61) * t);
-  const g = Math.round(107 + (191 - 107) * t);
-  const b = Math.round(255 + (176 - 255) * t);
+  const r = Math.round(74 + (77 - 74) * t);
+  const g = Math.round(123 + (155 - 123) * t);
+  const b = Math.round(167 + (143 - 167) * t);
   return `rgb(${r},${g},${b})`;
 }
 

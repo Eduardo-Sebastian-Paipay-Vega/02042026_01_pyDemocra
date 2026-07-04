@@ -1331,7 +1331,7 @@ export function Dashboard() {
                   {monthlyHours.data.map((_, index) => (
                     <Cell
                       key={index}
-                      fill={index === monthlyHours.data.length - 1 ? "#3D6BFF" : "rgba(61,107,255,0.35)"}
+                      fill={index === monthlyHours.data.length - 1 ? "#4A7BA7" : "rgba(74,123,167,0.35)"}
                     />
                   ))}
                 </Bar>
@@ -1359,7 +1359,7 @@ export function Dashboard() {
                     layoutId="tab-indicator"
                     className="absolute bottom-0 left-0 right-0 h-[1px]"
                     style={{
-                      background: "linear-gradient(90deg, transparent, #3D6BFF, transparent)",
+                      background: "linear-gradient(90deg, transparent, #4A7BA7, transparent)",
                     }}
                     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   />

@@ -19,7 +19,7 @@ export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardP
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
-        "group relative rounded-2xl backdrop-blur-xl px-5 py-4 transition-colors duration-300",
+        "group relative rounded-xl backdrop-blur-xl px-5 py-5 transition-colors duration-300",
         className
       )}
       style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}

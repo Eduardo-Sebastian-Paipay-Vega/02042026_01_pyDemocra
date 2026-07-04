@@ -45,7 +45,7 @@ export function DataTable<T extends { id: string }>({
   if (data.length === 0) {
     return (
       <div
-        className={cn("rounded-2xl p-12 text-center backdrop-blur-xl", className)}
+        className={cn("rounded-xl p-12 text-center backdrop-blur-xl", className)}
         style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)", boxShadow: "var(--t-shadow)" }}
       >
         <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>{emptyMessage}</p>
@@ -55,7 +55,7 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <div
-      className={cn("overflow-hidden rounded-2xl backdrop-blur-xl", className)}
+      className={cn("overflow-hidden rounded-xl backdrop-blur-xl", className)}
       style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)", boxShadow: "var(--t-shadow)" }}
     >
       <table className="w-full">

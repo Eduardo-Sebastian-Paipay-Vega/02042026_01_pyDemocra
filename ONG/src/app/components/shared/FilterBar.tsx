@@ -52,7 +52,7 @@ export function FilterBar({
                 className={cn(
                   "inline-flex h-9 items-center rounded-full border px-3.5 text-[12px] font-medium transition-colors",
                   filter.active
-                    ? "border-[var(--t-primary)]/35 bg-[var(--t-primary)]/16 text-[#D7E2FF]"
+                    ? "border-[var(--t-primary)]/35 bg-[var(--t-primary-soft)] text-[var(--t-primary)]"
                     : ""
                 )}
                 style={!filter.active ? {

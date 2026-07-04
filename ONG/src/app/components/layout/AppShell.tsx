@@ -171,15 +171,15 @@ function AppShellInner() {
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden transition-opacity duration-300">
         <div
           className="absolute -left-[220px] -top-[280px] h-[560px] w-[560px] rounded-full blur-[200px]"
-          style={{ background: "rgba(61,107,255,0.028)" }}
+          style={{ background: "rgba(74,123,167,0.05)" }}
         />
         <div
           className="absolute -right-[180px] top-[16%] h-[420px] w-[420px] rounded-full blur-[180px]"
-          style={{ background: "rgba(45,191,176,0.02)" }}
+          style={{ background: "rgba(77,155,143,0.04)" }}
         />
         <div
           className="absolute bottom-[-220px] left-[52%] h-[320px] w-[320px] -translate-x-1/2 rounded-full blur-[160px]"
-          style={{ background: "rgba(0,46,254,0.028)" }}
+          style={{ background: "rgba(212,167,106,0.03)" }}
         />
         <div
           className="absolute inset-0"

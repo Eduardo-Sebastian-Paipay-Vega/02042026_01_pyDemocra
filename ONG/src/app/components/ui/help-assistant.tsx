@@ -147,7 +147,7 @@ export function HelpAssistant() {
           "flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-200",
           open
             ? "bg-[var(--t-active)]"
-            : "hover:shadow-[0_0_20px_rgba(0,46,254,0.15)]"
+            : "hover:shadow-[0_0_20px_rgba(212,167,106,0.25)]"
         )}
         style={{
           background: open ? "var(--t-active)" : "var(--t-elevated)",

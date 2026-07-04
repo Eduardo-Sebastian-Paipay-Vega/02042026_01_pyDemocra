@@ -15,9 +15,9 @@ export function PageHeader({ title, description, action, className }: PageHeader
   return (
     <div className={cn("flex flex-col gap-4 md:flex-row md:items-start md:justify-between", className)}>
       <div className="max-w-3xl">
-        <h1 className="text-[20px] tracking-tight" style={{ color: "var(--t-text)" }}>{title}</h1>
+        <h1 className="text-[32px] font-semibold tracking-tight" style={{ color: "var(--t-text)" }}>{title}</h1>
         {description && (
-          <p className="mt-1 text-[13px]" style={{ color: "var(--t-text-secondary)" }}>{description}</p>
+          <p className="mt-1.5 text-[15px]" style={{ color: "var(--t-text-secondary)" }}>{description}</p>
         )}
       </div>
       {action && (

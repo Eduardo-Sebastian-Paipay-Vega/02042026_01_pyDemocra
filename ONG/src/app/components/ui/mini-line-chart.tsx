@@ -41,8 +41,8 @@ function CustomTooltip({ active, payload, label }: any) {
 export function MiniLineChart({
   data,
   height = 140,
-  color = "#3D6BFF",
-  gradientFrom = "#3D6BFF",
+  color = "#4A7BA7",
+  gradientFrom = "#4A7BA7",
   gradientTo = "transparent",
 }: MiniLineChartProps) {
   return (

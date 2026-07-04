@@ -351,7 +351,7 @@ export function VolunteerRegistrationPage() {
           <div>
             <Link
               to="/landing"
-              className="text-[12px] uppercase tracking-[0.2em] text-[#3D6BFF]"
+              className="text-[12px] uppercase tracking-[0.2em] text-[#4A7BA7]"
             >
               Volver al landing
             </Link>

@@ -31,9 +31,9 @@ export function OutlineButton({
         className
       )}
       style={{
-        border: "1px solid var(--t-border-strong)",
+        border: "1px solid var(--t-primary)",
         background: "var(--t-input-bg)",
-        color: "var(--t-text)",
+        color: "var(--t-primary)",
       }}
       {...props}
     >

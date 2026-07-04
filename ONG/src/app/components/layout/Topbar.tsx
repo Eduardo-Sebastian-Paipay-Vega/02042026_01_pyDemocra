@@ -202,7 +202,7 @@ export function Topbar({
               >
                 <Bell className="h-4 w-4" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--t-primary)]" />
+                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--t-warning)]" />
                 )}
                 <span className="sr-only">Notificaciones</span>
               </button>
@@ -300,7 +300,7 @@ export function Topbar({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex h-8 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-[var(--t-hover)]">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--t-primary)]/60 to-[var(--t-tertiary)]/60" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--t-primary)]/60 to-[var(--t-secondary)]/60" />
                 <span className="hidden sm:inline text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
                   {userLabel ?? "Cuenta"}
                 </span>

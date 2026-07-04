@@ -19,7 +19,7 @@ export function TestimonialCard({ quote, name, role }: TestimonialCardProps) {
       {/* Quotation mark */}
       <svg
         aria-hidden="true"
-        className="mb-5 h-7 w-7 text-[#3D6BFF]/50 flex-shrink-0"
+        className="mb-5 h-7 w-7 text-[#4A7BA7]/50 flex-shrink-0"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -36,7 +36,7 @@ export function TestimonialCard({ quote, name, role }: TestimonialCardProps) {
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
           style={{
             background:
-              "linear-gradient(135deg, #3D6BFF 0%, #2DBFB0 100%)",
+              "linear-gradient(135deg, #4A7BA7 0%, #4D9B8F 100%)",
           }}
         >
           <span className="text-[11px] font-bold tracking-wide text-white">
@@ -47,7 +47,7 @@ export function TestimonialCard({ quote, name, role }: TestimonialCardProps) {
           <p className="truncate text-sm font-semibold text-[#F5F5F5]">
             {name}
           </p>
-          <span className="mt-0.5 inline-block rounded-full bg-[#3D6BFF]/12 px-2.5 py-[3px] text-[11px] font-medium text-[#3D6BFF]">
+          <span className="mt-0.5 inline-block rounded-full bg-[#4A7BA7]/12 px-2.5 py-[3px] text-[11px] font-medium text-[#4A7BA7]">
             {role}
           </span>
         </div>

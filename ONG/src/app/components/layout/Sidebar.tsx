@@ -307,7 +307,7 @@ export function Sidebar({
             onToggleDesktop();
           }}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-150 ease-out hover:bg-[rgba(61,107,255,0.16)]",
+            "flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-150 ease-out hover:bg-[var(--t-hover)]",
             !showExpandedMode && "mx-auto"
           )}
           style={{ color: "var(--t-text-tertiary)" }}
@@ -327,9 +327,10 @@ export function Sidebar({
           to="/landing"
           className={cn(
             "flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ease-out",
-            "text-[#a9c2ff]/80 hover:bg-[rgba(61,107,255,0.14)] hover:text-[#e2ebff]",
+            "hover:bg-[var(--t-hover)] hover:text-[var(--t-primary)]",
             !showExpandedMode && "justify-center"
           )}
+          style={{ color: "var(--t-text-secondary)" }}
           onClick={onCloseMobile}
           title={!showExpandedMode ? "Pagina publica" : undefined}
         >
@@ -375,14 +376,14 @@ export function Sidebar({
                 }}
                 onKeyDown={(event) => handleCategoryKeyDown(event, category, isOpen)}
                 className={cn(
-                  "group relative flex w-full items-center gap-2.5 rounded-xl px-2.5 py-[8px] text-left transition-all duration-150 ease-out",
+                  "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-[8px] text-left transition-all duration-150 ease-out",
                   !showExpandedMode && "justify-center"
                 )}
                 style={{
-                  color: hasCurrent ? "#EAF0FF" : "var(--t-text-secondary)",
-                  background: hasCurrent ? "rgba(0,46,254,0.28)" : "transparent",
+                  color: hasCurrent ? "var(--t-primary)" : "var(--t-text-secondary)",
+                  background: hasCurrent ? "var(--t-primary-soft)" : "transparent",
                   boxShadow: hasCurrent
-                    ? "inset 0 0 0 1px rgba(61,107,255,0.45)"
+                    ? "inset 0 0 0 1px rgba(74,123,167,0.35)"
                     : "inset 0 0 0 1px transparent",
                 }}
                 title={!showExpandedMode ? category.label : undefined}
@@ -390,14 +391,14 @@ export function Sidebar({
                 aria-controls={showExpandedMode ? `${category.id}-submenu` : undefined}
               >
                 {hasCurrent && !showExpandedMode && (
-                  <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
+                  <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[var(--t-primary)]" />
                 )}
 
-                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[#EAF0FF]" />
+                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[var(--t-primary)]" />
 
                 {showExpandedMode && (
                   <>
-                    <span className="flex-1 text-[13px] group-hover:text-[#EAF0FF]">{category.label}</span>
+                    <span className="flex-1 text-[13px] group-hover:text-[var(--t-primary)]">{category.label}</span>
                     <motion.div
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={SNAPPY_MOTION}
@@ -430,14 +431,14 @@ export function Sidebar({
                               {isHighlighted && (
                                 <motion.span
                                   layoutId={`submenu-highlight-${category.id}`}
-                                  className="pointer-events-none absolute inset-0 rounded-lg"
+                                  className="pointer-events-none absolute inset-0 rounded-md"
                                   style={{
                                     background: isActive
-                                      ? "rgba(61,107,255,0.26)"
-                                      : "rgba(61,107,255,0.14)",
+                                      ? "var(--t-primary-soft)"
+                                      : "var(--t-hover)",
                                     boxShadow: isActive
-                                      ? "inset 0 0 0 1px rgba(61,107,255,0.48)"
-                                      : "inset 0 0 0 1px rgba(61,107,255,0.24)",
+                                      ? "inset 0 0 0 1px rgba(74,123,167,0.35)"
+                                      : "inset 0 0 0 1px rgba(74,123,167,0.14)",
                                   }}
                                   transition={SNAPPY_MOTION}
                                 />
@@ -448,9 +449,9 @@ export function Sidebar({
                                   itemLinkRefs.current[item.path] = node;
                                 }}
                                 to={item.path}
-                                className="relative z-10 flex items-center gap-2.5 rounded-lg px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[#EAF0FF]"
+                                className="relative z-10 flex items-center gap-2.5 rounded-md px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[var(--t-primary)]"
                                 style={{
-                                  color: isActive ? "#EAF0FF" : "var(--t-text-secondary)",
+                                  color: isActive ? "var(--t-primary)" : "var(--t-text-secondary)",
                                 }}
                                 aria-current={isActive ? "page" : undefined}
                                 onKeyDown={(event) => handleSubItemKeyDown(event, category, itemIndex)}
@@ -472,7 +473,7 @@ export function Sidebar({
                                 onClick={onCloseMobile}
                               >
                                 {isActive && (
-                                  <span className="absolute -left-[11px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
+                                  <span className="absolute -left-[11px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[var(--t-primary)]" />
                                 )}
                                 <item.icon className="h-[13px] w-[13px] shrink-0 opacity-70" />
                                 <span>{item.label}</span>

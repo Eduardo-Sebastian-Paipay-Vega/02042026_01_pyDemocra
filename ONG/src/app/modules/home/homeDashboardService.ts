@@ -684,7 +684,7 @@ export async function fetchTodayTimeline(limit = 6): Promise<DashboardTimelineIt
   if (activityError) throw new Error(toFriendlyError(activityError, "No se pudo cargar la agenda de hoy."));
 
   const dotColorByStatus: Record<DashboardActivityRow["status"], string> = {
-    scheduled: "bg-[#3D6BFF]",
+    scheduled: "bg-[#4A7BA7]",
     "in-progress": "bg-amber-400",
     completed: "bg-emerald-400",
     cancelled: "bg-red-400",
