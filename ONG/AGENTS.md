@@ -14,8 +14,8 @@ CRITICAL FOR CODEX AGENTS:
 - Do not start implementation if key decisions are still marked as `TODO`.
 
 ## Metadata
-- Project: `SistemaVolV2.0`
-- Repository root: `d:\PROYECTO\SistemaVolV2.0`
+- Project: `Democra` (this module was originally developed as `SistemaVolV2.0` and later integrated here)
+- Repository root: `d:\PROYECTO\Democra(git)\ONG`
 - Primary stack (current): `Vite + React + TypeScript + Supabase`
 - Last updated by: `Codex`
 - Last updated date: `2026-03-26`
