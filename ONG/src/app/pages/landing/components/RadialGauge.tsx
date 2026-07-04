@@ -1,7 +1,7 @@
 /**
  * RadialGauge — segmented donut / radial ring with gradient fill.
  * Uses inline SVG arc segments. Gradient follows brand:
- * #DB7052 → #7545E2 → #551BB3 mapped to fill percentage.
+ * #3D6BFF → #2DBFB0 mapped to fill percentage.
  */
 interface RadialGaugeProps {
   percentage: number;
@@ -9,19 +9,11 @@ interface RadialGaugeProps {
   size?: number;
 }
 
+// Linear interpolation between the brand primary (#3D6BFF) and tertiary (#2DBFB0)
 function gradientColor(t: number): string {
-  let r: number, g: number, b: number;
-  if (t < 0.55) {
-    const p = t / 0.55;
-    r = Math.round(219 + (117 - 219) * p);
-    g = Math.round(112 + (69 - 112) * p);
-    b = Math.round(82 + (226 - 82) * p);
-  } else {
-    const p = (t - 0.55) / 0.45;
-    r = Math.round(117 + (85 - 117) * p);
-    g = Math.round(69 + (27 - 69) * p);
-    b = Math.round(226 + (179 - 226) * p);
-  }
+  const r = Math.round(61 + (45 - 61) * t);
+  const g = Math.round(107 + (191 - 107) * t);
+  const b = Math.round(255 + (176 - 255) * t);
   return `rgb(${r},${g},${b})`;
 }
 
@@ -85,7 +77,7 @@ export function RadialGauge({
           width: size * 0.6,
           height: size * 0.6,
           background:
-            "linear-gradient(135deg, #DB7052 0%, #7545E2 55%, #551BB3 100%)",
+            "linear-gradient(135deg, #3D6BFF 0%, #2DBFB0 100%)",
         }}
       />
 

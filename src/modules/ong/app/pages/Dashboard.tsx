@@ -1108,7 +1108,7 @@ export function Dashboard() {
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
           <div className="mb-3 flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-[#7545E2]/70" />
+            <Calendar className="h-4 w-4 text-[var(--t-primary)]/70" />
             <span
               className="text-[11px] uppercase tracking-[0.1em]"
               style={{ color: "var(--t-text-dim)" }}
@@ -1252,7 +1252,7 @@ export function Dashboard() {
                     layoutId="tab-indicator"
                     className="absolute bottom-0 left-0 right-0 h-[1px]"
                     style={{
-                      background: "linear-gradient(90deg, transparent, #7545E2, transparent)",
+                      background: "linear-gradient(90deg, transparent, #3D6BFF, transparent)",
                     }}
                     transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   />

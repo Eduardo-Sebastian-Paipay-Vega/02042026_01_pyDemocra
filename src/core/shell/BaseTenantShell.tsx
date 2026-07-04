@@ -190,21 +190,21 @@ export function BaseTenantShell({
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden transition-opacity duration-300">
         <div
           className="absolute -left-[220px] -top-[280px] h-[560px] w-[560px] rounded-full blur-[200px]"
-          style={{ background: "rgba(117,69,226,var(--t-glow-purple))" }}
+          style={{ background: "rgba(61,107,255,0.028)" }}
         />
         <div
           className="absolute -right-[180px] top-[16%] h-[420px] w-[420px] rounded-full blur-[180px]"
-          style={{ background: "rgba(219,112,82,var(--t-glow-orange))" }}
+          style={{ background: "rgba(45,191,176,0.02)" }}
         />
         <div
           className="absolute bottom-[-220px] left-[52%] h-[320px] w-[320px] -translate-x-1/2 rounded-full blur-[160px]"
-          style={{ background: "rgba(85,27,179,var(--t-glow-purple))" }}
+          style={{ background: "rgba(0,46,254,0.028)" }}
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(6, 6, 8, 0.12) 0%, rgba(6, 6, 8, 0) 22%, rgba(6, 6, 8, 0.18) 100%)",
+              "linear-gradient(180deg, rgba(16, 14, 12, 0.12) 0%, rgba(16, 14, 12, 0) 22%, rgba(16, 14, 12, 0.18) 100%)",
           }}
         />
       </div>

@@ -24,7 +24,7 @@ export function GhostButton({
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full transition-all duration-200",
         "hover:bg-[var(--t-hover)]",
-        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7545E2]/50",
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--t-primary)]/50",
         "active:bg-[var(--t-active)]",
         "disabled:opacity-40 disabled:pointer-events-none",
         sizeClasses[size],

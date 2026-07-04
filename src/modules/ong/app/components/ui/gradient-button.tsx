@@ -23,10 +23,10 @@ export function GradientButton({
     <button
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full font-medium text-white transition-all duration-200",
-        "bg-gradient-to-r from-[#DB7052] via-[#7545E2] to-[#551BB3]",
-        "hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(117,69,226,0.35)]",
+        "bg-gradient-to-r from-[var(--t-primary)] to-[var(--t-tertiary)]",
+        "hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(0,46,254,0.30)]",
         "active:translate-y-0 active:shadow-none",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7545E2]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--t-bg,#070707)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--t-primary)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--t-bg,#100E0C)]",
         "disabled:opacity-50 disabled:pointer-events-none",
         sizeClasses[size],
         className

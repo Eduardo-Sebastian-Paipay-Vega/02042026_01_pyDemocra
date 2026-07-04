@@ -36,7 +36,7 @@ export function FilterBar({
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="ong-field-control h-10 w-full rounded-2xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[#7545E2]/30"
+            className="ong-field-control h-10 w-full rounded-2xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[var(--t-primary)]/30"
             style={{
               border: "1px solid var(--t-border-strong)",
               background: "var(--t-input-bg)",
@@ -52,7 +52,7 @@ export function FilterBar({
                 className={cn(
                   "inline-flex h-9 items-center rounded-full border px-3.5 text-[12px] font-medium transition-colors",
                   filter.active
-                    ? "border-[#7545E2]/35 bg-[#7545E2]/16 text-[#D7C7FF]"
+                    ? "border-[var(--t-primary)]/35 bg-[var(--t-primary)]/16 text-[#D7E2FF]"
                     : ""
                 )}
                 style={!filter.active ? {

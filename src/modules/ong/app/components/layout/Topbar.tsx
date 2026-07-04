@@ -173,7 +173,7 @@ export function Topbar({
                   >
                     <span className={cn(
                       "h-2 w-2 rounded-full",
-                      i === "suave" ? "bg-[#7545E2]/30" : i === "normal" ? "bg-[#7545E2]/60" : "bg-[#7545E2]"
+                      i === "suave" ? "bg-[var(--t-primary)]/30" : i === "normal" ? "bg-[var(--t-primary)]/60" : "bg-[var(--t-primary)]"
                     )} />
                     {intensityLabels[i]}
                   </button>
@@ -202,7 +202,7 @@ export function Topbar({
               >
                 <Bell className="h-4 w-4" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[#DB7052]" />
+                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--t-primary)]" />
                 )}
                 <span className="sr-only">Notificaciones</span>
               </button>
@@ -299,7 +299,7 @@ export function Topbar({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex h-8 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-[var(--t-hover)]">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[#7545E2]/60 to-[#551BB3]/60" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--t-primary)]/60 to-[var(--t-tertiary)]/60" />
                 <span className="hidden sm:inline text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
                   {userLabel ?? "Cuenta"}
                 </span>

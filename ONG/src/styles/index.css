@@ -20,6 +20,14 @@ body {
   color-scheme: inherit;
 }
 
+/* Familia monoespaciada para datos técnicos: códigos, identificadores,
+   montos alineados (ver LOOK_AND_FEEL_ONG.md §6.1). No usar para texto
+   general. */
+.ong-mono {
+  font-family: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 .ong-field-control::placeholder {
   color: var(--t-placeholder, var(--t-text-tertiary, rgba(148, 163, 184, 0.72)));
   opacity: 1;

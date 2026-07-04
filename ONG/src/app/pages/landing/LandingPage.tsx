@@ -71,9 +71,9 @@ export function LandingPage() {
     >
       {/* ── Ambient glow blobs ── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -left-[15%] -top-[20%] h-[700px] w-[700px] rounded-full bg-[#DB7052] opacity-[0.05] blur-[180px]" />
-        <div className="absolute right-[-12%] top-[25%] h-[600px] w-[600px] rounded-full bg-[#7545E2] opacity-[0.06] blur-[180px]" />
-        <div className="absolute bottom-[-10%] left-[25%] h-[500px] w-[500px] rounded-full bg-[#551BB3] opacity-[0.04] blur-[180px]" />
+        <div className="absolute -left-[15%] -top-[20%] h-[700px] w-[700px] rounded-full bg-[#3D6BFF] opacity-[0.05] blur-[180px]" />
+        <div className="absolute right-[-12%] top-[25%] h-[600px] w-[600px] rounded-full bg-[#2DBFB0] opacity-[0.06] blur-[180px]" />
+        <div className="absolute bottom-[-10%] left-[25%] h-[500px] w-[500px] rounded-full bg-[#002EFE] opacity-[0.04] blur-[180px]" />
       </div>
 
       {/* ══════════════════════════════════════════
@@ -167,7 +167,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           {/* Small badge */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-[#121212]/60 px-4 py-1.5 backdrop-blur-sm">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#7545E2] animate-pulse" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#3D6BFF] animate-pulse" />
             <span className="text-[12px] font-medium text-[#A7A7A7]">
               Now in open beta
             </span>
@@ -209,7 +209,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section heading */}
           <div className="mb-14 text-center">
-            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#7545E2]">
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
               User research
             </p>
             <h2
@@ -251,7 +251,7 @@ export function LandingPage() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             {/* ── User Goals ── */}
             <GlassCard className="p-8 md:p-10">
-              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#7545E2]">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
                 Insights
               </p>
               <h3
@@ -269,7 +269,7 @@ export function LandingPage() {
                       className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl"
                       style={{
                         background:
-                          "linear-gradient(135deg, #DB7052 0%, #7545E2 55%, #551BB3 100%)",
+                          "linear-gradient(135deg, #3D6BFF 0%, #2DBFB0 100%)",
                       }}
                     >
                       <svg
@@ -297,7 +297,7 @@ export function LandingPage() {
 
             {/* ── Motivations ── */}
             <GlassCard className="flex flex-col items-center justify-center p-8 md:p-10">
-              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#7545E2]">
+              <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
                 Insights
               </p>
               <h3
@@ -323,7 +323,7 @@ export function LandingPage() {
       <section className="relative z-10 py-14 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14 text-center">
-            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#7545E2]">
+            <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
               Testimonials
             </p>
             <h2
@@ -353,7 +353,7 @@ export function LandingPage() {
               className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[300px] w-[500px] opacity-[0.08] blur-[100px]"
               style={{
                 background:
-                  "linear-gradient(180deg, #7545E2 0%, #DB7052 100%)",
+                  "linear-gradient(180deg, #3D6BFF 0%, #2DBFB0 100%)",
               }}
               aria-hidden="true"
             />

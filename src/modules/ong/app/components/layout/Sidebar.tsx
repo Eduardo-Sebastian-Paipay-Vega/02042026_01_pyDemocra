@@ -307,7 +307,7 @@ export function Sidebar({
             onToggleDesktop();
           }}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-150 ease-out hover:bg-[rgba(117,69,226,0.16)]",
+            "flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-150 ease-out hover:bg-[rgba(61,107,255,0.16)]",
             !showExpandedMode && "mx-auto"
           )}
           style={{ color: "var(--t-text-tertiary)" }}
@@ -327,7 +327,7 @@ export function Sidebar({
           to="/landing"
           className={cn(
             "flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ease-out",
-            "text-[#b9a7f4]/80 hover:bg-[rgba(117,69,226,0.14)] hover:text-[#e7dbff]",
+            "text-[#a9c2ff]/80 hover:bg-[rgba(61,107,255,0.14)] hover:text-[#e2ebff]",
             !showExpandedMode && "justify-center"
           )}
           onClick={onCloseMobile}
@@ -379,10 +379,10 @@ export function Sidebar({
                   !showExpandedMode && "justify-center"
                 )}
                 style={{
-                  color: hasCurrent ? "#EFE9FF" : "var(--t-text-secondary)",
-                  background: hasCurrent ? "rgba(76,29,149,0.42)" : "transparent",
+                  color: hasCurrent ? "#EAF0FF" : "var(--t-text-secondary)",
+                  background: hasCurrent ? "rgba(0,46,254,0.28)" : "transparent",
                   boxShadow: hasCurrent
-                    ? "inset 0 0 0 1px rgba(117,69,226,0.45)"
+                    ? "inset 0 0 0 1px rgba(61,107,255,0.45)"
                     : "inset 0 0 0 1px transparent",
                 }}
                 title={!showExpandedMode ? category.label : undefined}
@@ -390,14 +390,14 @@ export function Sidebar({
                 aria-controls={showExpandedMode ? `${category.id}-submenu` : undefined}
               >
                 {hasCurrent && !showExpandedMode && (
-                  <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#7545E2]" />
+                  <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
                 )}
 
-                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[#F5EEFF]" />
+                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[#EAF0FF]" />
 
                 {showExpandedMode && (
                   <>
-                    <span className="flex-1 text-[13px] group-hover:text-[#F5EEFF]">{category.label}</span>
+                    <span className="flex-1 text-[13px] group-hover:text-[#EAF0FF]">{category.label}</span>
                     <motion.div
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={SNAPPY_MOTION}
@@ -433,11 +433,11 @@ export function Sidebar({
                                   className="pointer-events-none absolute inset-0 rounded-lg"
                                   style={{
                                     background: isActive
-                                      ? "rgba(117,69,226,0.26)"
-                                      : "rgba(117,69,226,0.14)",
+                                      ? "rgba(61,107,255,0.26)"
+                                      : "rgba(61,107,255,0.14)",
                                     boxShadow: isActive
-                                      ? "inset 0 0 0 1px rgba(117,69,226,0.48)"
-                                      : "inset 0 0 0 1px rgba(117,69,226,0.24)",
+                                      ? "inset 0 0 0 1px rgba(61,107,255,0.48)"
+                                      : "inset 0 0 0 1px rgba(61,107,255,0.24)",
                                   }}
                                   transition={SNAPPY_MOTION}
                                 />
@@ -448,9 +448,9 @@ export function Sidebar({
                                   itemLinkRefs.current[item.path] = node;
                                 }}
                                 to={item.path}
-                                className="relative z-10 flex items-center gap-2.5 rounded-lg px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[#F5EEFF]"
+                                className="relative z-10 flex items-center gap-2.5 rounded-lg px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[#EAF0FF]"
                                 style={{
-                                  color: isActive ? "#EFE9FF" : "var(--t-text-secondary)",
+                                  color: isActive ? "#EAF0FF" : "var(--t-text-secondary)",
                                 }}
                                 aria-current={isActive ? "page" : undefined}
                                 onKeyDown={(event) => handleSubItemKeyDown(event, category, itemIndex)}
@@ -472,7 +472,7 @@ export function Sidebar({
                                 onClick={onCloseMobile}
                               >
                                 {isActive && (
-                                  <span className="absolute -left-[11px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#7545E2]" />
+                                  <span className="absolute -left-[11px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
                                 )}
                                 <item.icon className="h-[13px] w-[13px] shrink-0 opacity-70" />
                                 <span>{item.label}</span>

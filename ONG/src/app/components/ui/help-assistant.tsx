@@ -104,7 +104,7 @@ export function HelpAssistant() {
                     {tip.type === "warning" ? (
                       <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-amber-400/60" />
                     ) : (
-                      <Lightbulb className="h-3 w-3 shrink-0 mt-0.5 text-[#7545E2]/60" />
+                      <Lightbulb className="h-3 w-3 shrink-0 mt-0.5 text-[var(--t-accent-warm)]/80" />
                     )}
                     <span className="text-[12px] leading-relaxed" style={{ color: "var(--t-text-tertiary)" }}>
                       {tip.text}
@@ -147,7 +147,7 @@ export function HelpAssistant() {
           "flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-200",
           open
             ? "bg-[var(--t-active)]"
-            : "hover:shadow-[0_0_20px_rgba(117,69,226,0.15)]"
+            : "hover:shadow-[0_0_20px_rgba(0,46,254,0.15)]"
         )}
         style={{
           background: open ? "var(--t-active)" : "var(--t-elevated)",
