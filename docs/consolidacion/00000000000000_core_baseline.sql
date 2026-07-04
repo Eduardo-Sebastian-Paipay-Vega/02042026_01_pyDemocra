@@ -130,33 +130,51 @@ ALTER TABLE public.cat_permissions ENABLE ROW LEVEL SECURITY;
 
 -- [AUDIT-OK] Patrón confirmado en DATABASE_MASTER_SCRIPT_S1.md §21.1/21.2:
 -- catálogos son de solo lectura para authenticated, sin escritura por API.
+-- NOTA: CREATE POLICY no es idempotente en PostgreSQL (no existe "IF NOT
+-- EXISTS" para políticas). Cada CREATE POLICY va precedida de su propio
+-- DROP POLICY IF EXISTS para que este script pueda re-ejecutarse sin error
+-- ante una corrida previa parcial o completa (sintaxis estándar PG16, a
+-- diferencia de "ADD CONSTRAINT IF NOT EXISTS", que no existe).
+DROP POLICY IF EXISTS p_cat_industry_types_read ON public.cat_industry_types;
 CREATE POLICY p_cat_industry_types_read ON public.cat_industry_types
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS p_cat_industry_types_insert_block ON public.cat_industry_types;
 CREATE POLICY p_cat_industry_types_insert_block ON public.cat_industry_types
   FOR INSERT TO authenticated WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_industry_types_update_block ON public.cat_industry_types;
 CREATE POLICY p_cat_industry_types_update_block ON public.cat_industry_types
   FOR UPDATE TO authenticated USING (false) WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_industry_types_delete_block ON public.cat_industry_types;
 CREATE POLICY p_cat_industry_types_delete_block ON public.cat_industry_types
   FOR DELETE TO authenticated USING (false);
 
+DROP POLICY IF EXISTS p_cat_plan_types_read ON public.cat_plan_types;
 CREATE POLICY p_cat_plan_types_read ON public.cat_plan_types
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS p_cat_plan_types_insert_block ON public.cat_plan_types;
 CREATE POLICY p_cat_plan_types_insert_block ON public.cat_plan_types
   FOR INSERT TO authenticated WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_plan_types_update_block ON public.cat_plan_types;
 CREATE POLICY p_cat_plan_types_update_block ON public.cat_plan_types
   FOR UPDATE TO authenticated USING (false) WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_plan_types_delete_block ON public.cat_plan_types;
 CREATE POLICY p_cat_plan_types_delete_block ON public.cat_plan_types
   FOR DELETE TO authenticated USING (false);
 
+DROP POLICY IF EXISTS p_cat_tenant_statuses_select ON public.cat_tenant_statuses;
 CREATE POLICY p_cat_tenant_statuses_select ON public.cat_tenant_statuses
   FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS p_cat_permissions_read ON public.cat_permissions;
 CREATE POLICY p_cat_permissions_read ON public.cat_permissions
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS p_cat_permissions_insert_block ON public.cat_permissions;
 CREATE POLICY p_cat_permissions_insert_block ON public.cat_permissions
   FOR INSERT TO authenticated WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_permissions_update_block ON public.cat_permissions;
 CREATE POLICY p_cat_permissions_update_block ON public.cat_permissions
   FOR UPDATE TO authenticated USING (false) WITH CHECK (false);
+DROP POLICY IF EXISTS p_cat_permissions_delete_block ON public.cat_permissions;
 CREATE POLICY p_cat_permissions_delete_block ON public.cat_permissions
   FOR DELETE TO authenticated USING (false);
 
@@ -292,6 +310,7 @@ ALTER TABLE public.sedes ENABLE ROW LEVEL SECURITY;
 -- [AUDIT-OK] Patrón confirmado en DATABASE_MASTER_SCRIPT_S1.md §21.6
 -- (`p_sedes_tenant_all`), usa solo fn_current_tenant_id() — sin dependencias
 -- fuera de este baseline.
+DROP POLICY IF EXISTS p_sedes_tenant_all ON public.sedes;
 CREATE POLICY p_sedes_tenant_all ON public.sedes
   FOR ALL TO authenticated
   USING (tenant_id = public.fn_current_tenant_id())
@@ -322,6 +341,7 @@ ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 
 -- [AUDIT-OK] Patrón confirmado en DATABASE_MASTER_SCRIPT_S1.md §21.6
 -- (`p_roles_tenant_all`).
+DROP POLICY IF EXISTS p_roles_tenant_all ON public.roles;
 CREATE POLICY p_roles_tenant_all ON public.roles
   FOR ALL TO authenticated
   USING (tenant_id = public.fn_current_tenant_id())
@@ -354,6 +374,7 @@ ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
 -- política de abajo es una reconstrucción razonable de esa intención, NO una
 -- extracción literal — debe revisarse contra la BD real antes de asumirla
 -- como definitiva.
+DROP POLICY IF EXISTS p_role_permissions_tenant_select ON public.role_permissions;
 CREATE POLICY p_role_permissions_tenant_select ON public.role_permissions
   FOR SELECT TO authenticated
   USING (
@@ -364,6 +385,7 @@ CREATE POLICY p_role_permissions_tenant_select ON public.role_permissions
     )
   );
 
+DROP POLICY IF EXISTS p_role_permissions_tenant_write ON public.role_permissions;
 CREATE POLICY p_role_permissions_tenant_write ON public.role_permissions
   FOR ALL TO authenticated
   USING (
@@ -422,6 +444,7 @@ ALTER TABLE public.user_roles_sedes ENABLE ROW LEVEL SECURITY;
 -- todavía: con RLS habilitada y sin políticas para esos comandos, Postgres
 -- las deniega por defecto (fail-closed), hasta que la capa de permisos se
 -- incorpore en una migración posterior.
+DROP POLICY IF EXISTS p_urs_select ON public.user_roles_sedes;
 CREATE POLICY p_urs_select ON public.user_roles_sedes
   FOR SELECT TO authenticated
   USING (tenant_id = public.fn_current_tenant_id());
