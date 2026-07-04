@@ -81,3 +81,48 @@ select optgroup,
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* ─── Fichas médicas: paleta oscura dedicada ───
+ * Alcance: SOLO el sistema de fichas médicas sensibles (MedicalRecords.tsx
+ * y sus modales en MedicalRecordPanels.tsx), y SOLO cuando el tema activo
+ * es "oscuro" (data-app-theme="oscuro" en <html>, puesto por
+ * ThemeProvider). No afecta modo claro ni ningún otro módulo: las
+ * variables --t-* solo se sobrescriben dentro de .fichas-medicas-theme,
+ * que se aplica exclusivamente a esas pantallas.
+ */
+[data-app-theme="oscuro"] .fichas-medicas-theme {
+  --t-bg: #0a0e27;
+  --t-board: #0a0e27;
+  --t-surface: #1a1f3a;
+  --t-elevated: #1a1f3a;
+  --t-sidebar: #0f1328;
+  --t-topbar: #0a0e27;
+  --t-border: #2a3548;
+  --t-border-strong: #2a3548;
+  --t-text: #ffffff;
+  --t-text-secondary: #b0b8c8;
+  --t-text-tertiary: #7a8294;
+  --t-text-dim: #7a8294;
+  --t-muted: #7a8294;
+  --t-placeholder: rgba(122, 130, 148, 0.6);
+  --t-primary: #4a9fd8;
+  --t-primary-soft: rgba(74, 159, 216, 0.16);
+  --t-secondary: #3d8fc5;
+  --t-secondary-soft: rgba(61, 143, 197, 0.16);
+  --t-info: #4a9fd8;
+  --t-info-soft: rgba(74, 159, 216, 0.16);
+  --t-hover: rgba(61, 143, 197, 0.14);
+  --t-active: rgba(90, 173, 234, 0.22);
+  --t-input-bg: #1a1f3a;
+}
+
+/* StatusDot "info" usa un morado fijo (bg-[#9B7AEA]) que no pertenece a
+   ninguna paleta del proyecto; es un componente compartido usado por
+   muchos módulos, así que no se toca globalmente — se corrige solo
+   dentro del alcance de fichas médicas, en modo oscuro. */
+[data-app-theme="oscuro"] .fichas-medicas-theme .bg-\[\#9B7AEA\] {
+  background-color: #4a9fd8;
+}
+[data-app-theme="oscuro"] .fichas-medicas-theme .text-\[\#9B7AEA\]\/80 {
+  color: #4a9fd8;
+}

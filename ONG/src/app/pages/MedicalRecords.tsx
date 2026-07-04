@@ -246,7 +246,7 @@ export function MedicalRecords() {
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={stagger} initial="hidden" animate="visible" className="fichas-medicas-theme space-y-6">
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Ficha medica sensible"

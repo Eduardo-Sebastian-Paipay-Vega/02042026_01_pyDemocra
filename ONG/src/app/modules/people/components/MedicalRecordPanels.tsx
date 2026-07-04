@@ -66,7 +66,7 @@ export function SensitiveAccessGateModal({
   });
 
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[560px]">
+    <ModalShell open={open} onClose={onClose} width="max-w-[560px]" className="fichas-medicas-theme">
       <PeopleModalHeader
         title="Motivo de acceso sensible"
         description={`Debes justificar el acceso a la ficha ${scope === "beneficiaries" ? "medica" : "sensible"} de ${personName}.`}
@@ -157,7 +157,7 @@ export function SensitiveMedicalFormModal({
   });
 
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[820px]">
+    <ModalShell open={open} onClose={onClose} width="max-w-[820px]" className="fichas-medicas-theme">
       <PeopleModalHeader
         title={detail?.hasRecord ? "Editar ficha sensible" : "Registrar ficha sensible"}
         description="Actualiza los datos clínicos sensibles del voluntario o beneficiario."
@@ -250,7 +250,7 @@ export function SensitiveMedicalDetailModal({
   canWrite: boolean;
 }) {
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[980px]">
+    <ModalShell open={open} onClose={onClose} width="max-w-[980px]" className="fichas-medicas-theme">
       <PeopleModalHeader
         title="Detalle de ficha sensible"
         description="El contenido clinico solo se expone despues de pasar por la validacion de acceso."
