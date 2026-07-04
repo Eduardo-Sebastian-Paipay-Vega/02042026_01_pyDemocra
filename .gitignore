@@ -40,3 +40,9 @@ Desktop.ini
 .vscode/
 *.swp
 *.swo
+
+# Configuración local de Claude Code (personal, no compartida)
+.claude/settings.local.json
+
+# Exportaciones de referencia de diseño (no forman parte de la app)
+Landing Page Design Request/
