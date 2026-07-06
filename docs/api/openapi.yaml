@@ -1,0 +1,446 @@
+openapi: 3.0.3
+info:
+  title: Democra — API interna (server/)
+  version: "1.0.0"
+  description: >
+    Documentación base de la API Express de Democra (server/index.js).
+    Extraída de los routers reales (server/routes/*.js), no inventada.
+    Todos los endpoints requieren un Bearer token de Supabase Auth salvo
+    donde se indique explícitamente lo contrario (terminal-login, validate-ruc).
+    Este archivo es el punto de partida ("estructura base") para mantener la
+    documentación de la API sincronizada con el código — se debe actualizar
+    cada vez que se agregue, cambie o elimine un endpoint en server/routes/.
+
+servers:
+  - url: http://localhost:8787/api
+    description: Desarrollo local (server/index.js, puerto por defecto de config.js)
+
+tags:
+  - name: auth
+    description: Autenticación, evaluación de riesgo, step-up OTP y login por terminal (PIN).
+  - name: audit
+    description: Auditoría forense (resumen asistido por IA) y métricas de seguridad del tenant.
+  - name: iam
+    description: Gestión de roles, permisos y asignaciones usuario-rol-sede.
+  - name: onboarding
+    description: Validación de datos fiscales durante el alta de un tenant.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Supabase JWT
+      description: >
+        Access token de una sesión de Supabase Auth. El backend lo resuelve
+        vía resolveAuthContext() (server/supabase.js) para obtener user + profile.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Formato estándar de error (server/utils/http.js sendError()).
+      properties:
+        error_code:
+          type: string
+          example: "IAM-004"
+        error_type:
+          type: string
+          example: "auth"
+        message:
+          type: string
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        hierarchy_level:
+          type: integer
+
+  responses:
+    Unauthorized:
+      description: Token ausente, inválido o expirado.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ValidationError:
+      description: Body o parámetros inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TenantMismatch:
+      description: El tenant solicitado no coincide con el del perfil autenticado (TEN-003).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/risk-evaluate:
+    post:
+      tags: [auth]
+      summary: Evalúa el motor de riesgo para el usuario/tenant actual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                tipo_evento:
+                  type: string
+                user_agent:
+                  type: string
+                geo_country:
+                  type: string
+      responses:
+        "200":
+          description: Decisión del motor de riesgo (ALLOW / REQUIRE_OTP / BLOCK).
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+
+  /auth/step-up/verify-otp:
+    post:
+      tags: [auth]
+      summary: Verifica un código OTP de un desafío de step-up ya iniciado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge_id, code]
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                challenge_id:
+                  type: string
+                code:
+                  type: string
+                  description: Código OTP de 6 dígitos.
+      responses:
+        "200":
+          description: Sesión step-up creada tras verificar el OTP.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/step-up/resend-otp:
+    post:
+      tags: [auth]
+      summary: Reenvía un código OTP para un desafío de step-up activo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                challenge_id:
+                  type: string
+      responses:
+        "200":
+          description: OTP reenviado.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/terminal-login:
+    post:
+      tags: [auth]
+      summary: Login por PIN en un terminal físico (kiosco), sin sesión Supabase previa
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_id, user_id, pin, terminal_id]
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                user_id:
+                  type: string
+                  format: uuid
+                pin:
+                  type: string
+                terminal_id:
+                  type: string
+                  format: uuid
+                user_agent:
+                  type: string
+      responses:
+        "200":
+          description: Sesión de terminal creada.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "403":
+          description: Terminal inactivo o no encontrado (IAM-005).
+
+  /audit/summary:
+    post:
+      tags: [audit]
+      summary: Genera un resumen forense asistido por IA de un evento de auditoría
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                event_type:
+                  type: string
+                resource_name:
+                  type: string
+                result:
+                  type: string
+                  enum: [success, error]
+                criticality:
+                  type: string
+                  enum: [low, medium, high, critical]
+                payload_before:
+                  type: object
+                  nullable: true
+                payload_after:
+                  type: object
+                  nullable: true
+      responses:
+        "200":
+          description: Resumen generado (sin exponer datos sensibles).
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+
+  /audit/metrics:
+    get:
+      tags: [audit]
+      summary: Métricas de seguridad del tenant de los últimos 7 días
+      description: >
+        Monta también bajo /api/security/metrics (mismo router, dos prefijos
+        — ver server/index.js: app.use("/api/audit", auditRoutes) y
+        app.use("/api/security", auditRoutes)).
+      responses:
+        "200":
+          description: Conteos agregados de auth_events, pagos y sesiones activas.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+
+  /iam/roles:
+    get:
+      tags: [iam]
+      summary: Lista los roles del tenant actual
+      responses:
+        "200":
+          description: Lista de roles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Role"
+    post:
+      tags: [iam]
+      summary: Crea un nuevo rol en el tenant actual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                hierarchy_level:
+                  type: integer
+      responses:
+        "201":
+          description: Rol creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    $ref: "#/components/schemas/Role"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+
+  /iam/roles/{roleId}:
+    put:
+      tags: [iam]
+      summary: Actualiza un rol existente
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Rol actualizado.
+    delete:
+      tags: [iam]
+      summary: Elimina un rol (no del sistema)
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Rol eliminado.
+
+  /iam/roles/{roleId}/permissions:
+    get:
+      tags: [iam]
+      summary: Lista los permisos asignados a un rol
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de permisos del rol.
+    post:
+      tags: [iam]
+      summary: Asigna un permiso a un rol
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permission:
+                  type: string
+      responses:
+        "201":
+          description: Permiso asignado.
+
+  /iam/roles/{roleId}/permissions/{permission}:
+    delete:
+      tags: [iam]
+      summary: Revoca un permiso de un rol
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: permission
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Permiso revocado.
+
+  /iam/user-roles:
+    get:
+      tags: [iam]
+      summary: Lista asignaciones usuario-rol-sede del tenant
+      responses:
+        "200":
+          description: Lista de asignaciones.
+    post:
+      tags: [iam]
+      summary: Asigna un rol (en una sede) a un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                role_id:
+                  type: string
+                  format: uuid
+                sede_id:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: Asignación creada.
+
+  /iam/user-roles/{assignmentId}:
+    delete:
+      tags: [iam]
+      summary: Revoca una asignación usuario-rol-sede
+      parameters:
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Asignación revocada.
+
+  /onboarding/validate-ruc/{ruc}:
+    get:
+      tags: [onboarding]
+      summary: Valida un RUC de 11 dígitos contra el servicio fiscal externo configurado
+      security: []
+      parameters:
+        - name: ruc
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^\\d{11}$"
+      responses:
+        "200":
+          description: Datos fiscales del RUC.
+        "400":
+          description: RUC con formato inválido (TEN-001).
+        "503":
+          description: Servicio de validación fiscal no configurado.

@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Democra API (server/)",
+    "description": "Colección base generada a partir de docs/api/openapi.yaml. Importar en Postman y configurar las variables de entorno base_url y bearer_token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{bearer_token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8787/api" },
+    { "key": "bearer_token", "value": "" },
+    { "key": "tenant_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Risk evaluate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/risk-evaluate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"tipo_evento\": \"LOGIN_ATTEMPT\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Step-up verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/step-up/verify-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"challenge_id\": \"\",\n  \"code\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Step-up resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/step-up/resend-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"challenge_id\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Terminal login (PIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "url": "{{base_url}}/auth/terminal-login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"user_id\": \"\",\n  \"pin\": \"\",\n  \"terminal_id\": \"\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "audit",
+      "item": [
+        {
+          "name": "Forensic summary",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/audit/summary",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"event_type\": \"FORENSIC_SUMMARY\",\n  \"resource_name\": \"audit.manual_summary\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Security metrics",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/audit/metrics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "iam",
+      "item": [
+        {
+          "name": "List roles",
+          "request": { "method": "GET", "url": "{{base_url}}/iam/roles" }
+        },
+        {
+          "name": "Create role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/iam/roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo rol\",\n  \"hierarchy_level\": 100\n}"
+            }
+          }
+        },
+        {
+          "name": "Update role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/iam/roles/:roleId",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Rol actualizado\"\n}" }
+          }
+        },
+        {
+          "name": "Delete role",
+          "request": { "method": "DELETE", "url": "{{base_url}}/iam/roles/:roleId" }
+        },
+        {
+          "name": "List role permissions",
+          "request": { "method": "GET", "url": "{{base_url}}/iam/roles/:roleId/permissions" }
+        },
+        {
+          "name": "Assign permission to role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/iam/roles/:roleId/permissions",
+            "body": { "mode": "raw", "raw": "{\n  \"permission\": \"settings.roles.read\"\n}" }
+          }
+        },
+        {
+          "name": "Revoke permission from role",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/iam/roles/:roleId/permissions/:permission"
+          }
+        },
+        {
+          "name": "List user-roles",
+          "request": { "method": "GET", "url": "{{base_url}}/iam/user-roles" }
+        },
+        {
+          "name": "Assign user role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/iam/user-roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"\",\n  \"role_id\": \"\",\n  \"sede_id\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Revoke user-role assignment",
+          "request": { "method": "DELETE", "url": "{{base_url}}/iam/user-roles/:assignmentId" }
+        }
+      ]
+    },
+    {
+      "name": "onboarding",
+      "item": [
+        {
+          "name": "Validate RUC",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": "{{base_url}}/onboarding/validate-ruc/:ruc"
+          }
+        }
+      ]
+    }
+  ]
+}
