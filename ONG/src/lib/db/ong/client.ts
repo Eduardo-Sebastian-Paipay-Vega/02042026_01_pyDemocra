@@ -5,11 +5,25 @@ import type { AppDatabase } from "./app-database";
 const ONG_MODULE_PREFIX = "ONG_DB";
 const ongModule = createSupabaseModuleManager(ONG_MODULE_PREFIX);
 
+// Debe coincidir exactamente con AUTH_STORAGE_KEY en src/services/supabase.js
+// (raíz) — mismo origen + mismo storageKey es lo que permite que ONG detecte
+// la sesión iniciada en la raíz sin re-autenticar ni leer tokens de la URL.
+const SHARED_AUTH_STORAGE_KEY = "sb-democra-auth-token";
+
 /**
  * Client with ANON key.
  * Safe for frontend usage and expected to work under RLS policies.
  */
-export const ongClient = ongModule.getPublicClient<AppDatabase>();
+export const ongClient = ongModule.getPublicClient<AppDatabase>({
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    // No hay flujo OAuth/magic-link propio en ONG: no debe confiar en tokens
+    // que lleguen por el hash de la URL (cierra el relay cross-origin viejo).
+    detectSessionInUrl: false,
+    storageKey: SHARED_AUTH_STORAGE_KEY,
+  },
+});
 
 function createServerOnlyClientGuard<TClient>(clientName: string): TClient {
   return new Proxy({} as TClient, {

@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { createSupabaseClient } from "../services/supabase";
 
-// Target ONG app — configurable via VITE_ONG_APP_URL in root .env
-const ONG_APP_URL = (import.meta.env.VITE_ONG_APP_URL as string) || "http://localhost:5174";
-
 export function LoginGateway() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -31,20 +28,10 @@ export function LoginGateway() {
       return;
     }
 
-    // Cross-port token relay: pass Supabase session to ONG app (port 5174) via URL hash.
-    // The ONG Supabase client has detectSessionInUrl: true (default), so it picks up the
-    // tokens automatically and fires SIGNED_IN without any extra code on the ONG side.
-    const { access_token, refresh_token, expires_in } = data.session;
-    const callbackUrl = new URL("/auth/callback", ONG_APP_URL);
-    callbackUrl.hash = [
-      `access_token=${encodeURIComponent(access_token)}`,
-      `refresh_token=${encodeURIComponent(refresh_token)}`,
-      `expires_in=${expires_in}`,
-      "token_type=bearer",
-      "type=magiclink",
-    ].join("&");
-
-    window.location.replace(callbackUrl.toString());
+    // Same-origin MPA: la sesión ya quedó en localStorage bajo AUTH_STORAGE_KEY
+    // (compartido con el cliente Supabase de ONG). Una navegación normal basta
+    // para que /ong la recoja al montar — sin tokens en la URL.
+    window.location.assign("/ong/");
   }
 
   return (

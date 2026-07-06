@@ -47,7 +47,6 @@ function loadEnv(filePath) {
 }
 
 const rootEnv = loadEnv(resolve(ROOT, ".env"));
-const ongEnv  = loadEnv(resolve(ROOT, "ONG", ".env"));
 
 // ── Validation ────────────────────────────────────────────────────────────────
 const issues = [];
@@ -63,50 +62,44 @@ if (!rootEnv["VITE_SUPABASE_URL"]) {
   issues.push("ROOT .env: VITE_SUPABASE_URL is missing");
 }
 
-// 3. ONG Supabase vars
-if (!ongEnv["VITE_ONG_DB_SUPABASE_URL"] && !ongEnv["ONG_DB_SUPABASE_URL"]) {
-  issues.push("ONG .env: ONG_DB_SUPABASE_URL / VITE_ONG_DB_SUPABASE_URL both missing");
+// 3. ONG Supabase vars (mismo .env raíz — ONG ya no tiene instancia de Vite propia)
+if (!rootEnv["VITE_ONG_DB_SUPABASE_URL"] && !rootEnv["ONG_DB_SUPABASE_URL"]) {
+  issues.push("ROOT .env: ONG_DB_SUPABASE_URL / VITE_ONG_DB_SUPABASE_URL both missing");
 }
 
-// 4. Check root vite config has strictPort
+// 4. Check root vite config has strictPort (única instancia, sirve / y /ong)
 const rootViteConfig = existsSync(resolve(ROOT, "vite.config.js"))
   ? readFileSync(resolve(ROOT, "vite.config.js"), "utf-8")
   : "";
-const ongViteConfig = existsSync(resolve(ROOT, "ONG", "vite.config.ts"))
-  ? readFileSync(resolve(ROOT, "ONG", "vite.config.ts"), "utf-8")
-  : "";
 
 const rootHasStrictPort = rootViteConfig.includes("strictPort: true");
-const ongHasStrictPort  = ongViteConfig.includes("strictPort: true");
 
 if (!rootHasStrictPort) issues.push("ROOT vite.config.js: strictPort: true is missing");
-if (!ongHasStrictPort)  issues.push("ONG vite.config.ts: strictPort: true is missing");
 
 // ── Print banner ──────────────────────────────────────────────────────────────
 console.log("");
 console.log(`${C.bold}${C.bgBlue}                                              ${C.reset}`);
-console.log(`${C.bold}${C.bgBlue}   Democra · Dev Environment                  ${C.reset}`);
+console.log(`${C.bold}${C.bgBlue}   Democra · Dev Environment (MPA)            ${C.reset}`);
 console.log(`${C.bold}${C.bgBlue}                                              ${C.reset}`);
 console.log("");
 
 console.log(`${C.bold}Services:${C.reset}`);
-console.log(`  ${C.blue}◆${C.reset}  API  (Express)   ${C.cyan}http://localhost:8787${C.reset}  ${C.dim}server/index.js${C.reset}`);
-console.log(`  ${C.yellow}◆${C.reset}  ADMIN (Legacy)   ${C.cyan}http://localhost:5173${C.reset}  ${C.dim}vite.config.js${C.reset}`);
-console.log(`  ${C.green}◆${C.reset}  ONG   (React)    ${C.cyan}http://localhost:5174${C.reset}  ${C.dim}ONG/vite.config.ts${C.reset}`);
-console.log(`  ${C.green}◆${C.reset}  ONG Login        ${C.cyan}http://localhost:5174/login${C.reset}`);
+console.log(`  ${C.blue}◆${C.reset}  API   (Express)  ${C.cyan}http://localhost:8787${C.reset}  ${C.dim}server/index.js${C.reset}`);
+console.log(`  ${C.green}◆${C.reset}  WEB   (Vite MPA) ${C.cyan}http://localhost:5173${C.reset}  ${C.dim}vite.config.js${C.reset}`);
+console.log(`  ${C.green}◆${C.reset}    └─ /            ${C.dim}landing / admin — index.html${C.reset}`);
+console.log(`  ${C.green}◆${C.reset}    └─ /ong         ${C.dim}módulo ONG — ONG/index.html${C.reset}`);
 console.log("");
 
 console.log(`${C.bold}Supabase:${C.reset}`);
-const supaUrl = ongEnv["VITE_ONG_DB_SUPABASE_URL"] ?? ongEnv["ONG_DB_SUPABASE_URL"] ?? "(not found)";
+const supaUrl = rootEnv["VITE_ONG_DB_SUPABASE_URL"] ?? rootEnv["ONG_DB_SUPABASE_URL"] ?? "(not found)";
 const shortUrl = supaUrl.replace("https://", "").split(".")[0];
 console.log(`  ${C.dim}Project ref:${C.reset} ${shortUrl}`);
 console.log("");
 
 console.log(`${C.bold}Config checks:${C.reset}`);
 console.log(rootHasStrictPort ? ok("ROOT  strictPort: true") : warn("ROOT  strictPort missing — port may float"));
-console.log(ongHasStrictPort  ? ok("ONG   strictPort: true") : warn("ONG   strictPort missing — port may float"));
 console.log(rootEnv["VITE_SUPABASE_URL"] ? ok("ROOT  VITE_SUPABASE_URL set") : warn("ROOT  VITE_SUPABASE_URL missing"));
-console.log((ongEnv["VITE_ONG_DB_SUPABASE_URL"] || ongEnv["ONG_DB_SUPABASE_URL"]) ? ok("ONG   Supabase URL set") : warn("ONG   Supabase URL missing"));
+console.log((rootEnv["VITE_ONG_DB_SUPABASE_URL"] || rootEnv["ONG_DB_SUPABASE_URL"]) ? ok("ONG   Supabase URL set") : warn("ONG   Supabase URL missing"));
 console.log(apiPort === "8787" ? ok(`API_PORT = ${apiPort}`) : warn(`API_PORT = ${apiPort} (expected 8787)`));
 console.log("");
 

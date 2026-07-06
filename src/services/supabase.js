@@ -1,5 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
+// Compartido con ONG (ver ONG/src/lib/db/ong/client.ts) para que ambos módulos
+// lean la misma sesión de localStorage bajo el mismo origen (democra.pro).
+// Si cambia aquí, debe cambiar también ahí, o la sesión deja de propagarse.
+export const AUTH_STORAGE_KEY = "sb-democra-auth-token";
+
 let browserClient = null;
 
 export const getSupabaseConfig = () => ({
@@ -25,7 +30,10 @@ export const createSupabaseClient = () => {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
+        // No usamos OAuth/magic-link propios: no hace falta parsear tokens
+        // desde el hash de la URL, y desactivarlo cierra esa superficie.
+        detectSessionInUrl: false,
+        storageKey: AUTH_STORAGE_KEY,
       },
     });
   }

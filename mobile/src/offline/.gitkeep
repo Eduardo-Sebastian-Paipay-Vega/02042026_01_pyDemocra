@@ -1,0 +1,1 @@
+# offline/ — Outbox (cola de operaciones idempotente), motor de sync, resolución de conflictos, estado de sync. Ver docs/mobile/OFFLINE_FIRST.md. Placeholder (Fase 0).

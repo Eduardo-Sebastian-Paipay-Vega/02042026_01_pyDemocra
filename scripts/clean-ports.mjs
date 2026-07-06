@@ -1,6 +1,6 @@
 /**
  * clean-ports.mjs
- * Frees ports 8787, 5173, 5174 before launching dev servers.
+ * Frees ports 8787, 5173 before launching dev servers.
  * No dependencies — usa Node.js built-ins + comandos nativos del SO.
  * Nunca lanza error: si un puerto ya está libre, simplemente continúa.
  *
@@ -10,7 +10,7 @@
 import { execSync } from "node:child_process";
 import { platform } from "node:os";
 
-const PORTS   = [8787, 5173, 5174];
+const PORTS   = [8787, 5173];
 const IS_WIN  = platform() === "win32";
 
 // ── ANSI helpers ──────────────────────────────────────────────────────────────

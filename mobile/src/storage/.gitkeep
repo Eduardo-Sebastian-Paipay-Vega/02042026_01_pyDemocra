@@ -1,0 +1,1 @@
+# storage/ — Wrappers: SecureStore (tokens), MMKV/AsyncStorage (KV), file cache (expo-file-system/expo-image). Placeholder (Fase 0).

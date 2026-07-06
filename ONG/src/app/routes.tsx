@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
 import { Login } from "./pages/Login";
-import { AuthCallback } from "./pages/AuthCallback";
 import { AuditLog } from "./pages/AuditLog";
 import { AdmissionDocuments } from "./pages/AdmissionDocuments";
 import { AdmissionInterviews } from "./pages/AdmissionInterviews";
@@ -47,15 +46,10 @@ import {
 import { TenantBootstrapLoadingScreen, TenantInlineAccessDenied, TenantStatusScreen } from "./tenant/screens";
 import type { TenantRouteId } from "./tenant/navigation";
 
-function resolveRouterBasename() {
-  if (typeof window === "undefined") {
-    return "/";
-  }
-
-  return window.location.pathname === "/ONG" || window.location.pathname.startsWith("/ONG/")
-    ? "/ONG"
-    : "/";
-}
+// URL pública fija: /ong (minúsculas). Debe coincidir con el mapeo de
+// vite.config.js (dev) y vercel.json (prod) — el folder físico "ONG/"
+// (mayúsculas) es solo una ruta de archivo, no afecta la URL del navegador.
+const ROUTER_BASENAME = "/ong";
 
 function RootEntryRedirect() {
   const { loading, status, message, context, resolveInitialPath } = useTenantBootstrap();
@@ -223,12 +217,6 @@ export const router = createBrowserRouter(
       Component: Login,
     },
     {
-      // Receives cross-port token relay from localhost:5173/login
-      // Supabase picks up #access_token from the URL hash automatically (detectSessionInUrl: true)
-      path: "/auth/callback",
-      Component: AuthCallback,
-    },
-    {
       path: "/landing",
       Component: LandingPage,
     },
@@ -381,6 +369,6 @@ export const router = createBrowserRouter(
     },
   ],
   {
-    basename: resolveRouterBasename(),
+    basename: ROUTER_BASENAME,
   }
 );

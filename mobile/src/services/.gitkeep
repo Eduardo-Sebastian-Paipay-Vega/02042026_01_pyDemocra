@@ -1,0 +1,1 @@
+# services/ — Reexport/adaptadores de la capa de negocio compartida (packages/core). Inyecta cliente Supabase RN + adaptador de Storage nativo. Placeholder (Fase 0).

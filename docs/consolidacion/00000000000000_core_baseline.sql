@@ -764,3 +764,26 @@ ON CONFLICT (id) DO NOTHING;
 -- Próximo paso de consolidación sugerido: decidir si estas dependencias se
 -- traen en un "01..._core_extensions.sql" antes de que GYMsos empiece a
 -- escribir sobre este baseline.
+
+
+
+-- =============================================================================
+-- ACOPLAMIENTO DE AUDITORÍA CENTRALIZADA PARA EL SISTEMA 2 (GIMNASIO)
+-- =============================================================================
+
+-- 1. Auditoría para la tabla de Gimnasios
+CREATE TRIGGER tr_audit_gym_gimnasios
+  AFTER INSERT OR UPDATE OR DELETE ON gym.gimnasios
+  FOR EACH ROW EXECUTE FUNCTION public.fn_trigger_audit_universal();
+
+-- 2. Auditoría para la tabla de Usuarios (Gimnasio)
+CREATE TRIGGER tr_audit_gym_usuarios
+  AFTER INSERT OR UPDATE OR DELETE ON gym.usuarios
+  FOR EACH ROW EXECUTE FUNCTION public.fn_trigger_audit_universal();
+
+-- 3. Auditoría para la tabla de Membresías (Opcional, si ya existe en tu esquema)
+-- CREATE TRIGGER tr_audit_gym_membresias
+--   AFTER INSERT OR UPDATE OR DELETE ON gym.membresias
+--   FOR EACH ROW EXECUTE FUNCTION public.fn_trigger_audit_universal();
+
+COMMENT ON TRIGGER tr_audit_gym_usuarios ON gym.usuarios IS 'Envía logs de auditoría mutada en la vertical gym al motor universal del Core public.';
