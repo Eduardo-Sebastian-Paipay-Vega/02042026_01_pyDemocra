@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useState, type ReactNode } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { GlassCard } from "./components/GlassCard";
 import { GradientText } from "./components/GradientText";
 import { PillButton } from "./components/PillButton";
 import { supabase } from "../../../supabaseClient";
 import { validateAccessCode, completeAccessOnboarding } from "../../services/ace/ace.service";
 
-type Step = "code" | "checking" | "form" | "submitting" | "done" | "error";
+type Step = "code" | "checking" | "form" | "submitting" | "done" | "redirecting" | "error";
 
 const LINK_TYPE_LABEL: Record<string, string> = {
   STAFF_JOIN: "colaborador / staff",
@@ -19,6 +19,7 @@ const inputClass =
   "w-full rounded-xl border border-white/[0.1] bg-[#0c0c0c]/60 px-4 py-2.5 text-[14px] text-[#F5F5F5] placeholder:text-white/30 outline-none focus:border-[#4A7BA7]/60";
 
 export function AccessCodeRedeemPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState<Step>("code");
   const [code, setCode] = useState(searchParams.get("code") ?? "");
@@ -57,6 +58,13 @@ export function AccessCodeRedeemPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (step !== "redirecting") return;
+    // Navegación vía React Router (no window.location.href): evita una
+    // recarga completa de página mientras este componente sigue montado.
+    navigate("/login");
+  }, [step, navigate]);
+
   async function handleSubmit() {
     if (!form.email || !form.password || !form.fullName) {
       setErrorMessage("Completa nombre, correo y contraseña.");
@@ -89,6 +97,91 @@ export function AccessCodeRedeemPage() {
     }
   }
 
+  // Un único bloque de contenido por paso, en vez de varios `{cond && <div>}`
+  // hermanos apuntando al mismo hueco del árbol. Con key={step}, React
+  // desmonta/monta el subárbol completo de forma limpia en cada transición
+  // en vez de intentar reconciliar parcialmente — evita que un nodo inyectado
+  // por el autofill del navegador (ver comentario en los <input> de abajo)
+  // quede "huérfano" a medio camino de un diff parcial.
+  let content: ReactNode;
+
+  if (step === "code" || step === "checking") {
+    content = (
+      <div className="flex flex-col gap-3">
+        <input
+          className={inputClass}
+          placeholder="Código de acceso"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          disabled={step === "checking"}
+          autoComplete="off"
+        />
+        <PillButton onClick={() => handleValidate(code)} className="w-full">
+          {step === "checking" ? "Verificando…" : "Continuar"}
+        </PillButton>
+      </div>
+    );
+  } else if (step === "form" || step === "submitting") {
+    content = (
+      <div className="flex flex-col gap-3">
+        <input
+          className={inputClass}
+          placeholder="Nombre completo"
+          value={form.fullName}
+          onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
+          disabled={step === "submitting"}
+          autoComplete="name"
+        />
+        <input
+          className={inputClass}
+          type="email"
+          placeholder="Correo electrónico"
+          value={form.email}
+          onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+          disabled={step === "submitting"}
+          autoComplete="email"
+        />
+        <input
+          className={inputClass}
+          type="password"
+          placeholder="Contraseña (mínimo 8 caracteres)"
+          value={form.password}
+          onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+          disabled={step === "submitting"}
+          autoComplete="new-password"
+        />
+        <PillButton onClick={handleSubmit} className="w-full">
+          {step === "submitting" ? "Creando cuenta…" : "Crear cuenta y unirme"}
+        </PillButton>
+      </div>
+    );
+  } else if (step === "done") {
+    content = (
+      <div className="flex flex-col gap-3">
+        <p className="text-[14px] text-[#4D9B8F]">
+          ¡Listo! Tu cuenta fue creada y tu rol se asignó automáticamente. Revisa tu correo
+          para confirmar la cuenta y luego inicia sesión.
+        </p>
+        <PillButton variant="secondary" onClick={() => setStep("redirecting")}>
+          Ir a iniciar sesión
+        </PillButton>
+      </div>
+    );
+  } else if (step === "redirecting") {
+    content = (
+      <p className="text-[14px] text-white/50">Redirigiendo a iniciar sesión…</p>
+    );
+  } else {
+    content = (
+      <div className="flex flex-col gap-3">
+        <p className="text-[14px] text-[#E06A6A]">{errorMessage}</p>
+        <PillButton variant="secondary" onClick={() => setStep("code")}>
+          Intentar de nuevo
+        </PillButton>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#070707] flex items-center justify-center px-4 py-16">
       <GlassCard className="w-full max-w-md p-8">
@@ -100,72 +193,7 @@ export function AccessCodeRedeemPage() {
           {linkType ? ` como ${LINK_TYPE_LABEL[linkType] ?? "invitado"}` : ""}.
         </p>
 
-        {(step === "code" || step === "checking") && (
-          <div className="flex flex-col gap-3">
-            <input
-              className={inputClass}
-              placeholder="Código de acceso"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              disabled={step === "checking"}
-            />
-            <PillButton onClick={() => handleValidate(code)} className="w-full">
-              {step === "checking" ? "Verificando…" : "Continuar"}
-            </PillButton>
-          </div>
-        )}
-
-        {(step === "form" || step === "submitting") && (
-          <div className="flex flex-col gap-3">
-            <input
-              className={inputClass}
-              placeholder="Nombre completo"
-              value={form.fullName}
-              onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))}
-              disabled={step === "submitting"}
-            />
-            <input
-              className={inputClass}
-              type="email"
-              placeholder="Correo electrónico"
-              value={form.email}
-              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-              disabled={step === "submitting"}
-            />
-            <input
-              className={inputClass}
-              type="password"
-              placeholder="Contraseña (mínimo 8 caracteres)"
-              value={form.password}
-              onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-              disabled={step === "submitting"}
-            />
-            <PillButton onClick={handleSubmit} className="w-full">
-              {step === "submitting" ? "Creando cuenta…" : "Crear cuenta y unirme"}
-            </PillButton>
-          </div>
-        )}
-
-        {step === "done" && (
-          <div className="flex flex-col gap-3">
-            <p className="text-[14px] text-[#4D9B8F]">
-              ¡Listo! Tu cuenta fue creada y tu rol se asignó automáticamente. Revisa tu correo
-              para confirmar la cuenta y luego inicia sesión.
-            </p>
-            <PillButton variant="secondary" onClick={() => (window.location.href = "/login")}>
-              Ir a iniciar sesión
-            </PillButton>
-          </div>
-        )}
-
-        {step === "error" && (
-          <div className="flex flex-col gap-3">
-            <p className="text-[14px] text-[#E06A6A]">{errorMessage}</p>
-            <PillButton variant="secondary" onClick={() => setStep("code")}>
-              Intentar de nuevo
-            </PillButton>
-          </div>
-        )}
+        <div key={step}>{content}</div>
 
         {errorMessage && step !== "error" && step !== "done" && (
           <p className="text-[13px] text-[#E06A6A] mt-3">{errorMessage}</p>

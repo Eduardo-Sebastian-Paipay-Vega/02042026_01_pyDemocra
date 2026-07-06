@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import { useTenantBootstrap } from "./tenant/TenantBootstrapProvider";
 import {
   canAccessTenantRoute,
@@ -287,8 +288,16 @@ export const router = createBrowserRouter(
       // Códigos ACE (STAFF_JOIN / BENEFICIARY_JOIN / GENERIC), generados desde
       // /app/ong/settings/access-control. Distinto del flujo de voluntarios
       // por solicitud de admisión (/signup), que usa su propia Edge Function.
+      // Envuelto en ErrorBoundary: signUp + completeAccessOnboarding tocan
+      // <input> de email/password, donde el autofill del navegador puede
+      // inyectar nodos fuera del control de React (ver AccessCodeRedeemPage.tsx)
+      // — si eso revienta el render, esto evita la pantalla en blanco.
       path: "/join",
-      Component: AccessCodeRedeemPage,
+      element: (
+        <ErrorBoundary fallbackMessage="No se pudo completar tu registro. Vuelve a intentarlo.">
+          <AccessCodeRedeemPage />
+        </ErrorBoundary>
+      ),
     },
     {
       path: "/app/ong",
