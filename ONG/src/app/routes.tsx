@@ -1,42 +1,7 @@
+import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
-import { Login } from "./pages/Login";
-import { AuditLog } from "./pages/AuditLog";
-import { AdmissionDocuments } from "./pages/AdmissionDocuments";
-import { AdmissionInterviews } from "./pages/AdmissionInterviews";
-import { AdmissionOnboarding } from "./pages/AdmissionOnboarding";
-import { Attendance } from "./pages/Attendance";
-import { AdmissionRequests } from "./pages/AdmissionRequests";
-import { Approvals } from "./pages/Approvals";
-import { Beneficiaries } from "./pages/Beneficiaries";
-import { Areas } from "./pages/Areas";
-import { Catalogs } from "./pages/Catalogs";
-import { Dashboard } from "./pages/Dashboard";
-import { Evidence } from "./pages/Evidence";
-import { Courses } from "./pages/Courses";
-import { Finance } from "./pages/Finance";
-import { GlobalSearch } from "./pages/GlobalSearch";
-import { Hours } from "./pages/Hours";
-import { HoursApproval } from "./pages/HoursApproval";
-import { IdCards } from "./pages/IdCards";
-import { Inventory } from "./pages/Inventory";
-import { MedicalRecords } from "./pages/MedicalRecords";
-import { NotificationHistory } from "./pages/NotificationHistory";
-import { NotificationTemplates } from "./pages/NotificationTemplates";
-import { PlaceholderPage } from "./pages/PlaceholderPage";
-import { ProjectActivities } from "./pages/ProjectActivities";
-import { ProjectAssignments } from "./pages/ProjectAssignments";
-import { Projects } from "./pages/Projects";
-import { Roles } from "./pages/Roles";
-import { Security } from "./pages/Security";
-import { SensitiveAccess } from "./pages/SensitiveAccess";
-import { SoftDelete } from "./pages/SoftDelete";
-import { SystemUsers } from "./pages/SystemUsers";
-import { Tasks } from "./pages/Tasks";
-import { Volunteers } from "./pages/Volunteers";
-import { LandingPage } from "./pages/landing/LandingPage";
-import { VolunteerRegistrationPage } from "./pages/landing/VolunteerRegistrationPage";
 import { useTenantBootstrap } from "./tenant/TenantBootstrapProvider";
 import {
   canAccessTenantRoute,
@@ -45,6 +10,94 @@ import {
 } from "./tenant/navigation";
 import { TenantBootstrapLoadingScreen, TenantInlineAccessDenied, TenantStatusScreen } from "./tenant/screens";
 import type { TenantRouteId } from "./tenant/navigation";
+
+// Code splitting: cada página se resuelve en su propio chunk, descargado
+// solo cuando se navega a esa ruta (en vez de ir todo en el bundle "ong"
+// único). AppShell NO se lazifica: es el layout persistente de casi toda
+// navegación protegida, cargarlo diferido solo retrasaría el primer render
+// sin ahorrar nada.
+const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
+const AuditLog = lazy(() => import("./pages/AuditLog").then((m) => ({ default: m.AuditLog })));
+const AdmissionDocuments = lazy(() =>
+  import("./pages/AdmissionDocuments").then((m) => ({ default: m.AdmissionDocuments }))
+);
+const AdmissionInterviews = lazy(() =>
+  import("./pages/AdmissionInterviews").then((m) => ({ default: m.AdmissionInterviews }))
+);
+const AdmissionOnboarding = lazy(() =>
+  import("./pages/AdmissionOnboarding").then((m) => ({ default: m.AdmissionOnboarding }))
+);
+const AccessControl = lazy(() =>
+  import("./pages/AccessControl").then((m) => ({ default: m.AccessControl }))
+);
+const Attendance = lazy(() => import("./pages/Attendance").then((m) => ({ default: m.Attendance })));
+const AdmissionRequests = lazy(() =>
+  import("./pages/AdmissionRequests").then((m) => ({ default: m.AdmissionRequests }))
+);
+const Approvals = lazy(() => import("./pages/Approvals").then((m) => ({ default: m.Approvals })));
+const Beneficiaries = lazy(() =>
+  import("./pages/Beneficiaries").then((m) => ({ default: m.Beneficiaries }))
+);
+const Areas = lazy(() => import("./pages/Areas").then((m) => ({ default: m.Areas })));
+const Catalogs = lazy(() => import("./pages/Catalogs").then((m) => ({ default: m.Catalogs })));
+const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Evidence = lazy(() => import("./pages/Evidence").then((m) => ({ default: m.Evidence })));
+const Courses = lazy(() => import("./pages/Courses").then((m) => ({ default: m.Courses })));
+const Finance = lazy(() => import("./pages/Finance").then((m) => ({ default: m.Finance })));
+const GlobalSearch = lazy(() =>
+  import("./pages/GlobalSearch").then((m) => ({ default: m.GlobalSearch }))
+);
+const Hours = lazy(() => import("./pages/Hours").then((m) => ({ default: m.Hours })));
+const HoursApproval = lazy(() =>
+  import("./pages/HoursApproval").then((m) => ({ default: m.HoursApproval }))
+);
+const IdCards = lazy(() => import("./pages/IdCards").then((m) => ({ default: m.IdCards })));
+const Inventory = lazy(() => import("./pages/Inventory").then((m) => ({ default: m.Inventory })));
+const MedicalRecords = lazy(() =>
+  import("./pages/MedicalRecords").then((m) => ({ default: m.MedicalRecords }))
+);
+const NotificationHistory = lazy(() =>
+  import("./pages/NotificationHistory").then((m) => ({ default: m.NotificationHistory }))
+);
+const NotificationTemplates = lazy(() =>
+  import("./pages/NotificationTemplates").then((m) => ({ default: m.NotificationTemplates }))
+);
+// Sin uso en el árbol de rutas hoy (ya estaba así antes de este cambio) —
+// se deja lazy por consistencia; no afecta el peso del bundle de todos modos.
+const PlaceholderPage = lazy(() =>
+  import("./pages/PlaceholderPage").then((m) => ({ default: m.PlaceholderPage }))
+);
+const ProjectActivities = lazy(() =>
+  import("./pages/ProjectActivities").then((m) => ({ default: m.ProjectActivities }))
+);
+const ProjectAssignments = lazy(() =>
+  import("./pages/ProjectAssignments").then((m) => ({ default: m.ProjectAssignments }))
+);
+const Projects = lazy(() => import("./pages/Projects").then((m) => ({ default: m.Projects })));
+const Roles = lazy(() => import("./pages/Roles").then((m) => ({ default: m.Roles })));
+const Security = lazy(() => import("./pages/Security").then((m) => ({ default: m.Security })));
+const SensitiveAccess = lazy(() =>
+  import("./pages/SensitiveAccess").then((m) => ({ default: m.SensitiveAccess }))
+);
+const SoftDelete = lazy(() => import("./pages/SoftDelete").then((m) => ({ default: m.SoftDelete })));
+const SystemUsers = lazy(() =>
+  import("./pages/SystemUsers").then((m) => ({ default: m.SystemUsers }))
+);
+const Tasks = lazy(() => import("./pages/Tasks").then((m) => ({ default: m.Tasks })));
+const Volunteers = lazy(() => import("./pages/Volunteers").then((m) => ({ default: m.Volunteers })));
+const LandingPage = lazy(() =>
+  import("./pages/landing/LandingPage").then((m) => ({ default: m.LandingPage }))
+);
+const VolunteerRegistrationPage = lazy(() =>
+  import("./pages/landing/VolunteerRegistrationPage").then((m) => ({
+    default: m.VolunteerRegistrationPage,
+  }))
+);
+const AccessCodeRedeemPage = lazy(() =>
+  import("./pages/landing/AccessCodeRedeemPage").then((m) => ({
+    default: m.AccessCodeRedeemPage,
+  }))
+);
 
 // URL pública fija: /ong (minúsculas). Debe coincidir con el mapeo de
 // vite.config.js (dev) y vercel.json (prod) — el folder físico "ONG/"
@@ -225,6 +278,19 @@ export const router = createBrowserRouter(
       Component: VolunteerRegistrationPage,
     },
     {
+      // Alias público con URL corta para enlaces de invitación: /ong/signup?code=XYZ
+      // Mismo componente y misma Edge Function que /landing/register — no duplica lógica.
+      path: "/signup",
+      Component: VolunteerRegistrationPage,
+    },
+    {
+      // Códigos ACE (STAFF_JOIN / BENEFICIARY_JOIN / GENERIC), generados desde
+      // /app/ong/settings/access-control. Distinto del flujo de voluntarios
+      // por solicitud de admisión (/signup), que usa su propia Edge Function.
+      path: "/join",
+      Component: AccessCodeRedeemPage,
+    },
+    {
       path: "/app/ong",
       element: <ProtectedTenantShell />,
       children: [
@@ -359,6 +425,10 @@ export const router = createBrowserRouter(
         {
           path: "settings/security",
           ...protectedPage("security", <Security />),
+        },
+        {
+          path: "settings/access-control",
+          ...protectedPage("access-control", <AccessControl />),
         },
       ],
     },

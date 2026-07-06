@@ -1105,6 +1105,44 @@ interface AuditoriaMedicalAccessRow {
   event_at: IsoDateTime;
 }
 
+// ── ACE: Access & Context Engine ─────────────────────────────
+
+interface PublicAccessLinkRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  code: string;
+  slug: string | null;
+  type: "VOLUNTEER_JOIN" | "STAFF_JOIN" | "BENEFICIARY_JOIN" | "GENERIC";
+  target_type: "PROJECT" | "PROGRAM" | "ACTIVITY" | "SEDE" | "GLOBAL";
+  target_id: Uuid | null;
+  assigned_role_id: Uuid | null;
+  assigned_sede_id: Uuid | null;
+  onboarding_flow: string | null;
+  max_uses: number;
+  used_count: number;
+  expires_at: IsoDateTime | null;
+  is_active: boolean;
+  metadata: JsonObject;
+  created_at: IsoDateTime;
+  updated_at: IsoDateTime;
+  created_by: Uuid | null;
+  updated_by: Uuid | null;
+}
+
+interface PublicMembershipRow {
+  id: Uuid;
+  tenant_id: Uuid;
+  user_id: Uuid;
+  context_type: "PROYECTO" | "SEDE" | "PROGRAMA" | "ACTIVIDAD" | "GLOBAL";
+  context_id: Uuid | null;
+  role_id: Uuid | null;
+  status: "active" | "inactive" | "pending";
+  joined_at: IsoDateTime;
+  created_at: IsoDateTime;
+  updated_at: IsoDateTime;
+  created_by: Uuid | null;
+}
+
 type PublicFunctions = {
   fn_current_tenant_id: {
     Args: Record<string, never>;
@@ -1126,6 +1164,19 @@ type PublicFunctions = {
       p_reason: string;
     };
     Returns: PublicSessionRow;
+  };
+  fn_validate_access_code: {
+    Args: {
+      p_code: string;
+    };
+    Returns: JsonObject;
+  };
+  fn_complete_access_onboarding: {
+    Args: {
+      p_access_code: string;
+      p_metadata?: JsonObject | null;
+    };
+    Returns: JsonObject;
   };
 };
 

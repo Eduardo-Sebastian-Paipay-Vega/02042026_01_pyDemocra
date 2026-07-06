@@ -11,6 +11,7 @@ import {
   Heart,
   Home,
   Layers,
+  Link2,
   ListTodo,
   Package,
   Search,
@@ -63,7 +64,8 @@ export type TenantRouteId =
   | "soft-delete"
   | "system-users"
   | "roles"
-  | "security";
+  | "security"
+  | "access-control";
 
 export interface TenantRouteDefinition {
   id: TenantRouteId;
@@ -500,6 +502,18 @@ const ROUTES: TenantRouteDefinition[] = [
     groupId: "configuracion",
     moduleKeys: ["settings", "ong"],
     anyPermissions: ["settings.sessions.read"],
+  },
+  {
+    id: "access-control",
+    label: "Control de acceso",
+    title: "Control de acceso",
+    breadcrumb: "Configuracion",
+    path: `${ONG_SHELL_BASE_PATH}/settings/access-control`,
+    legacyPath: "/admin/access-control",
+    icon: Link2,
+    groupId: "configuracion",
+    moduleKeys: ["settings", "ong"],
+    anyPermissions: ["ace.access_links.manage"],
   },
 ];
 
