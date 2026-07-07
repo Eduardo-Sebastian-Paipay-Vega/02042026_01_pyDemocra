@@ -6,8 +6,20 @@
 -- de prueba mínimos para demostrar que un mismo tenant puede operar módulos
 -- ONG y Gym sobre el mismo core compartido (public.tenants/profiles), y que
 -- una misma persona (por número de documento) es identificable en ambos
--- esquemas verticales. Debe ejecutarse manualmente en un entorno de prueba
--- (NO en el proyecto Supabase de producción vinculado a este repo).
+-- esquemas verticales.
+--
+-- CAMBIO respecto de la version anterior: ya NO inserta directamente en
+-- auth.users (eso rompia la integridad de Auth/GoTrue en cualquier proyecto
+-- Supabase real, incluso uno de prueba). En su lugar, recibe el UUID de un
+-- usuario YA EXISTENTE en tu auth.users real — reemplaza el valor de
+-- v_existing_user_id abajo antes de ejecutar. El bloque valida que ese UUID
+-- exista y aborta con un mensaje claro si no lo reemplazaste.
+--
+-- COMO OBTENER UN UUID VALIDO:
+--   - Supabase Dashboard -> Authentication -> Users -> copiar el "User UID"
+--     de cualquier usuario de prueba ya registrado en tu proyecto.
+--   - O, si prefieres crear uno nuevo primero: registralo normalmente por
+--     /login o /join en tu app, y luego copia su UUID desde el dashboard.
 --
 -- PRERREQUISITOS (aplicar en este orden, en un entorno de prueba):
 --   1. docs/consolidacion/00000000000000_core_baseline.sql (schemas, tenants,
@@ -17,13 +29,8 @@
 --      extraídas literalmente de s2/DATABASE_MASTER_SCRIPT_S2.md §3.1-3.2,
 --      porque el repositorio de GYMsos —y por tanto su DDL real— vive fuera
 --      de este repo).
---
--- NOTA SOBRE auth.users: en un proyecto Supabase real, los usuarios se crean
--- vía Auth (signup o Admin API), no con INSERT directo. Este script inserta
--- directamente en auth.users SOLO porque está pensado para un Postgres de
--- prueba aislado (o un proyecto Supabase de staging vacío) — NUNCA contra un
--- proyecto con Auth/GoTrue reales en uso, donde eso rompería la integridad de
--- Auth. Está marcado [SOLO-TEST] en cada punto relevante.
+--   3. El usuario cuyo UUID vas a usar debe existir YA en auth.users (ver
+--      "COMO OBTENER UN UUID VALIDO" arriba).
 --
 -- QUÉ DEMUESTRA:
 --   (a) Un tenant con módulos 'ong' y 'gym' activos simultáneamente
@@ -33,8 +40,6 @@
 --   (c) La misma persona real (mismo numero_documento/documento) es
 --       localizable cruzando ambos esquemas con una sola consulta JOIN.
 -- =============================================================================
-
-begin;
 
 -- =============================================================================
 -- 0. Slice mínimo del esquema `gym` (referencia — DDL real vive en GYMsos)
@@ -75,94 +80,63 @@ values
 on conflict (codigo) do nothing;
 
 -- =============================================================================
--- 1. Tenant de prueba con ambos módulos activos
+-- 1-4. Seed principal: tenant + modulos + profile + beneficiario + gym
 -- =============================================================================
--- Ajustar 'ong'/'gym' aquí solo si esos códigos de cat_industry_types no
--- existen todavía en el entorno de prueba (ver seeds del baseline, §12).
-insert into public.tenants (id, name, tax_id, industry_type_id, plan_id, status_financial_id)
-values (
-  '00000000-0000-4000-8000-000000000d01',
-  'Fundación Demo Ong+Gym',
-  '20999999999',
-  'ong',
-  'basic',
-  'FIN-ACTIVE'
-)
-on conflict (id) do nothing;
+-- Todo en un solo bloque plpgsql para poder usar una variable (el UUID
+-- dinamico) en vez de repetir un literal fijo en cada INSERT.
+do $$
+declare
+  -- 👇 REEMPLAZAR por el UUID de un usuario YA EXISTENTE en tu auth.users
+  -- real antes de ejecutar este script (ver "COMO OBTENER UN UUID VALIDO"
+  -- en la cabecera del archivo). El valor de placeholder de abajo NO existe
+  -- en ningun auth.users real — el bloque lo detecta y aborta si no lo
+  -- reemplazas.
+  v_existing_user_id uuid := 'REEMPLAZAR-CON-UUID-DE-AUTH-USERS-REAL';
+  v_tenant_id         uuid := '00000000-0000-4000-8000-000000000d01';
+  v_gimnasio_id       uuid := '00000000-0000-4000-8000-000000000d03';
+  v_email             text;
+begin
+  select au.email into v_email from auth.users au where au.id = v_existing_user_id;
 
-insert into public.tenant_modules (tenant_id, module_code, activated_at)
-values
-  ('00000000-0000-4000-8000-000000000d01', 'ong', now()),
-  ('00000000-0000-4000-8000-000000000d01', 'gym', now())
-on conflict (tenant_id, module_code) do nothing;
+  if v_email is null then
+    raise exception
+      'v_existing_user_id (%) no existe en auth.users. Reemplaza el valor de la variable por el UUID de un usuario real de tu proyecto antes de ejecutar este script.',
+      v_existing_user_id;
+  end if;
 
--- =============================================================================
--- 2. [SOLO-TEST] Usuario de Auth de prueba + profile
--- =============================================================================
--- En un proyecto Supabase real, reemplazar este INSERT por la creación del
--- usuario vía supabase.auth.admin.createUser({ email, password }) y usar el
--- UUID devuelto en vez del literal de abajo.
-insert into auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
-values (
-  '00000000-0000-4000-8000-000000000d02',
-  'demo.persona@ejemplo.test',
-  crypt('demo-password-not-for-prod', gen_salt('bf')),
-  now(),
-  now(),
-  now()
-)
-on conflict (id) do nothing;
+  -- 1) Tenant de prueba con ambos modulos activos.
+  insert into public.tenants (id, name, tax_id, industry_type_id, plan_id, status_financial_id)
+  values (v_tenant_id, 'Fundación Demo Ong+Gym', '20999999999', 'ong', 'basic', 'FIN-ACTIVE')
+  on conflict (id) do nothing;
 
-insert into public.profiles (id, tenant_id, full_name, tipo_documento, numero_documento)
-values (
-  '00000000-0000-4000-8000-000000000d02',
-  '00000000-0000-4000-8000-000000000d01',
-  'Persona Demo Ong-Gym',
-  'DNI',
-  '87654321'
-)
-on conflict (id) do update
-  set tenant_id = excluded.tenant_id;
+  insert into public.tenant_modules (tenant_id, module_code, activated_at)
+  values
+    (v_tenant_id, 'ong', now()),
+    (v_tenant_id, 'gym', now())
+  on conflict (tenant_id, module_code) do nothing;
 
--- =============================================================================
--- 3. Registro operativo en `ong` — beneficiario
--- =============================================================================
-insert into ong.beneficiarios (
-  tenant_id, numero_documento, tipo_documento, codigo_pais, nombre, apellido
-)
-values (
-  '00000000-0000-4000-8000-000000000d01',
-  '87654321',
-  'DNI',
-  'PE',
-  'Persona',
-  'Demo Ong-Gym'
-)
-on conflict (tenant_id, tipo_documento, numero_documento) do nothing;
+  -- 2) Profile del usuario existente, vinculado a este tenant.
+  insert into public.profiles (id, tenant_id, full_name, tipo_documento, numero_documento)
+  values (v_existing_user_id, v_tenant_id, 'Persona Demo Ong-Gym', 'DNI', '87654321')
+  on conflict (id) do update
+    set tenant_id = excluded.tenant_id;
 
--- =============================================================================
--- 4. Registro operativo en `gym` — gimnasio + usuario
--- =============================================================================
-insert into gym.gimnasios (id_gimnasio, nombre, tenant_id)
-values (
-  '00000000-0000-4000-8000-000000000d03',
-  'Sede Demo del Gimnasio',
-  '00000000-0000-4000-8000-000000000d01'
-)
-on conflict (id_gimnasio) do nothing;
+  -- 3) Registro operativo en `ong` — beneficiario.
+  insert into ong.beneficiarios (
+    tenant_id, numero_documento, tipo_documento, codigo_pais, nombre, apellido
+  )
+  values (v_tenant_id, '87654321', 'DNI', 'PE', 'Persona', 'Demo Ong-Gym')
+  on conflict (tenant_id, tipo_documento, numero_documento) do nothing;
 
-insert into gym.usuarios (id_usuario, email, nombre, documento, id_gimnasio, rol)
-values (
-  '00000000-0000-4000-8000-000000000d02',
-  'demo.persona@ejemplo.test',
-  'Persona Demo Ong-Gym',
-  '87654321',
-  '00000000-0000-4000-8000-000000000d03',
-  'miembro'
-)
-on conflict (id_usuario) do nothing;
+  -- 4) Registro operativo en `gym` — gimnasio + usuario (mismo UUID que profiles.id).
+  insert into gym.gimnasios (id_gimnasio, nombre, tenant_id)
+  values (v_gimnasio_id, 'Sede Demo del Gimnasio', v_tenant_id)
+  on conflict (id_gimnasio) do nothing;
 
-commit;
+  insert into gym.usuarios (id_usuario, email, nombre, documento, id_gimnasio, rol)
+  values (v_existing_user_id, v_email, 'Persona Demo Ong-Gym', '87654321', v_gimnasio_id, 'miembro')
+  on conflict (id_usuario) do nothing;
+end $$;
 
 -- =============================================================================
 -- 5. VERIFICACIÓN — confirmar que ong y gym "se comunican" vía el core
@@ -195,10 +169,10 @@ where b.tenant_id = '00000000-0000-4000-8000-000000000d01';
 -- =============================================================================
 -- 6. LIMPIEZA (opcional, ejecutar aparte tras verificar)
 -- =============================================================================
--- delete from gym.usuarios where id_usuario = '00000000-0000-4000-8000-000000000d02';
+-- No borra auth.users (nunca lo creamos nosotros — es un usuario real tuyo).
+-- delete from gym.usuarios where id_gimnasio = '00000000-0000-4000-8000-000000000d03';
 -- delete from gym.gimnasios where id_gimnasio = '00000000-0000-4000-8000-000000000d03';
 -- delete from ong.beneficiarios where tenant_id = '00000000-0000-4000-8000-000000000d01';
--- delete from public.profiles where id = '00000000-0000-4000-8000-000000000d02';
--- delete from auth.users where id = '00000000-0000-4000-8000-000000000d02';
+-- delete from public.profiles where tenant_id = '00000000-0000-4000-8000-000000000d01';
 -- delete from public.tenant_modules where tenant_id = '00000000-0000-4000-8000-000000000d01';
 -- delete from public.tenants where id = '00000000-0000-4000-8000-000000000d01';
