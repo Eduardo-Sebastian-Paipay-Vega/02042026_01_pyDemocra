@@ -18,6 +18,7 @@ import {
   SettingsFieldError,
   SettingsPermissionBadge,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -330,16 +331,9 @@ export function Roles() {
               deniedLabel="Sin catalogo de permisos"
             />
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
+          {(data.warnings.length > 0 || data.unsupportedFlows.length > 0) && (
+            <SettingsTechnicalDetails details={[...data.warnings, ...data.unsupportedFlows]} />
           )}
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
         </div>
       </motion.div>
 

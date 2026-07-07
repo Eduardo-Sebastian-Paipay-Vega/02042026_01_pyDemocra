@@ -85,6 +85,46 @@ export default defineConfig({
         index: resolve(__dirname, "index.html"),
         ong: resolve(__dirname, "ONG/index.html"),
       },
+      output: {
+        // Agrupa dependencias pesadas de terceros en chunks propios,
+        // separados del código de cada página (que ya se divide solo via
+        // React.lazy() en ONG/src/app/routes.tsx). Beneficio real: estos
+        // vendor chunks se descargan una vez y quedan cacheados por el
+        // navegador — no se vuelven a pedir en cada navegación entre
+        // páginas, y se comparten entre "/" y "/ong" al ser el mismo origen.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) {
+            return undefined;
+          }
+          if (id.includes("@supabase")) {
+            return "vendor-supabase";
+          }
+          if (id.includes("lucide-react")) {
+            return "vendor-icons";
+          }
+          if (id.includes("@mui") || id.includes("@emotion") || id.includes("@popperjs")) {
+            return "vendor-mui";
+          }
+          if (id.includes("@radix-ui")) {
+            return "vendor-radix";
+          }
+          if (id.includes("recharts") || id.includes("d3-")) {
+            return "vendor-charts";
+          }
+          if (id.includes("node_modules/motion") || id.includes("node_modules/framer-motion")) {
+            return "vendor-motion";
+          }
+          if (id.includes("react-router")) {
+            return "vendor-router";
+          }
+          // react/react-dom/scheduler se dejan en el bucket genérico "vendor"
+          // a propósito: separarlos en su propio chunk generaba una
+          // dependencia circular vendor <-> vendor-react (Rollup lo resuelve
+          // pero no es ideal). Casi todo depende de react igual, así que
+          // agruparlo con el resto no pierde nada práctico.
+          return "vendor";
+        },
+      },
     },
   },
 });

@@ -18,6 +18,7 @@ import {
   SettingsFieldError,
   SettingsPermissionBadge,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -299,7 +300,7 @@ export function Roles() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Roles y permisos"
-          description="Administra roles reales en public.roles, asigna permisos desde public.cat_permissions y sincroniza public.role_permissions sin inventar modulos ni acciones."
+          description="Administra los perfiles de acceso y define que puede hacer cada equipo dentro de la plataforma."
           action={
             data.access.canManageRoles
               ? { label: "Nuevo rol", onClick: openCreateModal }
@@ -330,16 +331,13 @@ export function Roles() {
               deniedLabel="Sin catalogo de permisos"
             />
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+          <SettingsTechnicalDetails
+            details={[
+              "Administra roles reales en public.roles, asigna permisos desde public.cat_permissions y sincroniza public.role_permissions sin inventar modulos ni acciones.",
+              ...data.warnings,
+              ...data.unsupportedFlows,
+            ]}
+          />
         </div>
       </motion.div>
 

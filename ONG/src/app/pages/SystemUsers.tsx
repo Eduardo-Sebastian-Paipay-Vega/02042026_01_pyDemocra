@@ -23,6 +23,7 @@ import {
   SettingsPermissionBadge,
   SettingsSelectField,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -491,19 +492,13 @@ export function SystemUsers() {
               </OutlineButton>
             )}
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            El permiso de gestión de usuarios habilita la creación e invitación. El permiso de lectura de sesiones activa el resumen visible, y el de terminación permite la revocación masiva.
-          </p>
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+          <SettingsTechnicalDetails
+            details={[
+              ...data.warnings,
+              "El permiso de gestion de usuarios habilita la creacion e invitacion. El permiso de lectura de sesiones activa el resumen visible, y el de terminacion permite la revocacion masiva.",
+              ...data.unsupportedFlows,
+            ]}
+          />
         </div>
       </motion.div>
 
@@ -774,8 +769,9 @@ export function SystemUsers() {
                 Crear o invitar usuario
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                Crea o invita a un nuevo usuario al sistema. La operación se ejecuta de forma segura desde el servidor y requiere permisos de gestión de usuarios o acceso de administrador.
+                Crea un acceso seguro o envia una invitacion para que la persona pueda ingresar a la plataforma.
               </p>
+              <SettingsTechnicalDetails details="La operacion se ejecuta de forma segura desde el servidor y requiere permisos de gestion de usuarios o acceso de administrador." />
             </div>
             <button
               type="button"

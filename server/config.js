@@ -22,6 +22,13 @@ export const config = {
   pinBlockMinutes: Number(process.env.PIN_BLOCK_MINUTES || 15),
   riskTempBlockMinutes: Number(process.env.RISK_TEMP_BLOCK_MINUTES || 15),
   exposeDebugOtp: String(process.env.EXPOSE_DEBUG_OTP || "false") === "true",
+  // Orígenes extra permitidos por CORS (previews de Vercel, otros dominios),
+  // además de los defaults same-origin/localhost ya cubiertos en index.js.
+  // Formato: lista separada por comas, ej. "https://staging.democra.pro,https://foo.vercel.app".
+  allowedOrigins: String(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 };
 
 export const assertServerConfig = () => {

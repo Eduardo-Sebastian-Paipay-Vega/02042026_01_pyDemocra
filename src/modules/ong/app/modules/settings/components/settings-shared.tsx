@@ -1,4 +1,55 @@
+import { useState } from "react";
 import { StatusDot } from "../../../components/ui/status-dot";
+
+export function SettingsTechnicalDetails({
+  details,
+  summary = "Algunos detalles tecnicos estan disponibles para soporte.",
+}: {
+  details: string | string[];
+  summary?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const items = Array.isArray(details) ? details.filter(Boolean) : [details].filter(Boolean);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        className="rounded-md px-2 py-1 text-[11px] transition-colors hover:bg-[var(--t-hover)]"
+        style={{ color: "var(--t-text-secondary)" }}
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+      >
+        {open ? "Ocultar detalles" : "Mostrar informacion tecnica"}
+      </button>
+      {open && (
+        <div
+          className="mt-2 rounded-xl px-3 py-2"
+          style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+        >
+          <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+            {summary}
+          </p>
+          <div className="mt-2 space-y-1">
+            {items.map((item) => (
+              <p
+                key={item}
+                className="whitespace-pre-wrap break-words text-[11px]"
+                style={{ color: "var(--t-text-secondary)" }}
+              >
+                {item}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SettingsErrorBlock({
   message,
@@ -9,20 +60,23 @@ export function SettingsErrorBlock({
 }) {
   return (
     <div
-      className="flex items-center justify-between rounded-2xl px-4 py-3"
+      className="rounded-2xl px-4 py-3"
       style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
     >
-      <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {message}
-      </p>
-      <button
-        type="button"
-        className="rounded-md px-2 py-1 text-[11px] transition-colors hover:bg-[var(--t-hover)]"
-        style={{ color: "var(--t-text-secondary)" }}
-        onClick={onRetry}
-      >
-        Reintentar
-      </button>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          No pudimos completar esta accion. Intenta nuevamente o contacta al administrador.
+        </p>
+        <button
+          type="button"
+          className="shrink-0 rounded-md px-2 py-1 text-[11px] transition-colors hover:bg-[var(--t-hover)]"
+          style={{ color: "var(--t-text-secondary)" }}
+          onClick={onRetry}
+        >
+          Reintentar
+        </button>
+      </div>
+      <SettingsTechnicalDetails details={message} />
     </div>
   );
 }

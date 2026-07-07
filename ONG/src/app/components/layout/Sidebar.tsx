@@ -289,9 +289,36 @@ export function Sidebar({
     >
       <div className="flex h-14 items-center justify-between px-3">
         {showExpandedMode ? (
-          <span className="pl-1.5 text-[13px] tracking-tight" style={{ color: "var(--t-text)" }}>
-            Administracion
-          </span>
+          // Doble logo: marca Democra (SaaS base) + marca del módulo ONG.
+          // No existe todavía un archivo de logo propio de la ONG en el repo —
+          // el badge con el ícono Heart es un placeholder honesto hasta que
+          // haya uno; basta con reemplazar ese <div> por un <img> real.
+          <div className="flex min-w-0 items-center gap-2 pl-0.5">
+            <img
+              src="/brand/d-core-monogram.png"
+              alt="Democra"
+              className="h-7 w-7 shrink-0 rounded-lg object-contain"
+            />
+            <span
+              className="h-5 w-px shrink-0"
+              style={{ background: "var(--t-border)" }}
+              aria-hidden="true"
+            />
+            <div className="flex min-w-0 items-center gap-1.5">
+              <div
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                style={{ background: "var(--t-primary)" }}
+              >
+                <Heart className="h-3.5 w-3.5" style={{ color: "#fff" }} />
+              </div>
+              <span
+                className="truncate text-[13px] tracking-tight"
+                style={{ color: "var(--t-text)" }}
+              >
+                ONG
+              </span>
+            </div>
+          </div>
         ) : (
           <span className="sr-only">Administracion</span>
         )}

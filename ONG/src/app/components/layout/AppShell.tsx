@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette, useCommandPalette } from "../ui/command-palette";
 import { HelpAssistant } from "../ui/help-assistant";
 import { ProjectHierarchySteps } from "../shared/ProjectHierarchySteps";
+import { RouteLoadingFallback } from "../shared/RouteLoadingFallback";
 import { useGlobalShortcuts } from "../../lib/useGlobalShortcuts";
 import { ThemeProvider, useTheme } from "../../lib/theme-context";
 import { useHomeNotifications } from "../../modules/home/useHomeNotifications";
@@ -256,7 +257,12 @@ function AppShellInner() {
             <div className="w-full space-y-6">
               <TenantFinancialBanner context={tenantContext} />
               <ProjectHierarchySteps />
-              <Outlet />
+              {/* Boundary ajustado: solo el contenido se reemplaza por el
+                  fallback mientras carga el chunk de la página — sidebar y
+                  topbar (fuera de este Suspense) permanecen montados. */}
+              <Suspense fallback={<RouteLoadingFallback fullScreen={false} />}>
+                <Outlet />
+              </Suspense>
             </div>
           </main>
         </div>

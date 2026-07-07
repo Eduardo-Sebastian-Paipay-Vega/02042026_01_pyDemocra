@@ -1,12 +1,19 @@
+import { Suspense } from "react";
 import { RouterProvider } from "react-router";
 import { Toaster } from "sonner";
 import { router } from "./routes";
 import { TenantBootstrapProvider } from "./tenant/TenantBootstrapProvider";
+import { RouteLoadingFallback } from "./components/shared/RouteLoadingFallback";
 
 export default function App() {
   return (
     <TenantBootstrapProvider>
-      <RouterProvider router={router} />
+      {/* Boundary de más afuera: cubre rutas públicas (Login, Landing, Signup)
+          que no pasan por AppShell. Las rutas protegidas tienen su propio
+          boundary más ajustado alrededor de <Outlet/> en AppShell.tsx. */}
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <RouterProvider router={router} />
+      </Suspense>
       <Toaster
         position="bottom-right"
         toastOptions={{

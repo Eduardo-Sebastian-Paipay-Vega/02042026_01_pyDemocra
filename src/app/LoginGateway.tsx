@@ -28,10 +28,37 @@ export function LoginGateway() {
       return;
     }
 
-    // Same-origin MPA: la sesión ya quedó en localStorage bajo AUTH_STORAGE_KEY
-    // (compartido con el cliente Supabase de ONG). Una navegación normal basta
-    // para que /ong la recoja al montar — sin tokens en la URL.
-    window.location.assign("/ong/");
+    // public.tenants tiene RLS sin políticas (deny-all), así que industry_type_id
+    // no es legible directamente. fn_get_user_redirect_target() (migración
+    // 20260706120000) resuelve esto del lado del servidor con SECURITY DEFINER
+    // y devuelve solo el destino ('ong' | 'gym' | 'root'), sin exponer la tabla.
+    const { data: redirectTarget, error: redirectError } = await supabase.rpc(
+      "fn_get_user_redirect_target"
+    );
+
+    if (redirectError) {
+      setError("Sesión iniciada, pero no se pudo determinar tu destino. Intenta de nuevo.");
+      setLoading(false);
+      return;
+    }
+
+    // Uso estricto del resultado: solo 'ong' tiene un módulo real montado en
+    // este MPA. Cualquier otro valor ('root', 'gym', o uno futuro) se trata
+    // como "sin acceso todavía" — nunca se asume una ruta que no existe.
+    if (redirectTarget === "ong") {
+      // Same-origin MPA: la sesión ya quedó en localStorage bajo AUTH_STORAGE_KEY
+      // (compartido con el cliente Supabase de ONG). Una navegación normal basta
+      // para que /ong la recoja al montar — sin tokens en la URL.
+      window.location.assign("/ong/");
+      return;
+    }
+
+    setError(
+      redirectTarget === "root"
+        ? "Tu cuenta aún no está asociada a ninguna organización."
+        : `Tu cuenta pertenece a un módulo ("${redirectTarget}") que todavía no está disponible en esta plataforma.`
+    );
+    setLoading(false);
   }
 
   return (

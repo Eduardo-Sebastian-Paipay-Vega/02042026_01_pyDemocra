@@ -23,6 +23,7 @@ import {
   SettingsFieldError,
   SettingsPermissionBadge,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -414,7 +415,7 @@ export function Security() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Seguridad de sesion"
-          description="Operacion real sobre public.sessions, public.devices, public.terminals y public.auth_events. `settings.sessions.read` habilita monitoreo y `settings.sessions.terminate` habilita cierre remoto y revocacion masiva por usuario."
+          description="Supervisa sesiones, dispositivos y terminales para mantener el acceso institucional bajo control."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -451,19 +452,14 @@ export function Security() {
               deniedLabel="Sin auth events"
             />
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            `settings.sessions.read` es el permiso base para ver sesiones. `settings.sessions.terminate` agrega cierre remoto por sesion y se reutiliza en la revocacion masiva desde Usuarios del sistema.
-          </p>
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+          <SettingsTechnicalDetails
+            details={[
+              "Operacion real sobre public.sessions, public.devices, public.terminals y public.auth_events. `settings.sessions.read` habilita monitoreo y `settings.sessions.terminate` habilita cierre remoto y revocacion masiva por usuario.",
+              ...data.warnings,
+              "`settings.sessions.read` es el permiso base para ver sesiones. `settings.sessions.terminate` agrega cierre remoto por sesion y se reutiliza en la revocacion masiva desde Usuarios del sistema.",
+              ...data.unsupportedFlows,
+            ]}
+          />
         </div>
       </motion.div>
 

@@ -23,6 +23,7 @@ import {
   SettingsFieldError,
   SettingsPermissionBadge,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -451,19 +452,13 @@ export function Security() {
               deniedLabel="Sin auth events"
             />
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            El permiso de lectura de sesiones es el mínimo requerido para el monitoreo. El permiso de terminación habilita el cierre remoto individual y masivo.
-          </p>
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+          <SettingsTechnicalDetails
+            details={[
+              ...data.warnings,
+              "El permiso de lectura de sesiones es el minimo requerido para el monitoreo. El permiso de terminacion habilita el cierre remoto individual y masivo.",
+              ...data.unsupportedFlows,
+            ]}
+          />
         </div>
       </motion.div>
 

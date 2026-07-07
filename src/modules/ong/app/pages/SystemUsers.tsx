@@ -23,6 +23,7 @@ import {
   SettingsPermissionBadge,
   SettingsSelectField,
   SettingsSummaryField,
+  SettingsTechnicalDetails,
 } from "../modules/settings/components/settings-shared";
 
 const stagger = {
@@ -442,7 +443,7 @@ export function SystemUsers() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Usuarios del sistema"
-          description="Gestiona perfiles reales del tenant desde public.profiles y su acceso institucional mediante public.user_roles_sedes. La creacion o invitacion de usuarios se resuelve por backend seguro y el resumen de sesiones depende de `settings.sessions.read`."
+          description="Gestiona las personas con acceso institucional, sus estados y sus sesiones visibles."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -491,19 +492,14 @@ export function SystemUsers() {
               </OutlineButton>
             )}
           </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            `settings.users.manage` habilita la Edge Function `admin-provision-user`. `settings.sessions.read` habilita el resumen visible de sesiones y `settings.sessions.terminate` permite la revocacion masiva por usuario.
-          </p>
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+          <SettingsTechnicalDetails
+            details={[
+              "Gestiona perfiles reales del tenant desde public.profiles y su acceso institucional mediante public.user_roles_sedes. La creacion o invitacion de usuarios se resuelve por backend seguro y el resumen de sesiones depende de `settings.sessions.read`.",
+              ...data.warnings,
+              "`settings.users.manage` habilita la Edge Function `admin-provision-user`. `settings.sessions.read` habilita el resumen visible de sesiones y `settings.sessions.terminate` permite la revocacion masiva por usuario.",
+              ...data.unsupportedFlows,
+            ]}
+          />
         </div>
       </motion.div>
 
@@ -774,8 +770,9 @@ export function SystemUsers() {
                 Crear o invitar usuario
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La operacion usa la Edge Function `admin-provision-user` para crear o invitar `auth.users`, sincronizar `public.profiles` y vincular opcionalmente `ong.voluntarios.iam_user_id`. Esta accion no se ejecuta desde frontend directo y exige `settings.users.manage` o tenant admin.
+                Crea un acceso seguro o envia una invitacion para que la persona pueda ingresar a la plataforma.
               </p>
+              <SettingsTechnicalDetails details="La operacion usa la Edge Function `admin-provision-user` para crear o invitar `auth.users`, sincronizar `public.profiles` y vincular opcionalmente `ong.voluntarios.iam_user_id`. Esta accion no se ejecuta desde frontend directo y exige `settings.users.manage` o tenant admin." />
             </div>
             <button
               type="button"
