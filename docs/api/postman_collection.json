@@ -176,6 +176,49 @@
             "auth": { "type": "noauth" },
             "url": "{{base_url}}/onboarding/validate-ruc/:ruc"
           }
+        },
+        {
+          "name": "Bootstrap tenant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/onboarding/bootstrap-tenant",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_name\": \"Fundacion Demo\",\n  \"tax_id\": \"20123456789\",\n  \"industry_type_id\": \"ong\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sedes",
+      "item": [
+        {
+          "name": "List sedes",
+          "request": { "method": "GET", "url": "{{base_url}}/sedes" }
+        },
+        {
+          "name": "Create sede",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/sedes",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sede Norte\"\n}" }
+          }
+        },
+        {
+          "name": "Update sede",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/sedes/:sedeId",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sede Norte (renombrada)\"\n}" }
+          }
+        },
+        {
+          "name": "Deactivate sede (soft-delete)",
+          "request": { "method": "DELETE", "url": "{{base_url}}/sedes/:sedeId" }
         }
       ]
     }

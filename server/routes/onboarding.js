@@ -1,6 +1,7 @@
 import express from "express";
 import { config } from "../config.js";
-import { sendError } from "../utils/http.js";
+import { resolveAuthContext } from "../supabase.js";
+import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
 
 const router = express.Router();
 
@@ -197,6 +198,77 @@ router.get("/validate-ruc/:ruc", async (req, res) => {
       error_type: "external_service",
       message: "Error al conectar con el servicio de validacion RUC.",
     });
+  }
+});
+
+// POST /api/onboarding/bootstrap-tenant
+// Envuelve public.fn_bootstrap_tenant (ver
+// supabase/migrations/20260302125000_fix_bootstrap_audit_tenant_null.sql):
+// crea tenant + profile + sede "Principal" + rol Owner + asignacion, de forma
+// idempotente (si el usuario ya tiene tenant, devuelve el existente). Antes
+// de este endpoint no habia NINGUN camino (ni Express ni llamada directa a
+// Supabase desde el frontend) para que una organizacion nueva se diera de
+// alta — ver reporte de cobertura funcional.
+router.post("/bootstrap-tenant", async (req, res) => {
+  try {
+    const accessToken = getBearerToken(req);
+    if (!accessToken) {
+      return sendError(res, 401, "IAM-004", { error_type: "auth" });
+    }
+
+    const authContext = await resolveAuthContext(accessToken);
+    if (authContext.error || !authContext.user) {
+      return sendError(res, 401, "IAM-004", { error_type: "auth" });
+    }
+
+    const body = req.body || {};
+    const tenantName = String(body.tenant_name || "").trim();
+    const taxId = String(body.tax_id || "").trim();
+    const industryTypeId = String(body.industry_type_id || "").trim();
+    const planId = body.plan_id ? String(body.plan_id).trim() : undefined;
+    const billingDay = Number.isInteger(body.billing_day) ? body.billing_day : undefined;
+
+    if (!tenantName) {
+      return sendError(res, 400, "TEN-001", {
+        error_type: "validation",
+        message: "tenant_name es requerido.",
+      });
+    }
+    if (!/^\d{11}$/.test(taxId)) {
+      return sendError(res, 400, "TEN-001", {
+        error_type: "validation",
+        message: "tax_id debe ser un RUC de 11 digitos.",
+      });
+    }
+    if (!industryTypeId) {
+      return sendError(res, 400, "TEN-001", {
+        error_type: "validation",
+        message: "industry_type_id es requerido.",
+      });
+    }
+
+    const { data: tenantId, error } = await authContext.userClient.rpc("fn_bootstrap_tenant", {
+      p_tenant_name: tenantName,
+      p_tax_id: taxId,
+      p_industry_type_id: industryTypeId,
+      ...(planId ? { p_plan_id: planId } : {}),
+      ...(billingDay ? { p_billing_day: billingDay } : {}),
+    });
+
+    if (error) {
+      // fn_bootstrap_tenant lanza RAISE EXCEPTION con mensajes de validacion
+      // propios (RUC invalido, billing_day fuera de rango, no autenticado) —
+      // se devuelven tal cual en vez de un 500 generico, son accionables por
+      // el cliente.
+      return sendError(res, 400, "TEN-001", {
+        error_type: "validation",
+        message: error.message,
+      });
+    }
+
+    return res.status(201).json({ tenant_id: tenantId });
+  } catch (error) {
+    return sendUnexpectedError(res, error, "TEN-001");
   }
 });
 

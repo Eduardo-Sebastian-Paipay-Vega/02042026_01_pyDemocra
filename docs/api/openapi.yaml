@@ -23,7 +23,9 @@ tags:
   - name: iam
     description: Gestión de roles, permisos y asignaciones usuario-rol-sede.
   - name: onboarding
-    description: Validación de datos fiscales durante el alta de un tenant.
+    description: Validación de datos fiscales y alta (bootstrap) de un tenant nuevo.
+  - name: sedes
+    description: Gestión de sedes físicas del tenant.
 
 components:
   securitySchemes:
@@ -59,6 +61,23 @@ components:
           type: string
         hierarchy_level:
           type: integer
+
+    Sede:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
   responses:
     Unauthorized:
@@ -444,3 +463,152 @@ paths:
           description: RUC con formato inválido (TEN-001).
         "503":
           description: Servicio de validación fiscal no configurado.
+
+  /onboarding/bootstrap-tenant:
+    post:
+      tags: [onboarding]
+      summary: Crea (o devuelve, si ya existe) el tenant del usuario autenticado
+      description: >
+        Envuelve public.fn_bootstrap_tenant: crea tenant + profile + sede
+        "Principal" + rol Owner + asignación, de forma idempotente. Antes de
+        este endpoint no había ningún camino (Express ni Supabase directo)
+        para que una organización nueva se diera de alta.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_name, tax_id, industry_type_id]
+              properties:
+                tenant_name:
+                  type: string
+                tax_id:
+                  type: string
+                  pattern: "^\\d{11}$"
+                  description: RUC de 11 dígitos.
+                industry_type_id:
+                  type: string
+                  example: ong
+                plan_id:
+                  type: string
+                  default: basic
+                billing_day:
+                  type: integer
+                  minimum: 1
+                  maximum: 28
+                  default: 1
+      responses:
+        "201":
+          description: Tenant creado o ya existente para este usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenant_id:
+                    type: string
+                    format: uuid
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /sedes:
+    get:
+      tags: [sedes]
+      summary: Lista las sedes del tenant actual
+      responses:
+        "200":
+          description: Lista de sedes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sedes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Sede"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [sedes]
+      summary: Crea una nueva sede (requiere ser administrador del tenant)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Sede creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sede:
+                    $ref: "#/components/schemas/Sede"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "403":
+          description: El actor no es administrador del tenant (IAM-003).
+
+  /sedes/{sedeId}:
+    put:
+      tags: [sedes]
+      summary: Actualiza el nombre o estado de una sede (requiere ser administrador)
+      parameters:
+        - name: sedeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                is_active:
+                  type: boolean
+      responses:
+        "200":
+          description: Sede actualizada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sede:
+                    $ref: "#/components/schemas/Sede"
+        "403":
+          description: El actor no es administrador del tenant (IAM-003).
+        "404":
+          description: Sede no encontrada en este tenant.
+    delete:
+      tags: [sedes]
+      summary: Desactiva una sede (soft-delete — no elimina la fila; ver comentario en sedes.js)
+      parameters:
+        - name: sedeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Sede desactivada.
+        "403":
+          description: El actor no es administrador del tenant (IAM-003).
+        "404":
+          description: Sede no encontrada en este tenant.
