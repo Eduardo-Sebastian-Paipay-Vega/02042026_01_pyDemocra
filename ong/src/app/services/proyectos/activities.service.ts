@@ -358,7 +358,7 @@ async function loadVolunteerLabels(
 function buildActivityPayload(input: ActivityFormValues) {
   const projectId = sanitizeOptionalId(input.projectId);
   const title = sanitizeText(input.title, 200);
-  const description = sanitizeText(input.description, 4000) || null;
+  const description = sanitizeText(input.description, 4000);
   const statusCode = resolveActivityStatusCode(input.statusCode);
   const startAt = normalizeDateValue(input.startAt);
   const endAt = normalizeDateValue(input.endAt);
@@ -427,7 +427,7 @@ async function ensureLocationExists(
 function getDateKey(value: string | null | undefined): string | null {
   if (!value) return null;
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10) || null;
+  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
   return parsed.toISOString().slice(0, 10);
 }
 

@@ -524,10 +524,10 @@ export async function saveBeneficiaryMedicalRecord(options: {
   const payload = {
     tenant_id: tenantId,
     id_beneficiario: beneficiaryId,
-    tipos_sangre: sanitizeText(input.bloodType ?? null, 20) || null,
-    alergias: sanitizeText(input.allergies ?? null, 500) || null,
-    condiciones_preexistentes: sanitizeText(input.preexistingConditions ?? null, 500) || null,
-    medicacion_actual: sanitizeText(input.currentMedication ?? null, 500) || null,
+    tipos_sangre: sanitizeText(input.bloodType ?? null, 20),
+    alergias: sanitizeText(input.allergies ?? null, 500),
+    condiciones_preexistentes: sanitizeText(input.preexistingConditions ?? null, 500),
+    medicacion_actual: sanitizeText(input.currentMedication ?? null, 500),
     updated_by: actorId,
   };
 
@@ -595,8 +595,8 @@ export async function saveVolunteerSensitiveRecord(options: {
   const payload = {
     tenant_id: tenantId,
     id_voluntario: volunteerId,
-    condiciones_medicas: sanitizeText(input.medicalConditions ?? null, 500) || null,
-    contacto_emergencia: sanitizeText(input.emergencyContact ?? null, 200) || null,
+    condiciones_medicas: sanitizeText(input.medicalConditions ?? null, 500),
+    contacto_emergencia: sanitizeText(input.emergencyContact ?? null, 200),
     telefono_emergencia: sanitizePhone(input.emergencyPhone),
     updated_by: actorId,
   };

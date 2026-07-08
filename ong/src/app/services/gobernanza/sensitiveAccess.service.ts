@@ -461,7 +461,7 @@ function sanitizeConstraintInput(input: RoleAccessConstraintFormInput) {
   }
 
   const sedeId = input.sedeId === "all" ? null : sanitizeOptionalId(input.sedeId);
-  const ipCidr = sanitizeText(input.ipCidr ?? null, 80) || null;
+  const ipCidr = sanitizeText(input.ipCidr ?? null, 80);
   const timeStart = normalizeTimeValue(input.timeStart);
   const timeEnd = normalizeTimeValue(input.timeEnd);
 

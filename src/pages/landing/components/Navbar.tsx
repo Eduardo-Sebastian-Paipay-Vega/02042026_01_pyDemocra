@@ -75,6 +75,38 @@ export function Navbar({ onOpenContact }: NavbarProps) {
           transition={{ delay: 0.32, duration: 0.5 }}
           className="hidden md:flex items-center gap-5"
         >
+          {/* Participa Dropdown */}
+          <div className="group relative">
+            <button
+              type="button"
+              className="text-sm font-light transition-colors flex items-center gap-1"
+              style={{ color: "var(--body-fg)", transitionDuration: "var(--t-smooth)" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#ffffff")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--body-fg)")}
+            >
+              Participa
+              <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div className="absolute top-full right-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-xl p-2 w-48 shadow-xl" style={{ backdropFilter: "blur(12px)" }}>
+                <a
+                  href="/ong/join"
+                  className="block px-3 py-2 text-sm font-light text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  Canjear Código ACE
+                </a>
+                <a
+                  href="/ong/signup"
+                  className="block px-3 py-2 text-sm font-light text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  Ser Voluntario
+                </a>
+              </div>
+            </div>
+          </div>
+
           <Link
             to="/login"
             className="text-sm font-light transition-colors"
@@ -105,14 +137,14 @@ export function Navbar({ onOpenContact }: NavbarProps) {
           </button>
 
           {/* Outline CTA — visually lighter than Hero solid */}
-          <Link to="/login">
+          <a href="/ong/create">
             <button
               className="h-9 px-5 rounded-xl text-sm font-medium border border-white/15 bg-transparent text-white hover:border-white/35 hover:bg-white/[0.05]"
               style={{ transition: `all var(--t-smooth)` }}
             >
               Comenzar ahora
             </button>
-          </Link>
+          </a>
         </motion.div>
 
         {/* Mobile hamburger */}
@@ -150,6 +182,13 @@ export function Navbar({ onOpenContact }: NavbarProps) {
               ))}
             </div>
             <div className="pb-5 space-y-2 border-t border-white/[0.06] pt-4">
+              <div className="px-3 pb-1 text-xs font-medium text-white/40 uppercase tracking-wider">Participa</div>
+              <a href="/ong/join" className="block w-full py-2 px-3 text-sm font-light text-white/55 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                Canjear Código ACE
+              </a>
+              <a href="/ong/signup" className="block w-full py-2 px-3 text-sm font-light text-white/55 hover:text-white hover:bg-white/5 rounded-lg transition-colors mb-4">
+                Ser Voluntario
+              </a>
               <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-white/60 hover:text-white hover:bg-white/5 rounded-xl">
                   Iniciar sesión
@@ -162,7 +201,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
               >
                 Contacto
               </button>
-              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+              <a href="/ong/create" onClick={() => setIsMenuOpen(false)}>
                 <button
                   className="w-full h-11 rounded-xl text-sm font-semibold text-white"
                   style={{
@@ -172,7 +211,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
                 >
                   Comenzar ahora
                 </button>
-              </Link>
+              </a>
             </div>
           </motion.div>
         )}

@@ -114,8 +114,8 @@ function Field({
 
 function textInputClass(disabled = false) {
   return [
-    "h-11 w-full rounded-2xl border border-white/[0.08] bg-[#0D0D0D]/80 px-3 text-[13px] text-[#F5F5F5] outline-none transition-colors",
-    "placeholder:text-[#5F5F5F] focus:border-white/[0.18]",
+    "h-11 w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 text-[13px] text-[#F5F5F5] outline-none transition-colors",
+    "placeholder:text-[#5F5F5F] focus:border-white/[0.2]",
     disabled ? "cursor-not-allowed opacity-70" : "",
   ]
     .filter(Boolean)
@@ -124,8 +124,8 @@ function textInputClass(disabled = false) {
 
 function selectInputClass(disabled = false) {
   return [
-    "h-11 w-full rounded-2xl border border-white/[0.08] bg-[#0D0D0D]/80 px-3 text-[13px] text-[#F5F5F5] outline-none transition-colors",
-    "focus:border-white/[0.18]",
+    "h-11 w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 text-[13px] text-[#F5F5F5] outline-none transition-colors",
+    "focus:border-white/[0.2]",
     disabled ? "cursor-not-allowed opacity-70" : "",
   ]
     .filter(Boolean)
@@ -343,7 +343,7 @@ export function VolunteerRegistrationPage() {
 
   return (
     <div
-      className="min-h-screen overflow-x-hidden bg-[#070707] px-4 py-8 text-[#F5F5F5] sm:px-6 lg:px-8"
+      className="w-full flex-grow px-4 text-[#F5F5F5] sm:px-6 lg:px-8 relative z-10"
       style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
     >
       <div className="mx-auto max-w-6xl space-y-8">
@@ -644,7 +644,7 @@ export function VolunteerRegistrationPage() {
               <textarea
                 value={form.notes}
                 onChange={(event) => updateForm("notes", event.target.value)}
-                className="min-h-[110px] w-full rounded-2xl border border-white/[0.08] bg-[#0D0D0D]/80 px-3 py-3 text-[13px] text-[#F5F5F5] outline-none placeholder:text-[#5F5F5F]"
+                className="min-h-[110px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-[13px] text-[#F5F5F5] outline-none placeholder:text-[#5F5F5F] focus:border-white/[0.2] transition-colors"
                 disabled={!preview?.canConsume}
                 placeholder="Observaciones adicionales para el alta del voluntariado"
               />

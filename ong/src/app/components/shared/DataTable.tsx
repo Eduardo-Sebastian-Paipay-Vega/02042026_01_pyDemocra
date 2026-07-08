@@ -15,7 +15,7 @@ export interface Column<T> {
 }
 
 export interface RowAction<T> {
-  label: string;
+  label: string | ((item: T) => string);
   onClick: (item: T) => void;
   variant?: "default" | "destructive";
   disabled?: boolean | ((item: T) => boolean);
@@ -42,7 +42,7 @@ export function DataTable<T extends { id: string }>({
     return <TableSkeleton rows={5} columns={columns.length} className={className} />;
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div
         className={cn("rounded-xl p-12 text-center backdrop-blur-xl", className)}
@@ -121,7 +121,7 @@ export function DataTable<T extends { id: string }>({
                             )}
                             style={action.variant !== "destructive" ? { color: "var(--t-text-secondary)" } : undefined}
                           >
-                            {action.label}
+                            {typeof action.label === "function" ? action.label(item) : action.label}
                           </DropdownMenuItem>
                         );
                       })}

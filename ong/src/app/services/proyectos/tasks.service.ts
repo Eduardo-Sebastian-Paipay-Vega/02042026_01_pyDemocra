@@ -246,7 +246,7 @@ async function ensureActivityExists(tenantId: string, activityId: string): Promi
 function buildTaskPayload(input: TaskFormValues) {
   const activityId = sanitizeOptionalId(input.activityId);
   const title = sanitizeText(input.title, 200);
-  const description = sanitizeText(input.description, 4000) || null;
+  const description = sanitizeText(input.description, 4000);
   const statusCode = resolveTaskStatusCode(input.statusCode);
   const deadline = normalizeDateValue(input.deadline);
 

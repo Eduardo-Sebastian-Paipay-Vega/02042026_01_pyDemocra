@@ -619,7 +619,7 @@ export async function createAsistencia(input: AttendanceRegisterInput): Promise<
       check_out_at: exitTime ? combineDateAndTime(date, exitTime, now) : null,
       origen_registro: "manual" as const,
       estado: "presente" as const,
-      observacion: sanitizeText(input.observation, 500) || null,
+      observacion: sanitizeText(input.observation, 500),
       created_by: actorId,
       updated_by: actorId,
     };

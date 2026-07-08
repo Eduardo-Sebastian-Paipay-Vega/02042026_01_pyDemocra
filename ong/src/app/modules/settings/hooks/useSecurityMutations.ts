@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import type {
   DeviceTrustInput,
   SessionTerminationInput,
@@ -18,17 +18,24 @@ export function useSecurityMutations(onCompleted?: () => void) {
   const [isSavingTerminal, setIsSavingTerminal] = useState(false);
   const [isRemovingTerminal, setIsRemovingTerminal] = useState(false);
 
+  const isTerminatingRef = useRef(false);
+  const isUpdatingRef = useRef(false);
+  const isSavingRef = useRef(false);
+  const isRemovingRef = useRef(false);
+
   const closeSession = useCallback(
     async (input: SessionTerminationInput) => {
-      if (isTerminatingSession) {
+      if (isTerminatingRef.current) {
         return;
       }
 
+      isTerminatingRef.current = true;
       setIsTerminatingSession(true);
       try {
         await terminateSession(input);
         onCompleted?.();
       } finally {
+        isTerminatingRef.current = false;
         setIsTerminatingSession(false);
       }
     },
@@ -37,15 +44,17 @@ export function useSecurityMutations(onCompleted?: () => void) {
 
   const updateDeviceTrust = useCallback(
     async (input: DeviceTrustInput) => {
-      if (isUpdatingDevice) {
+      if (isUpdatingRef.current) {
         return;
       }
 
+      isUpdatingRef.current = true;
       setIsUpdatingDevice(true);
       try {
         await setDeviceTrust(input);
         onCompleted?.();
       } finally {
+        isUpdatingRef.current = false;
         setIsUpdatingDevice(false);
       }
     },
@@ -54,10 +63,11 @@ export function useSecurityMutations(onCompleted?: () => void) {
 
   const saveTerminal = useCallback(
     async (input: TerminalMutationInput) => {
-      if (isSavingTerminal) {
+      if (isSavingRef.current) {
         return;
       }
 
+      isSavingRef.current = true;
       setIsSavingTerminal(true);
       try {
         if (input.terminalId) {
@@ -67,6 +77,7 @@ export function useSecurityMutations(onCompleted?: () => void) {
         }
         onCompleted?.();
       } finally {
+        isSavingRef.current = false;
         setIsSavingTerminal(false);
       }
     },
@@ -75,15 +86,17 @@ export function useSecurityMutations(onCompleted?: () => void) {
 
   const removeTerminal = useCallback(
     async (terminalId: string) => {
-      if (isRemovingTerminal) {
+      if (isRemovingRef.current) {
         return;
       }
 
+      isRemovingRef.current = true;
       setIsRemovingTerminal(true);
       try {
         await deleteTerminal(terminalId);
         onCompleted?.();
       } finally {
+        isRemovingRef.current = false;
         setIsRemovingTerminal(false);
       }
     },

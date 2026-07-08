@@ -330,7 +330,7 @@ export async function createEvidencia(
         id_voluntario: volunteerId,
         url_archivo: resolvedRoute,
         tipo_evidencia: typeCode ?? "foto",
-        comentario: description || null,
+        comentario: description || "",
         created_by: actorId,
         updated_by: actorId,
       })
@@ -392,7 +392,7 @@ export async function updateEvidencia(
         input.typeId === null ? "foto" : (await resolveEvidenceTypeCode(Number(input.typeId))) ?? "foto";
     }
     if (input.description !== undefined) {
-      updates.comentario = sanitizeText(input.description, 500) || null;
+      updates.comentario = sanitizeText(input.description, 500);
     }
     if (input.routeInput !== undefined) {
       const route = sanitizePath(input.routeInput);

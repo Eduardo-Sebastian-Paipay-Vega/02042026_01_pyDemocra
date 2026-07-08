@@ -1058,7 +1058,7 @@ export async function createSolicitud(
         email,
         estado: stateCode,
         fecha_solicitud: new Date().toISOString(),
-        notas: notes || null,
+        notas: notes || "",
         created_by: actorId,
         updated_by: actorId,
       })
@@ -1105,7 +1105,7 @@ export async function updateSolicitud(
       payload.email = sanitizeText(input.email, 255);
     }
     if (typeof input.notes !== "undefined") {
-      payload.notas = sanitizeText(input.notes ?? null, 2000) || null;
+      payload.notas = sanitizeText(input.notes ?? null, 2000);
     }
 
     const { data, error } = await rrhhSchema()
@@ -1177,7 +1177,7 @@ export async function changeEstadoAdmision(
       id_solicitud: id,
       estado_anterior: previous.estado,
       estado_nuevo: nextState,
-      comentario: comment || null,
+      comentario: comment || "",
       cambiado_por: actorId,
       fecha_cambio: new Date().toISOString(),
     });
@@ -1221,12 +1221,12 @@ export async function convertSolicitudToVoluntario(
     }
 
     const numeroDocumento = sanitizeText(input.numeroDocumento, 50);
-    const tipoDocumento = sanitizeText(input.tipoDocumento ?? null, 10) || null;
-    const genero = sanitizeText(input.genero ?? null, 10) || null;
+    const tipoDocumento = sanitizeText(input.tipoDocumento ?? null, 10);
+    const genero = sanitizeText(input.genero ?? null, 10);
     const codigoPais = sanitizeText(input.codigoPais ?? null, 2) || "PE";
-    const telefono = sanitizeText(input.telefono ?? null, 50) || null;
-    const fechaNacimiento = sanitizeText(input.fechaNacimiento ?? null, 50) || null;
-    const observaciones = sanitizeText(input.observaciones ?? null, 2000) || null;
+    const telefono = sanitizeText(input.telefono ?? null, 50);
+    const fechaNacimiento = sanitizeText(input.fechaNacimiento ?? null, 50);
+    const observaciones = sanitizeText(input.observaciones ?? null, 2000);
     const codigoEstado = sanitizeText(input.codigoEstado ?? null, 50) || "activo";
 
     if (!numeroDocumento) {
@@ -1354,12 +1354,12 @@ export async function generateRegistrationCodeBySolicitud(
     }
 
     const email =
-      sanitizeText(input.email ?? null, 255) || sanitizeText(request.email, 255) || null;
-    const numeroDocumento = sanitizeText(input.numeroDocumento ?? null, 50) || null;
+      sanitizeText(input.email ?? null, 255) || sanitizeText(request.email, 255);
+    const numeroDocumento = sanitizeText(input.numeroDocumento ?? null, 50);
     const nombres =
-      sanitizeText(input.nombres ?? null, 120) || sanitizeText(request.nombres, 120) || null;
+      sanitizeText(input.nombres ?? null, 120) || sanitizeText(request.nombres, 120);
     const apellidos =
-      sanitizeText(input.apellidos ?? null, 120) || sanitizeText(request.apellidos, 120) || null;
+      sanitizeText(input.apellidos ?? null, 120) || sanitizeText(request.apellidos, 120);
     const expiresInMinutes = Math.max(
       15,
       Math.min(10_080, Math.floor(input.expiresInMinutes ?? 1_440))
@@ -1658,7 +1658,7 @@ export async function createEntrevistaAdmision(input: {
         id_solicitud: requestId,
         entrevistador_id: interviewerId,
         fecha_entrevista: scheduledAt,
-        comentarios: comment || null,
+        comentarios: comment || "",
         resultado: result,
         puntaje: score,
         created_by: actorId,
@@ -1707,10 +1707,10 @@ export async function updateEntrevistaAdmision(input: {
       payload.fecha_entrevista = sanitizeText(input.scheduledAt, 50);
     }
     if (typeof input.result === "string") {
-      payload.resultado = sanitizeText(input.result, 50) || null;
+      payload.resultado = sanitizeText(input.result, 50);
     }
     if (typeof input.comment === "string") {
-      payload.comentarios = sanitizeText(input.comment, 2000) || null;
+      payload.comentarios = sanitizeText(input.comment, 2000);
     }
     if (typeof input.score === "number" && Number.isFinite(input.score)) {
       if (input.score < 0 || input.score > 100) {
@@ -1976,7 +1976,7 @@ export async function toggleOnboardingStep(input: {
       deleted_by: null,
     };
     if (Object.prototype.hasOwnProperty.call(input, "evidenceUrl")) {
-      payload.evidencia_url = sanitizeText(input.evidenceUrl ?? null, 2000) || null;
+      payload.evidencia_url = sanitizeText(input.evidenceUrl ?? null, 2000);
     }
 
     let row: OnboardingVoluntarioRow | null = null;

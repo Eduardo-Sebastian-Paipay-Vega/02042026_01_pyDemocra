@@ -122,7 +122,7 @@ async function readFunctionErrorPayload(
     return {
       status,
       message:
-        sanitizeText(payload?.error ?? payload?.message ?? payload?.code ?? null, 500) || null,
+        sanitizeText(payload?.error ?? payload?.message ?? payload?.code ?? null, 500),
     };
   } catch {
     try {

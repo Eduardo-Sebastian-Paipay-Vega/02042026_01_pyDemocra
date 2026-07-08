@@ -250,7 +250,7 @@ async function upsertBeneficiaryBase(
 
   const payload = {
     tenant_id: tenantId,
-    numero_documento: sanitizeText(input.documentNumber ?? null, 50) || null,
+    numero_documento: sanitizeText(input.documentNumber ?? null, 50),
     tipo_documento: sanitizeOptionalId(input.documentType ?? null),
     codigo_pais: sanitizeOptionalId(input.countryCode ?? null) ?? "PE",
     nombre: sanitizeText(input.firstName, 150),
@@ -258,9 +258,9 @@ async function upsertBeneficiaryBase(
     fecha_nacimiento: normalizeDateValue(input.birthDate),
     genero: sanitizeOptionalId(input.genderCode ?? null),
     telefono: sanitizePhone(input.phone),
-    direccion: sanitizeText(input.address ?? null, 250) || null,
-    foto_url: sanitizeText(input.photoUrl ?? null, 400) || null,
-    observaciones: sanitizeText(input.notes ?? null, 500) || null,
+    direccion: sanitizeText(input.address ?? null, 250),
+    foto_url: sanitizeText(input.photoUrl ?? null, 400),
+    observaciones: sanitizeText(input.notes ?? null, 500),
     updated_by: actorId,
   };
 
@@ -335,8 +335,8 @@ async function syncBeneficiaryProfiles(
       id_beneficiario: beneficiaryId,
       nombre_tutor: sanitizeText(input.childProfile?.tutorName ?? null, 200),
       telefono_tutor: sanitizePhone(input.childProfile?.tutorPhone ?? null),
-      colegio: sanitizeText(input.childProfile?.school ?? null, 200) || null,
-      grado_escolar: sanitizeText(input.childProfile?.schoolGrade ?? null, 50) || null,
+      colegio: sanitizeText(input.childProfile?.school ?? null, 200),
+      grado_escolar: sanitizeText(input.childProfile?.schoolGrade ?? null, 50),
       updated_by: actorId,
     };
 
@@ -384,7 +384,7 @@ async function syncBeneficiaryProfiles(
       movilidad_reducida: input.seniorProfile?.limitedMobility ?? false,
       vive_solo: input.seniorProfile?.livesAlone ?? false,
       contacto_emergencia:
-        sanitizeText(input.seniorProfile?.emergencyContact ?? null, 200) || null,
+        sanitizeText(input.seniorProfile?.emergencyContact ?? null, 200),
       updated_by: actorId,
     };
 

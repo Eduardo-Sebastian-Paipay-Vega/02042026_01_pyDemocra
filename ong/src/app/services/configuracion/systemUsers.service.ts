@@ -565,7 +565,7 @@ export async function provisionSystemUser(
 
   const email = sanitizeText(input.email, 255).toLowerCase();
   const mode = input.mode === "create" ? "create" : "invite";
-  const temporaryPassword = sanitizeText(input.temporaryPassword ?? null, 128) || null;
+  const temporaryPassword = sanitizeText(input.temporaryPassword ?? null, 128);
 
   if (!email) {
     throw new Error("El correo es obligatorio para provisionar el usuario.");
@@ -581,10 +581,10 @@ export async function provisionSystemUser(
       "admin-provision-user",
       {
         email,
-        fullName: sanitizeText(input.fullName ?? null, 180) || null,
-        tipoDocumento: sanitizeText(input.tipoDocumento ?? null, 10) || null,
-        numeroDocumento: sanitizeText(input.numeroDocumento ?? null, 50) || null,
-        genero: sanitizeText(input.genero ?? null, 10) || null,
+        fullName: sanitizeText(input.fullName ?? null, 180),
+        tipoDocumento: sanitizeText(input.tipoDocumento ?? null, 10),
+        numeroDocumento: sanitizeText(input.numeroDocumento ?? null, 50),
+        genero: sanitizeText(input.genero ?? null, 10),
         volunteerId: sanitizeOptionalId(input.volunteerId ?? null),
         mode,
         temporaryPassword,
@@ -627,7 +627,7 @@ export async function revokeSystemUserSessions(
             .map((value) => sanitizeOptionalId(value))
             .filter(Boolean)
         ),
-        targetAccessToken: sanitizeText(input.targetAccessToken ?? null, 4096) || null,
+        targetAccessToken: sanitizeText(input.targetAccessToken ?? null, 4096),
       }
     );
   } catch (error) {

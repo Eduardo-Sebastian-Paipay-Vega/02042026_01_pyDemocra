@@ -803,7 +803,7 @@ export async function resolveHoras(input: HoursResolutionInput): Promise<Mutatio
 
     const actorId =
       sanitizeOptionalId(input.reviewerId ?? null) ?? (await resolveCurrentUserId());
-    const comment = sanitizeText(input.comment, 500) || null;
+    const comment = sanitizeText(input.comment, 500);
     const databaseState =
       targetState.kind === "approved"
         ? "aprobada"

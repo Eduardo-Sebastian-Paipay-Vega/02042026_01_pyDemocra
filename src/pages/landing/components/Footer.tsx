@@ -8,6 +8,7 @@ export function Footer({ onOpenContact }: FooterProps) {
   const links: Record<string, string[]> = {
     Producto: ["Características", "Precios", "Integraciones", "API Docs", "Changelog"],
     Empresa: ["Sobre nosotros", "Blog", "Carreras", "Prensa", "Contacto"],
+    Participa: ["Canjear código", "Registro voluntarios", "Portal ONG"],
     Legal: ["Privacidad", "Términos", "Seguridad", "Cookies", "GDPR"],
   };
 
@@ -15,12 +16,15 @@ export function Footer({ onOpenContact }: FooterProps) {
     "Características": "#producto",
     "Precios": "#precios",
     "Cómo funciona": "#como-funciona",
+    "Canjear código": "/ong/join",
+    "Registro voluntarios": "/ong/signup",
+    "Portal ONG": "/ong",
   };
 
   return (
     <footer className="border-t border-white/5 py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-16 mb-16">
+        <div className="grid md:grid-cols-5 gap-8 mb-16">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}

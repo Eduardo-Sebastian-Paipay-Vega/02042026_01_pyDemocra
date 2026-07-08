@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
+import { PublicLayout } from "./components/layout/PublicLayout";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import { useTenantBootstrap } from "./tenant/TenantBootstrapProvider";
 import {
@@ -97,6 +98,11 @@ const VolunteerRegistrationPage = lazy(() =>
 const AccessCodeRedeemPage = lazy(() =>
   import("./pages/landing/AccessCodeRedeemPage").then((m) => ({
     default: m.AccessCodeRedeemPage,
+  }))
+);
+const CreateTenantPage = lazy(() =>
+  import("./pages/landing/CreateTenantPage").then((m) => ({
+    default: m.CreateTenantPage,
   }))
 );
 
@@ -275,29 +281,33 @@ export const router = createBrowserRouter(
       Component: LandingPage,
     },
     {
-      path: "/landing/register",
-      Component: VolunteerRegistrationPage,
-    },
-    {
-      // Alias público con URL corta para enlaces de invitación: /ong/signup?code=XYZ
-      // Mismo componente y misma Edge Function que /landing/register — no duplica lógica.
-      path: "/signup",
-      Component: VolunteerRegistrationPage,
-    },
-    {
-      // Códigos ACE (STAFF_JOIN / BENEFICIARY_JOIN / GENERIC), generados desde
-      // /app/ong/settings/access-control. Distinto del flujo de voluntarios
-      // por solicitud de admisión (/signup), que usa su propia Edge Function.
-      // Envuelto en ErrorBoundary: signUp + completeAccessOnboarding tocan
-      // <input> de email/password, donde el autofill del navegador puede
-      // inyectar nodos fuera del control de React (ver AccessCodeRedeemPage.tsx)
-      // — si eso revienta el render, esto evita la pantalla en blanco.
-      path: "/join",
-      element: (
-        <ErrorBoundary fallbackMessage="No se pudo completar tu registro. Vuelve a intentarlo.">
-          <AccessCodeRedeemPage />
-        </ErrorBoundary>
-      ),
+      element: <PublicLayout />,
+      children: [
+        {
+          path: "/landing/register",
+          Component: VolunteerRegistrationPage,
+        },
+        {
+          path: "/signup",
+          Component: VolunteerRegistrationPage,
+        },
+        {
+          path: "/join",
+          element: (
+            <ErrorBoundary fallbackMessage="No se pudo completar tu registro. Vuelve a intentarlo.">
+              <AccessCodeRedeemPage />
+            </ErrorBoundary>
+          ),
+        },
+        {
+          path: "/create",
+          element: (
+            <ErrorBoundary fallbackMessage="Error al cargar el formulario de creación.">
+              <CreateTenantPage />
+            </ErrorBoundary>
+          ),
+        },
+      ],
     },
     {
       path: "/app/ong",

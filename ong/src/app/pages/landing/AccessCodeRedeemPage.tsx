@@ -16,7 +16,7 @@ const LINK_TYPE_LABEL: Record<string, string> = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-white/[0.1] bg-[#0c0c0c]/60 px-4 py-2.5 text-[14px] text-[#F5F5F5] placeholder:text-white/30 outline-none focus:border-[#4A7BA7]/60";
+  "w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-[14px] text-[#F5F5F5] placeholder:text-white/30 outline-none focus:border-white/[0.2] transition-colors";
 
 export function AccessCodeRedeemPage() {
   const navigate = useNavigate();
@@ -183,8 +183,12 @@ export function AccessCodeRedeemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070707] flex items-center justify-center px-4 py-16">
-      <GlassCard className="w-full max-w-md p-8">
+    <div className="w-full flex-grow flex items-center justify-center px-4">
+      <GlassCard className="w-full max-w-md p-8 relative z-10" style={{
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        backdropFilter: "blur(20px)",
+      }}>
         <h1 className="text-[26px] font-semibold text-[#F5F5F5] mb-2">
           Únete a <GradientText>Democra</GradientText>
         </h1>

@@ -398,11 +398,11 @@ export async function updateItem(
     }
 
     if (input.sku !== undefined) {
-      payload.sku = sanitizeText(input.sku, MAX_SKU_LENGTH) || null;
+      payload.sku = sanitizeText(input.sku, MAX_SKU_LENGTH);
     }
 
     if (input.imageUrl !== undefined) {
-      payload.imagen_url = sanitizeText(input.imageUrl, MAX_IMAGE_LENGTH) || null;
+      payload.imagen_url = sanitizeText(input.imageUrl, MAX_IMAGE_LENGTH);
     }
 
     if (input.active !== undefined) {

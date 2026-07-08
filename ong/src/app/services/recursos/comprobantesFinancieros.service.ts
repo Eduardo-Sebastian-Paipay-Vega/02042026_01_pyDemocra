@@ -115,8 +115,8 @@ export async function updateComprobanteFinanciero(input: FinancialReceiptUpdateI
     }
     if (input.fileType !== undefined) payload.tipo_comprobante = sanitizeText(input.fileType, 50) || "Comprobante";
     if (input.receiptNumber !== undefined) payload.numero_comprobante = sanitizeText(input.receiptNumber, 100) || `REC-${Date.now()}`;
-    if (input.issuerDocument !== undefined) payload.emisor_ruc_dni = sanitizeText(input.issuerDocument, 50) || null;
-    if (input.issuerName !== undefined) payload.emisor_nombre = sanitizeText(input.issuerName, 200) || null;
+    if (input.issuerDocument !== undefined) payload.emisor_ruc_dni = sanitizeText(input.issuerDocument, 50);
+    if (input.issuerName !== undefined) payload.emisor_nombre = sanitizeText(input.issuerName, 200);
     if (Object.keys(payload).length === 0) throw new Error("No hay cambios para actualizar.");
 
     const { data, error } = await finanzasSchema()

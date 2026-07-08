@@ -380,7 +380,7 @@ function toDateOnly(value: string | null | undefined): string | null {
     return parsed.toISOString().slice(0, 10);
   }
 
-  return value.slice(0, 10) || null;
+  return value.slice(0, 10);
 }
 
 export async function listActividades(
@@ -584,7 +584,7 @@ export async function createActividad(input: ActivityCreateInput): Promise<Activ
   try {
     const projectId = sanitizeOptionalId(input.projectId);
     const title = sanitizeText(input.name, 200);
-    const description = sanitizeText(input.description ?? null, 4000) || null;
+    const description = sanitizeText(input.description ?? null, 4000);
     const startAt = toDateOnly(input.startAt ?? null);
     const endAt = toDateOnly(input.endAt ?? null);
     const locationId = sanitizeOptionalId(input.locationId ?? null);
@@ -694,7 +694,7 @@ export async function updateActividad(
       updates.titulo = title;
     }
     if (input.description !== undefined) {
-      updates.descripcion = sanitizeText(input.description, 4000) || null;
+      updates.descripcion = sanitizeText(input.description, 4000);
     }
     if (input.statusId !== undefined) {
       const stateCode = resolveActivityStateCode(input.statusId);
@@ -850,7 +850,7 @@ export async function addAsignacionActividad(
   try {
     const activityId = sanitizeOptionalId(payload.activityId);
     const volunteerId = sanitizeOptionalId(payload.volunteerId);
-    const role = sanitizeText(payload.role ?? null, 100) || null;
+    const role = sanitizeText(payload.role ?? null, 100);
 
     if (!activityId) {
       throw new Error("La actividad es obligatoria.");
@@ -933,7 +933,7 @@ export async function updateAsignacionActividad(
 
     const updates: Record<string, string | null> = {};
     if (input.role !== undefined) {
-      updates.rol_en_actividad = sanitizeText(input.role, 100) || null;
+      updates.rol_en_actividad = sanitizeText(input.role, 100);
     }
 
     if (Object.keys(updates).length === 0) {

@@ -687,7 +687,7 @@ async function syncCoordinatorProfile(
   }
 
   const yearsExperience = Math.max(0, Math.round(Number(profile?.yearsExperience ?? 0)));
-  const department = sanitizeText(profile?.department ?? null, 150) || null;
+  const department = sanitizeText(profile?.department ?? null, 150);
 
   if (data) {
     const { error: updateError } = await rrhhSchema()
@@ -752,9 +752,9 @@ async function upsertVolunteerBase(
     fecha_nacimiento: normalizeDateValue(input.birthDate),
     email: sanitizeEmail(input.email),
     telefono: sanitizePhone(input.phone),
-    ruta_foto: sanitizeText(input.photoUrl ?? null, 400) || null,
+    ruta_foto: sanitizeText(input.photoUrl ?? null, 400),
     codigo_estado: sanitizeText(input.stateCode, 50),
-    observaciones: sanitizeText(input.notes ?? null, 500) || null,
+    observaciones: sanitizeText(input.notes ?? null, 500),
     updated_by: actorId,
   };
 

@@ -176,8 +176,8 @@ function normalizeFieldRows(
       width,
       height,
       fontSize,
-      fontFamily: sanitizeText(field.fontFamily ?? null, 100) || null,
-      fontWeight: sanitizeText(field.fontWeight ?? null, 50) || null,
+      fontFamily: sanitizeText(field.fontFamily ?? null, 100),
+      fontWeight: sanitizeText(field.fontWeight ?? null, 50),
       colorHex: normalizeColorHex(field.colorHex),
       zIndex: Math.max(1, Math.round(Number(field.zIndex) || 1)),
     };
@@ -928,7 +928,7 @@ async function ensureCardInputValid(
     qrPayload: buildIdCardQrPayload(cardCode),
     expiresAt: normalizeExpiryDate(input.expiresAt),
     stateCode,
-    imageRenderUrl: sanitizeLongText(input.imageRenderUrl, 2_000_000) || null,
+    imageRenderUrl: sanitizeLongText(input.imageRenderUrl, 2_000_000),
   };
 }
 

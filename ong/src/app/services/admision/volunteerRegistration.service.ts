@@ -123,7 +123,7 @@ async function readFunctionErrorPayload(
     return {
       status,
       message:
-        sanitizeText(payload?.error ?? payload?.message ?? payload?.code ?? null, 500) || null,
+        sanitizeText(payload?.error ?? payload?.message ?? payload?.code ?? null, 500),
     };
   } catch {
     try {
@@ -337,7 +337,7 @@ export async function consumeVolunteerRegistrationCode(
   const documents = input.documents
     .map((document) => ({
       type: sanitizeText(document.type, 50),
-      manualUrl: sanitizeText(document.manualUrl ?? null, 2000) || null,
+      manualUrl: sanitizeText(document.manualUrl ?? null, 2000),
       file: document.file ?? null,
     }))
     .filter((document) => document.type || document.manualUrl || document.file);
@@ -390,12 +390,12 @@ export async function consumeVolunteerRegistrationCode(
       firstName,
       lastName,
       documentNumber,
-      documentType: sanitizeText(input.documentType ?? null, 20) || null,
-      genderCode: sanitizeText(input.genderCode ?? null, 20) || null,
-      countryCode: sanitizeText(input.countryCode ?? null, 20) || null,
-      birthDate: sanitizeText(input.birthDate ?? null, 30) || null,
-      phone: sanitizeText(input.phone ?? null, 50) || null,
-      notes: sanitizeText(input.notes ?? null, 500) || null,
+      documentType: sanitizeText(input.documentType ?? null, 20),
+      genderCode: sanitizeText(input.genderCode ?? null, 20),
+      countryCode: sanitizeText(input.countryCode ?? null, 20),
+      birthDate: sanitizeText(input.birthDate ?? null, 30),
+      phone: sanitizeText(input.phone ?? null, 50),
+      notes: sanitizeText(input.notes ?? null, 500),
       documents: payloadDocuments,
     })
   );

@@ -107,7 +107,7 @@ export function Hero({ onOpenContact }: HeroProps) {
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.18 }}
           >
-            <Link to="/login">
+            <a href="/ong/create">
               <Button
                 size="lg"
                 className="relative overflow-hidden text-white px-10 h-12 rounded-xl text-sm font-semibold group"
@@ -128,7 +128,7 @@ export function Hero({ onOpenContact }: HeroProps) {
                 <span className="relative z-10">Comenzar ahora</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </Button>
-            </Link>
+            </a>
           </motion.div>
 
           {/* Ghost secondary */}

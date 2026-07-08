@@ -536,7 +536,7 @@ export async function resolveAprobacion(
       const estado = mapTargetStateIdToEstado(input.targetStateId);
       const actorId = sanitizeOptionalId(input.reviewerId ?? null);
       const nowIso = new Date().toISOString();
-      const comment = sanitizeText(input.comment, 500) || null;
+      const comment = sanitizeText(input.comment, 500);
       const { error: updateError } = await ongSchema()
         .from("aprobaciones")
         .update({

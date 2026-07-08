@@ -420,8 +420,7 @@ async function filterRows(
   const categoryId =
     filters.categoryId && filters.categoryId !== "all" ? filters.categoryId : null;
   const typeCode =
-    sanitizeText(String(filters.typeCode ?? filters.typeId ?? ""), 20).toLowerCase() ||
-    null;
+    sanitizeText(String(filters.typeCode ?? filters.typeId ?? ""), 20).toLowerCase();
   const projectId =
     filters.projectId && filters.projectId !== "all" ? filters.projectId : null;
   const approvalKindFilter =
@@ -885,8 +884,8 @@ export async function createTransaccionFinanciera(
       fecha_transaccion: input.transactionDate
         ? new Date(input.transactionDate).toISOString().slice(0, 10)
         : new Date().toISOString().slice(0, 10),
-      descripcion: sanitizeText(input.description, MAX_DESCRIPTION_LENGTH) || null,
-      comprobante_url: sanitizeText(input.receiptUrl, 500) || null,
+      descripcion: sanitizeText(input.description, MAX_DESCRIPTION_LENGTH),
+      comprobante_url: sanitizeText(input.receiptUrl, 500),
       id_proyecto: projectId,
       created_by: actorId,
       updated_by: actorId,
@@ -954,10 +953,10 @@ export async function updateTransaccionFinanciera(
         .slice(0, 10);
     }
     if (input.description !== undefined) {
-      payload.descripcion = sanitizeText(input.description, MAX_DESCRIPTION_LENGTH) || null;
+      payload.descripcion = sanitizeText(input.description, MAX_DESCRIPTION_LENGTH);
     }
     if (input.receiptUrl !== undefined) {
-      payload.comprobante_url = sanitizeText(input.receiptUrl, 500) || null;
+      payload.comprobante_url = sanitizeText(input.receiptUrl, 500);
     }
     if (input.projectId !== undefined) {
       payload.id_proyecto = sanitizeOptionalId(input.projectId ?? null);
@@ -1027,7 +1026,7 @@ async function resolveEgresoApproval(
   }
 
   const actorId = await resolveActorId(input.reviewerId ?? null);
-  const comment = sanitizeText(input.comment, MAX_DESCRIPTION_LENGTH) || null;
+  const comment = sanitizeText(input.comment, MAX_DESCRIPTION_LENGTH);
   const detail = await getTransaccionFinancieraById(transactionId);
 
   if (detail.transaction.typeKind !== "egreso") {

@@ -192,7 +192,7 @@ export async function createUbicacion(input: InventoryLocationCreateInput): Prom
       latitud: input.latitude ?? null,
       longitud: input.longitude ?? null,
       activa: input.active ?? true,
-      imagen_url: sanitizeText(input.imageUrl, 500) || null,
+      imagen_url: sanitizeText(input.imageUrl, 500),
       codigo_pais: sanitizeOptionalId(input.countryCode ?? null) ?? "PE",
       created_by: actorId,
       updated_by: actorId,
@@ -221,7 +221,7 @@ export async function updateUbicacion(input: InventoryLocationUpdateInput): Prom
     if (input.latitude !== undefined) payload.latitud = input.latitude;
     if (input.longitude !== undefined) payload.longitud = input.longitude;
     if (input.countryCode !== undefined) payload.codigo_pais = sanitizeOptionalId(input.countryCode) ?? "PE";
-    if (input.imageUrl !== undefined) payload.imagen_url = sanitizeText(input.imageUrl, 500) || null;
+    if (input.imageUrl !== undefined) payload.imagen_url = sanitizeText(input.imageUrl, 500);
     if (input.active !== undefined) payload.activa = Boolean(input.active);
     if (Object.keys(payload).length === 2) throw new Error("No hay cambios para actualizar.");
 

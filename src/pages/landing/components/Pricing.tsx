@@ -208,7 +208,7 @@ export function Pricing({ onOpenContact }: PricingProps) {
                     boxShadow: plan.popular ? "0 0 28px rgba(0,85,255,0.35)" : "none",
                     transitionDuration: "var(--t-smooth)",
                   }}
-                  onClick={plan.action === "login" ? () => navigate("/login") : onOpenContact}
+                  onClick={plan.action === "login" ? () => window.location.assign("/ong/create") : onOpenContact}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget;
                     if (plan.popular) {

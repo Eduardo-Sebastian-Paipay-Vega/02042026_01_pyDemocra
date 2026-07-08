@@ -19,7 +19,7 @@ const base = [
   "inline-flex items-center justify-center rounded-full cursor-pointer",
   "transition-all duration-200 ease-out",
   "hover:-translate-y-[2px]",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A7BA7]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070707]",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055FF]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070707]",
   "active:translate-y-0 active:scale-[0.98]",
 ].join(" ");
 
@@ -40,13 +40,13 @@ export function PillButton({
           base,
           sizes[size],
           "text-white font-semibold",
-          "shadow-[0_8px_32px_rgba(74,123,167,0.30)]",
-          "hover:shadow-[0_14px_44px_rgba(74,123,167,0.40)]",
+          "shadow-[0_0_24px_rgba(0,85,255,0.3)]",
+          "hover:shadow-[0_0_36px_rgba(0,85,255,0.45)]",
           className,
         ].join(" ")}
         style={{
           backgroundImage:
-            "linear-gradient(90deg, #4A7BA7 0%, #4D9B8F 100%)",
+            "linear-gradient(135deg, #0055FF 0%, #3b82f6 100%)",
         }}
       >
         {children}
@@ -62,8 +62,8 @@ export function PillButton({
         base,
         sizes[size],
         "text-[#F5F5F5] font-medium",
-        "border border-white/[0.1] bg-[#121212]/60 backdrop-blur-sm",
-        "hover:border-white/[0.2] hover:bg-[#181818]/80",
+        "border border-white/[0.1] bg-white/[0.04] backdrop-blur-sm",
+        "hover:border-white/[0.22] hover:bg-white/[0.08]",
         className,
       ].join(" ")}
     >

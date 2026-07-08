@@ -59,7 +59,7 @@ function validateInput(input: AreaFormInput): { code: string; name: string; desc
   const name = sanitizeText(input.name, NAME_MAX);
   if (!name) throw new Error("El nombre del área es obligatorio.");
 
-  const description = sanitizeText(input.description, DESC_MAX) || null;
+  const description = sanitizeText(input.description, DESC_MAX);
   return { code: code.toUpperCase(), name, description };
 }
 

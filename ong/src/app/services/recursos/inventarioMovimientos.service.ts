@@ -236,7 +236,7 @@ export async function listTransaccionesInventario(params: Partial<InventoryMovem
     const itemId = params.itemId && params.itemId !== "all" ? params.itemId : null;
     const originId = params.originId && params.originId !== "all" ? params.originId : null;
     const destinationId = params.destinationId && params.destinationId !== "all" ? params.destinationId : null;
-    const typeCode = sanitizeText(String(params.typeCode ?? params.typeId ?? ""), 50).toLowerCase() || null;
+    const typeCode = sanitizeText(String(params.typeCode ?? params.typeId ?? ""), 50).toLowerCase();
 
     const { rows, total } = await loadMovementRows({
       itemId,
@@ -490,7 +490,7 @@ export async function listKardex(params: Partial<InventoryKardexFilters> = {}): 
     const catalogs = await resolveCatalogs(warnings);
     const itemId = params.itemId && params.itemId !== "all" ? params.itemId : null;
     const locationId = params.locationId && params.locationId !== "all" ? params.locationId : null;
-    const typeCode = sanitizeText(String(params.typeCode ?? params.typeId ?? ""), 50).toLowerCase() || null;
+    const typeCode = sanitizeText(String(params.typeCode ?? params.typeId ?? ""), 50).toLowerCase();
     const rows = await getRowsForStock(itemId ? [itemId] : undefined);
     const actorLabels = await actorLabelsFor(rows).catch(() => new Map());
     const filtered = rows.filter((row) => {

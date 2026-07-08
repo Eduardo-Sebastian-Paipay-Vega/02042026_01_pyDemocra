@@ -633,7 +633,7 @@ export async function createProjectVolunteerAssignment(
     const actorId = await resolveCurrentUserId();
     const projectId = sanitizeOptionalId(input.projectId);
     const volunteerId = sanitizeOptionalId(input.volunteerId);
-    const role = sanitizeText(input.role, 100) || null;
+    const role = sanitizeText(input.role, 100);
     const joinedAt = normalizeDateValue(input.joinedAt);
 
     if (!projectId) {
@@ -689,7 +689,7 @@ export async function updateProjectVolunteerAssignment(
     const actorId = await resolveCurrentUserId();
     const projectId = sanitizeOptionalId(input.projectId);
     const volunteerId = sanitizeOptionalId(input.volunteerId);
-    const role = sanitizeText(input.role, 100) || null;
+    const role = sanitizeText(input.role, 100);
     const joinedAt = normalizeDateValue(input.joinedAt);
 
     if (!id) {
@@ -780,7 +780,7 @@ export async function createActivityVolunteerAssignment(
     const actorId = await resolveCurrentUserId();
     const activityId = sanitizeOptionalId(input.activityId);
     const volunteerId = sanitizeOptionalId(input.volunteerId);
-    const role = sanitizeText(input.role, 100) || null;
+    const role = sanitizeText(input.role, 100);
 
     if (!activityId) {
       throw new Error("La actividad es obligatoria.");
@@ -833,7 +833,7 @@ export async function updateActivityVolunteerAssignment(
     const actorId = await resolveCurrentUserId();
     const activityId = sanitizeOptionalId(input.activityId);
     const volunteerId = sanitizeOptionalId(input.volunteerId);
-    const role = sanitizeText(input.role, 100) || null;
+    const role = sanitizeText(input.role, 100);
 
     if (!id) {
       throw new Error("No se encontro la asignacion a actividad.");
