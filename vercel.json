@@ -6,7 +6,8 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/server" },
-    { "source": "/ong/:path*", "destination": "/ONG/index.html" },
+    { "source": "/ong", "destination": "/ong/index.html" },
+    { "source": "/ong/:path*", "destination": "/ong/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

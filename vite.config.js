@@ -10,7 +10,7 @@ import tailwindcss from "@tailwindcss/vite";
  *
  * El folder físico se llama "ONG" (mayúsculas) pero la URL pública es
  * "/ong" (minúsculas). Este middleware hace ese mapeo en dev; vercel.json
- * hace el equivalente en producción. Ver también ONG/src/app/routes.tsx
+ * hace el equivalente en producción. Ver también ong/src/app/routes.tsx
  * (ROUTER_BASENAME) — debe coincidir con el "/ong" de aquí y de vercel.json.
  */
 function spaFallback() {
@@ -37,7 +37,7 @@ function spaFallback() {
     }
 
     const isOngPath = pathname === "/ong" || pathname.startsWith("/ong/");
-    req.url = isOngPath ? "/ONG/index.html" : "/index.html";
+    req.url = isOngPath ? "/ong/index.html" : "/index.html";
 
     next();
   };
@@ -61,7 +61,7 @@ export default defineConfig({
       // (ninguno de los dos usa hoy el alias "@", pero si empiezan a usarlo
       // conviene que cada módulo resuelva contra su propia carpeta).
       "@": resolve(__dirname, "src"),
-      "@ong": resolve(__dirname, "ONG/src"),
+      "@ong": resolve(__dirname, "ong/src"),
     },
   },
   // Requerido por el módulo ONG: imports "raw" de SVG/CSV.
@@ -83,12 +83,12 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, "index.html"),
-        ong: resolve(__dirname, "ONG/index.html"),
+        ong: resolve(__dirname, "ong/index.html"),
       },
       output: {
         // Agrupa dependencias pesadas de terceros en chunks propios,
         // separados del código de cada página (que ya se divide solo via
-        // React.lazy() en ONG/src/app/routes.tsx). Beneficio real: estos
+        // React.lazy() en ong/src/app/routes.tsx). Beneficio real: estos
         // vendor chunks se descargan una vez y quedan cacheados por el
         // navegador — no se vuelven a pedir en cada navegación entre
         // páginas, y se comparten entre "/" y "/ong" al ser el mismo origen.

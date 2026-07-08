@@ -46,3 +46,6 @@ Desktop.ini
 
 # Exportaciones de referencia de diseño (no forman parte de la app)
 Landing Page Design Request/
+
+.vercel
+.env*
