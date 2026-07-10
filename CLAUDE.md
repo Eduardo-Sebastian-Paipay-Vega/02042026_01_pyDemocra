@@ -2,6 +2,19 @@
 
 > Vigente desde 2026-07-04. Aplica a todo trabajo de Claude Code en este repositorio, en toda sesión futura, sin necesidad de que se solicite de nuevo.
 
+## Regla obligatoria: entorno de desarrollo al iniciar sesión de trabajo
+
+> Vigente desde 2026-07-10.
+
+Al empezar a trabajar en este repo (sesión nueva, clon nuevo, o entorno que no se tocó recientemente), verificar en este orden antes de tocar código:
+
+1. **Dependencias instaladas**: `node_modules/` existe y `npm ls --depth=0` no tira errores de resolución. Si falta, `npm install` en la raíz — nunca instalar dentro de `ong/` ni crear un `package.json` secundario (Regla de Oro #1 de `DEVELOPMENT_GUIDE.md`).
+2. **`.env` presente y completo**: si no existe, copiar `.env.example` y completar con las credenciales reales del proyecto Supabase `PT_solaris` (ref `qafvnjoqvdtnrdvlnwco`). Sin `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY`, `npm run dev` falla de inmediato (`server/config.js: assertServerConfig`). La `service_role` key no la expone el MCP de Supabase por diseño — pedirla al usuario o leerla del dashboard.
+3. **Vercel CLI enlazado**: `vercel whoami` para confirmar sesión activa y `.vercel/` presente (creado por `vercel link --project 02042026-01-py-democra`). Necesario para poder desplegar (`vercel` / `vercel --prod`) desde este entorno sin pasos manuales adicionales.
+4. **Tests ejecutables**: `npm test` (Jest, backend) y `npm run test:web` (Vitest, frontend) deben poder correr sin errores de configuración antes de dar por buena una tarea que toque código.
+
+Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (raíz del repo) — no dupliques esa guía aquí, mantenla actualizada ahí si cambia el flujo de arranque.
+
 ## Regla obligatoria: auditoría de cambios y versionado
 
 Cada vez que se realice un **cambio importante** (nueva funcionalidad, refactorización, corrección de error relevante, cambio de arquitectura, modificación de base de datos, cambio de UI significativo, etc.), se debe:

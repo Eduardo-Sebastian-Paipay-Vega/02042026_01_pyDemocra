@@ -15,18 +15,8 @@ vi.mock("../../../supabaseClient", () => ({
     schema: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
-        insert: vi.fn((payload) => {
-          if (payload && typeof payload === 'object' && Object.values(payload).some(v => v === null)) {
-            return Promise.resolve({ data: null, error: { message: 'null value in column violates not-null constraint', code: '23502' } });
-          }
-          return Promise.resolve({ data: { id: 'mock-id' }, error: null });
-        }),
-        update: vi.fn((payload) => {
-          if (payload && typeof payload === 'object' && Object.values(payload).some(v => v === null)) {
-            return Promise.resolve({ data: null, error: { message: 'null value in column violates not-null constraint', code: '23502' } });
-          }
-          return Promise.resolve({ data: { id: 'mock-id' }, error: null });
-        }),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),

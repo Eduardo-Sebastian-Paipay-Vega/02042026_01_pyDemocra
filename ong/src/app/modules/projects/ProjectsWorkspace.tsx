@@ -609,7 +609,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           const upload = await uploadFileToStorage({
             ...getAssetsUploadBucket(),
             file: projectForm.imageFile,
-            pathSegments: ["proyectos", editingProjectId ?? projectForm.name || "nuevo"],
+            pathSegments: ["proyectos", (editingProjectId ?? projectForm.name) || "nuevo"],
           });
           resolvedImageUrl = upload.publicUrl ?? upload.route;
         }
