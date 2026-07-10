@@ -1,49 +1,69 @@
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import { FolderKanban, Calendar, ListTodo, Users } from "lucide-react";
 import { ONG_SHELL_BASE_PATH } from "../../tenant/navigation";
 
+// REQ-012 (dds/MEJORAS/09072026/REQ012.md): las rutas de Operaciones
+// (operation/attendance, operation/hours, operation/evidence) se quitaron
+// de "Actividades" — este stepper es exclusivo del módulo Proyectos, no
+// tiene relación jerárquica con Operaciones. Al no matchear ninguna ruta de
+// Operaciones, activeIndex resuelve a -1 y el componente no se renderiza
+// ahí (ver `if (activeIndex === -1) return null` más abajo), sin necesidad
+// de condicionarlo desde AppShell.
 const STEPS = [
   {
     label: "Proyectos",
     icon: FolderKanban,
     color: "#3b82f6",
     glow: "rgba(59,130,246,0.35)",
-    paths: [`${ONG_SHELL_BASE_PATH}/projects`],
+    path: `${ONG_SHELL_BASE_PATH}/projects`,
   },
   {
     label: "Actividades",
     icon: Calendar,
     color: "#7c3aed",
     glow: "rgba(124,58,237,0.35)",
-    paths: [
-      `${ONG_SHELL_BASE_PATH}/projects/activities`,
-      `${ONG_SHELL_BASE_PATH}/operation/attendance`,
-      `${ONG_SHELL_BASE_PATH}/operation/hours`,
-      `${ONG_SHELL_BASE_PATH}/operation/evidence`,
-    ],
+    path: `${ONG_SHELL_BASE_PATH}/projects/activities`,
   },
   {
     label: "Tareas",
     icon: ListTodo,
     color: "#8b5cf6",
     glow: "rgba(139,92,246,0.35)",
-    paths: [`${ONG_SHELL_BASE_PATH}/projects/tasks`],
+    path: `${ONG_SHELL_BASE_PATH}/projects/tasks`,
   },
   {
     label: "Asignaciones",
     icon: Users,
     color: "#6366f1",
     glow: "rgba(99,102,241,0.35)",
-    paths: [`${ONG_SHELL_BASE_PATH}/projects/assignments`],
+    path: `${ONG_SHELL_BASE_PATH}/projects/assignments`,
   },
 ] as const;
 
+// REQ-010 (dds/MEJORAS/09072026/REQ010.md): resolver por coincidencia de
+// prefijo más específica (más larga), no por la primera coincidencia en el
+// orden del array. "Proyectos" y sus hermanos comparten el mismo prefijo
+// (`${ONG_SHELL_BASE_PATH}/projects`), así que en una ruta como
+// ".../projects/assignments" el match por `Array.prototype.findIndex` caía
+// siempre en "Proyectos" (idx 0, primero en declararse) en vez de
+// "Asignaciones" — eso rompía el nodo activo y, en cascada, el iluminado
+// acumulativo para cualquier sección que no fuera la propia "Proyectos".
+function resolveActiveIndex(pathname: string): number {
+  let bestIndex = -1;
+  let bestLength = -1;
+  STEPS.forEach((step, idx) => {
+    const matches = pathname === step.path || pathname.startsWith(`${step.path}/`);
+    if (matches && step.path.length > bestLength) {
+      bestLength = step.path.length;
+      bestIndex = idx;
+    }
+  });
+  return bestIndex;
+}
+
 export function ProjectHierarchySteps() {
   const { pathname } = useLocation();
-
-  const activeIndex = STEPS.findIndex((step) =>
-    step.paths.some((p) => pathname === p || pathname.startsWith(p + "/"))
-  );
+  const activeIndex = resolveActiveIndex(pathname);
 
   if (activeIndex === -1) return null;
 
@@ -66,8 +86,13 @@ export function ProjectHierarchySteps() {
 
         return (
           <div key={step.label} className="flex items-center shrink-0">
-            {/* Node */}
-            <div className="flex flex-col items-center gap-1" style={{ minWidth: 72 }}>
+            {/* Node — REQ-011 (dds/MEJORAS/09072026/REQ011.md): navegable,
+                reemplaza la barra de píldoras eliminada de ProjectsWorkspace. */}
+            <Link
+              to={step.path}
+              className="flex flex-col items-center gap-1 transition-opacity hover:opacity-80"
+              style={{ minWidth: 72 }}
+            >
               <div
                 className="flex items-center justify-center transition-all duration-200"
                 style={{
@@ -115,7 +140,7 @@ export function ProjectHierarchySteps() {
               >
                 {step.label}
               </span>
-            </div>
+            </Link>
 
             {/* Connector line */}
             {!isLast && (
