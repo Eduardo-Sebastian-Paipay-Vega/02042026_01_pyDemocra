@@ -13,6 +13,11 @@ import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
 import { ContactModal } from "./ContactModal";
 
+// REQ-001 (dds/MEJORAS/09072026/REQ001.md): secciones con datos mock aún sin
+// contenido real para este despliegue. Ocultas de forma no destructiva y
+// reversible con este flag hasta que existan datos reales que mostrar.
+const SHOW_MOCK_SECTIONS = false;
+
 export function LandingPage() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const openContact = () => setIsContactOpen(true);
@@ -25,13 +30,17 @@ export function LandingPage() {
       <div className="relative z-10">
         <Navbar onOpenContact={openContact} />
         <Hero onOpenContact={openContact} />
-        <TrustSection />
-        <Features />
-        <VisualShowcase />
-        <VisualImpact />
-        <HowItWorks />
-        <Pricing onOpenContact={openContact} />
-        <FinalCTA />
+        {SHOW_MOCK_SECTIONS && (
+          <>
+            <TrustSection />
+            <Features />
+            <VisualShowcase />
+            <VisualImpact />
+            <HowItWorks />
+            <Pricing onOpenContact={openContact} />
+            <FinalCTA />
+          </>
+        )}
         <Footer onOpenContact={openContact} />
       </div>
       <ContactModal isOpen={isContactOpen} onClose={closeContact} />
