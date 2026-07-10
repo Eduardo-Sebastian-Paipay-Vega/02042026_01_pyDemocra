@@ -236,6 +236,9 @@ function AppShellInner() {
             breadcrumb={pageInfo.breadcrumb}
             tenantName={tenantContext?.tenant.name ?? null}
             userLabel={tenantContext?.profile.fullName ?? tenantContext?.user.email ?? null}
+            userAvatarUrl={tenantContext?.profile.avatarUrl ?? null}
+            onProfileClick={() => navigate(normalizeTenantPath("/app/ong/account/profile"))}
+            onSettingsClick={() => navigate(normalizeTenantPath("/app/ong/account/settings"))}
             onMenuClick={() => {
               if (isDesktopViewport()) {
                 toggleDesktopSidebar();

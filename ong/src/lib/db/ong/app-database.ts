@@ -91,6 +91,9 @@ interface PublicProfileRow {
   tipo_documento: string | null;
   numero_documento: string | null;
   genero: string | null;
+  // Confirmado contra el esquema real de producción
+  // (dds/MEJORAS/BD_viva_09072026.txt) — faltaba en este tipo generado.
+  avatar_url: string | null;
   created_at: IsoDateTime;
   updated_at: IsoDateTime;
 }
@@ -1175,6 +1178,14 @@ type PublicFunctions = {
     Args: {
       p_access_code: string;
       p_metadata?: JsonObject | null;
+    };
+    Returns: JsonObject;
+  };
+  // Persiste profiles.avatar_url del usuario autenticado (confirmado contra
+  // el esquema real de producción, dds/MEJORAS/BD_viva_09072026.txt).
+  fn_update_my_avatar: {
+    Args: {
+      p_url: string;
     };
     Returns: JsonObject;
   };

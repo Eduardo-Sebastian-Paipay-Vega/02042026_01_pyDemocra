@@ -15,7 +15,15 @@ interface TopbarProps {
   title: string;
   breadcrumb?: string;
   tenantName?: string | null;
+  // REQ004.md#1: no existe hoy una columna de logo en public.tenants
+  // (confirmado contra dds/MEJORAS/BD_viva_09072026.txt), así que este
+  // valor siempre llega null por ahora — el slot y su fallback de iniciales
+  // quedan listos para conectarse en cuanto exista la columna real.
+  tenantLogoUrl?: string | null;
   userLabel?: string | null;
+  userAvatarUrl?: string | null;
+  onProfileClick?: () => void;
+  onSettingsClick?: () => void;
   onMenuClick?: () => void;
   onSearchClick?: () => void;
   notifications?: Array<{
@@ -38,11 +46,61 @@ const intensityLabels: Record<Intensity, string> = {
   vibrante: "Vibrante",
 };
 
+function getInitials(label: string | null | undefined): string {
+  const trimmed = (label ?? "").trim();
+  if (!trimmed) return "?";
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  const initials = parts.length > 1
+    ? `${parts[0][0]}${parts[parts.length - 1][0]}`
+    : trimmed.slice(0, 2);
+  return initials.toUpperCase();
+}
+
+// REQ004.md#3 (Topbar) / REQ005.md#4 (popup): avatar reutilizado por el
+// widget del trigger y por el encabezado del dropdown, con fallback de
+// iniciales cuando profiles.avatar_url es nulo.
+function UserAvatar({
+  avatarUrl,
+  label,
+  className,
+}: {
+  avatarUrl: string | null;
+  label: string | null;
+  className: string;
+}) {
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt=""
+        className={cn(className, "rounded-full object-cover")}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).style.display = "none";
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      className={cn(
+        className,
+        "flex items-center justify-center rounded-full bg-gradient-to-br from-[var(--t-primary)]/60 to-[var(--t-secondary)]/60 text-[10px] font-semibold text-white"
+      )}
+    >
+      {getInitials(label)}
+    </div>
+  );
+}
+
 export function Topbar({
   title,
   breadcrumb,
   tenantName = null,
+  tenantLogoUrl = null,
   userLabel = null,
+  userAvatarUrl = null,
+  onProfileClick,
+  onSettingsClick,
   onMenuClick,
   onSearchClick,
   notifications = [],
@@ -78,33 +136,51 @@ export function Topbar({
     >
       <div className="flex h-full items-center justify-between gap-4 px-5 sm:px-6">
         {/* Left: Menu + Title & Breadcrumb */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <button
             onClick={onMenuClick}
             data-sidebar-toggle="true"
-            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors md:hidden"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors md:hidden"
             style={{ color: "var(--t-text-secondary)" }}
             aria-label="Abrir menú"
           >
             <Menu className="h-4 w-4" />
           </button>
 
-          <div className="flex items-center gap-2">
+          {tenantName && (
+            <UserAvatar
+              avatarUrl={tenantLogoUrl}
+              label={tenantName}
+              className="hidden h-7 w-7 shrink-0 sm:flex"
+            />
+          )}
+
+          <div className="flex min-w-0 items-center gap-2">
             {breadcrumb && (
               <>
-                <span className="hidden sm:inline text-[12px]" style={{ color: "var(--t-text-dim)" }}>
+                <span className="hidden shrink-0 sm:inline text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                   {breadcrumb}
                 </span>
-                <span className="hidden sm:inline text-[12px]" style={{ color: "var(--t-text-dim)", opacity: 0.5 }}>/</span>
+                <span className="hidden shrink-0 sm:inline text-[12px]" style={{ color: "var(--t-text-dim)", opacity: 0.5 }}>/</span>
               </>
             )}
-            <div>
+            {/* REQ004.md#2: min-w-0 + truncate evitan que el nombre largo del
+                tenant y el título de la sección activa se encimen en
+                pantallas angostas (los flex items por defecto no se
+                encogen sin min-w-0). */}
+            <div className="min-w-0 max-w-[45vw] sm:max-w-[320px]">
               {tenantName && (
-                <p className="hidden text-[10px] uppercase tracking-[0.18em] sm:block" style={{ color: "var(--t-text-tertiary)" }}>
+                <p
+                  className="hidden truncate text-[10px] uppercase tracking-[0.18em] sm:block"
+                  style={{ color: "var(--t-text-tertiary)" }}
+                  title={tenantName}
+                >
                   {tenantName}
                 </p>
               )}
-              <h2 className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>{title}</h2>
+              <h2 className="truncate text-[14px] font-medium" style={{ color: "var(--t-text)" }} title={title}>
+                {title}
+              </h2>
             </div>
           </div>
         </div>
@@ -296,23 +372,44 @@ export function Topbar({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* User avatar */}
+          {/* User avatar — REQ004.md#3: nombre completo + foto real en vez
+              del correo. REQ005.md#4: mismo par foto+nombre en el
+              encabezado del popup en vez del correo. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex h-8 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-[var(--t-hover)]">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--t-primary)]/60 to-[var(--t-secondary)]/60" />
-                <span className="hidden sm:inline text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+                <UserAvatar avatarUrl={userAvatarUrl} label={userLabel} className="h-6 w-6" />
+                <span className="hidden max-w-[160px] truncate sm:inline text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
                   {userLabel ?? "Cuenta"}
                 </span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-2xl p-1.5" style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", boxShadow: "var(--t-shadow-lg)" }}>
-              <DropdownMenuLabel className="text-[12px]" style={{ color: "var(--t-text)" }}>
-                {userLabel ?? "Mi cuenta"}
+              <DropdownMenuLabel className="flex items-center gap-2 px-2 py-1.5 text-[12px]" style={{ color: "var(--t-text)" }}>
+                <UserAvatar avatarUrl={userAvatarUrl} label={userLabel} className="h-8 w-8" />
+                <span className="truncate">{userLabel ?? "Mi cuenta"}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator style={{ background: "var(--t-border)" }} />
-              <DropdownMenuItem className="text-[12px] focus:bg-[var(--t-hover)]" style={{ color: "var(--t-text-secondary)" }}>Perfil</DropdownMenuItem>
-              <DropdownMenuItem className="text-[12px] focus:bg-[var(--t-hover)]" style={{ color: "var(--t-text-secondary)" }}>Configuración</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-[12px] focus:bg-[var(--t-hover)]"
+                style={{ color: "var(--t-text-secondary)" }}
+                onSelect={(event) => {
+                  event.preventDefault();
+                  onProfileClick?.();
+                }}
+              >
+                Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-[12px] focus:bg-[var(--t-hover)]"
+                style={{ color: "var(--t-text-secondary)" }}
+                onSelect={(event) => {
+                  event.preventDefault();
+                  onSettingsClick?.();
+                }}
+              >
+                Configuración
+              </DropdownMenuItem>
               <DropdownMenuSeparator style={{ background: "var(--t-border)" }} />
               <DropdownMenuItem className="text-[12px] focus:bg-[var(--t-hover)] text-red-400/70 focus:text-red-400">
                 Cerrar sesión

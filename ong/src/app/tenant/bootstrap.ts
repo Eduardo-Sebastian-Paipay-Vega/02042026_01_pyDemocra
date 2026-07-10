@@ -3,7 +3,7 @@ import type { AppDatabase } from "../../lib/db/ong/app-database";
 
 type PublicProfileRow = Pick<
   AppDatabase["public"]["Tables"]["profiles"]["Row"],
-  "id" | "tenant_id" | "full_name"
+  "id" | "tenant_id" | "full_name" | "avatar_url"
 >;
 type PublicTenantRow = Pick<
   AppDatabase["public"]["Tables"]["tenants"]["Row"],
@@ -79,6 +79,7 @@ export interface TenantContextValue {
     id: string;
     tenantId: string;
     fullName: string | null;
+    avatarUrl: string | null;
   };
   tenant: {
     id: string;
@@ -662,7 +663,7 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
 
     const { data: profile, error: profileError } = await publicSchema()
       .from("profiles")
-      .select("id, tenant_id, full_name")
+      .select("id, tenant_id, full_name, avatar_url")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -764,6 +765,7 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
         id: typedProfile.id,
         tenantId: typedTenant.id,
         fullName: typedProfile.full_name ?? null,
+        avatarUrl: typedProfile.avatar_url ?? null,
       },
       tenant: {
         id: typedTenant.id,

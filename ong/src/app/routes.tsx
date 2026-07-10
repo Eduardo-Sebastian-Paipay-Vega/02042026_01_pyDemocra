@@ -19,6 +19,10 @@ import type { TenantRouteId } from "./tenant/navigation";
 // navegación protegida, cargarlo diferido solo retrasaría el primer render
 // sin ahorrar nada.
 const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
+const MyProfile = lazy(() => import("./pages/MyProfile").then((m) => ({ default: m.MyProfile })));
+const MyAccountSettings = lazy(() =>
+  import("./pages/MyAccountSettings").then((m) => ({ default: m.MyAccountSettings }))
+);
 const AuditLog = lazy(() => import("./pages/AuditLog").then((m) => ({ default: m.AuditLog })));
 const AdmissionDocuments = lazy(() =>
   import("./pages/AdmissionDocuments").then((m) => ({ default: m.AdmissionDocuments }))
@@ -324,6 +328,18 @@ export const router = createBrowserRouter(
         {
           path: "search",
           ...protectedPage("search", <GlobalSearch />),
+        },
+        {
+          // REQ-005 (dds/MEJORAS/09072026/REQ005.md): cuenta propia del
+          // usuario, sin gate de permisos de módulo — cualquier usuario
+          // autenticado con tenant resuelto (ya garantizado por
+          // ProtectedTenantShell) puede ver/editar su propia cuenta.
+          path: "account/profile",
+          element: <MyProfile />,
+        },
+        {
+          path: "account/settings",
+          element: <MyAccountSettings />,
         },
         {
           path: "operation/attendance",
