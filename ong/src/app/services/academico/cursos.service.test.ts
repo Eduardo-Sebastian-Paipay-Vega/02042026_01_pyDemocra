@@ -27,12 +27,10 @@ vi.mock("../../../supabaseClient", () => ({
           }
           return Promise.resolve({ data: { id: 'mock-id' }, error: null });
         }),
-
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
     single: vi.fn(),
     maybeSingle: vi.fn(),
   },

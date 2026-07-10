@@ -46,6 +46,7 @@ describe("Operacion Evidencias Service - Zero-Fail Tolerance Suite", () => {
 
             eq: vi.fn().mockReturnThis(),
             order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
             limit: vi.fn().mockResolvedValue({
               data: [
                 {
@@ -105,7 +106,6 @@ describe("Operacion Evidencias Service - Zero-Fail Tolerance Suite", () => {
 
     it("TST-ERR-061: createEvidencia debe alertar (warning) si la evidencia se guarda pero la insercion de aprobacion falla", async () => {
       const mockQuery = {
-        insert: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
         insert: vi.fn((payload) => {
           if (payload && typeof payload === 'object' && Object.values(payload).some(v => v === null)) {

@@ -92,7 +92,7 @@ export async function createComprobanteFinanciero(input: FinancialReceiptCreateI
 
     const { data, error } = await finanzasSchema()
       .from("comprobantes_financieros")
-      .insert(payload)
+      .insert(payload as any)
       .select("id, id_transaccion, tipo_comprobante, numero_comprobante, emisor_ruc_dni, emisor_nombre, url_archivo, created_at")
       .single();
     if (error) throw new Error(error.message);
@@ -121,7 +121,7 @@ export async function updateComprobanteFinanciero(input: FinancialReceiptUpdateI
 
     const { data, error } = await finanzasSchema()
       .from("comprobantes_financieros")
-      .update(payload)
+      .update(payload as any)
       .eq("id", receiptId)
       .select("id, id_transaccion, tipo_comprobante, numero_comprobante, emisor_ruc_dni, emisor_nombre, url_archivo, created_at")
       .single();

@@ -201,7 +201,7 @@ export async function createUbicacion(input: InventoryLocationCreateInput): Prom
     if (!payload.codigo) throw new Error("El codigo de la ubicacion es obligatorio.");
     if (!payload.nombre_ubicacion) throw new Error("El nombre de la ubicacion es obligatorio.");
 
-    const { data, error } = await ongSchema().from("ubicaciones").insert(payload).select("id").single();
+    const { data, error } = await ongSchema().from("ubicaciones").insert(payload as any).select("id").single();
     if (error) throw new Error(error.message);
     return { id: data.id, message: "Ubicacion registrada correctamente." };
   } catch (error) {
@@ -225,7 +225,7 @@ export async function updateUbicacion(input: InventoryLocationUpdateInput): Prom
     if (input.active !== undefined) payload.activa = Boolean(input.active);
     if (Object.keys(payload).length === 2) throw new Error("No hay cambios para actualizar.");
 
-    const { error } = await ongSchema().from("ubicaciones").update(payload).eq("id", locationId);
+    const { error } = await ongSchema().from("ubicaciones").update(payload as any).eq("id", locationId);
     if (error) throw new Error(error.message);
     return { id: locationId, message: "Ubicacion actualizada correctamente." };
   } catch (error) {

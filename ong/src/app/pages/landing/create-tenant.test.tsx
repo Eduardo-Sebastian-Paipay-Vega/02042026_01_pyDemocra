@@ -71,10 +71,13 @@ describe("CreateTenantPage", () => {
     fireEvent.click(screen.getByText("Crear Organización"));
     
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/onboarding/bootstrap-tenant", expect.objectContaining({
-        method: "POST",
-        body: expect.stringContaining('"industry_type_id":"ong"'),
-      }));
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/onboarding/bootstrap-tenant",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"industry_type_id":"ONG"'),
+        })
+      );
       expect(window.location.assign).toHaveBeenCalledWith("/ong/");
     });
 

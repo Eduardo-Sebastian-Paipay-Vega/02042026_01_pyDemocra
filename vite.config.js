@@ -128,8 +128,21 @@ export default defineConfig({
     },
   },
   test: {
+    pool: "threads",
+    server: {
+      deps: {
+        inline: [
+          "@exodus/bytes",
+          "html-encoding-sniffer",
+          "jsdom",
+          "data-urls",
+          "whatwg-url",
+          "whatwg-mimetype"
+        ],
+      },
+    },
     globals: true,
-    environment: "jsdom",
+    environment: "happy-dom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "ong/src/**/*.test.{ts,tsx}"],
     coverage: {

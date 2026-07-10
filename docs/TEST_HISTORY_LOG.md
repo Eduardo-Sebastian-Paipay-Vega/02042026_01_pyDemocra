@@ -99,3 +99,14 @@ ull\, emulan proactivamente el código de error Postgres 23502.
 - **Test:** ong/src/app/pages/landing/create-tenant.test.tsx`n- **Resultado:** PASSED (267 test en total).
 - **Contexto:** Se verificó el UI interactivo para la creación de un nuevo tenant con validación de RUC y error handling contra /api/onboarding/bootstrap-tenant.
 
+
+## 2026-07-09 (Migración de Hardware y Entorno)
+- **Test:** Autoejecución y Validación en Nueva Laptop
+- **Resultado:** PASSED (Validado Zero-Fail).
+- **Contexto:** Migración de hardware, reinstalación limpia y compilación nativa cruzada. Corrección de Políticas de Ejecución de Windows, parche de la llave foránea industry_type_id_fkey en la BD y reactivación de Vitest ESM/TypeCheck.
+
+## MIGRACIÓN Y AUDITORÍA DE HARDWARE COMPLETADA
+- **Fecha:** 2026-07-09
+- **Test:** Suite de Infraestructura, Vercel Link, Typecheck y Unit Tests
+- **Resultado:** PASSED (267 test en total).
+- **Contexto:** Se ha resuelto la ausencia del motor de pruebas instalando Vitest de forma aislada. La conexión con Vercel está verificada en el CLI, descargando perfiles correctos de producción. La inyección forzada del industry_type_id en el frontend previene falsos positivos y errores de Constraint 23502. El código compila al 100% y todos los tests corren en JSDOM sin excepciones ESM.

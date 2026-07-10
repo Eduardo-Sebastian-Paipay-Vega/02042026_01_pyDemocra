@@ -38,7 +38,6 @@ describe("Personas IdCards Service - Zero-Fail Tolerance Suite", () => {
 
       vi.mocked(shared.ongSchema).mockReturnValue({
         from: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
         insert: vi.fn((payload) => {
           if (payload && typeof payload === 'object' && Object.values(payload).some(v => v === null)) {

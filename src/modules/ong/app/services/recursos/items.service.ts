@@ -321,7 +321,7 @@ export async function createItem(
 
     const { data, error } = await ongSchema()
       .from("items")
-      .insert(payload)
+      .insert(payload as any)
       .select("id")
       .single();
 
@@ -404,7 +404,7 @@ export async function updateItem(
 
     payload.updated_by = actorId;
 
-    const { error } = await ongSchema().from("items").update(payload).eq("id", itemId);
+    const { error } = await ongSchema().from("items").update(payload as any).eq("id", itemId);
     if (error) {
       throw new Error(error.message);
     }

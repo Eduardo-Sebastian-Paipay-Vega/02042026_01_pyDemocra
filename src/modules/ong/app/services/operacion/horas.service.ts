@@ -358,7 +358,7 @@ async function syncHoursApproval(options: {
 
     const { error } = await ongSchema()
       .from("aprobaciones")
-      .update(updatePayload)
+      .update(updatePayload as any)
       .eq("tenant_id", options.tenantId)
       .eq("id", approvalId);
 
@@ -858,7 +858,7 @@ export async function resolveHoras(input: HoursResolutionInput): Promise<Mutatio
 
     const { error: updateError } = await ongSchema()
       .from("horas_actividad")
-      .update(payload)
+      .update(payload as any)
       .eq("tenant_id", tenantId)
       .eq("id", hoursId);
 

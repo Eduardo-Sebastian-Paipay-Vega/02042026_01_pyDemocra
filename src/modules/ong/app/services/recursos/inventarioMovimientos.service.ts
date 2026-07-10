@@ -334,7 +334,7 @@ export async function createTransaccionInventario(input: InventoryMovementCreate
     validateKind(type.kind, originId, destinationId);
     const payload: Record<string, string | number | null> = { id_item: itemId, codigo_tipo_transaccion: type.value, cantidad: quantity, id_ubicacion_origen: originId, id_ubicacion_destino: destinationId, fecha_transaccion: input.transactionDate ? new Date(input.transactionDate).toISOString() : new Date().toISOString(), registrado_por: actorId, created_by: actorId, updated_by: actorId };
     if (tenantId) payload.tenant_id = tenantId;
-    const { data, error } = await ongSchema().from("transacciones_inventario").insert(payload).select("id, tenant_id, id_item, codigo_tipo_transaccion, cantidad, id_ubicacion_origen, id_ubicacion_destino, fecha_transaccion, registrado_por, created_by, updated_by").single();
+    const { data, error } = await ongSchema().from("transacciones_inventario").insert(payload as any).select("id, tenant_id, id_item, codigo_tipo_transaccion, cantidad, id_ubicacion_origen, id_ubicacion_destino, fecha_transaccion, registrado_por, created_by, updated_by").single();
     if (error) throw new Error(error.message);
     const catalogs = await resolveCatalogs([]);
     const labels = await resolveProfileLabels([actorId ?? ""]).catch(() => new Map());
@@ -362,7 +362,7 @@ export async function updateTransaccionInventario(input: InventoryMovementUpdate
       validateKind(type.kind, nextOriginId, nextDestinationId);
       payload.codigo_tipo_transaccion = type.value;
     }
-    const { data, error } = await ongSchema().from("transacciones_inventario").update(payload).eq("id", movementId).select("id, tenant_id, id_item, codigo_tipo_transaccion, cantidad, id_ubicacion_origen, id_ubicacion_destino, fecha_transaccion, registrado_por, created_by, updated_by").single();
+    const { data, error } = await ongSchema().from("transacciones_inventario").update(payload as any).eq("id", movementId).select("id, tenant_id, id_item, codigo_tipo_transaccion, cantidad, id_ubicacion_origen, id_ubicacion_destino, fecha_transaccion, registrado_por, created_by, updated_by").single();
     if (error) throw new Error(error.message);
     const catalogs = await resolveCatalogs([]);
     const labels = await resolveProfileLabels([actorId ?? ""]).catch(() => new Map());

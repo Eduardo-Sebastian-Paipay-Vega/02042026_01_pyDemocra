@@ -777,7 +777,7 @@ async function createPendingApprovalRecord(
 
   const { data, error } = await finanzasSchema()
     .from("aprobaciones_transaccion")
-    .insert(payload)
+    .insert(payload as any)
     .select(
       "id, tenant_id, id_transaccion, estado, comentario, solicitado_por, resuelto_por, requested_at, resolved_at, created_at, updated_at"
     )
@@ -898,7 +898,7 @@ export async function createTransaccionFinanciera(
 
     const { data, error } = await finanzasSchema()
       .from("transacciones")
-      .insert(payload)
+      .insert(payload as any)
       .select("id")
       .single();
 
@@ -979,7 +979,7 @@ export async function updateTransaccionFinanciera(
 
     const { error } = await finanzasSchema()
       .from("transacciones")
-      .update(payload)
+      .update(payload as any)
       .eq("id", transactionId);
 
     if (error) {

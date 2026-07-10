@@ -51,7 +51,7 @@ export function CreateTenantPage() {
         body: JSON.stringify({
           tenant_name: data.tenantName,
           tax_id: data.taxId,
-          industry_type_id: "ong",
+          industry_type_id: "ONG",
         }),
       });
 

@@ -1164,7 +1164,7 @@ export async function updateSolicitud(
 
     const { data, error } = await rrhhSchema()
       .from("solicitudes_admision")
-      .update(payload)
+      .update(payload as any)
       .eq("tenant_id", tenantId)
       .eq("id", id)
       .select(REQUEST_SELECT)
@@ -1344,12 +1344,12 @@ export async function convertSolicitudToVoluntario(
     const volunteerMutation = matchedVolunteer
       ? await ongSchema()
           .from("voluntarios")
-          .update(payload)
+          .update(payload as any)
           .eq("tenant_id", tenantId)
           .eq("id", matchedVolunteer.id)
           .select("id")
           .single()
-      : await ongSchema().from("voluntarios").insert(payload).select("id").single();
+      : await ongSchema().from("voluntarios").insert(payload as any).select("id").single();
 
     if (volunteerMutation.error) {
       throw new Error(volunteerMutation.error.message);
@@ -1584,7 +1584,7 @@ export async function updateDocumentoAdmision(input: {
 
     const { data, error } = await rrhhSchema()
       .from("documentos_admision")
-      .update(payload)
+      .update(payload as any)
       .eq("tenant_id", tenantId)
       .eq("id", id)
       .select(DOCUMENT_SELECT)
@@ -1773,7 +1773,7 @@ export async function updateEntrevistaAdmision(input: {
 
     const { data, error } = await rrhhSchema()
       .from("entrevistas_admision")
-      .update(payload)
+      .update(payload as any)
       .eq("tenant_id", tenantId)
       .eq("id", id)
       .select(INTERVIEW_SELECT)
@@ -2003,7 +2003,7 @@ export async function toggleOnboardingStep(input: {
     if (existingRow) {
       const { data, error } = await rrhhSchema()
         .from("onboarding_voluntario")
-        .update(payload)
+        .update(payload as any)
         .eq("tenant_id", tenantId)
         .eq("id", existingRow.id)
         .select(ONBOARDING_SELECT)

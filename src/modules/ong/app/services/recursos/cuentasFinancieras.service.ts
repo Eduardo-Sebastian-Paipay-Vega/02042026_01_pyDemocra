@@ -348,7 +348,7 @@ export async function createCuenta(
 
     const { data, error } = await finanzasSchema()
       .from("cuentas")
-      .insert(payload)
+      .insert(payload as any)
       .select("id")
       .single();
 
@@ -407,7 +407,7 @@ export async function updateCuenta(
 
     const { error } = await finanzasSchema()
       .from("cuentas")
-      .update(payload)
+      .update(payload as any)
       .eq("id", accountId);
 
     if (error) {

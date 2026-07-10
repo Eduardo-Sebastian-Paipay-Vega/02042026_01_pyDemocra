@@ -17,8 +17,20 @@ export default defineConfig({
     },
   },
   test: {
+    server: {
+      deps: {
+        inline: [
+          "@exodus/bytes",
+          "html-encoding-sniffer",
+          "jsdom",
+          "data-urls",
+          "whatwg-url",
+          "whatwg-mimetype"
+        ],
+      },
+    },
     globals: true,
-    environment: "jsdom",
+    environment: "happy-dom",
     setupFiles: ["./vitest.setup.ts"],
     include: [
       "src/**/*.test.{ts,tsx}",
@@ -27,12 +39,7 @@ export default defineConfig({
     // Pasa --no-warnings a cada worker fork para que Node.js v22+ no imprima
     // "ExperimentalWarning: localStorage is not available" antes de que
     // el setup file pueda interceptarlo.
-    pool: "forks",
-    poolOptions: {
-      forks: {
-        execArgv: ["--no-warnings"],
-      },
-    },
+    pool: "threads",
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
