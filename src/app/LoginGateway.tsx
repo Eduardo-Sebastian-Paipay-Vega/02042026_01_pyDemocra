@@ -77,7 +77,7 @@ export function LoginGateway() {
         {/* Branding */}
         <div className="mb-8 text-center">
           <img
-            src="/Imagen/Iconos/logo_cua1.png"
+            src="/brand/d-core-monogram.png"
             alt="Democra"
             className="mx-auto mb-4 h-12 w-12 rounded-2xl object-contain"
             style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)" }}

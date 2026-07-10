@@ -66,7 +66,7 @@ export function NosotrosPage() {
         }}
       >
         <Link to="/" className="flex items-center gap-2.5 group" aria-label="Inicio">
-          <img src="/Imagen/Iconos/logo_cua1.png" alt="democra.pro" className="h-7 w-auto" />
+          <img src="/brand/d-core-monogram.png" alt="democra.pro" className="h-7 w-auto" />
           <span className="text-sm font-semibold tracking-tight">democra.pro</span>
         </Link>
 

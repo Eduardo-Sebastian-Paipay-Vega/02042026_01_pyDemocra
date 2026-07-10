@@ -23,7 +23,7 @@ function TenantLoadingLogo() {
         }
       `}</style>
       <img
-        src="/Imagen/Iconos/logo_cua1.png"
+        src="/brand/d-core-monogram.png"
         alt=""
         className="tenant-loading-logo mx-auto h-10 w-10 object-contain"
       />
