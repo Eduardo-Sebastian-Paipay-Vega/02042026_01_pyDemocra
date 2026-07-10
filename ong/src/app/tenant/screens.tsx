@@ -1,6 +1,35 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, Building2, LoaderCircle, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Building2, ShieldAlert } from "lucide-react";
 import type { TenantBootstrapStatus, TenantContextValue } from "./bootstrap";
+
+// REQ-003 (dds/MEJORAS/09072026/REQ003.md): reemplaza el spinner genérico
+// por el isotipo oficial con una micro-animación de flotación. Scoped al
+// componente (en vez de un CSS global) porque ong/src no importa
+// src/styles/*, donde ya existe un patrón equivalente ("logoBreath") para
+// el resto del sitio.
+function TenantLoadingLogo() {
+  return (
+    <>
+      <style>{`
+        @keyframes tenantLogoFloat {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%      { transform: translateY(-4px) scale(1.02); }
+        }
+        .tenant-loading-logo {
+          animation: tenantLogoFloat 2.6s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tenant-loading-logo { animation: none; }
+        }
+      `}</style>
+      <img
+        src="/Imagen/Iconos/logo_cua1.png"
+        alt=""
+        className="tenant-loading-logo mx-auto h-10 w-10 object-contain"
+      />
+    </>
+  );
+}
 
 export function TenantBootstrapLoadingScreen() {
   return (
@@ -9,10 +38,7 @@ export function TenantBootstrapLoadingScreen() {
         className="w-full max-w-[560px] rounded-3xl p-6 text-center"
         style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
       >
-        <LoaderCircle
-          className="mx-auto h-8 w-8 animate-spin"
-          style={{ color: "var(--t-text-dim)" }}
-        />
+        <TenantLoadingLogo />
         <h1 className="mt-4 text-[18px]" style={{ color: "var(--t-text)" }}>
           Cargando contexto del tenant
         </h1>

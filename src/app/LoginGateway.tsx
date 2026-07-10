@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createSupabaseClient } from "../services/supabase";
+import { GradientBackground } from "../pages/landing/components/GradientBackground";
 
 export function LoginGateway() {
   const [email, setEmail]       = useState("");
@@ -62,27 +63,29 @@ export function LoginGateway() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6" style={{ background: "#050505" }}>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 text-white antialiased">
+      <GradientBackground />
       <div
-        className="w-full max-w-[420px] rounded-3xl p-8"
-        style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.07)" }}
+        className="relative z-10 w-full max-w-[420px] rounded-3xl p-8"
+        style={{
+          background: "rgba(255,255,255,0.02)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow: "0 0 40px rgba(0,0,0,0.35)",
+        }}
       >
         {/* Branding */}
         <div className="mb-8 text-center">
-          <div
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+          <img
+            src="/Imagen/Iconos/logo_cua1.png"
+            alt="Democra"
+            className="mx-auto mb-4 h-12 w-12 rounded-2xl object-contain"
             style={{ background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)" }}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
+          />
           <h1 className="text-[22px] font-semibold" style={{ color: "#f5f5f5" }}>
             Democra
           </h1>
-          <p className="mt-1 text-[13px]" style={{ color: "#707070" }}>
+          <p className="mt-1 text-[13px]" style={{ color: "#a0a0a0" }}>
             Ingresa tus credenciales para acceder al sistema.
           </p>
         </div>
@@ -179,9 +182,34 @@ export function LoginGateway() {
               "Ingresar"
             )}
           </button>
+
+          {/* REQ-002 (dds/MEJORAS/09072026/REQ002.md): botón auxiliar de
+              asistencia solicitado por el usuario. type="button" explícito
+              para no interferir con el submit del formulario; reutiliza el
+              canal de WhatsApp ya usado en el sitio (ver
+              src/pages/landing/ContactModal.tsx) vía window.open en vez de
+              anidarlo en un <a>, que sería HTML inválido dentro de un botón. */}
+          <button
+            type="button"
+            onClick={() =>
+              window.open(
+                "https://wa.me/51953714752?text=Hola,%20necesito%20ayuda%20para%20ingresar%20a%20mi%20cuenta%20de%20Democra.",
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+            className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-[13px] font-medium transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "#c0c0c0",
+            }}
+          >
+            ¿Necesitas ayuda para ingresar?
+          </button>
         </form>
 
-        <p className="mt-6 text-center text-[11px]" style={{ color: "#404040" }}>
+        <p className="mt-6 text-center text-[11px]" style={{ color: "#707070" }}>
           ¿Nuevo en la plataforma?{" "}
           <a href="/" style={{ color: "#3b82f6" }}>
             Ir a la página principal
