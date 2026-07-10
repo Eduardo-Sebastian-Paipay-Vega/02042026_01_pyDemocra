@@ -598,10 +598,18 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       if (section === "projects") {
         let resolvedImageUrl = projectForm.imageUrl;
         if (projectForm.imageFile) {
+          // REQ-008 (dds/MEJORAS/09072026/REQ008.md): la subida en sí ya
+          // funcionaba de punta a punta (persiste en proyectos.imagen_url,
+          // errores se muestran vía toast). Se corrige solo el segmento de
+          // ruta: usaba projectForm.code, que ahora siempre llega vacío
+          // (REQ-006 quitó el campo editable y el código real se genera
+          // recién al insertar), lo que amontonaba todas las imágenes bajo
+          // "proyectos/proyecto/". editingProjectId (estable) o el nombre
+          // del proyecto son identificadores disponibles en este punto.
           const upload = await uploadFileToStorage({
             ...getAssetsUploadBucket(),
             file: projectForm.imageFile,
-            pathSegments: ["proyectos", projectForm.code || "proyecto"],
+            pathSegments: ["proyectos", editingProjectId ?? projectForm.name || "nuevo"],
           });
           resolvedImageUrl = upload.publicUrl ?? upload.route;
         }
@@ -1349,8 +1357,44 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
           <Button variant="outline" size="sm" onClick={closeForm}>Cerrar</Button>
         </div>
-        <div className="max-h-[75vh] space-y-4 overflow-y-auto p-4">
-          {section === "projects" ? <div className="grid gap-3 md:grid-cols-2"><InputField value={projectForm.code} onChange={(value) => setProjectForm((current) => ({ ...current, code: value }))} placeholder="Codigo (ej: PROJ-001, auto si vacío)" /><InputField value={projectForm.name} onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))} placeholder="Nombre del proyecto" /><SelectField value={projectForm.areaId} onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))} options={catalogs.areas} placeholder="Area" /><SelectField value={projectForm.stateCode} onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))} options={catalogs.projectStates} placeholder="Estado" /><InputField value={projectForm.startDate} onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))} placeholder="Fecha inicio" type="date" /><InputField value={projectForm.endDate} onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))} placeholder="Fecha fin" type="date" /><InputField value={projectForm.budget} onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))} placeholder="Presupuesto" type="number" /><div className="md:col-span-2"><ImageUploadField label="Imagen del proyecto (opcional)" existingUrl={projectForm.imageUrl || null} previewFile={projectForm.imageFile} onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))} onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))} /></div><div className="md:col-span-2"><TextareaField value={projectForm.description} onChange={(value) => setProjectForm((current) => ({ ...current, description: value }))} placeholder="Descripcion del proyecto" /></div></div> : null}
+        {/* REQ-009: space-y-4 -> space-y-3 reduce el aire vertical entre
+            secciones del formulario sin comprometer legibilidad. */}
+        <div className="max-h-[75vh] space-y-3 overflow-y-auto p-4">
+          {section === "projects" ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {/* REQ-006 (dds/MEJORAS/09072026/REQ006.md): el código ya no se
+                  captura manualmente. createProject() en
+                  services/proyectos/projects.service.ts ya generaba un
+                  correlativo (generateProjectCode) cuando el código llegaba
+                  vacío — el único cambio necesario era dejar de mostrar el
+                  input, para que siempre llegue vacío. projectForm.code se
+                  mantiene en el estado (útil al editar un proyecto
+                  existente) pero deja de ser editable desde este formulario. */}
+              <InputField value={projectForm.name} onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))} placeholder="Nombre del proyecto" />
+              <SelectField value={projectForm.areaId} onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))} options={catalogs.areas} placeholder="Area" />
+              <SelectField value={projectForm.stateCode} onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))} options={catalogs.projectStates} placeholder="Estado" />
+              {/* REQ-009 (dds/MEJORAS/09072026/REQ009.md): agrupa fecha
+                  inicio/fin en su propia fila explícita en vez de depender
+                  del flujo natural del grid — así se mantienen siempre
+                  emparejadas aunque cambie la cantidad de campos previos. */}
+              <div className="grid grid-cols-2 gap-3 md:col-span-2">
+                <InputField value={projectForm.startDate} onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))} placeholder="Fecha inicio" type="date" />
+                <InputField value={projectForm.endDate} onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))} placeholder="Fecha fin" type="date" />
+              </div>
+              {/* REQ-007 (dds/MEJORAS/09072026/REQ007.md): el "0" sin etiqueta
+                  visible era el campo presupuesto (ong.proyectos.presupuesto,
+                  confirmado contra BD_viva_09072026.txt) — placeholder nunca
+                  se veía porque el valor por defecto ya es "0" (no vacío).
+                  Se agrega un label real en vez de renombrarlo a
+                  "participantes", que no es el dato real del campo. */}
+              <div className="space-y-1">
+                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto</p>
+                <InputField value={projectForm.budget} onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))} placeholder="Presupuesto" type="number" />
+              </div>
+              <div className="md:col-span-2"><ImageUploadField label="Imagen del proyecto (opcional)" existingUrl={projectForm.imageUrl || null} previewFile={projectForm.imageFile} onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))} onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))} /></div>
+              <div className="md:col-span-2"><TextareaField value={projectForm.description} onChange={(value) => setProjectForm((current) => ({ ...current, description: value }))} placeholder="Descripcion del proyecto" /></div>
+            </div>
+          ) : null}
           {section === "tasks" ? (
             <div className="grid gap-3 md:grid-cols-2">
               {/* Cascading: first pick a project to filter the activities list */}
