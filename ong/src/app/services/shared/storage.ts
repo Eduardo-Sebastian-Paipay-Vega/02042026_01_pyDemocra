@@ -8,6 +8,12 @@ const DEFAULT_DOCUMENTS_BUCKET = (
   "evidence"
 ).trim();
 
+const IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+const DOCUMENT_MIME_TYPES = [...IMAGE_MIME_TYPES, "application/pdf"] as const;
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+
 export interface StorageUploadRequest {
   bucket: string;
   file: File;
@@ -15,6 +21,8 @@ export interface StorageUploadRequest {
   publicBucket?: boolean;
   tenantScoped?: boolean;
   upsert?: boolean;
+  allowedMimeTypes?: readonly string[];
+  maxSizeBytes?: number;
 }
 
 export interface StorageUploadResult {
@@ -74,6 +82,23 @@ async function resolveCurrentTenantFolder(): Promise<string> {
   return tenantId;
 }
 
+function assertAllowedFile(
+  file: File,
+  allowedMimeTypes: readonly string[] | undefined,
+  maxSizeBytes: number | undefined
+): void {
+  if (allowedMimeTypes && !allowedMimeTypes.includes(file.type)) {
+    throw new Error(
+      `Tipo de archivo no permitido: "${file.type || "desconocido"}". Tipos permitidos: ${allowedMimeTypes.join(", ")}.`
+    );
+  }
+  if (maxSizeBytes && file.size > maxSizeBytes) {
+    throw new Error(
+      `El archivo supera el tamaño máximo permitido (${Math.round(maxSizeBytes / (1024 * 1024))} MB).`
+    );
+  }
+}
+
 export async function uploadFileToStorage(
   request: StorageUploadRequest
 ): Promise<StorageUploadResult> {
@@ -81,6 +106,8 @@ export async function uploadFileToStorage(
   if (!bucket) {
     throw new Error("No hay bucket configurado para subir archivos.");
   }
+
+  assertAllowedFile(request.file, request.allowedMimeTypes, request.maxSizeBytes);
 
   const fileName = sanitizeFileName(request.file.name || "archivo");
   const timestampPrefix = new Date().toISOString().replace(/[:.]/g, "-");
@@ -122,6 +149,8 @@ export function getPeoplePhotoUploadBucket() {
     bucket: "avatars",
     publicBucket: true,
     tenantScoped: true,
+    allowedMimeTypes: IMAGE_MIME_TYPES,
+    maxSizeBytes: MAX_IMAGE_BYTES,
   } as const;
 }
 
@@ -130,6 +159,8 @@ export function getVolunteerDocumentsUploadBucket() {
     bucket: DEFAULT_DOCUMENTS_BUCKET,
     publicBucket: false,
     tenantScoped: true,
+    allowedMimeTypes: DOCUMENT_MIME_TYPES,
+    maxSizeBytes: MAX_DOCUMENT_BYTES,
   } as const;
 }
 
@@ -138,6 +169,8 @@ export function getAdmissionDocumentsUploadBucket() {
     bucket: DEFAULT_DOCUMENTS_BUCKET,
     publicBucket: false,
     tenantScoped: true,
+    allowedMimeTypes: DOCUMENT_MIME_TYPES,
+    maxSizeBytes: MAX_DOCUMENT_BYTES,
   } as const;
 }
 
@@ -146,6 +179,8 @@ export function getAdmissionOnboardingEvidenceBucket() {
     bucket: DEFAULT_PRIVATE_UPLOAD_BUCKET,
     publicBucket: false,
     tenantScoped: true,
+    allowedMimeTypes: DOCUMENT_MIME_TYPES,
+    maxSizeBytes: MAX_DOCUMENT_BYTES,
   } as const;
 }
 
@@ -154,5 +189,7 @@ export function getAssetsUploadBucket() {
     bucket: "avatars",
     publicBucket: true,
     tenantScoped: true,
+    allowedMimeTypes: IMAGE_MIME_TYPES,
+    maxSizeBytes: MAX_IMAGE_BYTES,
   } as const;
 }
