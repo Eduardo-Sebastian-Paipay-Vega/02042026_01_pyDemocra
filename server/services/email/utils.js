@@ -1,9 +1,6 @@
-import type { EmailOptions, EmailRecipient } from "./types.ts";
-import type { IEmailLogger, ILogEntry } from "./interfaces.ts";
-
 /** Falla de validación local (nunca se reintenta — el request nunca llega a Resend). */
 export class EmailValidationError extends Error {
-  constructor(message: string) {
+  constructor(message) {
     super(message);
     this.name = "EmailValidationError";
   }
@@ -11,12 +8,12 @@ export class EmailValidationError extends Error {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function isValidEmail(value: string): boolean {
+export function isValidEmail(value) {
   return typeof value === "string" && EMAIL_RE.test(value.trim());
 }
 
 /** Escapa HTML para interpolar valores dinámicos (nombres, códigos) en plantillas sin abrir paso a inyección. */
-export function escapeHtml(value: string): string {
+export function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -24,7 +21,7 @@ export function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export function normalizeRecipients(value: EmailRecipient): string[] {
+export function normalizeRecipients(value) {
   return Array.isArray(value) ? value : [value];
 }
 
@@ -32,7 +29,7 @@ export function normalizeRecipients(value: EmailRecipient): string[] {
  * Valida un `EmailOptions` antes de tocar red. Lanza `EmailValidationError`
  * con un mensaje puntual sobre qué campo falló.
  */
-export function validateEmailOptions(options: EmailOptions): void {
+export function validateEmailOptions(options) {
   const recipients = normalizeRecipients(options.to);
 
   if (recipients.length === 0) {
@@ -48,7 +45,7 @@ export function validateEmailOptions(options: EmailOptions): void {
   for (const [field, value] of [
     ["cc", options.cc],
     ["bcc", options.bcc],
-  ] as const) {
+  ]) {
     if (!value) continue;
     for (const recipient of normalizeRecipients(value)) {
       if (!isValidEmail(recipient)) {
@@ -74,29 +71,23 @@ const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
  * (reintentar es inútil: API key inválida, email malformado, dominio no
  * verificado, payload rechazado, etc.).
  */
-export function isRetryableError(error: unknown): boolean {
+export function isRetryableError(error) {
   if (error instanceof EmailValidationError) return false;
 
-  const status = (error as { statusCode?: number; status?: number })?.statusCode
-    ?? (error as { statusCode?: number; status?: number })?.status;
+  const status = error?.statusCode ?? error?.status;
 
   if (typeof status === "number") {
     return RETRYABLE_STATUS_CODES.has(status);
   }
 
   // Sin status HTTP: probablemente un fallo de red (fetch failed, timeout, DNS).
-  const name = (error as { name?: string })?.name ?? "";
-  const message = (error as { message?: string })?.message ?? "";
+  const name = error?.name ?? "";
+  const message = error?.message ?? "";
   return /network|timeout|fetch failed|ECONNRESET|ETIMEDOUT|EAI_AGAIN/i.test(`${name} ${message}`);
 }
 
-export function sleep(ms: number): Promise<void> {
+export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export interface RetryOptions {
-  maxRetries: number;
-  baseDelayMs: number;
 }
 
 /**
@@ -104,11 +95,8 @@ export interface RetryOptions {
  * Se detiene de inmediato ante un error no reintentable. Devuelve `{ result, attempts }`
  * si tiene éxito, o relanza el último error si se agotan los intentos.
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  { maxRetries, baseDelayMs }: RetryOptions
-): Promise<{ result: T; attempts: number }> {
-  let lastError: unknown;
+export async function withRetry(fn, { maxRetries, baseDelayMs }) {
+  let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
     try {
@@ -124,7 +112,7 @@ export async function withRetry<T>(
     }
   }
 
-  // Inalcanzable (maxRetries >= 1 siempre entra al loop), pero TS necesita el retorno.
+  // Inalcanzable (maxRetries >= 1 siempre entra al loop).
   throw lastError;
 }
 
@@ -132,8 +120,8 @@ export async function withRetry<T>(
  * Logger por defecto: consola estructurada. Nunca recibe ni imprime la API key
  * (no forma parte de `ILogEntry`) — ver server/services/email/README.md, sección Seguridad.
  */
-export const consoleEmailLogger: IEmailLogger = {
-  logSend(entry: ILogEntry): void {
+export const consoleEmailLogger = {
+  logSend(entry) {
     const line = {
       at: new Date().toISOString(),
       scope: "email",

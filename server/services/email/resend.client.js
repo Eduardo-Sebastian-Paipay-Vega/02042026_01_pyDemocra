@@ -1,14 +1,14 @@
 import { Resend } from "resend";
-import { getEmailConfig } from "./config/email.config.ts";
+import { getEmailConfig } from "./config/email.config.js";
 
 /**
  * Cliente Resend singleton. `new Resend(apiKey)` se ejecuta una única vez,
  * de forma perezosa, la primera vez que algo necesita enviar un correo.
  * Nunca se crean instancias adicionales — todo el módulo pasa por acá.
  */
-let instance: Resend | null = null;
+let instance = null;
 
-export function getResendClient(): Resend {
+export function getResendClient() {
   if (!instance) {
     const { apiKey } = getEmailConfig();
     instance = new Resend(apiKey);
@@ -17,6 +17,6 @@ export function getResendClient(): Resend {
 }
 
 /** Solo para tests: fuerza la recreación del cliente en la próxima llamada. */
-export function resetResendClient(): void {
+export function resetResendClient() {
   instance = null;
 }

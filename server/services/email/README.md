@@ -63,8 +63,8 @@ Variables opcionales (todas tienen default razonable):
 
 ## Cómo enviar un correo
 
-```ts
-import { emailService } from "../services/email/index.ts";
+```js
+import { emailService } from "../services/email/index.js";
 
 const result = await emailService.sendOTP({
   to: "usuario@empresa.com",
@@ -101,11 +101,11 @@ type EmailSendResult =
 | `sendAudit(data)` | Correos administrativos / de auditoría / confirmación de operaciones |
 | `sendCustomEmail(options)` | Cualquier otro caso — recibe `EmailOptions` crudo (`to`, `subject`, `html`, `text?`, ...) |
 
-Los tipos de dato de cada `data` están en [`types.ts`](./types.ts) (`OTPEmailData`, `WelcomeEmailData`, etc.).
+Los tipos de dato de cada `data` (`OTPEmailData`, `WelcomeEmailData`, etc.) están documentados como JSDoc/comentarios en cada función `render*Email` de `templates/`.
 
 ### Ejemplos
 
-```ts
+```js
 // Bienvenida
 await emailService.sendWelcome({ to: "nueva@empresa.com", name: "Carlos", loginUrl: "https://www.democra.pro/login" });
 
@@ -138,17 +138,17 @@ await emailService.sendCustomEmail({
 
 La arquitectura está pensada para extenderse **sin modificar `EmailService`** (Open/Closed):
 
-1. Agrega el shape de datos en [`types.ts`](./types.ts) (ej. `InvoiceEmailData`).
-2. Crea `templates/invoice.ts` con una función `renderInvoiceEmail(data): RenderedEmail` que arme `{ subject, html, text }` usando `renderLayout`/`renderButton` de [`templates/layout.ts`](./templates/layout.ts) para mantener el mismo look & feel.
+1. Define el shape de datos esperado (ej. `InvoiceEmailData: { to, invoiceUrl, amount, ... }`) como convención documentada — el módulo es JS puro, sin chequeo de tipos en runtime.
+2. Crea `templates/invoice.js` con una función `renderInvoiceEmail(data)` que arme `{ subject, html, text }` usando `renderLayout`/`renderButton` de [`templates/layout.js`](./templates/layout.js) para mantener el mismo look & feel.
 3. (Opcional) Agrega un método de una línea en `EmailService`:
-   ```ts
-   sendInvoice(data: InvoiceEmailData) {
+   ```js
+   sendInvoice(data) {
      const { subject, html, text } = renderInvoiceEmail(data);
      return this.dispatch("invoice", { to: data.to, subject, html, text, tags: { category: "invoice" } });
    }
    ```
    Si es un caso puntual, ni siquiera hace falta el método: usa `sendCustomEmail` directamente.
-4. Expórtalo desde [`index.ts`](./index.ts) si otros módulos van a usarlo por nombre.
+4. Expórtalo desde [`index.js`](./index.js) si otros módulos van a usarlo por nombre.
 
 ## Cómo cambiar el remitente
 
@@ -157,11 +157,11 @@ Cambia `EMAIL_FROM_NAME`/`EMAIL_FROM_ADDRESS` en `.env` — no hay ningún remit
 ## Manejo de errores, reintentos y logging
 
 - **Errores de la API de Resend** (`{ error }` en la respuesta) y **errores de red** (`fetch` fallido) se capturan y normalizan a un mismo shape (`EmailErrorInfo`: `name`, `message`, `status`, `stack`, `response`) — nunca quedan silenciosos.
-- **Reintentos**: solo ante errores transitorios (`429`, `500`, `502`, `503`, `504`, o fallos de red) — ver `isRetryableError` en [`utils.ts`](./utils.ts). Errores permanentes (API key inválida, dominio no verificado, destinatario rechazado, payload inválido) fallan de inmediato, sin reintentar. Backoff exponencial: `EMAIL_RETRY_BASE_DELAY_MS * 2^intento`.
+- **Reintentos**: solo ante errores transitorios (`429`, `500`, `502`, `503`, `504`, o fallos de red) — ver `isRetryableError` en [`utils.js`](./utils.js). Errores permanentes (API key inválida, dominio no verificado, destinatario rechazado, payload inválido) fallan de inmediato, sin reintentar. Backoff exponencial: `EMAIL_RETRY_BASE_DELAY_MS * 2^intento`.
 - **Validación previa** (`validateEmailOptions`): destinatarios con formato de correo inválido, asunto vacío o HTML vacío se rechazan **antes** de tocar la red (no consumen cuota de Resend ni cuentan como intento).
 - **Logging**: cada envío (exitoso o no) genera una línea JSON estructurada (`console.log`/`console.error`) con `type`, `recipient`, `ok`, `durationMs`, `attempts`, `messageId` (si tuvo éxito) o `errorMessage`. Para enviar esto a un logger real (Winston, Pino, Datadog), inyecta un `IEmailLogger` propio:
-  ```ts
-  import { EmailService } from "../services/email/email.service.ts";
+  ```js
+  import { EmailService } from "../services/email/email.service.js";
   const emailService = new EmailService(undefined, miLoggerPersonalizado);
   ```
 
@@ -206,4 +206,4 @@ Todo correo —incluidos los que en otro proyecto usarían el flujo nativo de Su
 
 - `RESEND_API_KEY` se lee **únicamente** de `process.env.RESEND_API_KEY` — nunca hardcodeada, nunca impresa, nunca incluida en logs (`ILogEntry` no tiene ningún campo que la exponga).
 - `.env` está en `.gitignore` — la key real nunca llega al repositorio.
-- Los templates escapan HTML de todo valor dinámico (`escapeHtml` en `utils.ts`) antes de interpolarlo, para evitar inyección si un nombre/mensaje viene de input de usuario.
+- Los templates escapan HTML de todo valor dinámico (`escapeHtml` en `utils.js`) antes de interpolarlo, para evitar inyección si un nombre/mensaje viene de input de usuario.

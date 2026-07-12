@@ -1,4 +1,4 @@
-import { loadEmailConfig, getEmailConfig, resetEmailConfigCache } from "./email.config.ts";
+import { loadEmailConfig, getEmailConfig, resetEmailConfigCache } from "./email.config.js";
 
 const ENV_KEYS = [
   "RESEND_API_KEY",

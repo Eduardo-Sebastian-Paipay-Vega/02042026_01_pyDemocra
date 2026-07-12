@@ -6,8 +6,7 @@ import {
   isRetryableError,
   withRetry,
   escapeHtml,
-} from "./utils.ts";
-import type { EmailOptions } from "./types.ts";
+} from "./utils.js";
 
 describe("isValidEmail", () => {
   test.each([
@@ -38,7 +37,7 @@ describe("normalizeRecipients", () => {
 });
 
 describe("validateEmailOptions", () => {
-  const base: EmailOptions = { to: "user@example.com", subject: "Hola", html: "<p>Hi</p>" };
+  const base = { to: "user@example.com", subject: "Hola", html: "<p>Hi</p>" };
 
   test("no lanza con un payload válido", () => {
     expect(() => validateEmailOptions(base)).not.toThrow();

@@ -1,9 +1,7 @@
-import type { VerificationEmailData } from "../types.ts";
-import { renderLayout, renderButton, COLORS } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, renderButton, COLORS } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-export function renderVerificationEmail(data: VerificationEmailData): RenderedEmail {
+export function renderVerificationEmail(data) {
   const greeting = data.name ? `Hola ${escapeHtml(data.name)},` : "Hola,";
   const expires = data.expiresInHours ?? 24;
 

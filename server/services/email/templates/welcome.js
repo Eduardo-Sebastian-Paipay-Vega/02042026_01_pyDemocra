@@ -1,10 +1,8 @@
-import type { WelcomeEmailData } from "../types.ts";
-import { renderLayout, renderButton } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import { getEmailConfig } from "../config/email.config.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, renderButton } from "./layout.js";
+import { escapeHtml } from "../utils.js";
+import { getEmailConfig } from "../config/email.config.js";
 
-export function renderWelcomeEmail(data: WelcomeEmailData): RenderedEmail {
+export function renderWelcomeEmail(data) {
   const { appName, appUrl } = getEmailConfig();
   const loginUrl = data.loginUrl ?? appUrl;
   const name = escapeHtml(data.name);

@@ -1,14 +1,7 @@
-import type { OTPEmailData } from "../types.ts";
-import { renderLayout, COLORS } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
+import { renderLayout, COLORS } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-export interface RenderedEmail {
-  subject: string;
-  html: string;
-  text: string;
-}
-
-export function renderOtpEmail(data: OTPEmailData): RenderedEmail {
+export function renderOtpEmail(data) {
   const greeting = data.name ? `Hola ${data.name},` : "Hola,";
   const ttl = data.ttlMinutes ?? 10;
 

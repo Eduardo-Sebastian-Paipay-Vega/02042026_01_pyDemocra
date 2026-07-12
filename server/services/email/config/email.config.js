@@ -5,38 +5,25 @@
  * el email todavía no está configurado (igual que el resto de `server/config.js`).
  */
 
-export interface EmailConfig {
-  readonly apiKey: string;
-  readonly fromName: string;
-  readonly fromEmail: string;
-  readonly replyTo: string | null;
-  readonly appName: string;
-  readonly appUrl: string;
-  readonly logoUrl: string;
-  readonly maxRetries: number;
-  readonly retryBaseDelayMs: number;
-  readonly defaultOtpTtlMinutes: number;
-}
-
-function readEnv(name: string): string {
+function readEnv(name) {
   return (process.env[name] ?? "").trim();
 }
 
-function readEnvInt(name: string, fallback: number): number {
+function readEnvInt(name, fallback) {
   const raw = readEnv(name);
   if (!raw) return fallback;
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-let cachedConfig: EmailConfig | null = null;
+let cachedConfig = null;
 
 /**
  * Construye y valida la configuración del módulo de email. Lanza un error
  * descriptivo si `RESEND_API_KEY` falta o está vacía — es la única variable
  * estrictamente obligatoria; el resto tiene defaults razonables.
  */
-export function loadEmailConfig(): EmailConfig {
+export function loadEmailConfig() {
   const apiKey = readEnv("RESEND_API_KEY");
 
   if (!apiKey) {
@@ -70,7 +57,7 @@ export function loadEmailConfig(): EmailConfig {
 }
 
 /** Devuelve la configuración cacheada, cargándola (y validándola) la primera vez. */
-export function getEmailConfig(): EmailConfig {
+export function getEmailConfig() {
   if (!cachedConfig) {
     cachedConfig = loadEmailConfig();
   }
@@ -78,6 +65,6 @@ export function getEmailConfig(): EmailConfig {
 }
 
 /** Solo para tests: limpia la caché para forzar una relectura de `process.env`. */
-export function resetEmailConfigCache(): void {
+export function resetEmailConfigCache() {
   cachedConfig = null;
 }

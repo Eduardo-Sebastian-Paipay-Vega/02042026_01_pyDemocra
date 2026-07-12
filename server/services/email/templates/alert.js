@@ -1,21 +1,19 @@
-import type { AlertEmailData, AlertSeverity } from "../types.ts";
-import { renderLayout, renderButton, COLORS } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, renderButton, COLORS } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-const SEVERITY_COLOR: Record<AlertSeverity, string> = {
+const SEVERITY_COLOR = {
   info: COLORS.info,
   warning: COLORS.warning,
   critical: COLORS.critical,
 };
 
-const SEVERITY_LABEL: Record<AlertSeverity, string> = {
+const SEVERITY_LABEL = {
   info: "Información",
   warning: "Advertencia",
   critical: "Crítico",
 };
 
-export function renderAlertEmail(data: AlertEmailData): RenderedEmail {
+export function renderAlertEmail(data) {
   const severity = data.severity ?? "warning";
   const color = SEVERITY_COLOR[severity];
 

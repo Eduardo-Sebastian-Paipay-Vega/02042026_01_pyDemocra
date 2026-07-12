@@ -1,17 +1,15 @@
-import { EmailService, emailService } from "./email.service.ts";
-import { resetEmailConfigCache } from "./config/email.config.ts";
-import type { IEmailProvider, IEmailLogger, ILogEntry } from "./interfaces.ts";
-import type { EmailOptions, EmailSendResult } from "./types.ts";
+import { EmailService, emailService } from "./email.service.js";
+import { resetEmailConfigCache } from "./config/email.config.js";
 
-function makeFakeProvider(result: EmailSendResult): IEmailProvider & { send: jest.Mock } {
+function makeFakeProvider(result: unknown) {
   return { send: jest.fn().mockResolvedValue(result) };
 }
 
-function makeFakeLogger(): IEmailLogger & { logSend: jest.Mock } {
+function makeFakeLogger() {
   return { logSend: jest.fn() };
 }
 
-const OK_RESULT: EmailSendResult = {
+const OK_RESULT = {
   ok: true,
   id: "email-123",
   provider: "resend",
@@ -71,7 +69,7 @@ describe("EmailService — despacho común", () => {
   });
 
   test("en fallo del provider, loggea errorMessage y no lo oculta", async () => {
-    const failResult: EmailSendResult = {
+    const failResult = {
       ok: false,
       provider: "resend",
       durationMs: 5,
@@ -96,7 +94,7 @@ describe("EmailService — despacho común", () => {
 });
 
 describe("EmailService — métodos de conveniencia", () => {
-  function captureOptions(): { provider: IEmailProvider & { send: jest.Mock }; service: EmailService } {
+  function captureOptions() {
     const provider = makeFakeProvider(OK_RESULT);
     const service = new EmailService(provider, makeFakeLogger());
     return { provider, service };
@@ -106,7 +104,7 @@ describe("EmailService — métodos de conveniencia", () => {
     const { provider, service } = captureOptions();
     await service.sendOTP({ to: "user@example.com", code: "482913", ttlMinutes: 5, name: "Ana" });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("482913");
     expect(sent.html).toContain("5 minutos");
     expect(sent.text).toContain("482913");
@@ -117,7 +115,7 @@ describe("EmailService — métodos de conveniencia", () => {
     const { provider, service } = captureOptions();
     await service.sendVerification({ to: "user@example.com", verificationUrl: "https://x.test/verify/abc" });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("https://x.test/verify/abc");
   });
 
@@ -125,7 +123,7 @@ describe("EmailService — métodos de conveniencia", () => {
     const { provider, service } = captureOptions();
     await service.sendResetPassword({ to: "user@example.com", resetUrl: "https://x.test/reset/abc" });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("https://x.test/reset/abc");
   });
 
@@ -133,7 +131,7 @@ describe("EmailService — métodos de conveniencia", () => {
     const { provider, service } = captureOptions();
     await service.sendWelcome({ to: "user@example.com", name: "Carlos" });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("Carlos");
   });
 
@@ -146,7 +144,7 @@ describe("EmailService — métodos de conveniencia", () => {
       invitationUrl: "https://x.test/invite/abc",
     });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("Lucía");
     expect(sent.html).toContain("ONG Ejemplo");
   });
@@ -160,7 +158,7 @@ describe("EmailService — métodos de conveniencia", () => {
       severity: "critical",
     });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.subject).toContain("Fallo de sync");
     expect(sent.tags).toMatchObject({ category: "alert", severity: "critical" });
   });
@@ -175,7 +173,7 @@ describe("EmailService — métodos de conveniencia", () => {
       actionLabel: "Ver reporte",
     });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("https://x.test/reports/1");
     expect(sent.html).toContain("Ver reporte");
   });
@@ -190,7 +188,7 @@ describe("EmailService — métodos de conveniencia", () => {
       metadata: { usuario_id: "42" },
     });
 
-    const sent = provider.send.mock.calls[0][0] as EmailOptions;
+    const sent = provider.send.mock.calls[0][0];
     expect(sent.html).toContain("Pedro");
     expect(sent.html).toContain("eliminó un usuario");
     expect(sent.html).toContain("42");

@@ -1,38 +1,23 @@
-import { getResendClient } from "./resend.client.ts";
-import { getEmailConfig } from "./config/email.config.ts";
-import type { IEmailProvider, IEmailLogger } from "./interfaces.ts";
-import { consoleEmailLogger, validateEmailOptions, withRetry, normalizeRecipients } from "./utils.ts";
-import type {
-  EmailOptions,
-  EmailSendResult,
-  EmailErrorInfo,
-  OTPEmailData,
-  VerificationEmailData,
-  ResetPasswordEmailData,
-  WelcomeEmailData,
-  InvitationEmailData,
-  AlertEmailData,
-  NotificationEmailData,
-  AuditEmailData,
-} from "./types.ts";
-import { renderOtpEmail } from "./templates/otp.ts";
-import { renderVerificationEmail } from "./templates/verification.ts";
-import { renderResetPasswordEmail } from "./templates/resetPassword.ts";
-import { renderWelcomeEmail } from "./templates/welcome.ts";
-import { renderInvitationEmail } from "./templates/invitation.ts";
-import { renderAlertEmail } from "./templates/alert.ts";
-import { renderNotificationEmail } from "./templates/notification.ts";
-import { renderAuditEmail } from "./templates/audit.ts";
+import { getResendClient } from "./resend.client.js";
+import { getEmailConfig } from "./config/email.config.js";
+import { consoleEmailLogger, validateEmailOptions, withRetry, normalizeRecipients } from "./utils.js";
+import { renderOtpEmail } from "./templates/otp.js";
+import { renderVerificationEmail } from "./templates/verification.js";
+import { renderResetPasswordEmail } from "./templates/resetPassword.js";
+import { renderWelcomeEmail } from "./templates/welcome.js";
+import { renderInvitationEmail } from "./templates/invitation.js";
+import { renderAlertEmail } from "./templates/alert.js";
+import { renderNotificationEmail } from "./templates/notification.js";
+import { renderAuditEmail } from "./templates/audit.js";
 
-function toErrorInfo(error: unknown): EmailErrorInfo {
+function toErrorInfo(error) {
   if (error instanceof Error) {
-    const withResponse = error as Error & { statusCode?: number; status?: number; response?: unknown };
     return {
       name: error.name,
       message: error.message,
-      status: withResponse.statusCode ?? withResponse.status,
+      status: error.statusCode ?? error.status,
       stack: error.stack,
-      response: withResponse.response,
+      response: error.response,
     };
   }
   return { name: "UnknownError", message: String(error) };
@@ -43,14 +28,14 @@ function toErrorInfo(error: unknown): EmailErrorInfo {
  * la API (los devuelve en `{ error }`); acá se normalizan ambos casos
  * (rechazo de la promesa y `{ error }` en la respuesta) a un único shape.
  */
-class ResendEmailProvider implements IEmailProvider {
-  async send(options: EmailOptions): Promise<EmailSendResult> {
+class ResendEmailProvider {
+  async send(options) {
     const started = Date.now();
     const { fromName, fromEmail, replyTo, maxRetries, retryBaseDelayMs } = getEmailConfig();
     const client = getResendClient();
 
     let attemptsMade = 0;
-    const sendOnce = async (): Promise<{ id: string }> => {
+    const sendOnce = async () => {
       attemptsMade += 1;
       const { data, error } = await client.emails.send({
         from: `${fromName} <${fromEmail}>`,
@@ -68,7 +53,7 @@ class ResendEmailProvider implements IEmailProvider {
       });
 
       if (error) {
-        const err = new Error(error.message) as Error & { name: string; status?: number };
+        const err = new Error(error.message);
         err.name = error.name || "ResendAPIError";
         throw err;
       }
@@ -92,10 +77,7 @@ class ResendEmailProvider implements IEmailProvider {
 }
 
 export class EmailService {
-  private readonly provider: IEmailProvider;
-  private readonly logger: IEmailLogger;
-
-  constructor(provider: IEmailProvider = new ResendEmailProvider(), logger: IEmailLogger = consoleEmailLogger) {
+  constructor(provider = new ResendEmailProvider(), logger = consoleEmailLogger) {
     this.provider = provider;
     this.logger = logger;
   }
@@ -105,7 +87,7 @@ export class EmailService {
    * internamente) y registra el resultado. Todos los métodos `send*` pasan
    * por acá — es el único lugar que sabe validar/loggear.
    */
-  private async dispatch(type: string, options: EmailOptions): Promise<EmailSendResult> {
+  async dispatch(type, options) {
     const started = Date.now();
     const recipient = normalizeRecipients(options.to).join(", ");
 
@@ -113,7 +95,7 @@ export class EmailService {
       validateEmailOptions(options);
     } catch (error) {
       const durationMs = Date.now() - started;
-      const result: EmailSendResult = {
+      const result = {
         ok: false,
         provider: "resend",
         durationMs,
@@ -126,7 +108,7 @@ export class EmailService {
         ok: false,
         durationMs,
         attempts: 0,
-        errorMessage: result.ok ? undefined : result.error.message,
+        errorMessage: result.error.message,
       });
       return result;
     }
@@ -146,37 +128,37 @@ export class EmailService {
     return result;
   }
 
-  sendOTP(data: OTPEmailData): Promise<EmailSendResult> {
+  sendOTP(data) {
     const { subject, html, text } = renderOtpEmail(data);
     return this.dispatch("otp", { to: data.to, subject, html, text, tags: { category: "otp" } });
   }
 
-  sendVerification(data: VerificationEmailData): Promise<EmailSendResult> {
+  sendVerification(data) {
     const { subject, html, text } = renderVerificationEmail(data);
     return this.dispatch("verification", { to: data.to, subject, html, text, tags: { category: "verification" } });
   }
 
-  sendResetPassword(data: ResetPasswordEmailData): Promise<EmailSendResult> {
+  sendResetPassword(data) {
     const { subject, html, text } = renderResetPasswordEmail(data);
     return this.dispatch("reset_password", { to: data.to, subject, html, text, tags: { category: "reset_password" } });
   }
 
-  sendWelcome(data: WelcomeEmailData): Promise<EmailSendResult> {
+  sendWelcome(data) {
     const { subject, html, text } = renderWelcomeEmail(data);
     return this.dispatch("welcome", { to: data.to, subject, html, text, tags: { category: "welcome" } });
   }
 
-  sendInvitation(data: InvitationEmailData): Promise<EmailSendResult> {
+  sendInvitation(data) {
     const { subject, html, text } = renderInvitationEmail(data);
     return this.dispatch("invitation", { to: data.to, subject, html, text, tags: { category: "invitation" } });
   }
 
-  sendAlert(data: AlertEmailData): Promise<EmailSendResult> {
+  sendAlert(data) {
     const { subject, html, text } = renderAlertEmail(data);
     return this.dispatch("alert", { to: data.to, subject, html, text, tags: { category: "alert", severity: data.severity ?? "warning" } });
   }
 
-  sendNotification(data: NotificationEmailData): Promise<EmailSendResult> {
+  sendNotification(data) {
     const { subject, html, text } = renderNotificationEmail(data);
     return this.dispatch("notification", { to: data.to, subject, html, text, tags: { category: "notification" } });
   }
@@ -186,7 +168,7 @@ export class EmailService {
    * para "confirmaciones de operación" y correos transaccionales ad-hoc:
    * arma un AuditEmailData con la acción realizada.
    */
-  sendAudit(data: AuditEmailData): Promise<EmailSendResult> {
+  sendAudit(data) {
     const { subject, html, text } = renderAuditEmail(data);
     return this.dispatch("audit", { to: data.to, subject, html, text, tags: { category: "audit" } });
   }
@@ -197,7 +179,7 @@ export class EmailService {
    * un archivo en `templates/` y, si se quiere un método de conveniencia, un
    * wrapper de una línea como los de arriba (Open/Closed).
    */
-  sendCustomEmail(options: EmailOptions): Promise<EmailSendResult> {
+  sendCustomEmail(options) {
     return this.dispatch("custom", options);
   }
 }

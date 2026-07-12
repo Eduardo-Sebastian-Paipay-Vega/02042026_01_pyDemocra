@@ -1,4 +1,4 @@
-import { getEmailConfig } from "../config/email.config.ts";
+import { getEmailConfig } from "../config/email.config.js";
 
 /**
  * Shell HTML compartido por todas las plantillas. Basado en tablas (no
@@ -23,14 +23,7 @@ const COLORS = {
 
 export { COLORS };
 
-export interface LayoutOptions {
-  /** Texto oculto que algunos clientes (Gmail) muestran como preview junto al asunto. */
-  previewText: string;
-  /** HTML ya armado de la plantilla específica (OTP, bienvenida, etc.). */
-  bodyHtml: string;
-}
-
-export function renderButton(label: string, url: string, color: string = COLORS.accent): string {
+export function renderButton(label, url, color = COLORS.accent) {
   return `
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;">
       <tr>
@@ -45,7 +38,7 @@ export function renderButton(label: string, url: string, color: string = COLORS.
   `;
 }
 
-export function renderLayout({ previewText, bodyHtml }: LayoutOptions): string {
+export function renderLayout({ previewText, bodyHtml }) {
   const { appName, appUrl, logoUrl } = getEmailConfig();
   const year = new Date().getFullYear();
 

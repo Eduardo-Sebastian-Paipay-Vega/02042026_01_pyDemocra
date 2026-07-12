@@ -1,9 +1,7 @@
-import type { InvitationEmailData } from "../types.ts";
-import { renderLayout, renderButton, COLORS } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, renderButton, COLORS } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-export function renderInvitationEmail(data: InvitationEmailData): RenderedEmail {
+export function renderInvitationEmail(data) {
   const expires = data.expiresInDays ?? 7;
   const roleLine = data.role ? ` como <strong>${escapeHtml(data.role)}</strong>` : "";
 

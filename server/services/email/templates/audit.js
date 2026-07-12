@@ -1,9 +1,7 @@
-import type { AuditEmailData } from "../types.ts";
-import { renderLayout, COLORS } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, COLORS } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-function renderMetadataRows(metadata: AuditEmailData["metadata"]): string {
+function renderMetadataRows(metadata) {
   if (!metadata) return "";
   return Object.entries(metadata)
     .map(
@@ -17,7 +15,7 @@ function renderMetadataRows(metadata: AuditEmailData["metadata"]): string {
     .join("");
 }
 
-export function renderAuditEmail(data: AuditEmailData): RenderedEmail {
+export function renderAuditEmail(data) {
   const occurredAt = data.occurredAt ?? new Date().toISOString();
 
   const bodyHtml = `

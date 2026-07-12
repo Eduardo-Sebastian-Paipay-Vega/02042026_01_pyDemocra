@@ -1,5 +1,5 @@
 import { config } from "../config.js";
-import { emailService } from "./email/index.ts";
+import { emailService } from "./email/index.js";
 
 // Adaptador delgado sobre server/services/email/ (Resend oficial + SOLID).
 // Mantiene el contrato histórico de sendStepUpOtp({ toEmail, otpCode, ttlMinutes })

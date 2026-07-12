@@ -1,8 +1,8 @@
 import { config } from "../config.js";
 import { sendStepUpOtp } from "./otp-mailer.js";
-import { emailService } from "./email/index.ts";
+import { emailService } from "./email/index.js";
 
-jest.mock("./email/index.ts", () => ({
+jest.mock("./email/index.js", () => ({
   emailService: { sendOTP: jest.fn() },
 }));
 

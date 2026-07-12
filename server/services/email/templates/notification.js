@@ -1,9 +1,7 @@
-import type { NotificationEmailData } from "../types.ts";
-import { renderLayout, renderButton } from "./layout.ts";
-import { escapeHtml } from "../utils.ts";
-import type { RenderedEmail } from "./otp.ts";
+import { renderLayout, renderButton } from "./layout.js";
+import { escapeHtml } from "../utils.js";
 
-export function renderNotificationEmail(data: NotificationEmailData): RenderedEmail {
+export function renderNotificationEmail(data) {
   const bodyHtml = `
     <p style="margin:0 0 16px;font-size:17px;font-weight:600;">${escapeHtml(data.title)}</p>
     <p style="margin:0 0 8px;white-space:pre-line;">${escapeHtml(data.message)}</p>
