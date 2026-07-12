@@ -1,0 +1,30 @@
+[
+  {
+    "target": "landing",
+    "url": "http://localhost:4173/",
+    "performanceScore": 53,
+    "FCP_ms": 2855.3308,
+    "LCP_ms": 3928.1349999999998,
+    "TBT_ms": 4466.4164,
+    "CLS": 0,
+    "SpeedIndex_ms": 2974.9998120465816,
+    "TTI_ms": 10453.197199999999,
+    "totalByteWeight_KB": 454,
+    "mainThreadWork_ms": 9892.383999999978,
+    "unusedJsBytes_KB": 168
+  },
+  {
+    "target": "ong",
+    "url": "http://localhost:4173/ong",
+    "performanceScore": 77,
+    "FCP_ms": 3147.4073,
+    "LCP_ms": 3622.1109500000002,
+    "TBT_ms": 263,
+    "CLS": 0,
+    "SpeedIndex_ms": 4469.70751999278,
+    "TTI_ms": 3660.4073000000003,
+    "totalByteWeight_KB": 367,
+    "mainThreadWork_ms": 1584.8360000000007,
+    "unusedJsBytes_KB": 157
+  }
+]

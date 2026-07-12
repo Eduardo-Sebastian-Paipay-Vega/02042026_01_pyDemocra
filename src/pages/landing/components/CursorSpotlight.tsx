@@ -13,16 +13,31 @@ export function CursorSpotlight() {
     let tx = cx;
     let ty = cy;
 
-    const onMove = (e: MouseEvent) => {
-      tx = e.clientX;
-      ty = e.clientY;
-    };
+    // Perf: antes este loop llamaba requestAnimationFrame incondicionalmente
+    // para siempre, incluso ya convergido y sin movimiento de mouse -- eso
+    // reescribia el `background` (repaint) en cada frame para toda la vida
+    // de la pagina, y era la causa principal del Total Blocking Time alto
+    // medido con Lighthouse (mobile) en esta pagina. Ahora el loop se
+    // detiene solo al converger y se reactiva en el proximo mousemove.
+    const isConverged = () => Math.abs(tx - cx) < 0.5 && Math.abs(ty - cy) < 0.5;
 
     const tick = () => {
       cx += (tx - cx) * 0.08;
       cy += (ty - cy) * 0.08;
       el.style.background = `radial-gradient(700px circle at ${cx}px ${cy}px, rgba(0,46,254,0.07), transparent 42%)`;
-      raf = requestAnimationFrame(tick);
+      if (!isConverged()) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+      }
+    };
+
+    const onMove = (e: MouseEvent) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      if (!raf) {
+        raf = requestAnimationFrame(tick);
+      }
     };
 
     window.addEventListener("mousemove", onMove);
