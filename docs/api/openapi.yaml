@@ -21,11 +21,18 @@ tags:
   - name: audit
     description: Auditoría forense (resumen asistido por IA) y métricas de seguridad del tenant.
   - name: iam
-    description: Gestión de roles, permisos y asignaciones usuario-rol-sede.
+    description: >
+      Gestión de roles, permisos y asignaciones usuario-rol-sede. Todas las
+      escrituras (POST/PUT/DELETE) pasan también por
+      requireFinancialWriteAccess() (server/middleware/financial-state.js) —
+      pueden devolver 403 FIN-001 (tenant suspendido) o 403 FIN-002 (tenant
+      en solo-lectura) antes de aplicar la regla de negocio propia de IAM.
   - name: onboarding
     description: Validación de datos fiscales y alta (bootstrap) de un tenant nuevo.
   - name: sedes
-    description: Gestión de sedes físicas del tenant.
+    description: >
+      Gestión de sedes físicas del tenant. Igual que iam, las escrituras
+      pasan por requireFinancialWriteAccess() (403 FIN-001/FIN-002).
 
 components:
   securitySchemes:
@@ -98,6 +105,23 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    FinancialRestricted:
+      description: >
+        El tenant está suspendido (FIN-001) o en modo de solo-lectura (FIN-002)
+        por su estado financiero — bloquea escrituras (server/middleware/financial-state.js,
+        montado en todas las rutas de escritura de iam.js y sedes.js).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: >
+        Error inesperado no capturado por la lógica de la ruta
+        (server/utils/http.js sendUnexpectedError()) — aplica a cualquier endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
 
 security:
   - bearerAuth: []
@@ -123,13 +147,71 @@ paths:
                   type: string
                 geo_country:
                   type: string
+                device_fingerprint:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+                action_name:
+                  type: string
+                action_criticality:
+                  type: string
+                required_permission:
+                  type: string
+                sede_id:
+                  type: string
+                  format: uuid
       responses:
         "200":
           description: Decisión del motor de riesgo (ALLOW / REQUIRE_OTP / BLOCK).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk_level:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [ALLOW, REQUIRE_OTP, BLOCK]
+                  reason_codes:
+                    type: array
+                    items:
+                      type: string
+                  user_message:
+                    type: string
+                  error_code:
+                    type: string
+                  blocked_until:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  challenge_id:
+                    type: string
+                    nullable: true
+                  challenge_expires_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  challenge_delivery_hint:
+                    type: string
+                    nullable: true
+                  challenge_delivery_status:
+                    type: string
+                    nullable: true
+                  debug_otp:
+                    type: string
+                    nullable: true
+                    description: Solo presente si el modo debug de OTP está habilitado.
+                  session_id:
+                    type: string
+                    nullable: true
         "401":
           $ref: "#/components/responses/Unauthorized"
         "409":
           $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /auth/step-up/verify-otp:
     post:
@@ -158,6 +240,16 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: >
+            OTP incorrecto, expirado o desafío inválido — código de error
+            explicado vía explainErrorCode(verified.reason) (server/routes/auth.js).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /auth/step-up/resend-otp:
     post:
@@ -169,6 +261,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [challenge_id]
               properties:
                 tenant_id:
                   type: string
@@ -178,8 +271,22 @@ paths:
       responses:
         "200":
           description: OTP reenviado.
+        "400":
+          description: Falta challenge_id (IAM-001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "503":
+          description: Fallo al reenviar el OTP (proveedor de email no disponible/configurado).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /auth/terminal-login:
     post:
@@ -212,8 +319,32 @@ paths:
           description: Sesión de terminal creada.
         "400":
           $ref: "#/components/responses/ValidationError"
+        "401":
+          description: PIN incorrecto, aún sin llegar al máximo de intentos (IAM-001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Terminal inactivo o no encontrado (IAM-005).
+          description: >
+            Terminal inactivo o no encontrado (IAM-005), perfil no encontrado
+            (IAM-001), usuario bloqueado (IAM-002), o bloqueado por el motor
+            de riesgo (error_code de explainErrorCode(riskResult.error_code),
+            con risk_level/reason_codes/blocked_until adicionales en el body).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "423":
+          description: >
+            PIN bloqueado temporalmente (IAM-002) — ya estaba bloqueado, o se
+            acaba de alcanzar el máximo de intentos permitidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /audit/summary:
     post:
@@ -245,13 +376,34 @@ paths:
                 payload_after:
                   type: object
                   nullable: true
+                error_code:
+                  type: string
+                  nullable: true
       responses:
         "200":
           description: Resumen generado (sin exponer datos sensibles).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  summary:
+                    type: string
+                  reasoning:
+                    type: string
+                  confidence:
+                    type: number
+                  audit_log_id:
+                    type: string
+                    format: uuid
         "401":
           $ref: "#/components/responses/Unauthorized"
         "409":
           $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /audit/metrics:
     get:
@@ -263,16 +415,25 @@ paths:
         app.use("/api/security", auditRoutes)).
       responses:
         "200":
-          description: Conteos agregados de auth_events, pagos y sesiones activas.
+          description: >
+            Conteos agregados de auth_events, pagos y sesiones activas
+            (login_success_rate, PIN_failure_rate, y otros conteos — ver
+            server/routes/audit.js para el shape exacto).
         "401":
           $ref: "#/components/responses/Unauthorized"
         "409":
           $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/roles:
     get:
       tags: [iam]
       summary: Lista los roles del tenant actual
+      description: >
+        Todos los endpoints de /iam/* pasan por resolveIamContext() (server/routes/iam.js),
+        que puede devolver 401 IAM-004 (sin perfil válido) o 409 TEN-003 (mismatch
+        de tenant) antes de llegar a la lógica propia de cada ruta.
       responses:
         "200":
           description: Lista de roles.
@@ -285,6 +446,16 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Role"
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     post:
       tags: [iam]
       summary: Crea un nuevo rol en el tenant actual
@@ -312,8 +483,14 @@ paths:
                     $ref: "#/components/schemas/Role"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
         "403":
           description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/roles/{roleId}:
     put:
@@ -326,9 +503,40 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                hierarchy_level:
+                  type: integer
       responses:
         "200":
           description: Rol actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    $ref: "#/components/schemas/Role"
+        "400":
+          description: Falta o está vacío el campo name (IAM-001).
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "404":
+          description: Rol no encontrado en este tenant (IAM-001).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     delete:
       tags: [iam]
       summary: Elimina un rol (no del sistema)
@@ -342,6 +550,14 @@ paths:
       responses:
         "204":
           description: Rol eliminado.
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/roles/{roleId}/permissions:
     get:
@@ -357,6 +573,14 @@ paths:
       responses:
         "200":
           description: Lista de permisos del rol.
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     post:
       tags: [iam]
       summary: Asigna un permiso a un rol
@@ -373,12 +597,23 @@ paths:
           application/json:
             schema:
               type: object
+              required: [permission]
               properties:
                 permission:
                   type: string
       responses:
         "201":
           description: Permiso asignado.
+        "400":
+          description: Falta el campo permission (IAM-001).
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/roles/{roleId}/permissions/{permission}:
     delete:
@@ -399,14 +634,38 @@ paths:
       responses:
         "204":
           description: Permiso revocado.
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar roles (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/user-roles:
     get:
       tags: [iam]
       summary: Lista asignaciones usuario-rol-sede del tenant
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filtra las asignaciones devueltas por usuario.
       responses:
         "200":
           description: Lista de asignaciones.
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar asignaciones (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     post:
       tags: [iam]
       summary: Asigna un rol (en una sede) a un usuario
@@ -416,6 +675,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [user_id, role_id, sede_id]
               properties:
                 user_id:
                   type: string
@@ -429,6 +689,16 @@ paths:
       responses:
         "201":
           description: Asignación creada.
+        "400":
+          description: Falta user_id, role_id o sede_id (IAM-001).
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar asignaciones (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /iam/user-roles/{assignmentId}:
     delete:
@@ -443,6 +713,14 @@ paths:
       responses:
         "204":
           description: Asignación revocada.
+        "401":
+          description: Sin perfil válido para resolver el contexto IAM (IAM-004).
+        "403":
+          description: El actor no tiene permiso para gestionar asignaciones (IAM-003).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /onboarding/validate-ruc/{ruc}:
     get:
@@ -461,8 +739,36 @@ paths:
           description: Datos fiscales del RUC.
         "400":
           description: RUC con formato inválido (TEN-001).
+        "403":
+          description: >
+            Empresa inactiva o "no habida" según el servicio fiscal (TEN-002)
+            — bloquea el onboarding aunque el RUC exista y tenga formato válido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: RUC no encontrado en el servicio fiscal (TEN-001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Respuesta ambigua o inesperada del servicio fiscal externo (TEN-001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Error o caída de conexión con el servicio fiscal externo (TEN-001).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: Servicio de validación fiscal no configurado.
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /onboarding/bootstrap-tenant:
     post:
@@ -513,6 +819,8 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /sedes:
     get:
@@ -532,6 +840,10 @@ paths:
                       $ref: "#/components/schemas/Sede"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     post:
       tags: [sedes]
       summary: Crea una nueva sede (requiere ser administrador del tenant)
@@ -557,8 +869,16 @@ paths:
                     $ref: "#/components/schemas/Sede"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: El actor no es administrador del tenant (IAM-003).
+          description: >
+            El actor no es administrador del tenant (IAM-003), o el tenant
+            está suspendido/en solo-lectura (FIN-001/FIN-002).
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /sedes/{sedeId}:
     put:
@@ -591,10 +911,20 @@ paths:
                 properties:
                   sede:
                     $ref: "#/components/schemas/Sede"
+        "400":
+          description: name vacío, o no se proveyó ningún campo a actualizar (TEN-001).
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: El actor no es administrador del tenant (IAM-003).
+          description: >
+            El actor no es administrador del tenant (IAM-003), o el tenant
+            está suspendido/en solo-lectura (FIN-001/FIN-002).
         "404":
           description: Sede no encontrada en este tenant.
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
     delete:
       tags: [sedes]
       summary: Desactiva una sede (soft-delete — no elimina la fila; ver comentario en sedes.js)
@@ -608,7 +938,15 @@ paths:
       responses:
         "204":
           description: Sede desactivada.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: El actor no es administrador del tenant (IAM-003).
+          description: >
+            El actor no es administrador del tenant (IAM-003), o el tenant
+            está suspendido/en solo-lectura (FIN-001/FIN-002).
         "404":
           description: Sede no encontrada en este tenant.
+        "409":
+          $ref: "#/components/responses/TenantMismatch"
+        "500":
+          $ref: "#/components/responses/InternalError"
