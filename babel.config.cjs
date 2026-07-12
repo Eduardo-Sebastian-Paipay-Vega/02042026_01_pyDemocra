@@ -5,5 +5,8 @@
 // CommonJS para que Jest (que no soporta ESM nativo de forma estable) pueda
 // ejecutar y mockear estos archivos con la API estandar (jest.mock, etc.).
 module.exports = {
-  presets: [["@babel/preset-env", { targets: { node: "current" } }]],
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-typescript", { onlyRemoveTypeImports: true }],
+  ],
 };

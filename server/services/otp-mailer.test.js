@@ -1,26 +1,20 @@
 import { config } from "../config.js";
 import { sendStepUpOtp } from "./otp-mailer.js";
+import { emailService } from "./email/index.ts";
 
-const originalFetch = global.fetch;
+jest.mock("./email/index.ts", () => ({
+  emailService: { sendOTP: jest.fn() },
+}));
+
 const originalProvider = config.otpEmailProvider;
-const originalApiKey = config.otpResendApiKey;
-const originalApiUrl = config.otpResendApiUrl;
-const originalFromEmail = config.otpFromEmail;
-const originalFromName = config.otpFromName;
 
 afterEach(() => {
-  global.fetch = originalFetch;
   config.otpEmailProvider = originalProvider;
-  config.otpResendApiKey = originalApiKey;
-  config.otpResendApiUrl = originalApiUrl;
-  config.otpFromEmail = originalFromEmail;
-  config.otpFromName = originalFromName;
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
 });
 
 describe("sendStepUpOtp", () => {
   test("rechaza recipients faltantes o sin @ sin llamar al proveedor", async () => {
-    global.fetch = jest.fn();
     config.otpEmailProvider = "resend";
 
     await expect(sendStepUpOtp({ toEmail: "", otpCode: "123456", ttlMinutes: 10 })).resolves.toEqual({
@@ -31,10 +25,10 @@ describe("sendStepUpOtp", () => {
     await expect(
       sendStepUpOtp({ toEmail: "sin-arroba", otpCode: "123456", ttlMinutes: 10 })
     ).resolves.toMatchObject({ ok: false, reason: "missing_recipient" });
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(emailService.sendOTP).not.toHaveBeenCalled();
   });
 
-  test("devuelve provider_not_configured si no hay proveedor configurado", async () => {
+  test("devuelve provider_not_configured si OTP_EMAIL_PROVIDER no es resend", async () => {
     config.otpEmailProvider = "";
 
     const result = await sendStepUpOtp({
@@ -43,120 +37,81 @@ describe("sendStepUpOtp", () => {
       ttlMinutes: 10,
     });
 
-    expect(result).toEqual({
-      ok: false,
-      provider: "none",
-      reason: "provider_not_configured",
-    });
+    expect(result).toEqual({ ok: false, provider: "none", reason: "provider_not_configured" });
+    expect(emailService.sendOTP).not.toHaveBeenCalled();
   });
 
-  test("devuelve provider_not_configured para resend sin apiKey o from", async () => {
+  test("envia via emailService.sendOTP con payload normalizado y devuelve messageId", async () => {
     config.otpEmailProvider = "resend";
-    config.otpResendApiKey = "";
-    config.otpFromEmail = "security@example.com";
-
-    await expect(
-      sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toMatchObject({ ok: false, provider: "resend", reason: "provider_not_configured" });
-
-    config.otpResendApiKey = "rk_test";
-    config.otpFromEmail = "";
-
-    await expect(
-      sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toMatchObject({ ok: false, provider: "resend", reason: "provider_not_configured" });
-  });
-
-  test("envia por Resend con payload seguro y devuelve messageId", async () => {
-    config.otpEmailProvider = "resend";
-    config.otpResendApiKey = "rk_test";
-    config.otpResendApiUrl = "https://api.resend.test/emails";
-    config.otpFromEmail = " security@example.com ";
-    config.otpFromName = "";
-    global.fetch = jest.fn().mockResolvedValue({
+    emailService.sendOTP.mockResolvedValue({
       ok: true,
-      text: async () => JSON.stringify({ id: "email-1" }),
+      id: "email-1",
+      provider: "resend",
+      durationMs: 42,
+      attempts: 1,
     });
 
     const result = await sendStepUpOtp({
       toEmail: "  user@example.com  ",
       otpCode: " 123456 ",
-      ttlMinutes: "0",
+      ttlMinutes: 15,
     });
 
     expect(result).toEqual({ ok: true, provider: "resend", messageId: "email-1" });
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.resend.test/emails",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({ Authorization: "Bearer rk_test" }),
-      })
-    );
-    const body = JSON.parse(global.fetch.mock.calls[0][1].body);
-    expect(body.from).toBe("Solaris Security <security@example.com>");
-    expect(body.to).toEqual(["user@example.com"]);
-    expect(body.html).toContain("123456");
-    expect(body.html).toContain("10 minutos");
+    expect(emailService.sendOTP).toHaveBeenCalledWith({
+      to: "user@example.com",
+      code: "123456",
+      ttlMinutes: 15,
+    });
   });
 
-  test("reporta provider_error usando message o error.message del proveedor", async () => {
+  test("ttlMinutes '0' se normaliza a undefined (el template aplica su propio default)", async () => {
     config.otpEmailProvider = "resend";
-    config.otpResendApiKey = "rk_test";
-    config.otpFromEmail = "security@example.com";
-    global.fetch = jest.fn().mockResolvedValueOnce({
+    emailService.sendOTP.mockResolvedValue({ ok: true, id: null, provider: "resend", durationMs: 1, attempts: 1 });
+
+    await sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: "0" });
+
+    expect(emailService.sendOTP).toHaveBeenCalledWith({
+      to: "user@example.com",
+      code: "123456",
+      ttlMinutes: undefined,
+    });
+  });
+
+  test("reporta provider_error con status y detail cuando el proveedor falla", async () => {
+    config.otpEmailProvider = "resend";
+    emailService.sendOTP.mockResolvedValue({
       ok: false,
-      status: 429,
-      text: async () => JSON.stringify({ message: "rate limited" }),
+      provider: "resend",
+      durationMs: 10,
+      attempts: 3,
+      error: { name: "ResendAPIError", message: "rate limited", status: 429 },
     });
 
     await expect(
       sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toMatchObject({
+    ).resolves.toEqual({
       ok: false,
       provider: "resend",
       reason: "provider_error",
       status: 429,
       detail: "rate limited",
     });
-
-    global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      text: async () => JSON.stringify({ error: { message: "smtp down" } }),
-    });
-
-    await expect(
-      sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toMatchObject({ detail: "smtp down" });
   });
 
-  test("maneja respuestas vacias, JSON invalido y errores de red", async () => {
+  test("degrada a provider_not_configured si emailService.sendOTP lanza (ej. RESEND_API_KEY ausente)", async () => {
     config.otpEmailProvider = "resend";
-    config.otpResendApiKey = "rk_test";
-    config.otpFromEmail = "security@example.com";
-    global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: true,
-      text: async () => "",
-    });
+    emailService.sendOTP.mockRejectedValueOnce(
+      new Error("[email.config] Falta la variable de entorno RESEND_API_KEY.")
+    );
 
     await expect(
       sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toEqual({ ok: true, provider: "resend", messageId: null });
-
-    global.fetch = jest.fn().mockResolvedValueOnce({
+    ).resolves.toEqual({
       ok: false,
-      status: 502,
-      text: async () => "not-json",
+      provider: "resend",
+      reason: "provider_not_configured",
+      detail: "[email.config] Falta la variable de entorno RESEND_API_KEY.",
     });
-
-    await expect(
-      sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).resolves.toMatchObject({ ok: false, detail: null });
-
-    global.fetch = jest.fn().mockRejectedValueOnce(new Error("network down"));
-
-    await expect(
-      sendStepUpOtp({ toEmail: "user@example.com", otpCode: "123456", ttlMinutes: 10 })
-    ).rejects.toThrow("network down");
   });
 });

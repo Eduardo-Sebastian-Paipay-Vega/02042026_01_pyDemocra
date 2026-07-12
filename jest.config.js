@@ -10,6 +10,7 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: [
     "server/**/*.js",
+    "server/**/*.ts",
     // supabase.js es un wrapper delgado sobre @supabase/supabase-js, siempre
     // mockeado en los tests (ver jest.mock en cada *.test.js) — su cobertura
     // real mediría "el mock devuelve lo que le dije", no lógica propia.

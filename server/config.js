@@ -15,8 +15,6 @@ export const config = {
   otpEmailProvider: (process.env.OTP_EMAIL_PROVIDER || "none").toLowerCase(),
   otpFromEmail: process.env.OTP_FROM_EMAIL || "",
   otpFromName: process.env.OTP_FROM_NAME || "Solaris Security",
-  otpResendApiKey: process.env.RESEND_API_KEY || "",
-  otpResendApiUrl: process.env.OTP_RESEND_API_URL || "https://api.resend.com/emails",
   sessionTtlHours: Number(process.env.SESSION_TTL_HOURS || 8),
   maxPinAttempts: Number(process.env.MAX_PIN_ATTEMPTS || 5),
   pinBlockMinutes: Number(process.env.PIN_BLOCK_MINUTES || 15),
