@@ -42,7 +42,10 @@ export default defineConfig({
     pool: "threads",
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json", "html", "lcov"],
+      // Directorio propio: Jest ya usa "coverage/" para server/, si Vitest
+      // escribiera ahí también se pisarían los reportes entre sí.
+      reportsDirectory: "coverage-web",
       include: ["src/**/*.{ts,tsx}", "ong/src/**/*.{ts,tsx}"],
       exclude: [
         "**/*.test.{ts,tsx}",

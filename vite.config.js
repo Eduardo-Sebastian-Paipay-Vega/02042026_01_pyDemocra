@@ -147,7 +147,10 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}", "ong/src/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json", "html", "lcov"],
+      // Directorio propio: Jest ya usa "coverage/" para server/, si Vitest
+      // escribiera ahí también se pisarían los reportes entre sí.
+      reportsDirectory: "coverage-web",
     },
   },
 });
