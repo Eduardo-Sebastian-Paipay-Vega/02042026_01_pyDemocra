@@ -1,0 +1,120 @@
+% =============================================================================
+% 5.3 Documentacion y Cobertura de la API REST
+% Archivo: 5.3_cobertura_api.tex
+% =============================================================================
+
+\section{Documentaci\'on y Cobertura de la API REST}
+\label{sec:cobertura-api}
+
+La documentaci\'on exhaustiva de la interfaz de programaci\'on de aplicaciones
+(\textit{Application Programming Interface}, API) constituye un pilar
+fundamental en el desarrollo de sistemas distribuidos, puesto que establece el
+contrato formal entre el servidor \textit{backend} y los clientes consumidores.
+La plataforma implementa una API REST documentada bajo la especificaci\'on
+OpenAPI 3.0, la cual provee una descripci\'on estructurada y legible por
+m\'aquinas de todos los \textit{endpoints} disponibles, sus par\'ametros de
+entrada, esquemas de respuesta y mecanismos de autenticaci\'on.
+
+\subsection{Especificaci\'on T\'ecnica de la API}
+\label{subsec:especificacion-api}
+
+El servidor de la API REST opera sobre el \textit{framework} Express.js,
+expuesto en el puerto \texttt{8787} del entorno local de desarrollo
+(\texttt{localhost}). La autenticaci\'on de las solicitudes se realiza mediante
+tokens JWT (\textit{JSON Web Tokens}) transmitidos a trav\'es del esquema
+\texttt{Bearer} en la cabecera \texttt{Authorization} de cada petici\'on HTTP.
+La Tabla~\ref{tab:especificacion-api} sintetiza los par\'ametros t\'ecnicos
+principales de la configuraci\'on de la API.
+
+\begin{table}[htbp]
+\centering
+\caption{Especificaci\'on t\'ecnica de la API REST}
+\label{tab:especificacion-api}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Par\'ametro} & \textbf{Valor} \\
+\hline
+Especificaci\'on          & OpenAPI 3.0 \\
+\hline
+\textit{Framework}        & Express.js (Node.js) \\
+\hline
+URL base                  & \texttt{http://localhost:8787} \\
+\hline
+Esquema de autenticaci\'on & Bearer JWT \\
+\hline
+Formato de intercambio    & JSON (\texttt{application/json}) \\
+\hline
+Versionamiento            & Por prefijo de ruta (\texttt{/api/v1/}) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Distribuci\'on de Endpoints por M\'odulo}
+\label{subsec:endpoints-modulo}
+
+La API se organiza en m\'odulos funcionales cohesivos que reflejan la
+arquitectura de dominios del sistema. Cada m\'odulo agrupa un conjunto de
+\textit{endpoints} relacionados sem\'anticamente, lo cual facilita el
+mantenimiento, la documentaci\'on y la asignaci\'on de permisos granulares.
+La Tabla~\ref{tab:endpoints-modulo} presenta la distribuci\'on de
+\textit{endpoints} por m\'odulo funcional.
+
+\begin{table}[htbp]
+\centering
+\caption{Distribuci\'on de \textit{endpoints} por m\'odulo de la API REST}
+\label{tab:endpoints-modulo}
+\begin{tabular}{|l|c|p{7cm}|}
+\hline
+\textbf{M\'odulo} & \textbf{Endpoints} & \textbf{Descripci\'on funcional} \\
+\hline
+\texttt{auth}       & var.\ & Autenticaci\'on, emisi\'on y renovaci\'on de tokens JWT, verificaci\'on OTP y evaluaci\'on de riesgo de acceso. \\
+\hline
+\texttt{audit}      & 2  & Registro y consulta de eventos de auditor\'ia del sistema, incluyendo accesos a datos sensibles. \\
+\hline
+\texttt{iam}        & 10 & Gesti\'on de identidad y acceso: roles, permisos, asignaci\'on de usuarios, y supervisi\'on de sesiones activas. \\
+\hline
+\texttt{onboarding} & 2  & Registro de organizaciones (\textit{tenants}), validaci\'on de RUC y creaci\'on de cuentas administradoras. \\
+\hline
+\texttt{sedes}      & 4  & Administraci\'on de sedes f\'isicas: registro, edici\'on, desactivaci\'on y consulta de locales operativos. \\
+\hline
+\hline
+\textbf{Total}      & \textbf{18+} & Cobertura completa de los dominios funcionales cr\'iticos del sistema. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{An\'alisis de la Documentaci\'on OpenAPI}
+\label{subsec:analisis-openapi}
+
+La adopci\'on de la especificaci\'on OpenAPI 3.0 como est\'andar de
+documentaci\'on confiere m\'ultiples ventajas al proceso de desarrollo. En
+primer lugar, permite la generaci\'on autom\'atica de interfaces interactivas
+de exploraci\'on mediante herramientas como Swagger UI, lo cual acelera la
+integraci\'on de los equipos de \textit{frontend} y reduce la dependencia de
+documentaci\'on manual propensa a desactualizaci\'on. En segundo lugar,
+habilita la validaci\'on autom\'atica de las solicitudes y respuestas contra
+los esquemas definidos, proporcionando una capa adicional de aseguramiento de
+calidad en tiempo de ejecuci\'on.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{coberapi}
+\caption{Interfaz de documentaci\'on interactiva de la API REST generada mediante OpenAPI 3.0}
+\label{fig:cobertura-api}
+\end{figure}
+
+La Figura~\ref{fig:cobertura-api} muestra la interfaz de documentaci\'on
+interactiva generada a partir de la especificaci\'on OpenAPI. Se observa la
+organizaci\'on jer\'arquica de los \textit{endpoints} por m\'odulo funcional,
+los esquemas de solicitud y respuesta, y los c\'odigos de estado HTTP asociados
+a cada operaci\'on. Esta documentaci\'on se genera de forma din\'amica a partir
+del c\'odigo fuente del servidor, garantizando la consistencia entre la
+implementaci\'on y la especificaci\'on documentada.
+
+El m\'odulo \texttt{iam}, con diez \textit{endpoints}, constituye el componente
+de mayor complejidad funcional, dado que encapsula la totalidad de las
+operaciones de gesti\'on de identidad y control de acceso basado en roles
+(RBAC). Este m\'odulo implementa operaciones CRUD sobre roles y permisos,
+as\'i como la asignaci\'on contextual de usuarios a sedes f\'isicas
+espec\'ificas, lo cual refleja la naturaleza multi-sede de las organizaciones
+no gubernamentales atendidas por la plataforma.

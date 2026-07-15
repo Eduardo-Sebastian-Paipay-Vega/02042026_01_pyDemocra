@@ -1,0 +1,472 @@
+
+/
+Claude terminó la respuesta
+vamos a pasar lista, ahora cumplimos con todo lo que nos piden en: He auditado ambos documentos en su totalidad. Antes de presentar el diagnóstico, una precisión metodológica crítica que condiciona todo el análisis:
+Los dos documentos pertenecen a géneros distintos. El benchmark (TrabajoEjemplo.pdf, 126 pp.) es una tesis de investigación empírica con estructura IMRyD (Introducción–Método–Resultados–Discusión): plantea hipótesis, define población/muestra, operacionaliza variables, aplica instrumentos y reporta resultados estadísticos reales (SUS = 83.5, n = 20). Zapata.pdf (32 pp.) es una documentación técnica de arquitectura por ingeniería inversa ("solo lectura sobre el repositorio"), sin componente empírico. La brecha, por tanto, no es solo de extensión (94 páginas de diferencia): es de naturaleza epistemológica. Para igualar el estándar, Zapata.pdf debe transformarse de un informe descriptivo de código en un informe de investigación aplicada-tecnológica que usa el código como objeto de estudio validado empíricamente.
+Con esa base, procedo.
+Tabla de Diagnóstico de Brechas (Gap Analysis)
+Eje estructuralTrabajoEjemplo.pdf (Estándar)Zapata.pdf (Estado actual)BrechaCriticidadPreliminaresDedicatoria, Agradecimiento, Resumen, AbstractSolo Resumen + AbstractFaltan páginas de cortesía académicaBajaAntecedentes§2.1 Nacionales + Internacionales (pp. 18-19)AusenteNo hay revisión de estado del arte ni trabajos previosCríticaHipótesis§1.4 Hipótesis explícita (p. 14)AusenteSin hipótesis no hay diseño de validaciónCríticaFormulación del problemaGeneral + específicos, con diagnóstico empírico (encuesta a 40 ciudadanos, análisis de 30 grupos Facebook, cifras INEI/CAPECE/DataReportal)General + específicos, diagnóstico cualitativo sin datos cuantitativosFalta sustento estadístico del problemaAltaJustificaciónImportancia, Justificación, Delimitación, Limitaciones (4 subsecciones)Justificación (téc./soc./acad.) + AlcanceFaltan "Importancia" y "Limitaciones" formalesMediaCapítulo de MétodoCap. III completo: Tipo, Nivel, Diseño, Población/Muestra, Variables e Indicadores (conceptual + operacional), Técnicas e Instrumentos, Diseño estadístico, Técnicas Scrum (12 pp.)Ausente por completoNo existe marco metodológicoCríticaMarco teórico14 subsecciones + §2.2.14 comparación/justificación de stack (pp. 20-38, ~18 pp.)7 subsecciones (pp. 10-11, ~2 pp.)Densidad teórica ~9× menor; sin comparativa de alternativas tecnológicasAltaResultados empíricosCap. IV (pp. 51-95, ~45 pp.): resultados por Sprint, validación de funcionamiento (100%), SUS = 83.5, DiscusiónCap. 8 con tablas vacías ("pendiente de ejecución")Capítulo de resultados sin datos realesCríticaDiscusión§4.2 Discusiones (pp. 90-95)AusenteNo hay contraste con antecedentesCríticaAnexos5 anexos ricos (matriz de consistencia, instrumentos, resultados SUS, 15 HU detalladas pp. 106-123, entregables de ingeniería)2 anexos (estructura de directorios, extracto RBAC)Anexos ~15 pp. menos densosAltaRecursos visuales32 figuras, ~13 tablas, 30 imágenes rasterizadas (capturas, burnup charts, DER, wireframes)3 figuras, ~19 tablas, casi sin capturasDéficit visual ~10× en figuras/capturasCríticaExtensión total126 páginas32 páginas−94 páginas (−74.6%)Crítica
+Observación de equilibrio: Zapata.pdf supera al benchmark en un aspecto —densidad de tablas técnicas normalizadas (endpoints, códigos de error, esquemas RLS, middlewares)—, lo que constituye una base sólida y reutilizable. El problema no es la calidad de lo escrito, sino la ausencia de los pilares de investigación y de la capa de evidencia visual/empírica.
+Plan de Expansión de Contenido y Subíndices
+Desglose por capítulo, indicando qué falta y cómo desarrollarlo bajo el estándar del benchmark. 
+ orientativa: pasar de 32 a ~90-110 páginas.
+Capítulo 1 — Planteamiento (expandir de 2 a ~8 pp.)
+1.1 Diagnóstico cuantitativo: el benchmark sustenta el problema con encuesta (n=40), conteo de grupos y estadísticas oficiales. Adapta esto a tu dominio: cuantifica el problema de las ONG con cifras (número de ONG en Ayacucho/Perú, % que usa hojas de cálculo/mensajería informal, incidentes de exposición de datos sensibles citando fuentes como INEI, SUNARP o literatura de gobernanza del tercer sector). No basta afirmar "surgen tres problemas estructurales"; hay que medirlos.
+1.4 Hipótesis (NUEVA, obligatoria): formula al menos una hipótesis contrastable. Ejemplo adaptado: "La implementación de Democra con aislamiento RLS y RBAC de negación por defecto garantiza el aislamiento total de datos entre inquilinos (0 fugas cross-tenant) y alcanza un nivel de usabilidad 'Bueno' o superior (SUS ≥ 68)."
+1.5 Reestructurar Justificación en cuatro subsecciones espejo: Importancia, Justificación (técnica/social/académica — ya la tienes), Delimitación, Limitaciones (declara explícitamente las restricciones del análisis solo-lectura).
+Capítulo 2 — Marco Teórico (expandir de 2 a ~14-16 pp.)
+2.1 Antecedentes (NUEVA sección, crítica): subdivide en Nacionales e Internacionales. Reseña 3-4 trabajos previos por categoría sobre SaaS multi-tenant, RLS en PostgreSQL, RBAC y QA de plataformas web. Cada antecedente: autor/año, objetivo, metodología, resultado, y relación con tu proyecto. Esta sección es la que habilita la Discusión del Cap. 8.
+Profundizar las 7 subsecciones existentes: cada tecnología (SaaS, SPA/React, Node/Express, Supabase/PostgreSQL, REST, RBAC/RLS, ISO 25010) pasa de 1 párrafo a 3-5 párrafos con diagrama conceptual.
+Añadir §2.x Comparación y justificación del stack: el benchmark dedica una subsección a justificar por qué eligió su stack frente a alternativas. Replica: tabla comparativa React vs. Angular/Vue, Supabase vs. Firebase/backend propio, esquema-múltiple vs. base-por-tenant vs. discriminador de columna. Justifica cada decisión técnica.
+Capítulo 3 — Material y Métodos (NUEVO capítulo completo, ~10-12 pp.)
+Este es el vacío más grave. Zapata.pdf carece por entero del aparato metodológico. Debes construir:
+3.1-3.3 Tipo (aplicada-tecnológica), Nivel (descriptivo) y Diseño (no experimental, transversal — o describe tu enfoque de ingeniería inversa documental como método).
+3.4 Población y Muestra: define universo (p. ej., módulos/endpoints del repositorio, o usuarios de ONG para validación) y la muestra evaluada.
+3.5 Variables e Indicadores: operacionaliza. Variable Funcionamiento → indicadores (aislamiento cross-tenant, cobertura, tasa de éxito de login). Variable Usabilidad → SUS. Presenta la matriz de operacionalización (variable → dimensión → indicador → instrumento).
+3.6 Técnicas e Instrumentos: análisis documental del código (ficha técnica), pruebas automatizadas (Jest/Vitest/supertest como instrumento de medición), y SUS. Diseño estadístico para procesar los resultados.
+Capítulo de Resultados (transformar Cap. 8, de placeholders vacíos a ~30-40 pp.)
+Ejecutar realmente las suites: jest --coverage y vitest --coverage → poblar la Tabla 8.1 con números reales (sentencias/ramas/funciones/líneas por artefacto).
+Ejecutar Lighthouse → insertar la captura real del reporte (Figura 8.1).
+Aplicar el instrumento SUS a usuarios de ONG → Tabla 8.2 con score e interpretación.
+Narrativa de desarrollo por incrementos: el benchmark documenta 4 Sprints con 15 Historias de Usuario y gráficas Burnup por sprint. Aunque tu proyecto no usó Scrum formal, reorganiza la implementación en incrementos funcionales por dominio (los 10 módulos) con capturas de pantalla reales de cada interfaz (Dashboard, Volunteers, Finance, Audit, etc.). El benchmark tiene ~20 capturas de UI; tú tienes cero.
+Sección de Discusión (NUEVA): contrasta tus resultados con los antecedentes del §2.1. Aquí es donde el capítulo pasa de "reporte" a "investigación".
+Auditoría de Tratamiento de Datos y Tecnologías
+Zapata.pdf describe con solidez el modelo de datos en reposo (esquemas, RLS, soft delete, retención), pero omite el ciclo de vida de la información como objeto de investigación. Instrucciones de robustecimiento:
+1. Fuente de datos origen y gobernanza. El benchmark documenta cómo recolectó y procesó los datos de su fuente (repositorio + encuestas). Tú debes formalizar una sección de procedencia y gobernanza de datos: qué es exactamente el "repositorio como única fuente de verdad", cómo se extrajo la información (commits analizados, openapi.yaml, package.json, archivos de tipos), y bajo qué protocolo de trazabilidad. Añade un diagrama del pipeline de ingeniería inversa: Repositorio → extracción de artefactos → normalización → documentación.
+2. Robustecer la capa de datos con evidencia ejecutable. Actualmente el modelo multi-esquema se describe conceptualmente. Eleva el rigor incorporando:
+Fragmentos reales de las políticas RLS (CREATE POLICY ... USING (fn_current_tenant_id())) y de las funciones (fn_has_permission, fn_bootstrap_tenant) como listados de código anotados.
+El DER (Diagrama Entidad-Relación) completo por esquema. El benchmark incluye su DER de MySQL como figura y anexo; Zapata.pdf describe entidades en prosa/tablas pero no presenta un solo DER. Es la ausencia más notoria del modelo de datos.
+Una prueba empírica de aislamiento: script que intenta un acceso cross-tenant y demuestra el rechazo (evidencia directa de la hipótesis del §1.4).
+3. Stack tecnológico — de inventario a justificación comparada. La Tabla 7.1 es un buen inventario, pero el benchmark argumenta cada elección. Añade: (a) diagrama estructural del stack por capas con versiones (el benchmark tiene su "Figura 3: Diagrama estructural del stack"), (b) tabla comparativa de alternativas descartadas, (c) sección de arquitectura de directorios ilustrada de frontend y backend (el benchmark dedica las Figuras 6 y 7 a esto; tú lo tienes solo como tabla textual en el Anexo A).
+4. Tecnologías subdesarrolladas que requieren expansión. Mencionadas pero no profundizadas en Zapata.pdf: el motor de riesgo (falta el diagrama de decisión ALLOW/REQUIRE_OTP/BLOCK y sus umbrales), el flujo OTP/step-up (falta diagrama de secuencia), la auditoría forense asistida por IA (falta describir el modelo, el prompt, y el flujo de datos hacia el LLM sin exponer datos sensibles), y el despliegue serverless en Vercel + CI (el benchmark documenta integración continua en su Figura 5; tú solo la recomiendas en el Cap. 9).
+Requerimientos de Ingeniería Visual y Anexos
+Brecha visual cuantificada: 32 figuras / 30 imágenes (benchmark) frente a 3 figuras / ~0 capturas (Zapata.pdf). Para cerrarla se requiere diseñar e integrar, como mínimo, los siguientes artefactos:
+Diagramas de arquitectura y sistema (formales, tipo UML/C4):
+Diagrama de arquitectura general C4 (contexto y contenedores) — reemplaza el diagrama ASCII actual de la Figura 3.1 por uno vectorial profesional.
+Diagrama Entidad-Relación (DER) completo del modelo multi-esquema — actualmente inexistente y prioritario.
+Diagrama de despliegue (Vercel serverless, Supabase, dominio único).
+Diagrama de arquitectura de directorios de frontend (por componentes) y de backend (por capas) — dos figuras separadas, como el benchmark.
+Diagramas de flujo y comportamiento:
+5. Diagrama de secuencia del flujo de petición cliente→hook→servicio→Supabase (formaliza tu Figura 3.2).
+6. Diagrama de secuencia de autenticación con motor de riesgo y step-up OTP.
+7. Diagrama de estados del ciclo de vida de una solicitud de admisión de voluntario.
+8. Diagrama de actividad del proceso de onboarding de inquilinos (bootstrap_tenant).
+9. Diagrama de decisión del motor de riesgo (umbrales y ramas).
+Capturas de pantalla reales (la mayor ausencia — el benchmark tiene ~20):
+10. Una captura por cada uno de los 10 módulos (Dashboard, Operación, Proyectos, Personas, Aprobaciones, Admisión, Recursos, Notificaciones, Gobernanza, Configuración).
+11. Captura de Swagger UI (/api/docs) mostrando el contrato vivo.
+12. Captura del reporte Lighthouse real (Figura 8.1, hoy vacía).
+Anexos a incorporar (elevar de 2 a ~5-6):
+Anexo — Matriz de Consistencia: vincula problema → objetivo → hipótesis → variable → indicador → instrumento (el benchmark lo tiene como Anexo 1; es estándar de tesis y hoy falta).
+Anexo — Instrumentos: la ficha de análisis documental del código y el cuestionario SUS aplicado.
+Anexo — Resultados estadísticos SUS: tabla de las 10 ítems por usuario y cálculo del score.
+Anexo — Matriz de trazabilidad RF/CU: vincula cada módulo con sus requisitos funcionales y casos de uso (tu propio Cap. 9 lo recomienda; conviértelo en anexo cumplido).
+Anexo — Matriz de permisos RBAC completa (hoy solo un extracto en el Anexo B; el benchmark presenta sus 15 HU al detalle en ~18 páginas).
+Anexo — Catálogo completo de endpoints y códigos de error (expandir las Tablas 6.1/6.2 a su versión íntegra desde openapi.yaml). y más?
+
+Mostrar más
+
+Proceso de pensamiento
+Proceso de pensamiento
+Entendido: cerramos toda la brecha del Gap Analysis. Es una expansión grande (de 32 a ~90-110 pp.), así que la haré como una reconstrucción completa del .tex, escrita directamente en D:\espelo\Documento. Para que las partes técnicas nuevas (DER, políticas RLS reales, umbrales del motor de riesgo) sean fieles y no inventadas, primero leo el SQL y el risk-engine reales.
+
+
+Se buscaron 2 patrones, leyó 2 archivos
+Se buscaron 2 patrones, leyó 2 archivos
+Tengo la verdad real del motor de riesgo (decisiones ALLOW / REQUIRE_OTP / DENY / TEMP_BLOCK con sus reglas y umbrales: is_blocked, pin_blocked_until, pin_failed_attempts ≥ 5, permiso faltante, dispositivo/IP nuevos → OTP) y del modelo de datos multi-esquema real (PostgreSQL 16, esquemas public/ong/rrhh/finanzas/clinico/academico/comunicaciones, trigger fn_trigger_audit_universal). Reconstruyo la tesis expandida directamente en D:\espelo\Documento, por partes. Parte 1: preámbulo, preliminares, Cap. 1 (con Hipótesis) y Cap. 2 (Antecedentes + bases + comparación de stack).
+
+
+Creó un archivo
+Creó un archivo
+El archivo existe en D:\espelo\Documento; debo leerlo antes de sobrescribir. Lo leo brevemente y reescribo.
+
+
+Archivo leído
+Archivo leído
+Leído. Registro la tarea de expansión y escribo la Parte 1 (ya preparada).
+
+
+Tareas actualizadas, creó un archivo
+Tareas actualizadas, creó un archivo
+Parte 1 en D:. Ahora anexo la Parte 2: Capítulo 3 Material y Métodos completo (población/muestra, matriz de operacionalización, técnicas/instrumentos, gobernanza de datos, aplicación DDS), Capítulo 4 Arquitectura (C4 TikZ) y Capítulo 5 Modelo de Datos (esquemas reales, listados RLS/funciones reales, DER, auditoría).
+
+
+Editó un archivo
+Editó un archivo
+Parte 2 anexada. Parte 3: Capítulo 6 Módulos, Capítulo 7 API y Seguridad (con diagrama de decisión real del motor de riesgo en TikZ y flujo OTP), y Capítulo 8 Implementación y Aseguramiento de la Calidad.
+
+
+Editó un archivo
+Editó un archivo
+Parte 3 anexada. Parte final: Capítulo 9 Resultados (andamiaje PENDIENTE + narrativa por incrementos con capturas), Capítulo 10 Discusión, Capítulo 11 Conclusiones/Recomendaciones, Referencias y Anexos (matriz de consistencia, RF/CU, RBAC completa, catálogo de endpoints, instrumentos).
+
+
+Editó un archivo
+Editó un archivo
+Documento completo escrito en D:\espelo\Documento. Valido el balance de entornos LaTeX con Grep (bash no alcanza D: y el montaje de outputs sigue congelado); si están balanceados y dado que todos los patrones ya se compilaron antes, la compilación es segura.
+
+
+Se buscaron 2 patrones
+Se buscaron 2 patrones
+Balance total 65 = 65. Verifico per-entorno los más críticos (document, tikzpicture, lstlisting, tabularx, thebibliography) para descartar compensaciones.
+
+
+Se buscaron 3 patrones
+Se buscaron 3 patrones
+Validación estructural completa: \begin{document}/\end{document} balanceados (líneas 102/1486), 3 tikzpicture 3/3, lstlisting 1/1, thebibliography 1/1, 22 tablas tabularx balanceadas, y todas las claves \citep/\autoref tienen su definición. El documento (1486 líneas) quedó completo en D:\espelo\Documento junto a logo.png e imagenes/.
+
+
+Tareas actualizadas, archivo leído
+Tareas actualizadas, archivo leído
+Pasé lista sobre cada eje del Gap Analysis. El .tex reconstruido ya está en D:\espelo\Documento (1486 líneas, estructura IMRyD completa, compilación estructuralmente validada).
+
+Ejes cerrados (derivables del repo, hechos):
+
+Eje del Gap Analysis	Estado
+Preliminares (Dedicatoria + Agradecimiento)	✅ añadidos
+Antecedentes (Nac. + Internac., sección creada)	✅ estructura; reseñas [PENDIENTE] (fuentes verificables)
+Hipótesis §1.3 contrastable	✅ (aislamiento 0 cross-tenant + SUS ≥ 68)
+Justificación 4 subsecciones (Importancia/Justif./Delimitación/Limitaciones)	✅
+Capítulo Material y Métodos (tipo, nivel, diseño, población/muestra, variables e indicadores + matriz de operacionalización, técnicas/instrumentos, gobernanza de datos + pipeline, aplicación DDS)	✅ completo
+Marco teórico ampliado + comparación/justificación de stack (tabla)	✅
+Modelo de datos real (7 esquemas, funciones, listado RLS, trigger de auditoría, retención)	✅ (RLS exacto marcado [PENDIENTE] para transcripción verbatim)
+Motor de riesgo: diagrama de decisión TikZ fiel (ALLOW/REQUIRE_OTP/DENY/TEMP_BLOCK con reglas reales)	✅
+Discusión (contraste con antecedentes por variable)	✅
+Anexos elevados a 6 (Matriz de Consistencia, estructura, RF/CU, RBAC completa, catálogo endpoints, instrumentos SUS)	✅
+Catálogo maestro de imágenes (25 recursos, prompts, nombres exactos)	✅ (imagenes/requerimientos_imagenes.md)
+Ejes que NO puedo cerrar sin fabricar datos (quedan como [PENDIENTE] con andamiaje listo):
+
+Cobertura real (Jest/Vitest), pgTAP, Lighthouse → tablas/figuras preparadas; requieren npm run test:coverage, etc.
+SUS con usuarios → tabla + fórmula de Brooke listas; requiere aplicar el instrumento.
+~20 capturas de UI + DER/C4/secuencias vectoriales → llamadas \includegraphics comentadas + catálogo con prompts; requieren generarse.
+Cifras del diagnóstico y reseñas de antecedentes → requieren fuentes citables (INEI/SUNARP/literatura).
+Sobre la extensión: el cuerpo (texto, tablas, TikZ) está completo; el salto a ~90-110 pp. se alcanza al insertar las imágenes/datos [PENDIENTE], que son justamente los que no debo inventar.
+
+Validación: no pude compilar en el sandbox (bash no alcanza D: y el montaje de outputs quedó congelado), pero verifiqué por Grep que todos los entornos están balanceados y las referencias/citas resueltas; todos los patrones ya compilaron limpio antes (36 pp.). Para el PDF:
+
+cmd
+cd /d D:\espelo\Documento
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+¿Quieres que priorice ahora las reseñas de Antecedentes con fuentes reales (que habilitan la Discusión), o que transcriba las políticas RLS/funciones SQL exactas desde las migraciones para el Anexo del modelo de datos?
+
+
+D:\espelo\Documento\proyecto_final_corregido.tex
+ 
+sí por favor a lo de ¿Quieres que priorice ahora las reseñas de Antecedentes con fuentes reales (que habilitan la Discusión), o que transcriba las políticas RLS/funciones SQL exactas desde las migraciones para el Anexo del modelo de datos?, si necesitas info más de mi base de datos supabase: Supabase Snippet Untitled query
+
+
+Proceso de pensamiento
+Proceso de pensamiento
+Perfecto, hago las dos. La transcripción de RLS/funciones sale del repo (sin inventar); las reseñas de Antecedentes requieren fuentes reales, que buscaré en la web. (Nota: el "Supabase Snippet" llegó vacío — no te preocupes, leo las migraciones directamente, que son la fuente de verdad.)
+
+Primero localizo las definiciones reales de políticas y funciones en las migraciones.
+
+
+Se buscaron 3 patrones
+Se buscaron 3 patrones
+Encontré las políticas y funciones reales. Leo las definiciones exactas para transcribirlas verbatim.
+
+
+Leyó 2 archivos
+Leyó 2 archivos
+Tengo las funciones y políticas RLS reales verbatim (fn_current_tenant_id, fn_trigger_audit_universal, fn_bootstrap_tenant, y las políticas p_profiles_update y p_urs_*). Para los Antecedentes necesito confirmar fuentes académicas reales; cargo la búsqueda web y verifico trabajos citables sobre SaaS multi-tenant, RLS y RBAC.
+
+
+Se buscó en la web, herramientas cargadas
+Se buscó en la web, herramientas cargadas
+Confirmé dos antecedentes internacionales sólidos (Bezemer & Zaidman 2010; Chong, Carraro & Wolter 2006) y un tercero aparece en resultados (Krebs, Momm & Kounev 2012). Busco un antecedente nacional peruano verificable y una referencia sobre RLS/aislamiento.
+
+
+Se buscó en la web
+Se buscó en la web
+Tres antecedentes internacionales verificados (Bezemer & Zaidman 2010; Chong, Carraro & Wolter 2006; Krebs, Momm & Kounev 2012). Actualizo la sección de Antecedentes internacionales del .tex con reseñas reales.
+
+
+Editó un archivo
+Editó un archivo
+Actualizo Antecedentes nacionales con marco honesto y guía a RENATI (no puedo verificar una tesis peruana específica sin fabricar, así que dejo la ruta exacta para completarla).
+
+
+Editó un archivo
+Editó un archivo
+Añado los tres bibitems reales a la bibliografía (orden alfabético).
+
+
+Editó 2 archivos
+Editó 2 archivos
+Ahora transcribo las políticas RLS y funciones reales (verbatim de las migraciones). Reemplazo el listado ilustrativo del Cap. 5 por los reales y añado un anexo con fn_bootstrap_tenant y el trigger de auditoría.
+
+
+Editó un archivo
+Editó un archivo
+Añado el Anexo con las funciones completas. Primero leo el resto de fn_bootstrap_tenant para transcribirlo fiel (sin cortar a mitad).
+
+
+Archivo leído
+Archivo leído
+Transcribo el Anexo con fn_bootstrap_tenant y fn_trigger_audit_universal completos y verbatim, antes de \end{document}.
+
+
+Editó un archivo
+Editó un archivo
+Actualizado. Valido de nuevo el balance de entornos tras añadir los tres listados SQL reales.
+
+
+Se buscaron 2 patrones
+Se buscaron 2 patrones
+Ambas tareas completadas y validadas (entornos balanceados: 4 listados SQL, document 1/1; archivo ahora 1704 líneas en D:\espelo\Documento).
+
+1. Antecedentes con fuentes reales (habilitan la Discusión)
+Reseñé tres antecedentes internacionales verificados —objetivo, metodología, resultado y relación con Democra— y los agregué a la bibliografía:
+
+Chong, Carraro & Wolter (2006) — Multi-Tenant Data Architecture (Microsoft): fundamenta la estrategia de esquema compartido con discriminador de inquilino.
+Bezemer & Zaidman (2010) — Maintenance dream or nightmare? (IWPSE/EVOL, ACM): riesgos de mantenibilidad que Democra mitiga con capas + DDS.
+Krebs, Momm & Kounev (2012) — Architectural Concerns in Multi-Tenant SaaS (CLOSER): sustento teórico del aislamiento por fila con RLS.
+Los nacionales quedaron con marco honesto y ruta exacta a RENATI (renati.sunedu.gob.pe) marcados [PENDIENTE] — no fabriqué tesis peruanas que no pude verificar.
+
+2. Políticas RLS y funciones SQL reales (verbatim del repo)
+Reemplacé el listado ilustrativo por transcripciones exactas de las migraciones:
+
+Cap. 5: fn_current_tenant_id() real y las políticas reales p_urs_select/p_urs_insert sobre user_roles_sedes (con fn_has_permission + fn_is_tenant_admin = negación por defecto) y el trigger tr_audit_urs.
+Anexo G nuevo: fn_trigger_audit_universal() y fn_bootstrap_tenant() completos y verbatim (alta atómica de tenant + perfil + sede Principal + rol Owner + permisos + asignación + contrato/entitlements; retención por plan coalesce(..., 180)).
+Quedó pendiente solo lo que exige tu decisión o datos externos: las reseñas de antecedentes nacionales (fuentes RENATI) y, si quieres, transcribir también las políticas de catálogos (p_cat_*) y de mfa_challenges.
+
+Sources:
+
+Bezemer & Zaidman (2010) — ACM DL
+Chong, Carraro & Wolter (2006) — Microsoft Learn
+Krebs, Momm & Kounev (2012) — SciTePress PDF
+RENATI — SUNEDU
+¿Transcribo también las políticas de mfa_challenges y catálogos, o busco las tesis nacionales en RENATI para cerrar ese último [PENDIENTE]?
+
+okey hazlo, luego corremos esto no?: cd /d D:\espelo\Documento
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+
+
+Proceso de pensamiento
+Proceso de pensamiento
+Perfecto — hago las dos cosas y luego sí corres el pdflatex (yo además haré una compilación de validación aquí antes). Primero leo las políticas reales de mfa_challenges y de catálogos, y busco las tesis nacionales en RENATI.
+
+
+Archivo leído, se buscó en la web
+Archivo leído, se buscó en la web
+Tengo las políticas reales de mfa_challenges. La búsqueda en RENATI no arrojó una tesis específica verificable (con autor/título/año), así que no fabricaré antecedentes nacionales; quedan con la guía a RENATI. Añado al Anexo G las políticas verbatim de mfa_challenges y el patrón de catálogos.
+
+
+Editó un archivo
+Editó un archivo
+Añadido. Antes de que corras pdflatex, hago yo una compilación de validación. Primero pruebo si bash ya alcanza D: (sería lo más barato); si no, copio por otra vía.
+
+
+Ejecutó un comando
+Ejecutó un comando
+bash no alcanza D:. Leo el archivo completo del host y lo llevo a mi área de trabajo para compilarlo (inodo nuevo, sin el tope congelado).
+
+
+Archivo leído
+Archivo leído
+He completado ambas adiciones (políticas mfa_challenges + patrón de catálogos verbatim; y la búsqueda RENATI, que no arrojó una tesis específica citable, así que no fabriqué ninguna). El archivo está completo en D:\espelo\Documento (1747 líneas).
+
+Sobre la validación: revisé estáticamente todo el archivo (entornos balanceados en cada control, y todas las \citep/\autoref/\ref/\nameref tienen su definición; los listados SQL van dentro de lstlisting, que neutraliza caracteres especiales como $$, %, _). Pero no puedo ejecutar pdflatex contra D: desde aquí (bash no monta esa unidad y el scratch quedó congelado), así que tu corrida local es la prueba real.
+
+Sí, corre esto — pero con una tercera pasada para que el índice, la lista de figuras/tablas y las referencias cruzadas queden resueltos:
+
+cmd
+cd /d D:\espelo\Documento
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+pdflatex -interaction=nonstopmode proyecto_final_corregido.tex
+Qué esperar como normal (no son errores):
+
+Advertencias Overfull \hbox ocasionales y LaTeX Warning: Reference ... undefined en la 1ª pasada (se resuelven en la 2ª/3ª).
+Las figuras C4, DER, secuencias y capturas salen con su caption pero sin imagen (los \includegraphics están comentados a propósito hasta que generes los archivos de imagenes/).
+Si algo sí rompe la compilación, pégame el bloque del log que empieza con ! (y el número de línea) y lo corrijo de una. Los puntos más probables, por si acaso: el diagrama TikZ del motor de riesgo (usa diamond, ya cargué shapes.geometric) y los acentos — el archivo usa inputenc utf8, así que si tu editor guardó en otra codificación podría quejarse.
+
+¿Lo corres y me dices qué salió? Si compila, seguimos con lo que quede (p. ej. reseñar las tesis nacionales que tú elijas de RENATI, o pasar los diagramas pendientes a TikZ para que no dependan de imágenes externas).
+
+ya lo corrí, necesito ver donde lo puedo ver
+
+You've hit your monthly spend limit · raise it at claude.ai/settings/usage
+
+
+Has alcanzado tu límite de gasto mensual y te has quedado sin créditos.
+Aumentar límite de gasto
+
+
+
+Claude es IA y puede cometer errores. Verifica las respuestas. Danos tu opinión
+
+Instrucciones · CLAUDE.md
+proyecto_final_corregido.tex
+20260301120000_ai_security_copilot.sql
+20260302125000_fix_bootstrap_audit_tenant_null.sql
+20260305110000_rls_hardening_p0.sql
+risk-engine.js
+modelos_base_datos.md
+requerimientos_imagenes.md
+dds_integracion_tesis.md
+README.md
+README.md
+README.md
+README.md
+README.md
+guia_onboarding.md
+validacion.md
+README.md
+BD_viva_09072026.txt
+01-ssot-maestro.md
+README.md
+vite.config.js
+vercel.json
+vitest.config.ts
+tsconfig.json
+vitest.setup.ts
+package-lock.json
+package.json
+jest.config.js
+jest.setup.js
+index.html
+fix-types.js
+SETUP.md
+README.md
+PROMPT_INTEGRA.md
+PROMPT_APLICAR_LOOK_AND_FEEL_ONG.md
+ONG_ROUTER_INTEGRATION_REPORT.md
+ONG_LIGHT_MODE_REDESIGN_REPORT.md
+LOOK_AND_FEEL_ONG.md
+LOOK_AND_FEEL_IMPLEMENTATION_REPORT.md
+DEVELOPMENT_GUIDE.md
+DATABASE_MASTER_SCRIPT_S1.md
+CONTRIBUTING.md
+DATABASE_DICTIONARY_S1.md
+AUDIT_REPORT_S1.md
+AGENTS.md
+Base.md
+estructura_proyecto.md
+caratula.tex
+proyecto_final_corregido.tex
+README.md
+package.json
+AGENTS.md
+index.js
+config.js
+openapi.yaml
+
+Salidas
+proyecto_final_corregido.tex
+_ok3.log
+finok.log
+finok.pdf
+finok.out
+finok.toc
+finok.lof
+finok.lot
+finok.aux
+_ok2.log
+_ok1.log
+_fl3.log
+_finr3.log
+_finr3.pdf
+_finr3.aux
+_finr3.out
+_finr3.toc
+_finr3.lof
+_finr3.lot
+_fl2.log
+_finr2.log
+_finr2.pdf
+_finr2.aux
+_finr2.out
+_finr2.toc
+_finr2.lof
+_finr2.lot
+_fl1.log
+_finr1.pdf
+_finr1.log
+_finr1.toc
+_finr1.lof
+_finr1.lot
+_finr1.out
+_finr1.aux
+_fin.tex
+_v3_3.log
+_v3r3.log
+_v3r3.out
+_v3r3.pdf
+_v3r3.aux
+_v3r3.lot
+_v3r3.lof
+_v3r3.toc
+_v3_2.log
+_v3r2.log
+_v3r2.out
+_v3r2.pdf
+_v3r2.aux
+_v3r2.lot
+_v3r2.lof
+_v3r2.toc
+_v3_1.log
+_v3r1.log
+_v3r1.out
+_v3r1.pdf
+_v3r1.aux
+_v3r1.lot
+_v3r1.lof
+_v3r1.toc
+_v3.tex
+_v2_3.log
+_v2run3.pdf
+_v2run3.log
+_v2run3.out
+_v2run3.aux
+_v2run3.lot
+_v2run3.lof
+_v2run3.toc
+_v2_2.log
+_v2run2.log
+_v2run2.pdf
+_v2run2.out
+_v2run2.aux
+_v2run2.lot
+_v2run2.toc
+_v2run2.lof
+_v2_1.log
+_v2run1.log
+_v2run1.pdf
+_v2run1.out
+_v2run1.aux
+_v2run1.lot
+_v2run1.lof
+_v2run1.toc
+_v2.tex
+_l3.log
+_t.log
+_t.pdf
+_t.out
+_t.aux
+_t.lot
+_t.lof
+_t.toc
+_l2.log
+_l1.log
+_t.tex
+_test.txt
+_p3.log
+_test.log
+_test.pdf
+_test.lot
+_test.toc
+_test.lof
+_test.aux
+_test.out
+_p2.log
+_p1.log
+_test.tex
+pass1.log
+proyecto_final_corregido.log
+logo.png
+Conectores
+
+Búsqueda web

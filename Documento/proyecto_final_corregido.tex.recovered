@@ -1,0 +1,156 @@
+Created At: 2026-07-14T04:08:00Z
+Completed At: 2026-07-14T04:08:01Z
+
+				The command completed successfully.
+				Output:
+				<truncated 1 lines>
+  SELECT NULLIF(
+      current_setting('request.jwt.claims', true)::json->'user_metadata'->>'tenant_id', 
+      ''
+  )::uuid;
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+-- 3. Crear la politica de aislamiento para operaciones DML
+CREATE POLICY transacciones_tenant_isolation_policy ON finanzas.transacciones
+    FOR ALL
+    TO authenticated
+    USING (tenant_id = auth.get_tenant_id_from_jwt())
+    WITH CHECK (tenant_id = auth.get_tenant_id_from_jwt());
+\end{lstlisting}
+
+'''
+text = text[:sec4_2_idx] + insert_4_1 + text[sec4_2_idx:]
+
+
+# 3. Add 4.2.1 and 4.2.2 before \section{Configuracion y Variables de Entorno}
+sec4_3_idx = text.find(r'\section{Configuracion y Variables de Entorno}')
+insert_4_2 = r'''\subsection{Contrato de la API REST y Rutas de Dominio}
+Para complementar la descripci�n del Servidor de Aplicaci�n de la secci�n anterior, se especifica detalladamente el mapa de endpoints que expone la API de Express (\autoref{tab:api_endpoints}).
+
+\begin{table}[H]
+    \centering
+    \caption{Contrato de rutas y endpoints de la API REST Express}
+    \label{tab:api_endpoints}
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{|l|l|p{3.5cm}|p{3.5cm}|p{3.5cm}|p{3cm}|}
+        \hline
+        \textbf{Endpoint} & \textbf{MǸtodo} & \textbf{Middleware Seguridad} & \textbf{Payload Entrada (JSON)} & \textbf{Respuesta (200/201)} & \textbf{Error Cr�tico} \\
+        \hline
+        \texttt{/api/auth/login} & POST & \texttt{authLimiter} & \texttt{\{"email": "...", "password": "..."\}} & \texttt{\{"token": "JWT", "user": \{...\}\}} & 401 Unauthorized / 429 Too Many Requests \\
+        \hline
+        \texttt{/api/auth/verify-otp} & POST & \texttt{authLimiter} & \texttt{\{"email": "...", "code": "123456"\}} & \texttt{\{"session": "active", ...\}} & 400 Bad Request / 403 Forbidden \\
+        \hline
+        \texttt{/api/iam/users} & GET & \texttt{authMiddleware} & Ninguno (Query Params de paginaci�n) & \texttt{\{"data": [...], "total": 12\}} & 401 Unauthorized / 403 Forbidden \\
+        \hline
+        \texttt{/api/onboarding/register} & POST & \texttt{generalLimiter} & \texttt{\{"ong\_name": "...", "ruc": "...", ...\}} & \texttt{\{"status": "pending\_validation"\}} & 422 Unprocessable Entity \\
+        \hline
+        \texttt{/api/audit/logs} & GET & \texttt{authMiddleware} (Admin) & Ninguno & \texttt{\{"logs": [\{"timestamp": "..."\}]\}} & 401 Unauthorized / 403 Forbidden \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
+
+\subsection{Arquitectura Detallada de Seguridad: El Motor de Riesgo Dinǭmico}
+La constante de configuraci�n \texttt{RISK\_TEMP\_BLOCK\_MINUTES = 15} mostrada en la tabla de variables de entorno alimenta directamente al Motor de Riesgo Dinǭmico de la plataforma Democra. Este motor opera como un middleware interceptor de backend que evalǧa las solicitudes entrantes antes de dar paso a los controladores de negocio.
+
+El flujo algor�tmico del motor de riesgo implementa la siguiente l�gica secuencial:
+\begin{enumerate}
+    \item \textbf{Recolecci�n de Metadatos:} Se captura la direcci�n IP origen, la huella digital del navegador (\textit{Browser Fingerprint}), la geolocalizaci�n aproximada y el historial inmediato de peticiones fallidas.
+    \item \textbf{Evaluaci�n de Variaci�n de Geoposici�n (Impossibility of Velocity):} Si una IP de sesi�n activa realiza una solicitud desde Ayacucho y, transcurridos 5 minutos, se registra otra solicitud del mismo token de usuario desde una IP ubicada en un pa�s diferente, el motor calcula la velocidad de traslado f�sico requerida:
+    $$ \text{Velocidad} = \frac{\Delta \text{Distancia}}{\Delta \text{Tiempo}} $$
+    Si la velocidad calculada excede los l�mites f�sicos viables ($> 1000\text{ km/h}$), la solicitud se clasifica de alto riesgo de secuestro de sesi�n (\textit{Session Hijacking}).
+    \item \textbf{Ejecuci�n de Mitigaci�n:} Al sobrepasar el umbral de riesgo, el motor de riesgo activa automǭticamente una flag de bloqueo temporal por un periodo definido en \texttt{RISK\_TEMP\_BLOCK\_MINUTES}. El sistema invalida el token JWT activo en la base de datos y rechaza toda comunicaci�n posterior retornando un c�digo HTTP \texttt{403 Forbidden} (\texttt{SEC-RISK-BLOCK}).
+\end{enumerate}
+
+'''
+text = text[:sec4_3_idx] + insert_4_2 + text[sec4_3_idx:]
+
+
+# 4. Add 4.4 at the end of the chapter
+end_of_chap4_idx = text.find(r'\chapter{Modelo de Datos y Seguridad}')
+if end_of_chap4_idx == -1:
+    end_of_chap4_idx = text.find(r'\chapter{Conclusiones}')
+
+insert_4_4 = r'''\section{Arquitectura de Estado y Estrategia de Caching en el Frontend}
+La capa de Presentaci�n (UI) detallada en la Figura 4.1 requiere una gesti�n eficiente de los datos para garantizar una experiencia fluida al usuario final. Democra implementa una estrategia de \textbf{Arquitectura de Estado Desacoplada} utilizando \textit{custom hooks} y un cliente HTTP altamente tipado.
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
+  +-------------------------------+
+  |       Presentacion (UI)       |
+  | (Componentes React / Paginas) |
+  +---------------+---------------+
+                  |
+                  v
+  +---------------+---------------+
+  |        Estado (Hooks)         |
+  |   (carga, error, recarga)     |
+  +---------------+---------------+
+                  |
+                  v
+  +---------------+---------------+
+  |       Servicios Tipados       |
+  |      (services/api.ts)        |
+  +---------------+---------------+
+                  |
+        +---------+---------+
+        v                   v
++-------------------+ +-----------------------+
+|   Supabase SDK    | |     Axios Client      |
+| (CRUD directos)   | | (Endpoints Complejos) |
++-------------------+ +-----------------------+
+\end{verbatim}
+\caption{Esquema de desacoplamiento de estado e inyecci�n de dependencias en React.}
+\label{fig:react_hooks}
+\end{figure}
+
+\textbf{Client-Side State \& Custom Hooks:}\\
+Para aislar la complejidad de las llamadas as�ncronas de red de la l�gica visual de los componentes, se implementa el patr�n de contenedor e inyector de estado a travǸs de \textit{React Custom Hooks} personalizados en el directorio \texttt{modules/[modulo]/hooks/}.
+
+Por ejemplo, para el m�dulo de finanzas, el hook \texttt{useTransacciones} expone una interfaz r�gida:
+
+\begin{lstlisting}[language=TypeScript, caption={Implementaci�n de inyector de estado useTransacciones en TypeScript}, label={lst:use_transacciones}]
+// apps/frontend/src/modules/finanzas/hooks/useTransacciones.ts
+import { useState, useEffect, useCallback } from 'react';
+import { getTransaccionesService } from '../../services/finanzasService';
+import { Transaccion } from '../../types';
+
+export function useTransacciones(tenantId: string) {
+  const [transacciones, setTransacciones] = useState<Transaccion[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTransacciones = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getTransaccionesService(tenantId);
+      setTransacciones(data);
+    } catch (err: any) {
+      setError(err.message || 'Error al recuperar transacciones');
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchTransacciones();
+  }, [fetchTransacciones]);
+
+  return { transacciones, loading, error, recargar: fetchTransacciones };
+}
+\end{lstlisting}
+
+Este desacoplamiento asegura que si en el futuro se decide migrar de la librer�a de manejo de llamadas HTTP a una soluci�n avanzada de cache como \textit{TanStack Query} (React Query), la interfaz del hook hacia los componentes de UI se mantendrǭ idǸntica, minimizando el impacto de refactorizaci�n.
+
+'''
+if end_of_chap4_idx != -1:
+    text = text[:end_of_chap4_idx] + insert_4_4 + text[end_of_chap4_idx:]
+else:
+    print('Failed to find end of chap 4')
+
+with open('D:/espelo/Documento/proyecto_final_corregido.tex', 'w', encoding='utf-8') as f:
+    f.write(text)
+
+print('Success.')
+

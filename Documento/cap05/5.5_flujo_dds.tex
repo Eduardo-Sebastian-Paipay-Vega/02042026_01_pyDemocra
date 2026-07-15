@@ -1,0 +1,226 @@
+% =============================================================================
+% 5.5 Flujo del Design Documentation System (DDS)
+% Archivo: 5.5_flujo_dds.tex
+% =============================================================================
+
+\section{Flujo del Design Documentation System (DDS)}
+\label{sec:flujo-dds}
+
+El \textit{Design Documentation System} (DDS) constituye la metodolog\'ia
+propietaria adoptada para sistematizar el proceso completo de dise\~no,
+desarrollo y documentaci\'on de la plataforma. A diferencia de las
+metodolog\'ias \'agiles convencionales, el DDS integra expl\'icitamente las
+fases de documentaci\'on t\'ecnica y validaci\'on acad\'emica dentro del flujo
+de trabajo de ingenier\'ia de software, asegurando que cada artefacto producido
+sea trazable, reproducible y verificable. El flujo se estructura en ocho fases
+secuenciales, cada una con objetivos, entregables y criterios de aceptaci\'on
+claramente definidos.
+
+\subsection{Fase 0: Developer Experience (DX)}
+\label{subsec:fase0-dx}
+
+La Fase 0 establece las bases del entorno de desarrollo y la experiencia del
+desarrollador (\textit{Developer Experience}, DX). Esta fase previa abarca la
+configuraci\'on del entorno de desarrollo integrado (IDE), la selecci\'on y
+estandarizaci\'on del \textit{stack} tecnol\'ogico, la definici\'on de
+convenciones de c\'odigo (\textit{linting}, formateo, nomenclatura), y la
+implementaci\'on de la infraestructura de integraci\'on y despliegue continuo
+(CI/CD). El objetivo primordial es garantizar que todo miembro del equipo de
+desarrollo pueda incorporarse al proyecto con fricci\'on m\'inima y productividad
+inmediata.
+
+\subsection{Fase 1: Descubrimiento y An\'alisis}
+\label{subsec:fase1-descubrimiento}
+
+La fase de descubrimiento y an\'alisis comprende la investigaci\'on exploratoria
+del dominio problem\'atico, la identificaci\'on de \textit{stakeholders}, la
+recolecci\'on de requisitos mediante entrevistas semiestructuradas y la
+elaboraci\'on del an\'alisis de viabilidad t\'ecnica y econ\'omica. Los
+artefactos producidos en esta fase incluyen el documento de visi\'on del
+producto, el mapa de actores, los diagramas de contexto y las matrices de
+priorizaci\'on de requisitos. Esta fase se alinea con las pr\'acticas de
+\textit{Design Thinking} en su etapa de empat\'ia y definici\'on del problema.
+
+\subsection{Fase 2: Innovaci\'on y Validaci\'on}
+\label{subsec:fase2-innovacion}
+
+La fase de innovaci\'on y validaci\'on se enfoca en la generaci\'on de
+soluciones creativas y su contraste con las restricciones del mundo real. Se
+emplean t\'ecnicas de ideaci\'on como \textit{brainstorming} estructurado,
+an\'alisis competitivo y evaluaci\'on de soluciones existentes en el mercado.
+Los prototipos conceptuales generados son sometidos a validaci\'on temprana
+con usuarios representativos, lo cual permite descartar aproximaciones
+inviables antes de invertir recursos significativos en implementaci\'on. Los
+hallazgos de esta fase alimentan directamente la especificaci\'on de requisitos
+funcionales y no funcionales del sistema.
+
+\subsection{Fase 3: Dise\~no y Definici\'on}
+\label{subsec:fase3-diseno}
+
+La fase de dise\~no y definici\'on transforma los requisitos validados en
+especificaciones t\'ecnicas detalladas. Se elaboran los diagramas de casos de
+uso, los diagramas de secuencia, los modelos de datos y los contratos de la
+API REST. Adicionalmente, se definen las pol\'iticas de seguridad, los
+esquemas de autorizaci\'on basados en roles (RBAC) y las reglas de negocio
+formalizadas. Esta fase produce el \textit{blueprint} arquitect\'onico que
+guiar\'a las fases subsiguientes de implementaci\'on.
+
+\subsection{Fase 4: UI/UX}
+\label{subsec:fase4-uiux}
+
+La fase de dise\~no de interfaz de usuario (UI) y experiencia de usuario (UX)
+abarca la creaci\'on del sistema de dise\~no visual, la elaboraci\'on de
+\textit{wireframes} de baja y alta fidelidad, y la construcci\'on de prototipos
+interactivos navegables. Se aplican principios de dise\~no centrado en el
+usuario, heur\'isticas de usabilidad de Nielsen y directrices de accesibilidad
+WCAG 2.1. Los prototipos resultantes son evaluados mediante pruebas de
+usabilidad con usuarios finales, cuyos hallazgos retroalimentan el dise\~no
+antes de la implementaci\'on del \textit{frontend}.
+
+\subsection{Fase 5: Arquitectura y Desarrollo}
+\label{subsec:fase5-arquitectura}
+
+La fase de arquitectura y desarrollo materializa las especificaciones t\'ecnicas
+en c\'odigo fuente funcional. Se implementa la arquitectura multi-inquilino
+(\textit{multi-tenant}), los microservicios de autenticaci\'on y autorizaci\'on,
+el motor de evaluaci\'on de riesgos, y los m\'odulos de gesti\'on operativa.
+El desarrollo sigue un enfoque de \textit{Test-Driven Development} (TDD),
+donde los casos de prueba se escriben previamente a la implementaci\'on de la
+funcionalidad, garantizando una cobertura de c\'odigo elevada desde las etapas
+iniciales del desarrollo.
+
+\subsection{Fase 6: QA y Testing}
+\label{subsec:fase6-qa}
+
+La fase de aseguramiento de calidad (QA) y pruebas comprende la ejecuci\'on
+sistem\'atica de pruebas unitarias, pruebas de integraci\'on, pruebas de la
+API REST y pruebas de seguridad. Se emplean herramientas automatizadas como
+Jest para las pruebas unitarias del \textit{backend}, y se implementan
+escenarios de prueba que cubren tanto los flujos principales como los flujos
+alternativos y de error. Los resultados de cobertura son analizados
+cuantitativamente para identificar \'areas de riesgo y priorizar esfuerzos
+de prueba adicionales.
+
+\subsection{Fase 7: Despliegue y Operaciones}
+\label{subsec:fase7-despliegue}
+
+La fase final de despliegue y operaciones abarca la configuraci\'on de la
+infraestructura en la nube, la implementaci\'on de \textit{pipelines} de
+despliegue continuo, la configuraci\'on de monitoreo y alertas, y la
+elaboraci\'on de la documentaci\'on operativa. Se definen los procedimientos
+de \textit{rollback}, las estrategias de escalamiento horizontal y las
+pol\'iticas de respaldo y recuperaci\'on ante desastres. Esta fase asegura
+que el sistema sea operable, observable y mantenible en un entorno de
+producci\'on real.
+
+\subsection{Diagrama del Flujo DDS}
+\label{subsec:diagrama-flujo-dds}
+
+La Figura~\ref{fig:flujo-dds} presenta el diagrama visual del flujo completo
+del \textit{Design Documentation System}, ilustrando la secuencia de fases,
+sus interdependencias y los puntos de retroalimentaci\'on entre etapas.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{Flujo de DDS}
+\caption{Diagrama del flujo del \textit{Design Documentation System} (DDS) con sus ocho fases}
+\label{fig:flujo-dds}
+\end{figure}
+
+\subsection{Mapeo de Fases y Artefactos}
+\label{subsec:mapeo-fases-artefactos}
+
+La Tabla~\ref{tab:fases-artefactos} establece la correspondencia entre cada
+fase del DDS y los artefactos tangibles producidos, proporcionando trazabilidad
+completa del proceso de documentaci\'on.
+
+\begin{small}
+\begin{longtable}{|p{1cm}|p{3.2cm}|p{5cm}|p{4.5cm}|}
+\caption{Mapeo de fases del DDS con artefactos y entregables}
+\label{tab:fases-artefactos} \\
+\hline
+\textbf{Fase} & \textbf{Nombre} & \textbf{Artefactos principales} & \textbf{Criterio de aceptaci\'on} \\
+\hline
+\endfirsthead
+
+\multicolumn{4}{c}%
+{{\tablename\ \thetable{} -- Continuaci\'on de la p\'agina anterior}} \\
+\hline
+\textbf{Fase} & \textbf{Nombre} & \textbf{Artefactos principales} & \textbf{Criterio de aceptaci\'on} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{4}{r}{{Contin\'ua en la siguiente p\'agina\ldots}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+0 & Developer Experience & Configuraci\'on de IDE, convenciones de c\'odigo, \textit{pipelines} CI/CD & Entorno reproducible y documentado \\
+\hline
+1 & Descubrimiento y An\'alisis & Documento de visi\'on, mapa de actores, matrices de priorizaci\'on & Requisitos validados con \textit{stakeholders} \\
+\hline
+2 & Innovaci\'on y Validaci\'on & An\'alisis competitivo, prototipos conceptuales, informes de validaci\'on & Soluci\'on viable validada con usuarios \\
+\hline
+3 & Dise\~no y Definici\'on & Casos de uso, diagramas de secuencia, modelo de datos, contratos API & Especificaciones t\'ecnicas aprobadas \\
+\hline
+4 & UI/UX & Sistema de dise\~no, \textit{wireframes}, prototipos interactivos & Pruebas de usabilidad superadas \\
+\hline
+5 & Arquitectura y Desarrollo & C\'odigo fuente, pruebas TDD, documentaci\'on t\'ecnica & Funcionalidad implementada y verificada \\
+\hline
+6 & QA y Testing & Reportes de cobertura, matrices de trazabilidad, informes de defectos & Cobertura $\geq$ 80\%, cero defectos cr\'iticos \\
+\hline
+7 & Despliegue y Operaciones & Infraestructura configurada, monitoreo activo, documentaci\'on operativa & Sistema desplegado y observable \\
+
+\end{longtable}
+\end{small}
+
+\subsection{Arquitectura de la Plataforma}
+\label{subsec:arquitectura-plataforma}
+
+La implementaci\'on del flujo DDS se sustenta en una arquitectura de plataforma
+cuidadosamente dise\~nada para soportar las necesidades operativas de
+m\'ultiples organizaciones no gubernamentales de manera simult\'anea. La
+Figura~\ref{fig:arquitectura-plataforma} presenta el diagrama de arquitectura
+general de la plataforma, donde se visualizan los componentes principales, sus
+interacciones y los flujos de datos entre las capas del sistema.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{Diagrama de arquitectura de la plataforma de ONG}
+\caption{Diagrama de arquitectura de la plataforma de gesti\'on de ONG}
+\label{fig:arquitectura-plataforma}
+\end{figure}
+
+La arquitectura adopta un patr\'on de capas claramente diferenciadas: la capa
+de presentaci\'on (\textit{frontend}) implementada en React con TypeScript, la
+capa de l\'ogica de negocio (\textit{backend}) construida sobre Node.js con
+Express, y la capa de persistencia basada en PostgreSQL con aislamiento de
+datos por esquema para garantizar la segregaci\'on multi-inquilino. Los
+servicios transversales de seguridad, auditor\'ia e inteligencia artificial
+operan como componentes desacoplados que pueden escalar de forma independiente.
+
+\subsection{Stack Tecnol\'ogico y Estandarizaci\'on Arquitect\'onica}
+\label{subsec:stack-tecnologico}
+
+La selecci\'on del \textit{stack} tecnol\'ogico responde a criterios de madurez,
+rendimiento, ecosistema de herramientas y alineaci\'on con las competencias del
+equipo de desarrollo. La Figura~\ref{fig:stack-tecnologico} presenta el diagrama
+estructural del \textit{stack} tecnol\'ogico adoptado y la estandarizaci\'on
+arquitect\'onica aplicada a todos los m\'odulos del sistema.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{Diagrama estructural del stack tecnologico y estandarizacion arquitectonica del sistema}
+\caption{Diagrama estructural del \textit{stack} tecnol\'ogico y estandarizaci\'on arquitect\'onica del sistema}
+\label{fig:stack-tecnologico}
+\end{figure}
+
+La estandarizaci\'on arquitect\'onica garantiza que todos los m\'odulos del
+sistema sigan patrones de dise\~no consistentes, lo cual reduce la curva de
+aprendizaje para nuevos desarrolladores, facilita las revisiones de c\'odigo
+y minimiza la deuda t\'ecnica acumulada. Los est\'andares definidos incluyen
+la estructura de directorios, las convenciones de nomenclatura, los patrones
+de manejo de errores, las estrategias de \textit{logging} y los esquemas de
+validaci\'on de datos de entrada.

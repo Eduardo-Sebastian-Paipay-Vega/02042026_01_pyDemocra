@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Democra - Sustentación de Proyecto</title>
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/simple.min.css" id="theme">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ======================================================
+           TEMA PERSONALIZADO "ARQUITECTO DE SOFTWARE"
+           Paleta: Azul oscuro, Azul medio, Gris claro, Blanco
+           ====================================================== */
+        :root {
+            --azul-oscuro: #0A1E3C;
+            --azul-medio: #0066CC;
+            --gris-claro: #F5F7FA;
+            --gris-texto: #333333;
+            --blanco: #FFFFFF;
+        }
+
+        .reveal {
+            font-family: 'Inter', sans-serif;
+            color: var(--gris-texto);
+            background-color: var(--blanco);
+        }
+
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            text-transform: none;
+            color: var(--azul-oscuro);
+        }
+
+        /* Estilos de Tipografía */
+        .reveal h2 { font-size: 2.2em; margin-bottom: 40px; }
+        .reveal h3 { font-size: 1.5em; color: var(--azul-medio); font-weight: 600; }
+        .reveal p, .reveal li { font-size: 0.9em; line-height: 1.4; }
+        
+        .reveal ul { margin-top: 20px; }
+        .reveal li { margin-bottom: 15px; }
+
+        /* Estructura de Dos Columnas */
+        .col-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            height: 100%;
+            gap: 40px;
+        }
+        .col-left, .col-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .col-left { text-align: left; }
+        .col-right { text-align: center; }
+
+        /* Componentes Visuales */
+        .img-rounded {
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+        
+        .placeholder-box {
+            background-color: var(--gris-claro);
+            border: 2px dashed #CBD5E1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-weight: 600;
+            width: 100%;
+            height: 400px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .tech-badge {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            display: inline-block;
+            margin: 5px;
+            font-weight: 600;
+        }
+
+        /* Tablas */
+        .reveal table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8em;
+        }
+        .reveal th, .reveal td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .reveal th {
+            background-color: var(--gris-claro);
+            color: var(--azul-oscuro);
+            font-weight: 700;
+            border-bottom: 2px solid var(--azul-medio);
+        }
+        .reveal td:first-child { font-weight: 600; color: var(--azul-medio); }
+
+        /* Flujos / Diagramas simples en CSS */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .flow-step {
+            background-color: var(--blanco);
+            border: 2px solid var(--azul-oscuro);
+            color: var(--azul-oscuro);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+        .flow-arrow {
+            color: var(--azul-medio);
+            font-weight: bold;
+        }
+        
+        .footer-logo {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.4em;
+            color: var(--azul-medio);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- DIAPOSITIVA 1: Portada -->
+            <section data-transition="fade">
+                <div style="margin-top: 5%;">
+                    <img src="./Documento/logo.png" alt="Democra Logo" style="height: 120px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <h1 style="font-size: 3.5em; margin-bottom: 10px;">Democra</h1>
+                    <h3 style="color: var(--gris-texto); font-weight: 400; margin-bottom: 40px;">Plataforma SaaS Multi-Tenant para Gestión de ONG</h3>
+                    
+                    <div style="margin-top: 60px;">
+                        <p style="font-weight: 600; color: var(--azul-medio);">Sustentación de Proyecto de Grado</p>
+                        <p style="font-size: 0.8em; color: var(--gris-texto);">Ingeniería de Sistemas - Arquitectura de Software</p>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Presentar el proyecto y contextualizar la exposición.
+                    Tiempo: 30 segundos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 2: Agenda -->
+            <section data-transition="slide">
+                <h2>Agenda</h2>
+                <div class="col-container" style="text-align: left; justify-content: center; margin-top: 50px;">
+                    <div style="width: 40%;">
+                        <ul style="list-style-type: square; color: var(--azul-medio);">
+                            <li><span style="color: var(--gris-texto);">El Problema</span></li>
+                            <li><span style="color: var(--gris-texto);">Solución Propuesta</span></li>
+                            <li><span style="color: var(--gris-texto);">Metodología DDS</span></li>
+                            <li><span style="color: var(--gris-texto);">Arquitectura General</span></li>
+                            <li><span style="color: var(--gris-texto);">Stack Tecnológico</span></li>
+                        </ul>
+                    </div>
+                    <div style="width: 40%;">
+                        <ul style="list-style-type: square; color: var(--azul-medio);">
+                            <li><span style="color: var(--gris-texto);">Desarrollo y Código</span></li>
+                            <li><span style="color: var(--gris-texto);">Calidad y Pruebas</span></li>
+                            <li><span style="color: var(--gris-texto);">Demostración en Vivo</span></li>
+                            <li><span style="color: var(--gris-texto);">Conclusiones</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar el recorrido de la exposición.
+                    Tiempo: 30 segundos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 3: Problema -->
+            <section data-transition="slide">
+                <h2>El Problema</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li>Gestión descentralizada en ONG.</li>
+                            <li>Procesos manuales ineficientes.</li>
+                            <li>Falta de control de voluntarios.</li>
+                            <li>Datos fragmentados y vulnerables.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <div class="placeholder-box">
+                            [Falta Imagen del Problema - Referencia main.pdf]
+                            <br><br>
+                            <span style="font-size: 0.7em; font-weight: normal;">(Añadir diagrama de problema extraído del PDF)</span>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar la necesidad que originó Democra.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 4: Solución -->
+            <section data-transition="slide">
+                <h2>Solución Propuesta</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li>Plataforma unificada en la nube.</li>
+                            <li>Arquitectura SaaS Multi-Tenant.</li>
+                            <li>Gestión integral automatizada.</li>
+                            <li>Alta disponibilidad y seguridad.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <img src="./Documento/imagenes/sistema/landing.png" class="img-rounded" alt="Solución Propuesta - Landing">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar qué hace Democra.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 5: Qué es Democra -->
+            <section data-transition="slide">
+                <h2>¿Qué es Democra?</h2>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.4;">
+                        <ul>
+                            <li>Entorno multi-organización.</li>
+                            <li>Panel de control centralizado.</li>
+                            <li>Sistema escalable y robusto.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.6;">
+                        <img src="./Documento/imagenes/sistema/dashborad_home.png" class="img-rounded" alt="Dashboard Home">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar el sistema desde una perspectiva general.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 6: DDS -->
+            <section data-transition="slide">
+                <h2>Metodología DDS</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li>Domain-Driven Design (DDD).</li>
+                            <li>Enfoque en reglas de negocio.</li>
+                            <li>Escalabilidad técnica asegurada.</li>
+                            <li>Mantenibilidad a largo plazo.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <img src="./Documento/imagenes/diagramas/Flujo de DDS.jpg" class="img-rounded" alt="Flujo DDS">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Presentar la metodología utilizada.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 7: Flujo DDS -->
+            <section data-transition="slide">
+                <h2>Flujo DDS</h2>
+                <div style="margin-top: 80px;">
+                    <div class="flow-container">
+                        <div class="flow-step">Problema</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Investigación</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Diseño</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Arquitectura</div>
+                    </div>
+                    <div class="flow-container" style="margin-top: 20px;">
+                        <div class="flow-step">Implementación</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Testing</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Documentación</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Despliegue</div>
+                    </div>
+                    
+                    <ul style="margin-top: 60px; text-align: left; display: inline-block;">
+                        <li>Proceso iterativo e incremental.</li>
+                        <li>Calidad asegurada en cada fase.</li>
+                    </ul>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar cada etapa del desarrollo.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 8: Arquitectura General -->
+            <section data-transition="slide">
+                <h2>Arquitectura General</h2>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.35;">
+                        <ul>
+                            <li>Separación de responsabilidades.</li>
+                            <li>Desacoplamiento de capas.</li>
+                            <li>Servicios modulares.</li>
+                            <li>Flujo de datos unidireccional.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.65;">
+                        <img src="./Documento/imagenes/diagramas/Diagrama estructural del stack tecnologico y estandarizacion arquitectonica del sistema.jpg" class="img-rounded" alt="Arquitectura Stack y Estructura">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar la arquitectura completa.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 9: Arquitectura Código -->
+            <section data-transition="slide">
+                <h2>Arquitectura del Código</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li>Usuario interactúa con UI.</li>
+                            <li>Componentes usan Hooks.</li>
+                            <li>Hooks llaman a Servicios.</li>
+                            <li>API conecta con BD.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <div style="background: var(--gris-claro); padding: 20px; border-radius: 8px;">
+                            <div class="flow-step" style="background: var(--blanco); margin-bottom:10px;">Usuario</div>
+                            <div class="flow-arrow" style="transform: rotate(90deg); margin:10px 0;">→</div>
+                            <div class="flow-step" style="background: var(--azul-oscuro); color: white; margin-bottom:10px;">Frontend</div>
+                            <div class="flow-arrow" style="transform: rotate(90deg); margin:10px 0;">→</div>
+                            <div class="flow-step" style="background: var(--blanco); margin-bottom:10px;">Hooks / Servicios</div>
+                            <div class="flow-arrow" style="transform: rotate(90deg); margin:10px 0;">→</div>
+                            <div class="flow-step" style="background: var(--azul-oscuro); color: white; margin-bottom:10px;">API Express</div>
+                            <div class="flow-arrow" style="transform: rotate(90deg); margin:10px 0;">→</div>
+                            <div class="flow-step" style="background: var(--blanco);">Supabase (PostgreSQL)</div>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar cómo se organizó el proyecto.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 10: Stack Tecnológico -->
+            <section data-transition="slide">
+                <h2>Stack Tecnológico</h2>
+                <table style="margin-top: 40px;">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Tecnologías Implementadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Frontend</td>
+                            <td><span class="tech-badge">React</span> <span class="tech-badge">Vite</span> <span class="tech-badge">Tailwind</span></td>
+                        </tr>
+                        <tr>
+                            <td>Backend</td>
+                            <td><span class="tech-badge">Node.js</span> <span class="tech-badge">Express</span></td>
+                        </tr>
+                        <tr>
+                            <td>Base de Datos</td>
+                            <td><span class="tech-badge">PostgreSQL</span> <span class="tech-badge">Supabase</span></td>
+                        </tr>
+                        <tr>
+                            <td>Testing</td>
+                            <td><span class="tech-badge">Vitest</span> <span class="tech-badge">Jest</span> <span class="tech-badge">Supertest</span></td>
+                        </tr>
+                        <tr>
+                            <td>Seguridad</td>
+                            <td><span class="tech-badge">JWT</span> <span class="tech-badge">RLS</span> <span class="tech-badge">Helmet</span> <span class="tech-badge">OTP</span></td>
+                        </tr>
+                        <tr>
+                            <td>Documentación</td>
+                            <td><span class="tech-badge">Swagger</span> <span class="tech-badge">Graphify</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <aside class="notes">
+                    Objetivo: Mostrar todas las tecnologías.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 11: Arquitectura Datos -->
+            <section data-transition="slide">
+                <h2>Arquitectura de Datos</h2>
+                <h3 style="font-size: 1.2em; margin-top: -30px; margin-bottom: 40px;">Enfoque Multi-Tenant</h3>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.4;">
+                        <ul>
+                            <li>Aislamiento de datos.</li>
+                            <li>Seguridad por inquilino (RLS).</li>
+                            <li>Rendimiento optimizado.</li>
+                            <li>Escalabilidad horizontal.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.6;">
+                        <img src="./Documento/imagenes/diagramas/Diagrama de arquitectura de la plataforma de ONG.jpg" class="img-rounded" alt="Arquitectura de Datos ONG">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar Multi-Tenant.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 12: Seguridad -->
+            <section data-transition="slide">
+                <h2>Seguridad</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li><strong>RBAC:</strong> Control de accesos.</li>
+                            <li><strong>JWT:</strong> Autenticación segura.</li>
+                            <li><strong>RLS:</strong> Políticas a nivel de fila.</li>
+                            <li><strong>OTP:</strong> Accesos de un solo uso.</li>
+                            <li><strong>Helmet:</strong> Protección HTTP.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <img src="./Documento/imagenes/sistema/sis_ajustes_roles.png" class="img-rounded" alt="Gestión de Roles RBAC" style="max-height: 350px;">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar cómo se protege el sistema.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 13: Wireframes -->
+            <section data-transition="slide">
+                <h2>Wireframes y Prototipos</h2>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.3;">
+                        <ul>
+                            <li>Diseño centrado en usuario.</li>
+                            <li>Iteraciones ágiles.</li>
+                            <li>Validación de UX.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.7; display: flex; flex-direction: row; gap: 10px; justify-content: center;">
+                        <img src="./Documento/imagenes/prototipado/1_inicio.jpg" class="img-rounded" alt="Wireframe Inicio" style="max-width: 48%;">
+                        <img src="./Documento/imagenes/prototipado/3_dashboard.jpg" class="img-rounded" alt="Wireframe Dashboard" style="max-width: 48%;">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar la evolución del diseño.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 14: Implementación -->
+            <section data-transition="slide">
+                <h2>Implementación</h2>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.4;">
+                        <ul>
+                            <li>Entorno de desarrollo.</li>
+                            <li>Control de versiones estricto.</li>
+                            <li>Revisión de código (PR).</li>
+                            <li>Estándares de calidad.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.6;">
+                        <div class="placeholder-box">
+                            [Captura de VSCode reservada para Demo en Vivo]
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar cómo se construyó el sistema.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 15: Calidad -->
+            <section data-transition="slide">
+                <h2>Calidad del Software</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <ul>
+                            <li>Estándar <strong>ISO 25010</strong>.</li>
+                            <li><strong>Vitest:</strong> Pruebas unitarias UI.</li>
+                            <li><strong>Jest:</strong> Lógica del backend.</li>
+                            <li><strong>Supertest:</strong> Integración API.</li>
+                            <li>Ejecución continua (CI).</li>
+                        </ul>
+                    </div>
+                    <div class="col-right">
+                        <div class="flow-container" style="flex-direction: column; gap: 20px;">
+                            <div class="flow-step" style="width: 250px;">Pruebas Unitarias</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" style="width: 250px;">Pruebas de Integración</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" style="width: 250px; background: var(--azul-oscuro); color: white;">Análisis de Cobertura</div>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar la estrategia de calidad.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 16: Cobertura -->
+            <section data-transition="slide">
+                <h2>Cobertura y Testing</h2>
+                <div class="col-container">
+                    <div class="col-left">
+                        <h3 style="text-align: center; font-size: 1.2em;">Resultados de Pruebas</h3>
+                        <img src="./Documento/imagenes/tests/uniteback.png" class="img-rounded" alt="Pruebas Unitarias Backend">
+                    </div>
+                    <div class="col-right">
+                        <h3 style="text-align: center; font-size: 1.2em;">Reporte de Cobertura</h3>
+                        <img src="./Documento/imagenes/tests/coberback.jpg" class="img-rounded" alt="Cobertura Backend">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Explicar la cobertura y las pruebas.
+                    Tiempo: 2 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 17: Documentación -->
+            <section data-transition="slide">
+                <h2>Documentación Técnica</h2>
+                <div class="col-container">
+                    <div class="col-left" style="flex: 0.4;">
+                        <ul>
+                            <li><strong>Swagger:</strong> Contratos API.</li>
+                            <li><strong>Graphify:</strong> Grafo de conocimiento.</li>
+                            <li>Trazabilidad completa.</li>
+                            <li>Integración continua.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="flex: 0.6;">
+                        <img src="./Documento/imagenes/tests/coberapi.jpg" class="img-rounded" alt="Cobertura API (Referencia Docs)">
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar la documentación.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 18: Demo -->
+            <section data-transition="zoom">
+                <h2 style="color: var(--azul-medio);">Demostración en Vivo</h2>
+                <div style="background: var(--gris-claro); padding: 40px; border-radius: 8px; display: inline-block; text-align: left; margin-top: 20px;">
+                    <ul style="font-size: 1.1em; line-height: 1.8;">
+                        <li><span style="color: var(--azul-medio);">1.</span> Mostrar estructura del proyecto (VSCode).</li>
+                        <li><span style="color: var(--azul-medio);">2.</span> Ejecutar suite de pruebas.</li>
+                        <li><span style="color: var(--azul-medio);">3.</span> Revisar reporte de cobertura.</li>
+                        <li><span style="color: var(--azul-medio);">4.</span> Explorar contratos de API (Swagger).</li>
+                        <li><span style="color: var(--azul-oscuro); font-weight: bold;">5. Demostrar sistema funcionando en vivo.</span></li>
+                    </ul>
+                </div>
+                <aside class="notes">
+                    Objetivo: Mostrar el funcionamiento real.
+                    Tiempo: 5 minutos.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 19: Resultados -->
+            <section data-transition="slide">
+                <h2>Resultados</h2>
+                <table style="margin-top: 50px;">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Resultado Alcanzado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Plataforma</td>
+                            <td>Operativa y Desplegada en la Nube</td>
+                        </tr>
+                        <tr>
+                            <td>Arquitectura</td>
+                            <td>Modelo SaaS Multi-Tenant Implementado</td>
+                        </tr>
+                        <tr>
+                            <td>Seguridad</td>
+                            <td>Reglas RLS, Roles RBAC y tokens JWT Activos</td>
+                        </tr>
+                        <tr>
+                            <td>Cobertura</td>
+                            <td>Alta fiabilidad del código probada</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <aside class="notes">
+                    Objetivo: Resumir los logros técnicos.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+            <!-- DIAPOSITIVA 20: Conclusiones -->
+            <section data-transition="fade">
+                <h2>Conclusiones</h2>
+                <div class="col-container" style="margin-top: 50px;">
+                    <div class="col-left" style="background: var(--gris-claro); padding: 30px; border-radius: 8px; border-top: 4px solid var(--azul-oscuro);">
+                        <h3 style="color: var(--azul-oscuro); text-align: center;">Logros Alcanzados</h3>
+                        <ul style="margin-top: 20px;">
+                            <li>Solución integral para ONG.</li>
+                            <li>Arquitectura escalable y segura.</li>
+                            <li>Código mantenible y testeado.</li>
+                        </ul>
+                    </div>
+                    <div class="col-right" style="background: var(--blanco); border: 2px solid var(--gris-claro); padding: 30px; border-radius: 8px; border-top: 4px solid var(--azul-medio);">
+                        <h3 style="color: var(--azul-medio); text-align: center;">Trabajo Futuro</h3>
+                        <ul style="margin-top: 20px; text-align: left;">
+                            <li>Integración de Inteligencia Artificial.</li>
+                            <li>Módulos contables avanzados.</li>
+                            <li>Aplicación móvil nativa.</li>
+                        </ul>
+                    </div>
+                </div>
+                <aside class="notes">
+                    Objetivo: Cerrar la exposición.
+                    Tiempo: 1 minuto.
+                </aside>
+            </section>
+
+        </div>
+        
+        <div class="footer-logo">DEMOCRA | SUSTENTACIÓN DE ARQUITECTURA</div>
+    </div>
+
+    <!-- Reveal.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'slide', // Transiciones uniformes
+            plugins: [ RevealNotes ] // Para ver las notas presionar la tecla 'S'
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+% =============================================================================
+% 5.2 Cobertura de Pruebas del Servidor Backend (Node.js/Express)
+% Archivo: 5.2_cobertura_backend.tex
+% =============================================================================
+
+\section{Cobertura de Pruebas del Servidor Backend (Node.js/Express)}
+\label{sec:cobertura-backend}
+
+La evaluaci\'on sistem\'atica de la cobertura de pruebas constituye un indicador
+cuantitativo fundamental para determinar el grado de confiabilidad del c\'odigo
+fuente desplegado en producci\'on. En el contexto del servidor \textit{backend}
+de la plataforma, construido sobre Node.js con el \textit{framework} Express y
+TypeScript como lenguaje de tipado est\'atico, se implement\'o una estrategia
+integral de pruebas automatizadas utilizando Jest como \textit{framework} de
+ejecuci\'on y aserci\'on.
+
+\subsection{Resultados Globales de Cobertura}
+\label{subsec:resultados-cobertura-backend}
+
+La ejecuci\'on completa del \textit{suite} de pruebas del \textit{backend}
+comprendi\'o un total de \textbf{16 suites de pruebas} y \textbf{334 casos de
+prueba}, todos con resultado satisfactorio (\textit{PASSED}). El tiempo total
+de ejecuci\'on fue de \textbf{17.237 segundos}, lo cual evidencia una eficiencia
+notable considerando la extensi\'on del conjunto de pruebas. La
+Tabla~\ref{tab:cobertura-backend} presenta los indicadores globales de cobertura
+desglosados por categor\'ia m\'etrica.
+
+\begin{table}[htbp]
+\centering
+\caption{Indicadores globales de cobertura del servidor \textit{backend}}
+\label{tab:cobertura-backend}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{M\'etrica} & \textbf{Cobertura (\%)} & \textbf{Cubiertos/Total} & \textbf{Evaluaci\'on} \\
+\hline
+Sentencias (\textit{Statements}) & 92.44 & 1052 / 1138 & Excelente \\
+\hline
+Ramas (\textit{Branches})        & 89.70 & 1072 / 1195 & Muy buena \\
+\hline
+Funciones (\textit{Functions})    & 89.47 & 136 / 152   & Muy buena \\
+\hline
+L\'ineas (\textit{Lines})        & 93.87 & 981 / 1045  & Excelente \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Resumen de ejecuci\'on del \textit{suite} de pruebas del \textit{backend}}
+\label{tab:ejecucion-backend}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Par\'ametro} & \textbf{Valor} \\
+\hline
+\textit{Framework} de pruebas        & Jest (TypeScript) \\
+\hline
+Suites de pruebas ejecutados         & 16 \\
+\hline
+Suites aprobados                     & 16 (100\%) \\
+\hline
+Casos de prueba ejecutados           & 334 \\
+\hline
+Casos de prueba aprobados            & 334 (100\%) \\
+\hline
+Casos de prueba fallidos             & 0 \\
+\hline
+Tiempo total de ejecuci\'on          & 17.237 s \\
+\hline
+\end{tabular}
+\end{table}
+
+Los resultados obtenidos superan ampliamente los umbrales recomendados por la
+literatura especializada en ingenier\'ia de software. Seg\'un las directrices de
+la norma ISO/IEC 25010:2011 y las pr\'acticas sugeridas por Martin Fowler en su
+taxonom\'ia de pruebas, una cobertura de sentencias superior al 80\% se considera
+adecuada para sistemas en producci\'on, mientras que valores por encima del 90\%
+denotan un nivel de madurez elevado en las pr\'acticas de aseguramiento de calidad.
+En este sentido, la cobertura de sentencias del 92.44\% y la cobertura de
+l\'ineas del 93.87\% posicionan al sistema en la categor\'ia de excelencia.
+
+\subsection{An\'alisis de la Cobertura por Categor\'ia}
+\label{subsec:analisis-cobertura-backend}
+
+La cobertura de \textbf{ramas} (\textit{branches}) del 89.70\% indica que la
+mayor\'ia de las bifurcaciones condicionales del c\'odigo han sido ejercitadas
+durante la ejecuci\'on de las pruebas, incluyendo escenarios de flujo alternativo
+y manejo de errores. Las ramas no cubiertas corresponden predominantemente a
+condiciones de borde en la validaci\'on de datos de entrada y a rutas de
+recuperaci\'on ante fallos de servicios externos, las cuales ser\'an abordadas
+en iteraciones futuras de refactorizaci\'on.
+
+La cobertura de \textbf{funciones} del 89.47\% refleja que 136 de las 152
+funciones implementadas cuentan con al menos una invocaci\'on durante el ciclo
+de pruebas. Las funciones no cubiertas pertenecen principalmente a m\'odulos
+auxiliares de utilidades y a \textit{handlers} de eventos at\'ipicos que
+requieren condiciones de ejecuci\'on dif\'icilmente reproducibles en un entorno
+de pruebas unitarias.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{coberback}
+\caption{Reporte de cobertura de pruebas del servidor \textit{backend} generado por Jest}
+\label{fig:cobertura-backend}
+\end{figure}
+
+La Figura~\ref{fig:cobertura-backend} presenta el reporte detallado de cobertura
+generado por Jest, en el cual se visualizan los porcentajes por archivo fuente
+y la distribuci\'on de l\'ineas cubiertas y no cubiertas. Este nivel de
+cobertura proporciona una garant\'ia cuantificable de que los componentes
+cr\'iticos del sistema ---incluyendo la l\'ogica de autenticaci\'on adaptativa,
+el motor de evaluaci\'on de riesgos y los servicios de gesti\'on de identidad---
+han sido sometidos a verificaci\'on exhaustiva mediante pruebas automatizadas.

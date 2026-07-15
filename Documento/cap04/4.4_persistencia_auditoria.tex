@@ -1,0 +1,14 @@
+% cap04/4.4_persistencia_auditoria.tex
+\section{Fortalecimiento de la Persistencia y Seguridad IAM}
+
+El proyecto \textit{Democra} rechaza la ilusi\'on de que la seguridad debe gestionarse en la capa de aplicaci\'on (ej. \textit{Node.js}). Confiar en \textit{MySQL} \'unicamente para la integridad referencial y propiedades \textit{ACID} es insuficiente. En su lugar, la plataforma adopta \textbf{PostgreSQL v16} e inyecta el concepto abstracto de seguridad directamente en el subsuelo transaccional, convirtiendo al motor relacional en el primer y \'ultimo basti\'on de defensa.
+
+\subsection{Middleware IAM (Identity and Access Management) Nativo}
+
+La decisi\'on arquitect\'onica m\'as radical es el desarrollo de un \textbf{Middleware IAM} embebido en la propia base de datos. Cuando \textit{Express} recibe un JWT, este no extrae el \textit{tenant\_id} para concatenarlo a una consulta. En su lugar, el backend inyecta todo el payload del JWT dentro de una variable de configuraci\'on transaccional (\textit{SET LOCAL request.jwt.claims}).
+
+\subsection{Seguridad a Nivel de Fila (RLS) Inquebrantable}
+
+A partir de ese milisegundo, \textit{PostgreSQL} toma el control absoluto. Se han implementado pol\'iticas de \textbf{Row Level Security (RLS)}. Estas pol\'iticas son reglas matem\'aticas adheridas de forma nativa a la tabla (ej. \textit{ALTER TABLE voluntarios ENABLE ROW LEVEL SECURITY;}). El motor eval\'ua cada registro devuelto contra el \textit{claims} inyectado.
+
+La ecuaci\'on es implacable: si un atacante (o un error de software) ejecuta un \textit{SELECT * FROM api.donaciones} sin un \textit{WHERE}, la base de datos intercepta el llamado a nivel de hardware y retorna exclusivamente los datos cuyo \textit{tenant\_id} coincida criptogr\'aficamente con la firma del JWT inyectado. Es una barrera impenetrable; el filtro no est\'a en el c\'odigo \textit{Node}, est\'a en la memoria transaccional.

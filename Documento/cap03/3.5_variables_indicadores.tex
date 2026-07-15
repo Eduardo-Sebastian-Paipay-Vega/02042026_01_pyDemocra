@@ -1,0 +1,35 @@
+% cap03/3.5_variables_indicadores.tex
+\section{Variables e Indicadores}
+
+Para despojar a este trabajo ingenieril de cualquier sesgo subjetivo y alcanzar la pureza del an\'alisis algor\'itmico, las variables de evaluaci\'on se anclan de forma dogm\'atica a m\'etricas estandarizadas de calidad de software y pruebas automatizadas. No se admiten apreciaciones cualitativas; cada indicador se traduce a una f\'ormula algor\'itmica expl\'icita.
+
+\subsection{Matriz de Operacionalizaci\'on: Cobertura y Desempe\~no}
+
+\textbf{Variable Independiente: La Arquitectura \textit{Democra}.} La arquitectura de \textit{Democra} (compuesta por \textit{React.js}, \textit{Node.js}, y \textit{PostgreSQL} con RLS) se erige como la causa motriz. Su operaci\'on es inyectada sobre el entorno de pruebas de caja blanca.
+
+\textbf{Variable Dependiente: Eficiencia de Desempe\~no y Cobertura de C\'odigo.}
+Las variables de medici\'on se dividen en dos dominios normativos:
+\begin{itemize}
+    \item \textbf{Eficiencia de Desempe\~no:} Mide el comportamiento temporal y utilizaci\'on de recursos bajo carga transaccional.
+    \item \textbf{Cobertura de C\'odigo (Code Coverage):} Mide el porcentaje del c\'odigo fuente que es ejecutado y validado exitosamente durante las pruebas unitarias y de integraci\'on automatizadas.
+\end{itemize}
+
+\subsection{Traducci\'on Matem\'atica y Umbrales R\'igidos}
+
+Para la \textbf{Eficiencia de Desempe\~no}, se establece la m\'etrica de \textit{Latencia Media de Transacci\'on As\'incrona} ($L_m$). La f\'ormula algor\'itmica es la sumatoria de las diferencias de tiempo ($\Delta t$) entre el env\'io del \textit{WebSocket} y la recepci\'on del \textit{ACK}, dividida entre el n\'umero total de transacciones ($N$).
+\begin{equation}
+L_m = \frac{1}{N} \sum_{i=1}^{N} (t_{ACK\_i} - t_{Send\_i})
+\end{equation}
+Se impone un \textbf{umbral de aceptaci\'on r\'igido}: $L_m < 200 \text{ ms}$. Cualquier resultado superior se considera un fallo arquitect\'onico inaceptable.
+
+Asimismo, se define la m\'etrica de \textbf{Cobertura de Bloqueo de Fallos de Concurrencia} ($C_b$).
+\begin{equation}
+C_b = \left( \frac{\text{Ataques Bloqueados por RLS}}{\text{Total de Ataques Inyectados}} \right) \times 100\%
+\end{equation}
+El umbral absoluto es del $\mathbf{100\%}$. No se tolera la m\'as m\'inima fuga de datos.
+
+Para la \textbf{Cobertura de C\'odigo}, la m\'etrica de porcentaje global de cobertura ($Cov$) se expresa como la proporci\'on de l\'ineas de c\'odigo ($L_c$) transitadas exitosamente por las suites de prueba \textit{Jest} respecto al total de l\'ineas ejecutables del proyecto ($L_t$).
+\begin{equation}
+Cov = \left( \frac{L_c}{L_t} \right) \times 100\%
+\end{equation}
+El umbral te\'orico de aceptaci\'on es una cobertura global $\ge 85\%$, considerado el est\'andar de alta calidad en la industria del software para despliegues a producci\'on.

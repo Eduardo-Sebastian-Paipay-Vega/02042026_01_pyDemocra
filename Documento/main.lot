@@ -1,0 +1,13 @@
+\babel@toc {spanish}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Resultados del Stress Test sobre API Node.js/Supabase (M\'etrica $P_{95}$)}}{56}{table.caption.10}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Impacto del RLS en Consultas \texttt {SELECT} sobre 1 Mill\'on de Registros (Seq Scan vs Index Scan)}}{56}{table.caption.11}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Resultados del Vector de Ataque por Inyecci\'on de Consulta Transversal}}{57}{table.caption.12}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Desglose Estad\'istico de Puntuaci\'on SUS (N=30 Operadores de ONGs)}}{58}{table.caption.13}%
+\contentsline {table}{\numberline {5.5}{\ignorespaces Resultados Emp\'iricos de la Auditor\'ia de API (Endpoints Cr\'iticos)}}{63}{table.caption.16}%
+\contentsline {table}{\numberline {5.6}{\ignorespaces Matriz de Pruebas ISO 25010 (Adecuaci\'on Funcional y Seguridad)}}{77}{table.caption.18}%
+\addvspace {10\p@ }

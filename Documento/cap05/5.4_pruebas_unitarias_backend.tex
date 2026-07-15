@@ -1,0 +1,123 @@
+% =============================================================================
+% 5.4 Pruebas Unitarias del Backend
+% Archivo: 5.4_pruebas_unitarias_backend.tex
+% =============================================================================
+
+\section{Pruebas Unitarias del Backend}
+\label{sec:pruebas-unitarias-backend}
+
+Las pruebas unitarias representan el primer nivel de la pir\'amide de pruebas
+de software y constituyen el mecanismo m\'as granular para verificar el
+comportamiento correcto de las unidades individuales de c\'odigo. En el contexto
+del servidor \textit{backend} de la plataforma, se implement\'o una estrategia
+exhaustiva de pruebas unitarias que abarca las capas de enrutamiento, servicios
+de negocio, componentes de seguridad, \textit{middleware} transversal y
+funciones utilitarias.
+
+\subsection{Resultados Generales de Ejecuci\'on}
+\label{subsec:resultados-unitarias}
+
+La ejecuci\'on completa de las pruebas unitarias del \textit{backend} arroj\'o
+resultados plenamente satisfactorios, con la totalidad de los suites y casos
+de prueba aprobados sin excepciones. La Tabla~\ref{tab:resumen-unitarias}
+presenta el resumen cuantitativo de la ejecuci\'on.
+
+\begin{table}[htbp]
+\centering
+\caption{Resumen de ejecuci\'on de pruebas unitarias del \textit{backend}}
+\label{tab:resumen-unitarias}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Par\'ametro} & \textbf{Valor} \\
+\hline
+\textit{Framework} de pruebas         & Jest (TypeScript) \\
+\hline
+Suites de pruebas ejecutados          & 16 \\
+\hline
+Suites aprobados                      & 16 (100\%) \\
+\hline
+Suites fallidos                       & 0 \\
+\hline
+Casos de prueba ejecutados            & 334 \\
+\hline
+Casos de prueba aprobados             & 334 (100\%) \\
+\hline
+Casos de prueba fallidos              & 0 \\
+\hline
+Tiempo total de ejecuci\'on           & 19.375 s \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Distribuci\'on de Suites por Categor\'ia}
+\label{subsec:distribucion-suites}
+
+Los diecis\'eis suites de pruebas se organizan en cinco categor\'ias funcionales
+que reflejan la arquitectura en capas del servidor \textit{backend}. Esta
+clasificaci\'on permite identificar con precisi\'on la cobertura de cada
+componente arquitect\'onico y priorizar las \'areas que requieren
+fortalecimiento en iteraciones futuras. La Tabla~\ref{tab:suites-categoria}
+presenta la distribuci\'on detallada.
+
+\begin{table}[htbp]
+\centering
+\caption{Distribuci\'on de suites de pruebas unitarias por categor\'ia}
+\label{tab:suites-categoria}
+\begin{tabular}{|l|p{6.5cm}|p{4.5cm}|}
+\hline
+\textbf{Categor\'ia} & \textbf{Suites incluidos} & \textbf{Alcance funcional} \\
+\hline
+Rutas (\textit{Routes}) & \texttt{iam.routes}, \texttt{sedes.routes}, \texttt{audit.routes}, \texttt{auth.routes}, \texttt{onboarding.routes} & Validaci\'on de endpoints HTTP, par\'ametros de entrada y c\'odigos de respuesta. \\
+\hline
+Servicios (\textit{Services}) & \texttt{email.service} & L\'ogica de negocio del servicio de correo electr\'onico y env\'io de notificaciones. \\
+\hline
+Seguridad (\textit{Security}) & \texttt{risk-engine}, \texttt{ai-client}, \texttt{audit} & Motor de evaluaci\'on de riesgos, cliente de IA generativa y registro de auditor\'ia. \\
+\hline
+\textit{Middleware} & \textit{Middleware} transversal & Autenticaci\'on, autorizaci\'on, manejo de errores y validaci\'on de esquemas. \\
+\hline
+Utilidades (\textit{Utils}) & Funciones auxiliares & Formateo de datos, generaci\'on de tokens, cifrado y funciones de apoyo. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{An\'alisis de Resultados por Componente}
+\label{subsec:analisis-unitarias}
+
+La categor\'ia de \textbf{rutas} (\textit{routes}) concentra la mayor cantidad
+de casos de prueba, dado que cada \textit{endpoint} de la API REST es verificado
+contra m\'ultiples escenarios: solicitudes v\'alidas con respuestas exitosas,
+solicitudes con par\'ametros inv\'alidos o ausentes, intentos de acceso sin
+autenticaci\'on, y operaciones con permisos insuficientes. Los suites
+correspondientes a los m\'odulos \texttt{iam} y \texttt{auth} presentan la
+mayor densidad de casos de prueba, lo cual refleja la complejidad inherente a
+las operaciones de gesti\'on de identidad y autenticaci\'on adaptativa.
+
+Los componentes de \textbf{seguridad} (\textit{security}) incluyen pruebas
+especializadas para el motor de evaluaci\'on de riesgos (\texttt{risk-engine}),
+el cual implementa algoritmos de puntuaci\'on basados en m\'ultiples factores
+contextuales como la geolocalizaci\'on, el dispositivo, el horario de acceso y
+el historial de comportamiento del usuario. El suite \texttt{ai-client} verifica
+la integraci\'on con el servicio de inteligencia artificial generativa utilizado
+para la s\'intesis de m\'etricas de seguridad, incluyendo escenarios de
+\textit{timeout}, respuestas malformadas y manejo de errores de la API externa.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{uniteback}
+\caption{Resultados de ejecuci\'on de las pruebas unitarias del servidor \textit{backend}}
+\label{fig:pruebas-unitarias-backend}
+\end{figure}
+
+La Figura~\ref{fig:pruebas-unitarias-backend} presenta la salida completa de
+la ejecuci\'on de Jest, donde se observa el estado de aprobaci\'on de cada
+suite individual, la cantidad de casos de prueba por suite y el tiempo de
+ejecuci\'on parcial. La ausencia total de fallos confirma la estabilidad del
+c\'odigo base y la correcta implementaci\'on de los contratos funcionales
+definidos en los requisitos del sistema.
+
+El tiempo total de ejecuci\'on de \textbf{19.375 segundos} para 334 casos de
+prueba arroja un promedio de aproximadamente 58 milisegundos por caso de prueba,
+lo cual demuestra la eficiencia del enfoque de \textit{mocking} y aislamiento
+de dependencias empleado en la estrategia de pruebas. Este rendimiento permite
+la integraci\'on de las pruebas unitarias en el flujo de integraci\'on continua
+(CI) sin impactar significativamente los tiempos de construcci\'on del proyecto.

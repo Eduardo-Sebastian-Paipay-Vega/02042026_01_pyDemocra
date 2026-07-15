@@ -1,0 +1,6 @@
+% ============================================================
+%  cap05/5.9_seguridad_defensiva.tex
+% ============================================================
+\subsection{Reflexiones sobre la Seguridad Defensiva Activa}
+
+El dise\~no del sistema de alertas de auditor\'ia (\textit{Audit Logs Trigger}) documentado experimentalmente rindi\'o un $100\%$ de cobertura de Control de Cambios (CDC), acoplando implacablemente el \textit{UserID} criptogr\'afico a cada transacci\'on DML (Data Manipulation Language). A diferencia de los controles pasivos tradicionales (que solo validan la ruta en la API), \textit{Democra} despliega seguridad defensiva en el rinc\'on m\'as inh\'ospito del flujo de datos: el disparador de base de datos. Esta arquitectura de confianza cero (\textit{Zero-Trust Architecture}) convalida la premisa de que los sistemas de ONGs, poseedores de bases de datos de donantes y operaciones econ\'omicas cr\'iticas, deben ser concebidos asumiendo que el per\'imetro de red exterior ya ha sido vulnerado (\textit{Assume-Breach Paradigm}).

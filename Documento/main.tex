@@ -1,0 +1,48 @@
+% ============================================================
+%  main.tex  —  Archivo maestro (arquitectura modular)
+%  Democra: Plataforma Web SaaS Multi-Tenant para la Gestion
+%  Integral de Organizaciones de Voluntariado (ONG)
+%  ------------------------------------------------------------
+%  Compilar con PDFLaTeX (3 pasadas).
+%  Cap. 4 (Arquitectura) eliminado en reestructuracion julio 2026.
+% ============================================================
+\documentclass[11pt,a4paper,oneside]{report}
+
+% -------- Preambulo (paquetes, estilo, colores) --------
+\input{config/preambulo}
+
+\begin{document}
+
+% -------- Preliminares --------
+\pagenumbering{roman}
+\input{frontmatter/portada}
+\input{frontmatter/dedicatoria}
+\input{frontmatter/agradecimiento}
+\input{frontmatter/resumen}
+\input{frontmatter/abstract}
+
+% -------- Indice General --------
+\cleardoublepage
+\phantomsection
+\newpage \thispagestyle{empty} \tableofcontents
+\cleardoublepage
+
+\pagenumbering{arabic}
+
+\input{frontmatter/introduccion}
+
+% -------- Capitulos --------
+\input{cap01/cap01}
+\input{cap02/cap02}
+\input{cap03/cap03}
+% Cap. 4 (Arquitectura y Diseno del Sistema) eliminado — julio 2026
+\input{cap05/cap05}
+\input{cap06/cap06}
+
+% -------- Bibliografia --------
+\input{bibliografia/referencias}
+
+% -------- Anexos --------
+\input{anexos/anexos}
+
+\end{document}

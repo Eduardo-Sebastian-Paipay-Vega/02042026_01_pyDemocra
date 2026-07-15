@@ -1,0 +1,14 @@
+\babel@toc {spanish}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Evaluaci\'on Acad\'emica: Ecosistemas Est\'aticos vs Din\'amicos}}{20}{table.caption.7}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Matriz de Operacionalizaci\'on - Dimensiones T\'ecnicas e Interfaces}}{30}{table.caption.8}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Resultados del Stress Test sobre API Node.js/Supabase (M\'etrica $P_{95}$)}}{36}{table.caption.9}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Impacto del RLS en Consultas \texttt {SELECT} sobre 1 Mill\'on de Registros (Seq Scan vs Index Scan)}}{36}{table.caption.10}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Resultados del Vector de Ataque por Inyecci\'on de Consulta Transversal}}{37}{table.caption.11}%
+\contentsline {table}{\numberline {5.4}{\ignorespaces Desglose Estad\'istico de Puntuaci\'on SUS (N=30 Operadores de ONGs)}}{38}{table.caption.12}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }

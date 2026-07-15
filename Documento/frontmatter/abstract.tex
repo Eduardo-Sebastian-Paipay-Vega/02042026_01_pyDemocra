@@ -1,0 +1,21 @@
+% frontmatter/abstract.tex
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This report documents and evaluates, through a documentary reverse-engineering approach over the
+repository, the design and implementation of \textbf{Democra}, a multi-tenant Software as a Service
+(SaaS) web platform for the comprehensive management of volunteer organizations (NGOs). The system
+comprises a Single Page Application (SPA) client built with React, TypeScript and Vite, and a REST
+API implemented with Node.js and Express on top of the Supabase data platform (PostgreSQL 16). At the
+data level, it adopts a multi-schema model with tenant isolation enforced through Row Level Security
+(RLS) and database functions. Security relies on Supabase authentication, Role-Based Access Control
+(RBAC) with a deny-by-default policy, a risk evaluation engine with two-step verification (OTP),
+forensic auditing, and soft deletion with retention policies. Methodologically, the development is governed
+by the DDS methodology (Design Documentation System assisted by AI), organized into eight lifecycle
+phases. The research is applied-technological and descriptive, with a non-experimental cross-sectional
+design. The study variables are Functioning and Usability; their indicators are validated through
+documentary code analysis, automated testing (Jest, Vitest, supertest, pgTAP) and code coverage and automated testing. Quantitative coverage and performance results are structured and
+reserved for execution in a controlled environment, without reporting unverified values.
+
+\vspace{0.3cm}
+\noindent\textbf{Keywords:} multi-tenant SaaS, NGO, volunteering, React, Supabase, PostgreSQL, RBAC,
+RLS, quality assurance, DDS methodology.

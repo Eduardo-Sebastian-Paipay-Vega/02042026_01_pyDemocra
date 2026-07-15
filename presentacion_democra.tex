@@ -1,0 +1,588 @@
+\documentclass[aspectratio=169]{beamer}
+
+% Tema minimalista
+\usetheme{default}
+\usecolortheme{whale} % tonos azules
+
+% Opciones para notas del expositor (descomentar para ver)
+% \setbeameroption{show notes on second screen=right}
+
+% Colores personalizados
+\definecolor{AzulOscuro}{RGB}{10, 30, 60}
+\definecolor{AzulMedio}{RGB}{0, 102, 204}
+\definecolor{GrisClaro}{RGB}{240, 240, 240}
+\definecolor{GrisTexto}{RGB}{60, 60, 60}
+\definecolor{Negro}{RGB}{0, 0, 0}
+
+% Configuración de colores del tema
+\setbeamercolor{palette primary}{bg=AzulOscuro,fg=white}
+\setbeamercolor{palette secondary}{bg=AzulMedio,fg=white}
+\setbeamercolor{palette tertiary}{bg=AzulOscuro,fg=white}
+\setbeamercolor{palette quaternary}{bg=AzulOscuro,fg=white}
+\setbeamercolor{structure}{fg=AzulMedio}
+\setbeamercolor{normal text}{fg=GrisTexto}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{frametitle}{bg=white,fg=AzulOscuro}
+\setbeamercolor{title}{bg=white,fg=AzulOscuro}
+
+% Configuración de fuentes y estilo
+\usefonttheme{professionalfonts}
+\usefonttheme[onlymath]{serif}
+\setbeamerfont{title}{size=\huge, series=\bfseries}
+\setbeamerfont{frametitle}{size=\Large, series=\bfseries}
+
+% Limpiar plantilla para que sea más minimalista
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{frametitle}{
+    \vspace*{0.5cm}
+    \insertframetitle
+    \vspace*{0.2cm}
+}
+
+% Paquetes adicionales
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{array}
+
+\title{Democra}
+\subtitle{Plataforma SaaS Multi-Tenant para la gestión integral de organizaciones de voluntariado}
+\author{Sustentación de Proyecto - Ingeniería de Sistemas}
+\date{\today}
+\institute{Arquitectura de Software}
+
+\begin{document}
+
+% DIAPOSITIVA 1: Portada
+\begin{frame}[plain]
+    \titlepage
+    \begin{center}
+        % Reemplazar con el logo real de la universidad
+        % \includegraphics[height=1.5cm]{img/logo_universidad.png} 
+    \end{center}
+    \note{
+        Objetivo: Presentar el proyecto y contextualizar la exposición.\\
+        Tiempo: 30 segundos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 2: Agenda
+\begin{frame}{Agenda}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
+                \item Problema
+                \item Solución propuesta
+                \item Metodología DDS
+                \item Arquitectura General
+                \item Stack Tecnológico
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{itemize}
+                \item Desarrollo
+                \item Calidad del Software
+                \item Demostración en Vivo
+                \item Conclusiones
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar el recorrido de la exposición.\\
+        Tiempo: 30 segundos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 3: Problema
+\begin{frame}{Problema}
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Gestión descentralizada en ONG.
+                \item Procesos manuales ineficientes.
+                \item Falta de control de voluntarios.
+                \item Datos fragmentados y vulnerables.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/problema.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=6cm, minimum height=4cm, text=GrisTexto] {Imagen del Problema (main.pdf)};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar la necesidad que originó Democra.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 4: Solución propuesta
+\begin{frame}{Solución propuesta}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Plataforma unificada en la nube.
+                \item Arquitectura SaaS Multi-Tenant.
+                \item Gestión integral automatizada.
+                \item Alta disponibilidad y seguridad.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/arquitectura_funcional.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=5cm, minimum height=4cm, text=GrisTexto, align=center] {Diagrama\\Arquitectura Funcional};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar qué hace Democra.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 5: ¿Qué es Democra?
+\begin{frame}{¿Qué es Democra?}
+    \begin{columns}[T]
+        \begin{column}{0.3\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Entorno multi-organización.
+                \item Panel de control centralizado.
+                \item Sistema escalable y robusto.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.7\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/sistema_funcionando.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=7cm, minimum height=5cm, text=GrisTexto, align=center] {Captura del\\Sistema Funcionando};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar el sistema desde una perspectiva general.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 6: Metodología DDS
+\begin{frame}{Metodología DDS}
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Diseño Guiado por el Dominio.
+                \item Enfoque en reglas de negocio.
+                \item Escalabilidad técnica asegurada.
+                \item Mantenibilidad a largo plazo.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/dds.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=6cm, minimum height=4cm, text=GrisTexto, align=center] {Imagen Metodología DDS};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Presentar la metodología utilizada.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 7: Flujo DDS
+\begin{frame}{Flujo DDS}
+    \centering
+    \vspace{0.5cm}
+    \begin{tikzpicture}[node distance=1.6cm, auto,
+        box/.style={rectangle, draw=AzulOscuro, fill=white, thick, minimum width=2.8cm, minimum height=0.8cm, align=center, font=\footnotesize\sffamily},
+        arrow/.style={->, thick, AzulMedio}]
+        
+        \node[box] (prob) {Problema};
+        \node[box, right of=prob, xshift=1.6cm] (inv) {Investigación};
+        \node[box, right of=inv, xshift=1.6cm] (dis) {Diseño};
+        \node[box, right of=dis, xshift=1.6cm] (arq) {Arquitectura};
+        
+        \node[box, below of=arq, yshift=-0.5cm] (imp) {Implementación};
+        \node[box, left of=imp, xshift=-1.6cm] (test) {Testing};
+        \node[box, left of=test, xshift=-1.6cm] (doc) {Documentación};
+        \node[box, left of=doc, xshift=-1.6cm] (desp) {Despliegue};
+        
+        \draw[arrow] (prob) -- (inv);
+        \draw[arrow] (inv) -- (dis);
+        \draw[arrow] (dis) -- (arq);
+        \draw[arrow] (arq) -- (imp);
+        \draw[arrow] (imp) -- (test);
+        \draw[arrow] (test) -- (doc);
+        \draw[arrow] (doc) -- (desp);
+    \end{tikzpicture}
+    
+    \vspace{1cm}
+    \begin{itemize}
+        \item Proceso iterativo e incremental.
+        \item Calidad asegurada en cada fase.
+    \end{itemize}
+    \note{
+        Objetivo: Explicar cada etapa del desarrollo.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 8: Arquitectura General
+\begin{frame}{Arquitectura General}
+    \begin{columns}[T]
+        \begin{column}{0.3\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Separación de capas.
+                \item Desacoplamiento.
+                \item Servicios modulares.
+                \item Datos unidireccionales.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.7\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/arquitectura.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=7cm, minimum height=5cm, text=GrisTexto, align=center] {Diagrama\\Arquitectura General};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar la arquitectura completa.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 9: Arquitectura del Código
+\begin{frame}{Arquitectura del Código}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Modularidad en estructura.
+                \item Carpetas por dominio.
+                \item Reusabilidad de componentes.
+                \item Código mantenible.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance=1cm,
+                box/.style={rectangle, draw=AzulOscuro, thick, minimum width=4cm, minimum height=0.6cm, align=center, font=\footnotesize},
+                arrow/.style={->, thick, AzulMedio}]
+                
+                \node[box, fill=white] (user) {Usuario};
+                \node[box, fill=GrisClaro, below of=user] (front) {Frontend};
+                \node[box, fill=white, below of=front] (hooks) {Hooks};
+                \node[box, fill=GrisClaro, below of=hooks] (serv) {Servicios};
+                \node[box, fill=white, below of=serv] (api) {API};
+                \node[box, fill=GrisClaro, below of=api] (supa) {Supabase (PostgreSQL)};
+                
+                \draw[arrow] (user) -- (front);
+                \draw[arrow] (front) -- (hooks);
+                \draw[arrow] (hooks) -- (serv);
+                \draw[arrow] (serv) -- (api);
+                \draw[arrow] (api) -- (supa);
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar cómo se organizó el proyecto.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 10: Stack Tecnológico
+\begin{frame}{Stack Tecnológico}
+    \centering
+    \renewcommand{\arraystretch}{1.6}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{Categoría} & \textbf{Tecnologías} \\
+        \midrule
+        \textcolor{AzulMedio}{Frontend} & React, Vite, Tailwind CSS \\
+        \textcolor{AzulMedio}{Backend} & Node.js, Express \\
+        \textcolor{AzulMedio}{Base de Datos} & PostgreSQL (Supabase) \\
+        \textcolor{AzulMedio}{Testing} & Vitest, Jest, Supertest \\
+        \textcolor{AzulMedio}{Seguridad} & JWT, RLS, Helmet, OTP \\
+        \textcolor{AzulMedio}{Documentación} & Swagger, Graphify \\
+        \bottomrule
+    \end{tabular}
+    \note{
+        Objetivo: Mostrar todas las tecnologías.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 11: Arquitectura de Datos
+\begin{frame}{Arquitectura de Datos (Multi-Tenant)}
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Aislamiento de datos.
+                \item Seguridad por inquilino.
+                \item Rendimiento optimizado.
+                \item Escalabilidad horizontal.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/arquitectura_datos.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=6cm, minimum height=4cm, text=GrisTexto, align=center] {Diagrama\\Base de Datos};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar Multi-Tenant.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 12: Seguridad
+\begin{frame}{Seguridad}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item \textbf{RBAC:} Control de accesos.
+                \item \textbf{JWT:} Autenticación segura.
+                \item \textbf{RLS:} Políticas a nivel de fila.
+                \item \textbf{OTP:} Accesos un solo uso.
+                \item \textbf{Helmet:} Protección HTTP.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{img/seguridad.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=5cm, minimum height=4cm, text=GrisTexto, align=center] {Esquema de\\Seguridad};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar cómo se protege el sistema.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 13: Wireframes
+\begin{frame}{Wireframes}
+    \begin{columns}[T]
+        \begin{column}{0.3\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Diseño centrado en usuario.
+                \item Iteraciones ágiles.
+                \item Validación de UX/UI.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.7\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/wireframes.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=7cm, minimum height=5cm, text=GrisTexto, align=center] {Imágenes de\\Wireframes};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar la evolución del diseño.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 14: Implementación
+\begin{frame}{Implementación}
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item Entorno de desarrollo.
+                \item Control de versiones estricto.
+                \item Revisión de código (PR).
+                \item Estándares de calidad.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/vscode_captura.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=6cm, minimum height=4cm, text=GrisTexto, align=center] {Captura de\\VSCode};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar cómo se construyó el sistema.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 15: Calidad del Software
+\begin{frame}{Calidad del Software}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \vspace{0.5cm}
+            \begin{itemize}
+                \item Estándar \textbf{ISO 25010}.
+                \item \textbf{Vitest:} Pruebas unitarias UI.
+                \item \textbf{Jest:} Lógica del backend.
+                \item \textbf{Supertest:} Integración API.
+                \item Ejecución continua (CI).
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            \begin{tikzpicture}[node distance=1.5cm,
+                box/.style={rectangle, draw=AzulOscuro, thick, minimum width=3.5cm, minimum height=0.8cm, align=center, font=\footnotesize},
+                arrow/.style={->, thick, AzulMedio}]
+                
+                \node[box, fill=white] (unit) {Pruebas Unitarias};
+                \node[box, fill=GrisClaro, below of=unit] (int) {Pruebas Integración};
+                \node[box, fill=white, below of=int] (cov) {Métricas de Cobertura};
+                
+                \draw[arrow] (unit) -- (int);
+                \draw[arrow] (int) -- (cov);
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar la estrategia de calidad.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 16: Cobertura y Testing
+\begin{frame}{Cobertura y Testing}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \centering
+            \textbf{Resultados de Pruebas}\\
+            \vspace{0.3cm}
+            % \includegraphics[width=0.9\textwidth,height=0.5\textheight,keepaspectratio]{img/captura_tests.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=4cm, minimum height=3.5cm, text=GrisTexto, align=center] {Captura\\Tests};
+            \end{tikzpicture}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            \textbf{Reporte de Cobertura}\\
+            \vspace{0.3cm}
+            % \includegraphics[width=0.9\textwidth,height=0.5\textheight,keepaspectratio]{img/captura_coverage.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=4cm, minimum height=3.5cm, text=GrisTexto, align=center] {Captura\\Coverage};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Explicar la cobertura y las pruebas.\\
+        Tiempo: 2 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 17: Documentación Técnica
+\begin{frame}{Documentación Técnica}
+    \begin{columns}[T]
+        \begin{column}{0.4\textwidth}
+            \vspace{1cm}
+            \begin{itemize}
+                \item \textbf{Swagger:} Contratos API.
+                \item \textbf{Graphify:} Grafo de conocimiento.
+                \item Trazabilidad completa.
+                \item Integración continua.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+            \centering
+            % \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{img/captura_swagger.png}
+            \begin{tikzpicture}
+                \node[draw=GrisClaro, fill=GrisClaro, minimum width=6cm, minimum height=4cm, text=GrisTexto, align=center] {Captura\\Swagger / Graphify};
+            \end{tikzpicture}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Mostrar la documentación.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 18: Demostración en Vivo
+\begin{frame}{Demostración en Vivo}
+    \centering
+    \vspace{0.5cm}
+    \Large \textcolor{AzulOscuro}{\textbf{Escenario de Demostración}}
+    \normalsize
+    \vspace{0.8cm}
+    \begin{itemize}
+        \item Mostrar estructura del proyecto (VSCode).
+        \item Ejecutar suite de pruebas en terminal.
+        \item Revisar reporte final de cobertura.
+        \item Explorar contratos de API (Swagger).
+        \item \textbf{Demostrar sistema Democra operando en vivo.}
+    \end{itemize}
+    \note{
+        Objetivo: Mostrar el funcionamiento real.\\
+        Tiempo: 5 minutos.
+    }
+\end{frame}
+
+% DIAPOSITIVA 19: Resultados
+\begin{frame}{Resultados}
+    \centering
+    \renewcommand{\arraystretch}{1.6}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{Métrica} & \textbf{Resultado} \\
+        \midrule
+        \textcolor{AzulMedio}{Plataforma} & Operativa y Desplegada \\
+        \textcolor{AzulMedio}{Arquitectura} & SaaS Multi-Tenant Implementada \\
+        \textcolor{AzulMedio}{Seguridad} & RLS, RBAC y JWT Activos \\
+        \textcolor{AzulMedio}{Cobertura} & Alta fiabilidad del código lograda \\
+        \bottomrule
+    \end{tabular}
+    \note{
+        Objetivo: Resumir los logros técnicos.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+% DIAPOSITIVA 20: Conclusiones
+\begin{frame}{Conclusiones}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \textcolor{AzulOscuro}{\textbf{Logros Alcanzados}}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Solución integral para ONG.
+                \item Arquitectura escalable y segura.
+                \item Código mantenible y testeado.
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \textcolor{AzulOscuro}{\textbf{Trabajo Futuro}}
+            \vspace{0.3cm}
+            \begin{itemize}
+                \item Integración de Inteligencia Artificial.
+                \item Módulos contables avanzados.
+                \item Aplicación móvil nativa.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+    \note{
+        Objetivo: Cerrar la exposición.\\
+        Tiempo: 1 minuto.
+    }
+\end{frame}
+
+\end{document}

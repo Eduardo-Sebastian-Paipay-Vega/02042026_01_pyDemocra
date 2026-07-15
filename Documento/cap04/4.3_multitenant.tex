@@ -1,0 +1,16 @@
+% cap04/4.3_multitenant.tex
+\section{Arquitectura de Persistencia Multi-Tenant (Modelo de Pool)}
+
+La escalabilidad de \textit{Democra} no se sustenta en la fuerza bruta (como levantar m\'as servidores de bases de datos), sino en la elegancia de su topolog\'ia de aislamiento transaccional. Para soportar el despliegue de m\'ultiples ONGs (sub-regiones o delegaciones) de forma concurrente, la arquitectura adopta de forma absoluta el \textbf{Dise\~no \textit{Shared-Database, Shared-Schema} (Modelo de Pool)}.
+
+\subsection{El Patr\'on \textit{Shared-Database, Shared-Schema}}
+
+Bajo este paradigma arquitect\'onico de alta densidad, todos los inquilinos (\textit{Tenants}) comparten el mismo cl\'uster de \textit{PostgreSQL v16} y la misma base de datos. M\'as a\'un, comparten el mismo esquema (\textit{public} o \textit{api}) y las mismas tablas (ej. \textit{usuarios}, \textit{donaciones}). No se provisionan bases de datos separadas por ONG (modelo de Silo), ni esquemas separados (modelo de Puente).
+
+La justificaci\'on de esta topolog\'ia radica en la eficiencia de mantenimiento y la agilidad de las migraciones (\textit{Migrations}). Si el sistema escala a 5,000 ONGs, mantener 5,000 esquemas o 5,000 bases de datos generar\'ia una \textit{entrop\'ia operacional} inmanejable. El modelo de \textit{Pool} garantiza que una \'unica operaci\'on de \textit{ALTER TABLE} impacte simult\'anea y sim\'etricamente a todos los inquilinos.
+
+\subsection{El Aislamiento Param\'etrico y Criptogr\'afico}
+
+Sin embargo, esta densidad plantea un reto forense: el aislamiento de datos. Si todas las ONGs escriben en la misma tabla, ?`c\'omo se garantiza que el \textit{Tenant A} no lea las donaciones del \textit{Tenant B}? En arquitecturas deficientes, la responsabilidad de filtrar los datos se delega al c\'odigo de la aplicaci\'on en el \textit{Backend} (ej. a\~nadiendo cl\'ausulas \textit{WHERE tenant\_id = X} en las consultas de \textit{Node.js}).
+
+\textit{Democra} repudia este patr\'on como una vulnerabilidad cr\'itica. Si un programador junior olvida incluir la cl\'ausula \textit{WHERE} en un solo \textit{endpoint}, todos los datos de todos los inquilinos se filtran al exterior. Para neutralizar esta falla sist\'emica, la responsabilidad de aislamiento se desplaza hacia el subsuelo de la base de datos, utilizando \textit{Row Level Security (RLS)}.

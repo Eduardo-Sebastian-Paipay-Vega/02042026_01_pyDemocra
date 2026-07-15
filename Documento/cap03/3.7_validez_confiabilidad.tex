@@ -1,0 +1,14 @@
+% cap03/3.7_validez_confiabilidad.tex
+\section{Validez y Confiabilidad}
+
+La validez y confiabilidad de los instrumentos de recolecci\'on (suites de pruebas, analizadores de cobertura y monitores de rendimiento) no se asumen por decreto te\'orico, sino que se demuestran matem\'aticamente con el m\'as alto rigor de la ingenier\'ia de software.
+
+\subsection{Escrutinio T\'ecnico: Determinismo Algor\'itmico}
+
+A diferencia de las evaluaciones perceptuales basadas en encuestas (como SUS) que requieren coeficientes estad\'isticos (e.g., Alfa de Cronbach) para estimar la consistencia interna y descartar el sesgo humano, el enfoque cien por ciento algor\'itmico de esta investigaci\'on garantiza una confiabilidad determinista absoluta. Los \textit{scripts} de \textit{Jest} y las restricciones de \textit{Row-Level Security} en la base de datos se ejecutan con resultados binarios inmutables: \textit{Pass} o \textit{Fail}. Este determinismo elimina cualquier variable de sesgo de aquiescencia o varianza de respuesta.
+
+La validaci\'on t\'ecnica se calcula mediante la repetibilidad de los \textit{pipelines} de Integraci\'on Continua (CI). Si un conjunto de $N$ pruebas unitarias se ejecuta $M$ veces, la varianza de los resultados esperados debe ser matem\'aticamente cero ($\sigma^2 = 0$).
+
+\subsection{Validez Constructiva T\'ecnica}
+
+Por el flanco arquitect\'onico de \textit{White-Box Penetration Testing}, la validez del constructo no requiere un coeficiente estad\'istico inferencial, pues es intr\'insecamente absoluta. Se sustenta te\'orica y matem\'aticamente que los \textit{Expected Results} en un \textit{framework} de aserci\'on (como \textit{Jest}) nacen estrictamente de la l\'ogica binaria y los diagramas arquitect\'onicos pre-documentados, eliminando por completo las probabilidades subjetivas. Todo m\'odulo, ruta y sentencia de base de datos se contrasta asint\'oticamente contra su propio contrato de interfaz, validando estructuralmente la totalidad de la aplicaci\'on.

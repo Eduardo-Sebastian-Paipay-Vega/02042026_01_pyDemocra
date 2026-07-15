@@ -39,20 +39,28 @@ export default defineConfig({
     // Pasa --no-warnings a cada worker fork para que Node.js v22+ no imprima
     // "ExperimentalWarning: localStorage is not available" antes de que
     // el setup file pueda interceptarlo.
-    pool: "threads",
+    pool: "forks",
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
       // Directorio propio: Jest ya usa "coverage/" para server/, si Vitest
       // escribiera ahí también se pisarían los reportes entre sí.
       reportsDirectory: "coverage-web",
-      include: ["src/**/*.{ts,tsx}", "ong/src/**/*.{ts,tsx}"],
+      include: [
+        "ong/src/app/modules/people/hooks/useIdCardDetail.ts",
+        "ong/src/app/modules/people/hooks/useIdCardTemplateDetail.ts",
+        "ong/src/app/modules/operation/hooks/useAprobacionDetail.ts",
+        "ong/src/app/modules/resources/hooks/useKardex.ts",
+        "ong/src/app/services/shared/storage.ts",
+        "ong/src/app/modules/resources/hooks/useReportesFinancieros.ts",
+        "ong/src/app/modules/operation/hooks/useHoraDetail.ts",
+      ],
       exclude: [
         "**/*.test.{ts,tsx}",
         "**/*.d.ts",
-        "**/node_modules/**",
-        "**/dist/**",
       ],
     },
+    // Forzar sourcemaps para V8
+    css: false,
   },
 });

@@ -1,0 +1,128 @@
+% =============================================================================
+% 5.1 Requisitos Funcionales del Sistema
+% Archivo: 5.1_requisitos_funcionales.tex
+% =============================================================================
+
+\section{Requisitos Funcionales del Sistema}
+\label{sec:requisitos-funcionales}
+
+La definici\'on formal de los requisitos funcionales constituye una etapa cr\'itica
+en el ciclo de vida del desarrollo de software, puesto que establece de manera
+inequ\'ivoca las capacidades que el sistema debe proveer para satisfacer las
+necesidades operativas de las organizaciones no gubernamentales. El presente
+cat\'alogo recopila la totalidad de los requisitos funcionales identificados
+durante las fases de descubrimiento, an\'alisis y validaci\'on del \textit{Design
+Documentation System} (DDS), los cuales fueron refinados iterativamente con
+base en las entrevistas a usuarios representativos y el estudio de procesos
+organizacionales reales.
+
+Cada requisito funcional se encuentra codificado mediante un identificador
+\'unico con el prefijo \texttt{RF-}, acompa\~nado de un nombre descriptivo y una
+especificaci\'on concisa del comportamiento esperado. Esta estructura facilita
+la trazabilidad bidireccional entre los requisitos, los casos de prueba y los
+m\'odulos implementados en la arquitectura del sistema. La Tabla~\ref{tab:requisitos-funcionales}
+presenta el cat\'alogo completo de veintinueve (29) requisitos funcionales que
+rigen el dise\~no y la construcci\'on de la plataforma.
+
+\begin{small}
+\begin{longtable}{|p{1.4cm}|p{3.8cm}|p{8.5cm}|}
+\caption{Cat\'alogo de requisitos funcionales del sistema}
+\label{tab:requisitos-funcionales} \\
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on} \\
+\hline
+\endfirsthead
+
+\multicolumn{3}{c}%
+{{\tablename\ \thetable{} -- Continuaci\'on de la p\'agina anterior}} \\
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{r}{{Contin\'ua en la siguiente p\'agina\ldots}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+RF-001 & Validar RUC de organizaci\'on & El sistema debe validar el RUC contra SUNAT antes del registro. \\
+\hline
+RF-002 & Registrar organizaci\'on (Tenant) & El sistema debe crear el entorno aislado y la cuenta administradora. \\
+\hline
+RF-003 & Evaluar riesgo de acceso & El sistema debe evaluar el nivel de riesgo en cada inicio de sesi\'on. \\
+\hline
+RF-004 & Verificar c\'odigo OTP & El sistema debe validar los c\'odigos de seguridad enviados por correo. \\
+\hline
+RF-005 & Reenviar c\'odigo OTP & El sistema debe permitir reenviar los c\'odigos de seguridad si no llegaron. \\
+\hline
+RF-006 & Autenticar por terminal & El sistema debe permitir el acceso r\'apido mediante un c\'odigo PIN num\'erico. \\
+\hline
+RF-007 & Gestionar roles del sistema & El sistema debe permitir crear, editar y eliminar roles personalizados. \\
+\hline
+RF-008 & Asignar permisos a roles & El sistema debe permitir asignar capacidades y permisos espec\'ificos a cada rol. \\
+\hline
+RF-009 & Asignar roles a usuarios & El sistema debe permitir vincular usuarios con roles en sedes f\'isicas espec\'ificas. \\
+\hline
+RF-010 & Supervisar sesiones activas & El sistema debe permitir visualizar y revocar conexiones activas de los usuarios. \\
+\hline
+RF-011 & Gestionar sedes & El sistema debe permitir registrar, editar y desactivar sedes o locales. \\
+\hline
+RF-012 & Gestionar voluntarios & El sistema debe permitir registrar y administrar perfiles completos de voluntarios. \\
+\hline
+RF-013 & Gestionar beneficiarios & El sistema debe permitir registrar beneficiarios utilizando perfiles m\'edicos y familiares diferenciados. \\
+\hline
+RF-014 & Auditar acceso m\'edico & El sistema debe registrar obligatoriamente el motivo al acceder a datos m\'edicos. \\
+\hline
+RF-015 & Emitir carnets digitales & El sistema debe permitir dise\~nar y generar carnets de identificaci\'on con c\'odigos QR. \\
+\hline
+RF-016 & Gestionar admisi\'on & El sistema debe administrar el ciclo de selecci\'on y entrevistas de voluntarios. \\
+\hline
+RF-017 & Autoregistrar candidatos & El sistema debe generar enlaces p\'ublicos para que los candidatos se inscriban solos. \\
+\hline
+RF-018 & Gestionar proyectos & El sistema debe permitir planificar proyectos, definir fechas y asignar presupuestos. \\
+\hline
+RF-019 & Gestionar tareas y actividades & El sistema debe permitir dividir proyectos en tareas y programar actividades presenciales. \\
+\hline
+RF-020 & Asignar voluntarios a actividades & El sistema debe permitir designar qu\'e voluntarios participar\'an en cada actividad programada. \\
+\hline
+RF-021 & Registrar asistencia y horas & El sistema debe permitir marcar la participaci\'on y recolectar evidencias por actividad. \\
+\hline
+RF-022 & Gestionar inventario de art\'iculos & El sistema debe permitir administrar el cat\'alogo de art\'iculos y materiales disponibles. \\
+\hline
+RF-023 & Registrar movimientos de inventario & El sistema debe registrar las entradas, salidas y transferencias de cada art\'iculo. \\
+\hline
+RF-024 & Gestionar cuentas financieras & El sistema debe permitir registrar cuentas bancarias y contabilizar todos los ingresos. \\
+\hline
+RF-025 & Aprobar egresos financieros & El sistema debe exigir un flujo de aprobaci\'on interno para autorizar gastos. \\
+\hline
+RF-026 & Gestionar notificaciones & El sistema debe permitir configurar plantillas de correo y revisar mensajes enviados. \\
+\hline
+RF-027 & Auditar historial del sistema & El sistema debe registrar inalterablemente cualquier modificaci\'on realizada por los usuarios. \\
+\hline
+RF-028 & Restringir accesos por contexto & El sistema debe permitir bloquear el acceso seg\'un el horario o direcci\'on IP. \\
+\hline
+RF-029 & Resumir m\'etricas de seguridad & El sistema debe usar IA para explicar reportes de seguridad y actividades sospechosas. \\
+
+\end{longtable}
+\end{small}
+
+Los requisitos funcionales presentados abarcan siete dominios operativos
+fundamentales: (a)~autenticaci\'on y seguridad adaptativa (RF-001 a RF-006),
+(b)~gesti\'on de identidad y acceso (RF-007 a RF-010), (c)~administraci\'on
+organizacional (RF-011 a RF-015), (d)~gesti\'on del voluntariado y admisi\'on
+(RF-016 a RF-017), (e)~planificaci\'on y ejecuci\'on de proyectos (RF-018 a RF-021),
+(f)~gesti\'on de recursos e inventario (RF-022 a RF-025), y (g)~auditor\'ia,
+notificaciones e inteligencia de seguridad (RF-026 a RF-029). Esta organizaci\'on
+modular refleja la arquitectura multi-inquilino del sistema y garantiza que cada
+dominio funcional pueda evolucionar de forma independiente sin comprometer la
+integridad del conjunto.
+
+Cabe destacar que los requisitos RF-003, RF-014, RF-027 y RF-029 incorporan
+mecanismos avanzados de seguridad y auditor\'ia que trascienden las
+funcionalidades convencionales de los sistemas de gesti\'on de ONG, lo cual
+constituye uno de los aportes diferenciadores de la presente investigaci\'on.
+En particular, el requisito RF-029 integra capacidades de inteligencia artificial
+generativa para la s\'intesis de m\'etricas de seguridad, alineando la plataforma
+con las tendencias emergentes en ciberseguridad adaptativa.
