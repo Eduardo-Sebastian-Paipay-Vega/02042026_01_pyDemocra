@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
-import { AlertTriangle, Building2, ShieldAlert } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { AlertTriangle, Building2, MailCheck, ShieldAlert } from "lucide-react";
+import { supabase } from "../../supabaseClient";
 import type { TenantBootstrapStatus, TenantContextValue } from "./bootstrap";
 
 // REQ-003 (dds/MEJORAS/09072026/REQ003.md): reemplaza el spinner genérico
@@ -73,6 +74,16 @@ function resolveStatusCopy(
     };
   }
 
+  if (status === "email_unverified") {
+    return {
+      title: "Verifica tu correo electronico",
+      description:
+        message ??
+        "Te enviamos un correo con un boton para verificar tu cuenta. Revisa tu bandeja de entrada (y spam) antes de continuar.",
+      icon: MailCheck,
+    };
+  }
+
   if (status === "missing_tenant") {
     return {
       title: "Tenant sin asignar",
@@ -112,6 +123,55 @@ function resolveStatusCopy(
   };
 }
 
+function ResendVerificationEmailAction() {
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function handleResend() {
+    setState("sending");
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setState("error");
+        return;
+      }
+
+      const response = await fetch("/api/onboarding/resend-verification-email", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      setState(response.ok ? "sent" : "error");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <button
+        type="button"
+        onClick={handleResend}
+        disabled={state === "sending" || state === "sent"}
+        className="rounded-2xl px-4 py-2 text-[13px] font-semibold transition-opacity disabled:opacity-50"
+        style={{ background: "#3b82f6", color: "#fff" }}
+      >
+        {state === "sending"
+          ? "Enviando…"
+          : state === "sent"
+            ? "Correo reenviado"
+            : "Reenviar correo de verificacion"}
+      </button>
+      {state === "error" ? (
+        <span className="text-[12px]" style={{ color: "#fca5a5" }}>
+          No se pudo reenviar el correo. Intenta nuevamente.
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export function TenantStatusScreen({
   status,
   message,
@@ -125,6 +185,8 @@ export function TenantStatusScreen({
 }) {
   const copy = resolveStatusCopy(status, message, context);
   const Icon = copy.icon;
+  const resolvedAction =
+    action ?? (status === "email_unverified" ? <ResendVerificationEmailAction /> : null);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-6">
@@ -144,7 +206,7 @@ export function TenantStatusScreen({
         <p className="mt-2 text-[13px]" style={{ color: "var(--t-text-dim)" }}>
           {copy.description}
         </p>
-        {action ? <div className="mt-4">{action}</div> : null}
+        {resolvedAction ? <div className="mt-4">{resolvedAction}</div> : null}
       </div>
     </div>
   );

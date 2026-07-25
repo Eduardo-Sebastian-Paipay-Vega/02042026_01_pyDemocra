@@ -1,9 +1,51 @@
+import crypto from "node:crypto";
 import express from "express";
 import { config } from "../config.js";
-import { resolveAuthContext } from "../supabase.js";
+import { resolveAuthContext, serviceClient } from "../supabase.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
+import { emailService } from "../services/email/index.js";
+import { getEmailConfig } from "../services/email/config/email.config.js";
 
 const router = express.Router();
+
+const VERIFY_TOKEN_TTL_HOURS = 24;
+
+const hashVerifyToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+// Genera un token de verificación, lo guarda (hasheado) en el profile y envía
+// el correo con el botón. No lanza si el envío falla — el signup no debe
+// fallar por un problema transitorio de Resend; el usuario puede reenviar.
+const issueVerificationEmail = async ({ userId, email, name }) => {
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + VERIFY_TOKEN_TTL_HOURS * 60 * 60 * 1000);
+
+  const { error } = await serviceClient
+    .from("profiles")
+    .update({
+      verify_token_hash: hashVerifyToken(token),
+      verify_token_expires_at: expiresAt.toISOString(),
+    })
+    .eq("id", userId);
+
+  if (error) {
+    console.error("[onboarding.verify-email] no se pudo guardar el token", { message: error.message });
+    return;
+  }
+
+  const { appUrl } = getEmailConfig();
+  const verificationUrl = `${appUrl.replace(/\/$/, "")}/api/onboarding/verify-email?uid=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`;
+
+  try {
+    await emailService.sendVerification({
+      to: email,
+      name: name || null,
+      verificationUrl,
+      expiresInHours: VERIFY_TOKEN_TTL_HOURS,
+    });
+  } catch (sendErr) {
+    console.error("[onboarding.verify-email] no se pudo enviar el correo", { message: sendErr?.message });
+  }
+};
 
 const normalizeApiText = (value) => {
   return String(value || "")
@@ -266,7 +308,90 @@ router.post("/bootstrap-tenant", async (req, res) => {
       });
     }
 
+    await issueVerificationEmail({
+      userId: authContext.user.id,
+      email: authContext.user.email,
+      name: tenantName,
+    });
+
     return res.status(201).json({ tenant_id: tenantId });
+  } catch (error) {
+    return sendUnexpectedError(res, error, "TEN-001");
+  }
+});
+
+// GET /api/onboarding/verify-email?uid=&token=
+// Ruta publica (sin bearer token: llega desde el link del correo, no desde la
+// SPA autenticada). Compara el hash del token contra lo guardado en el
+// profile y, si es valido y no expiro, marca la cuenta como verificada.
+router.get("/verify-email", async (req, res) => {
+  const { appUrl } = getEmailConfig();
+  const redirectBase = appUrl.replace(/\/$/, "");
+
+  const uid = String(req.query?.uid || "").trim();
+  const token = String(req.query?.token || "").trim();
+
+  if (!uid || !token) {
+    return res.redirect(302, `${redirectBase}/login?verified=0`);
+  }
+
+  const { data: profile, error } = await serviceClient
+    .from("profiles")
+    .select("id, verify_token_hash, verify_token_expires_at, email_verified")
+    .eq("id", uid)
+    .maybeSingle();
+
+  if (error || !profile) {
+    return res.redirect(302, `${redirectBase}/login?verified=0`);
+  }
+
+  if (profile.email_verified) {
+    return res.redirect(302, `${redirectBase}/login?verified=1`);
+  }
+
+  const isExpired =
+    !profile.verify_token_expires_at || new Date(profile.verify_token_expires_at) < new Date();
+  const tokenMatches =
+    profile.verify_token_hash && profile.verify_token_hash === hashVerifyToken(token);
+
+  if (!tokenMatches || isExpired) {
+    return res.redirect(302, `${redirectBase}/login?verified=0`);
+  }
+
+  await serviceClient
+    .from("profiles")
+    .update({ email_verified: true, verify_token_hash: null, verify_token_expires_at: null })
+    .eq("id", uid);
+
+  return res.redirect(302, `${redirectBase}/login?verified=1`);
+});
+
+// POST /api/onboarding/resend-verification-email
+// Autenticada: reenvia el correo de verificacion al usuario logueado (mismo
+// patron que resendOtpChallenge en server/security/risk-engine.js).
+router.post("/resend-verification-email", async (req, res) => {
+  try {
+    const accessToken = getBearerToken(req);
+    if (!accessToken) {
+      return sendError(res, 401, "IAM-004", { error_type: "auth" });
+    }
+
+    const authContext = await resolveAuthContext(accessToken);
+    if (authContext.error || !authContext.user) {
+      return sendError(res, 401, "IAM-004", { error_type: "auth" });
+    }
+
+    if (authContext.profile?.email_verified) {
+      return res.status(200).json({ resent: false, already_verified: true });
+    }
+
+    await issueVerificationEmail({
+      userId: authContext.user.id,
+      email: authContext.user.email,
+      name: null,
+    });
+
+    return res.status(200).json({ resent: true });
   } catch (error) {
     return sendUnexpectedError(res, error, "TEN-001");
   }

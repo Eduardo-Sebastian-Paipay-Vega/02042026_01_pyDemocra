@@ -94,6 +94,10 @@ interface PublicProfileRow {
   // Confirmado contra el esquema real de producción
   // (dds/MEJORAS/BD_viva_09072026.txt) — faltaba en este tipo generado.
   avatar_url: string | null;
+  // supabase/migrations/20260725150000_profile_email_verification.sql
+  email_verified: boolean;
+  verify_token_hash: string | null;
+  verify_token_expires_at: IsoDateTime | null;
   created_at: IsoDateTime;
   updated_at: IsoDateTime;
 }

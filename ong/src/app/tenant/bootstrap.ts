@@ -3,7 +3,7 @@ import type { AppDatabase } from "../../lib/db/ong/app-database";
 
 type PublicProfileRow = Pick<
   AppDatabase["public"]["Tables"]["profiles"]["Row"],
-  "id" | "tenant_id" | "full_name" | "avatar_url"
+  "id" | "tenant_id" | "full_name" | "avatar_url" | "email_verified"
 >;
 type PublicTenantRow = Pick<
   AppDatabase["public"]["Tables"]["tenants"]["Row"],
@@ -30,6 +30,7 @@ export type TenantBootstrapStatus =
   | "ready"
   | "unauthenticated"
   | "missing_profile"
+  | "email_unverified"
   | "missing_tenant"
   | "invalid_tenant"
   | "unsupported_industry"
@@ -663,7 +664,7 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
 
     const { data: profile, error: profileError } = await publicSchema()
       .from("profiles")
-      .select("id, tenant_id, full_name, avatar_url")
+      .select("id, tenant_id, full_name, avatar_url, email_verified")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -686,6 +687,16 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
     }
 
     const typedProfile = profile as PublicProfileRow;
+
+    if (typedProfile.email_verified === false) {
+      return {
+        status: "email_unverified",
+        context: null,
+        message: "Debes verificar tu correo electrónico antes de continuar.",
+        warnings,
+      };
+    }
+
     if (!typedProfile.tenant_id) {
       return {
         status: "missing_tenant",

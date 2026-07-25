@@ -17,6 +17,7 @@ import {
   verifyPinHash,
 } from "../utils/security.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
+import { emailService } from "../services/email/index.js";
 
 const router = express.Router();
 
@@ -273,6 +274,17 @@ router.post("/step-up/verify-otp", async (req, res) => {
         ip,
         userAgent,
       });
+
+      if (session && authContext.user.email) {
+        emailService
+          .sendAlert({
+            to: authContext.user.email,
+            title: "Nuevo inicio de sesion detectado",
+            message: `Se detecto un inicio de sesion desde un dispositivo o ubicacion no reconocidos.\nFecha: ${new Date().toISOString()}\nIP: ${ip}\nNavegador: ${userAgent}\n\nSi no fuiste tu, cambia tu contrasena de inmediato.`,
+            severity: "warning",
+          })
+          .catch((err) => console.error("[auth.step-up] fallo notificacion de nuevo login", { message: err?.message }));
+      }
     }
 
     await insertAuthEvent({

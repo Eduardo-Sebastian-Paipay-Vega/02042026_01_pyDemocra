@@ -39,7 +39,7 @@ export const resolveAuthContext = async (accessToken) => {
   const { data: profile, error: profileError } = await serviceClient
     .from("profiles")
     .select(
-      "id, tenant_id, is_blocked, blocked_reason, risk_blocked_until, pin_failed_attempts, pin_blocked_until"
+      "id, tenant_id, is_blocked, blocked_reason, risk_blocked_until, pin_failed_attempts, pin_blocked_until, email_verified"
     )
     .eq("id", user.id)
     .maybeSingle();
