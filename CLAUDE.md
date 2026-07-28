@@ -1,6 +1,6 @@
 # Reglas de desarrollo — Democra
 
-> Vigente desde 2026-07-04. Aplica a todo trabajo de Claude Code en este repositorio, en toda sesión futura, sin necesidad de que se solicite de nuevo.
+> Vigente desde 2026-07-04. Aplica a todo trabajo de Claude Code / Antigravity en este repositorio, en toda sesión futura, sin necesidad de que se solicite de nuevo.
 
 ## Regla obligatoria: entorno de desarrollo al iniciar sesión de trabajo
 
@@ -13,7 +13,14 @@ Al empezar a trabajar en este repo (sesión nueva, clon nuevo, o entorno que no 
 3. **Vercel CLI enlazado**: `vercel whoami` para confirmar sesión activa y `.vercel/` presente (creado por `vercel link --project 02042026-01-py-democra`). Necesario para poder desplegar (`vercel` / `vercel --prod`) desde este entorno sin pasos manuales adicionales.
 4. **Tests ejecutables**: `npm test` (Jest, backend) y `npm run test:web` (Vitest, frontend) deben poder correr sin errores de configuración antes de dar por buena una tarea que toque código.
 
-Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (raíz del repo) — no dupliques esa guía aquí, mantenla actualizada ahí si cambia el flujo de arranque.
+Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (raíz del repo).
+
+## Reglas de Oro de Arquitectura y Desarrollo
+
+1. **Cero `package.json` secundarios**: Ninguna subcarpeta (como `ONG/` u otro submódulo) debe tener su propio `package.json` ni su propia carpeta `node_modules`. Todas las dependencias se instalan en la raíz del proyecto.
+2. **Autenticación compartida nativa**: Todo cliente de Supabase (raíz, ONG, y cualquier módulo futuro) debe inicializarse con el mismo `storageKey` explícito: `storageKey: 'sb-democra-auth-token'`.
+3. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse strictly en minúsculas (`/ong/`, `/api/`, etc.).
+4. **El backend vive en `server/`, no en `api/`**: `api/server.js` es solo el adaptador Serverless para Vercel. La lógica real (rutas, middleware, controllers, servicios) pertenece a `server/`.
 
 ## Regla obligatoria: auditoría de cambios y versionado
 
@@ -70,13 +77,13 @@ style(ui): mejora consistencia visual del dashboard
 ### 3. Push a GitHub
 
 Cuando el cambio quede terminado y estable:
-1. Verificar que el proyecto compile.
+1. Verificar que el proyecto compile (`npm run build` o Vite).
 2. Verificar que no existan errores nuevos.
-3. Ejecutar las pruebas disponibles.
+3. Ejecutar las pruebas disponibles (`npm test` / `npm run test:web`).
 4. Confirmar que no se rompió funcionalidad existente.
 5. Commit.
 6. **Push inmediato a `origin/main`** — no acumular cambios grandes sin subirlos. Esto es autorización permanente para hacer push sin volver a preguntar, siempre que los pasos 1–4 se hayan verificado y el cambio esté genuinamente estable. Si algo queda incierto, roto, o parcialmente probado, no se hace push — se reporta el motivo en vez de forzarlo.
 
-## Objetivo de esta regla
+## Objetivo de estas reglas
 
-Trazabilidad completa, auditorías técnicas simples, reversión sencilla ante problemas, y un remoto (`origin/main`) siempre sincronizado con el estado real del trabajo.
+Trazabilidad completa, auditorías técnicas simples, reversión sencilla ante problemas, consistencia arquitectónica en el monorepo y un remoto (`origin/main`) siempre sincronizado con el estado real del trabajo.
