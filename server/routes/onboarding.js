@@ -16,26 +16,29 @@ const hashVerifyToken = (token) => crypto.createHash("sha256").update(token).dig
 // el correo con el botón. No lanza si el envío falla — el signup no debe
 // fallar por un problema transitorio de Resend; el usuario puede reenviar.
 const issueVerificationEmail = async ({ userId, email, name }) => {
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + VERIFY_TOKEN_TTL_HOURS * 60 * 60 * 1000);
-
-  const { error } = await serviceClient
-    .from("profiles")
-    .update({
-      verify_token_hash: hashVerifyToken(token),
-      verify_token_expires_at: expiresAt.toISOString(),
-    })
-    .eq("id", userId);
-
-  if (error) {
-    console.error("[onboarding.verify-email] no se pudo guardar el token", { message: error.message });
-    return;
-  }
-
-  const { appUrl } = getEmailConfig();
-  const verificationUrl = `${appUrl.replace(/\/$/, "")}/api/onboarding/verify-email?uid=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`;
-
   try {
+    if (!serviceClient || typeof serviceClient.from !== "function") {
+      return;
+    }
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + VERIFY_TOKEN_TTL_HOURS * 60 * 60 * 1000);
+
+    const { error } = await serviceClient
+      .from("profiles")
+      .update({
+        verify_token_hash: hashVerifyToken(token),
+        verify_token_expires_at: expiresAt.toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("[onboarding.verify-email] no se pudo guardar el token", { message: error.message });
+      return;
+    }
+
+    const { appUrl } = getEmailConfig();
+    const verificationUrl = `${appUrl.replace(/\/$/, "")}/api/onboarding/verify-email?uid=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`;
+
     await emailService.sendVerification({
       to: email,
       name: name || null,
@@ -43,7 +46,7 @@ const issueVerificationEmail = async ({ userId, email, name }) => {
       expiresInHours: VERIFY_TOKEN_TTL_HOURS,
     });
   } catch (sendErr) {
-    console.error("[onboarding.verify-email] no se pudo enviar el correo", { message: sendErr?.message });
+    console.error("[onboarding.verify-email] no se pudo procesar/enviar el correo", { message: sendErr?.message });
   }
 };
 
