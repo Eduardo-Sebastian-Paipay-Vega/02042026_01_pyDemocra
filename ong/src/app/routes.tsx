@@ -260,6 +260,27 @@ const protectedPage = (routeId: TenantRouteId, element: ReactNode) => ({
   element: <ProtectedTenantRoute routeId={routeId}>{element}</ProtectedTenantRoute>,
 });
 
+const spanishRouteRedirects = [
+  { path: "/voluntarios", element: <LegacyPathRedirect to="/app/ong/people/volunteers" /> },
+  { path: "/solicitudes-admision", element: <LegacyPathRedirect to="/app/ong/admission/requests" /> },
+  { path: "/beneficiarios", element: <LegacyPathRedirect to="/app/ong/people/beneficiaries" /> },
+  { path: "/carnets", element: <LegacyPathRedirect to="/app/ong/people/id-cards" /> },
+  { path: "/eventos", element: <LegacyPathRedirect to="/app/ong/projects/activities" /> },
+  { path: "/asistencias", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
+  { path: "/inventario", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
+  { path: "/transferencias", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
+  { path: "/finanzas", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
+  { path: "/apadrinamientos", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
+  { path: "/cursos", element: <LegacyPathRedirect to="/app/ong/resources/courses" /> },
+  { path: "/notificaciones", element: <LegacyPathRedirect to="/app/ong/notifications/history" /> },
+  { path: "/configuracion", element: <LegacyPathRedirect to="/app/ong/settings/users" /> },
+  { path: "/auditoria", element: <LegacyPathRedirect to="/app/ong/governance/audit-log" /> },
+  { path: "/reportes", element: <LegacyPathRedirect to="/app/ong/home" /> },
+  { path: "/dashboard", element: <LegacyPathRedirect to="/app/ong/home" /> },
+  { path: "/mi-pase-qr", element: <LegacyPathRedirect to="/app/ong/people/id-cards" /> },
+  { path: "/mi-cuenta", element: <LegacyPathRedirect to="/app/ong/account/profile" /> },
+];
+
 const legacyRouteRedirects = listTenantRoutes().map((route) => ({
   path: route.legacyPath,
   element:
@@ -468,6 +489,7 @@ export const router = createBrowserRouter(
       ],
     },
     ...legacyRouteRedirects,
+    ...spanishRouteRedirects,
     {
       path: "*",
       element: <Navigate to="/" replace />,
