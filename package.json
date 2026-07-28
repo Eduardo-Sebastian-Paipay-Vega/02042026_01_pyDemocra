@@ -24,12 +24,18 @@
     "test": "jest --runInBand",
     "test:coverage": "jest --coverage --runInBand",
     "test:web": "vitest run",
-    "test:web:coverage": "vitest run --coverage"
+    "test:web:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-typescript": "^8.0.1",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "4.1.12",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

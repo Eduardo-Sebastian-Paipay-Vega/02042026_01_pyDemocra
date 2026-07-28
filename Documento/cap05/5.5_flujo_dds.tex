@@ -1,12 +1,12 @@
 % =============================================================================
-% 5.5 Flujo del Design Documentation System (DDS)
+% 5.5 Flujo del Document-Driven SDLC (DDS)
 % Archivo: 5.5_flujo_dds.tex
 % =============================================================================
 
-\section{Flujo del Design Documentation System (DDS)}
+\section{Flujo del Document-Driven SDLC (DDS)}
 \label{sec:flujo-dds}
 
-El \textit{Design Documentation System} (DDS) constituye la metodolog\'ia
+El \textit{Document-Driven SDLC} (DDS) constituye la metodolog\'ia
 propietaria adoptada para sistematizar el proceso completo de dise\~no,
 desarrollo y documentaci\'on de la plataforma. A diferencia de las
 metodolog\'ias \'agiles convencionales, el DDS integra expl\'icitamente las
@@ -14,7 +14,11 @@ fases de documentaci\'on t\'ecnica y validaci\'on acad\'emica dentro del flujo
 de trabajo de ingenier\'ia de software, asegurando que cada artefacto producido
 sea trazable, reproducible y verificable. El flujo se estructura en ocho fases
 secuenciales, cada una con objetivos, entregables y criterios de aceptaci\'on
-claramente definidos.
+claramente definidos. El contraste sistem\'atico de esta metodolog\'ia frente a
+los enfoques de cascada, \'agil/Scrum, RUP, \textit{dual-track} y de
+\textit{design docs}/RFC ---junto con su fundamento acad\'emico e industrial---
+se desarrolla en el marco te\'orico (\autoref{sec:flujo_dds_ia}) y se sintetiza en
+la \autoref{tab:dds_comparativa}.
 
 \subsection{Fase 0: Developer Experience (DX)}
 \label{subsec:fase0-dx}
@@ -32,25 +36,28 @@ inmediata.
 \subsection{Fase 1: Descubrimiento y An\'alisis}
 \label{subsec:fase1-descubrimiento}
 
-La fase de descubrimiento y an\'alisis comprende la investigaci\'on exploratoria
-del dominio problem\'atico, la identificaci\'on de \textit{stakeholders}, la
-recolecci\'on de requisitos mediante entrevistas semiestructuradas y la
-elaboraci\'on del an\'alisis de viabilidad t\'ecnica y econ\'omica. Los
-artefactos producidos en esta fase incluyen el documento de visi\'on del
-producto, el mapa de actores, los diagramas de contexto y las matrices de
-priorizaci\'on de requisitos. Esta fase se alinea con las pr\'acticas de
-\textit{Design Thinking} en su etapa de empat\'ia y definici\'on del problema.
+La fase de descubrimiento y an\'alisis comprende el an\'alisis inverso del
+sistema preexistente (\textit{As-Is}), la identificaci\'on de \textit{stakeholders}
+y la derivaci\'on de los requisitos a partir del c\'odigo fuente y de los procesos
+organizacionales reales. Los artefactos producidos en esta fase incluyen el
+inventario del c\'odigo fuente, la documentaci\'on del estado actual, el mapa de
+actores, los diagramas de contexto (C4) y el mapa de brechas identificadas.
+Complementariamente, se ejecuta un ejercicio de modelado de amenazas
+(\textit{Red Teaming} con STRIDE) previo a la escritura de c\'odigo nuevo, con lo
+que la fase captura la realidad operativa del sistema antes de intervenirlo.
 
 \subsection{Fase 2: Innovaci\'on y Validaci\'on}
 \label{subsec:fase2-innovacion}
 
-La fase de innovaci\'on y validaci\'on se enfoca en la generaci\'on de
-soluciones creativas y su contraste con las restricciones del mundo real. Se
-emplean t\'ecnicas de ideaci\'on como \textit{brainstorming} estructurado,
-an\'alisis competitivo y evaluaci\'on de soluciones existentes en el mercado.
-Los prototipos conceptuales generados son sometidos a validaci\'on temprana
-con usuarios representativos, lo cual permite descartar aproximaciones
-inviables antes de invertir recursos significativos en implementaci\'on. Los
+La fase de innovaci\'on y validaci\'on documenta los patrones de innovaci\'on
+t\'ecnica del sistema y contrasta su viabilidad con las restricciones reales del
+\textit{stack}. Entre estos patrones destacan el acceso a datos sin ORM
+(\textit{Zero-ORM}) con \textit{Row Level Security} din\'amico, la arquitectura
+h\'ibrida \textit{serverless} m\'as servidor \textit{stateful} de seguridad, y el
+esquema \textit{Multi-Page Application} nativo sobre Vite. La validaci\'on se
+formaliza mediante una matriz de integraci\'on que traza cada requisito hacia su
+implementaci\'on t\'ecnica y registra su estado y sus riesgos, permitiendo
+descartar aproximaciones inviables antes de escalar la construcci\'on. Los
 hallazgos de esta fase alimentan directamente la especificaci\'on de requisitos
 funcionales y no funcionales del sistema.
 
@@ -117,13 +124,13 @@ producci\'on real.
 \label{subsec:diagrama-flujo-dds}
 
 La Figura~\ref{fig:flujo-dds} presenta el diagrama visual del flujo completo
-del \textit{Design Documentation System}, ilustrando la secuencia de fases,
+del \textit{Document-Driven SDLC}, ilustrando la secuencia de fases,
 sus interdependencias y los puntos de retroalimentaci\'on entre etapas.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{Flujo de DDS}
-\caption{Diagrama del flujo del \textit{Design Documentation System} (DDS) con sus ocho fases}
+\caption{Diagrama del flujo del \textit{Document-Driven SDLC} (DDS) con sus ocho fases}
 \label{fig:flujo-dds}
 \end{figure}
 
@@ -159,9 +166,9 @@ completa del proceso de documentaci\'on.
 
 0 & Developer Experience & Configuraci\'on de IDE, convenciones de c\'odigo, \textit{pipelines} CI/CD & Entorno reproducible y documentado \\
 \hline
-1 & Descubrimiento y An\'alisis & Documento de visi\'on, mapa de actores, matrices de priorizaci\'on & Requisitos validados con \textit{stakeholders} \\
+1 & Descubrimiento y An\'alisis & Inventario de c\'odigo, an\'alisis \textit{As-Is}, mapa de actores, diagramas C4, mapa de brechas, \textit{Red Teaming} (STRIDE) & Requisitos derivados y trazados al sistema real \\
 \hline
-2 & Innovaci\'on y Validaci\'on & An\'alisis competitivo, prototipos conceptuales, informes de validaci\'on & Soluci\'on viable validada con usuarios \\
+2 & Innovaci\'on y Validaci\'on & Patrones de innovaci\'on (Zero-ORM+RLS, arquitectura h\'ibrida, MPA), matriz de integraci\'on de requisitos & Viabilidad t\'ecnica confirmada sobre el \textit{stack} \\
 \hline
 3 & Dise\~no y Definici\'on & Casos de uso, diagramas de secuencia, modelo de datos, contratos API & Especificaciones t\'ecnicas aprobadas \\
 \hline

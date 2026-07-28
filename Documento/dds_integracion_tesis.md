@@ -38,7 +38,7 @@ Capítulo 2. Marco Teórico y Tecnológico
   2.2 SPA y el ecosistema React
   ...
   2.7 Calidad del producto (ISO/IEC 25010)
-» 2.8 Metodología DDS (Design Documentation System + IA)      [CONCEPTUAL — NUEVO]
+» 2.8 Metodología DDS (Document-Driven SDLC + IA)      [CONCEPTUAL — NUEVO]
     2.8.1 Definición y propósito arquitectónico (SSOT)
     2.8.2 Principios rectores
     2.8.3 Fases del ciclo de vida DDS
@@ -64,10 +64,10 @@ Capítulo 3. Material y Métodos                                 [CAPÍTULO NUEV
 
 ## 3. Contenido desarrollado
 
-### 2.8 Metodología DDS (Design Documentation System + IA) — plano conceptual
+### 2.8 Metodología DDS (Document-Driven SDLC + IA) — plano conceptual
 
-**2.8.1 Definición y propósito.** DDS (Design Documentation System asistido por Inteligencia
-Artificial) es una metodología de documentación de diseño que consolida, en un único árbol de
+**2.8.1 Definición y propósito.** DDS (Document-Driven SDLC asistido por Inteligencia
+Artificial) es un ciclo de vida de desarrollo guiado por documentación que consolida, en un único árbol de
 carpetas (`dds/`), la **Única Fuente de Verdad (SSOT)** del proyecto, aislando la documentación
 de diseño y el contexto para agentes de IA respecto del código funcional. Su propósito es
 mantener el repositorio desacoplado y cohesionado: ningún artefacto de diseño reside huérfano en

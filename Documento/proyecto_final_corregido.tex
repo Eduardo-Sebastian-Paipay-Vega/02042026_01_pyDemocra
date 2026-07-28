@@ -167,7 +167,7 @@ por inquilino reforzado por \textit{Row Level Security} (RLS) y funciones de bas
 seguridad se sustenta en autenticacion Supabase, control de acceso basado en roles y permisos (RBAC)
 con negacion por defecto, un motor de evaluacion de riesgo con verificacion en dos pasos (OTP),
 auditoria forense y borrado logico con politicas de retencion. Metodologicamente, el desarrollo se
-gobierna con la metodologia DDS (\textit{Design Documentation System} asistido por IA), organizada en
+gobierna con la metodologia DDS (\textit{Document-Driven SDLC} asistido por IA), organizada en
 ocho fases del ciclo de vida. La investigacion es de tipo aplicada-tecnologica, nivel descriptivo y
 diseno no experimental transversal. Las variables de estudio son el Funcionamiento y la Usabilidad;
 sus indicadores se validan mediante analisis documental del codigo, pruebas automatizadas (Jest,
@@ -190,7 +190,7 @@ data level it adopts a multi-schema model with tenant isolation enforced through
 (RLS) and database functions. Security relies on Supabase authentication, Role-Based Access Control
 (RBAC) with a deny-by-default policy, a risk evaluation engine with two-step verification (OTP),
 forensic auditing and soft delete with retention policies. Methodologically, development is governed
-by the DDS methodology (Design Documentation System assisted by AI), organized into eight lifecycle
+by the DDS methodology (Document-Driven SDLC assisted by AI), organized into eight lifecycle
 phases. The research is applied-technological, descriptive, with a non-experimental cross-sectional
 design. The study variables are Functioning and Usability; their indicators are validated through
 documentary code analysis, automated testing (Jest, Vitest, supertest, pgTAP) and the System
@@ -230,7 +230,7 @@ sistema —originalmente desarrollado como \textit{SistemaVolV2.0} e integrado p
 \textit{monorepo} Democra— implementa una arquitectura desacoplada de cliente y servidor, un modelo
 de datos relacional multi-esquema sobre PostgreSQL administrado a traves de Supabase, y un conjunto
 de mecanismos transversales de seguridad, auditoria y control de acceso, gobernados por la
-metodologia de documentacion de diseno DDS.
+metodologia de desarrollo guiada por documentacion (DDS).
 
 La documentacion se elabora bajo un enfoque de \textit{ingenieria inversa documental}: el repositorio
 constituye la unica fuente de verdad, y el analisis describe fielmente lo que el codigo implementa,
@@ -295,7 +295,7 @@ La contrastaci\'on emp\'irica de esta hip\'otesis metodol\'ogica se operacionali
 
 \section{Objetivos}
 \subsection{Objetivo General}
-Dise\~nar, desarrollar y documentar con precisi\'on acad\'emica una plataforma web SaaS multi-tenant a escala comercial, denominada Democra. Su fin primordial es viabilizar la gesti\'on integral y centralizada de los procesos operativos, la administraci\'on del capital humano, los recursos log\'isticos y la gobernanza estrat\'egica de organizaciones de voluntariado peruanas. Esta construcci\'on debe cimentarse en una arquitectura desacoplada moderna, provista de mecanismos transversales de seguridad perimetral, criptograf\'ia, auditor\'ia profunda forense y metodolog\'ias de aseguramiento de la calidad; aplicando para todo el proceso la innovadora metodolog\'ia de dise\~no \textit{Design Documentation System} (DDS) orientada a inteligencias artificiales.
+Dise\~nar, desarrollar y documentar con precisi\'on acad\'emica una plataforma web SaaS multi-tenant a escala comercial, denominada Democra. Su fin primordial es viabilizar la gesti\'on integral y centralizada de los procesos operativos, la administraci\'on del capital humano, los recursos log\'isticos y la gobernanza estrat\'egica de organizaciones de voluntariado peruanas. Esta construcci\'on debe cimentarse en una arquitectura desacoplada moderna, provista de mecanismos transversales de seguridad perimetral, criptograf\'ia, auditor\'ia profunda forense y metodolog\'ias de aseguramiento de la calidad; aplicando para todo el proceso la innovadora metodolog\'ia de dise\~no \textit{Document-Driven SDLC} (DDS) orientada a inteligencias artificiales.
 
 \subsection{Objetivos Espec\'ificos}
 \begin{enumerate}[label=\alph*.]
@@ -311,7 +311,7 @@ Dise\~nar, desarrollar y documentar con precisi\'on acad\'emica una plataforma w
 La trascendencia y pertinencia de la presente investigaci\'on radican en proveer al ecosistema de voluntariado y a las Organizaciones No Gubernamentales (ONG) un instrumento de base tecnol\'ogica altamente escalable, estandarizado y seguro, que moderniza dr\'asticamente su gesti\'on. Al proporcionar una soluci\'on integral como SaaS (donde la ONG no asume los exorbitantes costos de mantenimiento de servidores o seguridad), se reducen de forma significativa las brechas tecnol\'ogicas del tercer sector en un pa\'is en v\'ias de desarrollo, apalancando la digitalizaci\'on inclusiva e insertando a estas instituciones en la econom\'ia global del dato.
 
 \subsection{Justificaci\'on T\'ecnica y Tecnol\'ogica}
-A nivel estrictamente ingenieril, el proyecto halla su fundamentaci\'on en la convergencia orquestada de paradigmas modernos de arquitectura de software y seguridad ofensiva/defensiva. El diseno contempla arquitecturas \textit{serverless}, la programaci\'on declarativa en interfaces (\textit{React Fiber}), as\'i como estrategias profundas de aislamiento (\textit{Tenant Data Bleeding Prevention}). La centralizaci\'on de la l\'ogica en esquemas fuertemente tipados de base de datos, soportados bajo el principio ACID de PostgreSQL 16 y envueltos por pol\'iticas RLS y triggers de Change Data Capture (CDC), elevan la calidad arquitect\'onica. Adicionalmente, la adopci\'on nativa de la metodolog\'ia "Design Documentation System" (DDS) para coordinar con \textit{Large Language Models} (LLMs) marca un precedente de vanguardia en la ingenier\'ia reversa de requerimientos y asegura un Single Source of Truth (SSOT).
+A nivel estrictamente ingenieril, el proyecto halla su fundamentaci\'on en la convergencia orquestada de paradigmas modernos de arquitectura de software y seguridad ofensiva/defensiva. El diseno contempla arquitecturas \textit{serverless}, la programaci\'on declarativa en interfaces (\textit{React Fiber}), as\'i como estrategias profundas de aislamiento (\textit{Tenant Data Bleeding Prevention}). La centralizaci\'on de la l\'ogica en esquemas fuertemente tipados de base de datos, soportados bajo el principio ACID de PostgreSQL 16 y envueltos por pol\'iticas RLS y triggers de Change Data Capture (CDC), elevan la calidad arquitect\'onica. Adicionalmente, la adopci\'on nativa de la metodolog\'ia "Document-Driven SDLC" (DDS) para coordinar con \textit{Large Language Models} (LLMs) marca un precedente de vanguardia en la ingenier\'ia reversa de requerimientos y asegura un Single Source of Truth (SSOT).
 
 \subsection{Justificaci\'on Social}
 El tercer sector maneja la delicada labor de intervenir ante crisis humanitarias, brindar salud y proporcionar bienestar a comunidades excluidas. Sin embargo, su capacidad multiplicadora suele atrofiarse bajo la carga burocr\'atica. Proveer a las organizaciones de una herramienta centralizada, segura y matemáticamente trazable fortalece radicalmente su resiliencia administrativa. Esto permite que dirijan un mayor volumen de sus recursos financieros y de esfuerzo humano directamente hacia sus misiones sociales en lugar de tareas operativas administrativas, maximizando su impacto filantr\'opico en el territorio nacional.
@@ -705,7 +705,7 @@ Esta macro-implementaci\'on consolida un nivel arquitect\'onico perimetral irrom
 \chapter{Resultados y An\'alisis Experimental}
 \label{chapter:resultados}
 
-En alineaci\'on irrestricta con la metodolog\'ia hipot\'etico-deductiva y el \textit{Design Documentation System} (DDS) establecidos en los cap\'itulos precedentes, el presente apartado expone la evaluaci\'on emp\'irica del constructo arquitect\'onico. La recolecci\'on de datos, de car\'acter mixto (cuantitativo y estad\'istico), ha sido estructurada para someter a comprobaci\'on cient\'ifica la tolerancia transaccional, el aislamiento criptogr\'afico y la usabilidad final de la plataforma \textit{Democra} en entornos simulados de alta volatilidad operativa, caracter\'isticos del tercer sector.
+En alineaci\'on irrestricta con la metodolog\'ia hipot\'etico-deductiva y el \textit{Document-Driven SDLC} (DDS) establecidos en los cap\'itulos precedentes, el presente apartado expone la evaluaci\'on emp\'irica del constructo arquitect\'onico. La recolecci\'on de datos, de car\'acter mixto (cuantitativo y estad\'istico), ha sido estructurada para someter a comprobaci\'on cient\'ifica la tolerancia transaccional, el aislamiento criptogr\'afico y la usabilidad final de la plataforma \textit{Democra} en entornos simulados de alta volatilidad operativa, caracter\'isticos del tercer sector.
 
 \section{Evaluaci\'on de Rendimiento y Escalabilidad (Performance Testing)}
 
