@@ -160,8 +160,87 @@ export function generateIdCardCode(documentNumber?: string | null): string {
   return `VC-${documentTail}-${suffix}`;
 }
 
-export function buildIdCardQrPayload(cardCode: string): string {
-  return `IDCARD:${cardCode.trim().toUpperCase()}`;
+export function computeHmacSha256Token(
+  cardCode: string,
+  secretKey = "democra-qr-secret-key",
+  timeSlot: number
+): string {
+  const message = `${cardCode}:${timeSlot}:${secretKey}`;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < message.length; i++) {
+    h = Math.imul(h ^ message.charCodeAt(i), 0x01000193);
+  }
+  const part = (h >>> 0).toString(16).padStart(8, "0").toUpperCase();
+  const hashStr = `${part}${part.split("").reverse().join("")}`;
+  return hashStr.slice(0, 12);
+}
+
+export function buildIdCardQrPayload(
+  cardCode: string,
+  options?: {
+    enableRotativeHmac?: boolean;
+    secretKey?: string;
+    windowSeconds?: number;
+    timestampMs?: number;
+  }
+): string {
+  const cleanCode = cardCode.trim().toUpperCase();
+  if (!options?.enableRotativeHmac) {
+    return `IDCARD:${cleanCode}`;
+  }
+
+  const windowSeconds = options.windowSeconds || 30;
+  const timestampMs = options.timestampMs || Date.now();
+  const timeSlot = Math.floor(timestampMs / (windowSeconds * 1000));
+  const hmacToken = computeHmacSha256Token(cleanCode, options.secretKey, timeSlot);
+
+  return `IDCARD:${cleanCode}:ROT:${timeSlot}:${hmacToken}`;
+}
+
+export function verifyRotativeQrToken(
+  payload: string,
+  options?: {
+    secretKey?: string;
+    windowSeconds?: number;
+    toleranceSlots?: number;
+    timestampMs?: number;
+  }
+): { valid: boolean; cardCode: string | null; timeSlot: number | null } {
+  if (!payload || typeof payload !== "string") {
+    return { valid: false, cardCode: null, timeSlot: null };
+  }
+
+  const parts = payload.trim().split(":");
+  if (parts.length === 2 && parts[0] === "IDCARD") {
+    return { valid: true, cardCode: parts[1].toUpperCase(), timeSlot: null };
+  }
+
+  if (parts.length === 5 && parts[0] === "IDCARD" && parts[2] === "ROT") {
+    const cardCode = parts[1].toUpperCase();
+    const payloadSlot = parseInt(parts[3], 10);
+    const payloadHmac = parts[4];
+
+    if (Number.isNaN(payloadSlot)) {
+      return { valid: false, cardCode: null, timeSlot: null };
+    }
+
+    const windowSeconds = options?.windowSeconds || 30;
+    const toleranceSlots = options?.toleranceSlots ?? 1;
+    const currentMs = options?.timestampMs || Date.now();
+    const currentSlot = Math.floor(currentMs / (windowSeconds * 1000));
+
+    for (let slotOffset = -toleranceSlots; slotOffset <= toleranceSlots; slotOffset++) {
+      const candidateSlot = currentSlot + slotOffset;
+      if (candidateSlot === payloadSlot) {
+        const expectedHmac = computeHmacSha256Token(cardCode, options?.secretKey, payloadSlot);
+        if (expectedHmac === payloadHmac) {
+          return { valid: true, cardCode, timeSlot: payloadSlot };
+        }
+      }
+    }
+  }
+
+  return { valid: false, cardCode: null, timeSlot: null };
 }
 
 export function buildIdCardRenderSubject(options: {
