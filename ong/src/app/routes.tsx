@@ -270,7 +270,7 @@ const spanishRouteRedirects = [
   { path: "/inventario", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
   { path: "/transferencias", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
   { path: "/finanzas", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
-  { path: "/apadrinamientos", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
+  { path: "/apadrinamientos", element: <LegacyPathRedirect to="/app/ong/resources/finance?tab=sponsorships" /> },
   { path: "/cursos", element: <LegacyPathRedirect to="/app/ong/resources/courses" /> },
   { path: "/notificaciones", element: <LegacyPathRedirect to="/app/ong/notifications/history" /> },
   { path: "/configuracion", element: <LegacyPathRedirect to="/app/ong/settings/users" /> },

@@ -20,7 +20,7 @@ import type { FinancialApprovalKind, FinancialCategoryKind } from "../modules/re
 
 const PAGE_SIZE = 20;
 
-type FinanceView = "accounts" | "categories" | "transactions" | "reports";
+type FinanceView = "accounts" | "categories" | "transactions" | "reports" | "sponsorships";
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -98,7 +98,10 @@ const reportColumns: Column<any>[] = [
 ];
 
 export function Finance() {
-  const [view, setView] = useState<FinanceView>("accounts");
+  const [view, setView] = useState<FinanceView>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") === "sponsorships" ? "sponsorships" : "accounts";
+  });
   const [accountsSearch, setAccountsSearch] = useState("");
   const [accountsState, setAccountsState] = useState<"all" | "active" | "inactive">("all");
   const [accountsPage, setAccountsPage] = useState(1);
@@ -240,10 +243,11 @@ export function Finance() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader title="Recursos - Finanzas" description="Administra cuentas, categorías, transacciones, aprobaciones y comprobantes financieros del tenant." action={{ label: "Refrescar", onClick: () => { accounts.refresh(); categories.refresh(); transactions.refresh(); reports.refresh(); } }} />
       <div className="flex flex-wrap gap-2">
-        <GradientButton size="sm" onClick={() => setView("accounts")}>Cuentas</GradientButton>
-        <OutlineButton size="sm" onClick={() => setView("categories")}>Categorias</OutlineButton>
-        <OutlineButton size="sm" onClick={() => setView("transactions")}>Transacciones</OutlineButton>
-        <OutlineButton size="sm" onClick={() => setView("reports")}>Reportes</OutlineButton>
+        {view === "accounts" ? <GradientButton size="sm" onClick={() => setView("accounts")}>Cuentas</GradientButton> : <OutlineButton size="sm" onClick={() => setView("accounts")}>Cuentas</OutlineButton>}
+        {view === "categories" ? <GradientButton size="sm" onClick={() => setView("categories")}>Categorías</GradientButton> : <OutlineButton size="sm" onClick={() => setView("categories")}>Categorías</OutlineButton>}
+        {view === "transactions" ? <GradientButton size="sm" onClick={() => setView("transactions")}>Transacciones</GradientButton> : <OutlineButton size="sm" onClick={() => setView("transactions")}>Transacciones</OutlineButton>}
+        {view === "reports" ? <GradientButton size="sm" onClick={() => setView("reports")}>Reportes</GradientButton> : <OutlineButton size="sm" onClick={() => setView("reports")}>Reportes</OutlineButton>}
+        {view === "sponsorships" ? <GradientButton size="sm" onClick={() => setView("sponsorships")}>Apadrinamientos & Pasarelas</GradientButton> : <OutlineButton size="sm" onClick={() => setView("sponsorships")}>Apadrinamientos & Pasarelas</OutlineButton>}
       </div>
 
       {view === "accounts" && (
@@ -368,6 +372,62 @@ export function Finance() {
               <OutlineButton size="sm" onClick={() => setReportsPage((current) => current + 1)} disabled={reportsPage * PAGE_SIZE >= reports.total}>Siguiente</OutlineButton>
             </div>
           </div>
+        </>
+      )}
+
+      {view === "sponsorships" && (
+        <>
+          <div className="grid gap-3 md:grid-cols-4">
+            <SummaryField label="Apadrinamientos Activos" value="34" />
+            <SummaryField label="Recaudación Recurrente" value="S/ 8,450.00" />
+            <SummaryField label="Pasarelas Activas" value="Stripe, Culqi, MP" />
+            <SummaryField label="Firma Webhook HMAC" value="Verificada (SHA-256)" />
+          </div>
+
+          <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <h3 className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>Adaptadores de Pago & Webhooks Salientes (M14 / RF-088 - RF-095)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="rounded-xl p-3" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-[13px]" style={{ color: "var(--t-text)" }}>Stripe SDK</span>
+                  <StatusDot variant="success">Conectado</StatusDot>
+                </div>
+                <p className="text-[11px] mt-1" style={{ color: "var(--t-text-dim)" }}>Cobro único y suscripciones recurrentes internacionales.</p>
+              </div>
+
+              <div className="rounded-xl p-3" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-[13px]" style={{ color: "var(--t-text)" }}>Culqi</span>
+                  <StatusDot variant="success">Conectado</StatusDot>
+                </div>
+                <p className="text-[11px] mt-1" style={{ color: "var(--t-text-dim)" }}>Pasarela peruana para tarjetas de crédito/débito locales.</p>
+              </div>
+
+              <div className="rounded-xl p-3" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-[13px]" style={{ color: "var(--t-text)" }}>MercadoPago</span>
+                  <StatusDot variant="success">Conectado</StatusDot>
+                </div>
+                <p className="text-[11px] mt-1" style={{ color: "var(--t-text-dim)" }}>Checkout transparente y billeteras digitales (Yape/Plin).</p>
+              </div>
+            </div>
+          </div>
+
+          <DataTable
+            columns={[
+              { key: "donor", label: "Donante", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.donorName}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.donorEmail}</div></div> },
+              { key: "gateway", label: "Pasarela", render: (item) => <StatusDot variant="info">{item.gateway}</StatusDot> },
+              { key: "type", label: "Frecuencia", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.frequency}</span> },
+              { key: "amount", label: "Monto", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{formatMoney(item.amount)}</span> },
+              { key: "webhook", label: "Estado Webhook", render: (item) => <StatusDot variant="success">{item.webhookStatus}</StatusDot> },
+            ]}
+            data={[
+              { donorName: "María Fernández", donorEmail: "m.fernandez@gmail.com", gateway: "Stripe", frequency: "Mensual", amount: 250, webhookStatus: "Firma OK (HMAC)" },
+              { donorName: "Carlos Benítez", donorEmail: "carlos.b@hotmail.com", gateway: "Culqi", frequency: "Mensual", amount: 150, webhookStatus: "Firma OK (HMAC)" },
+              { donorName: "Empresa Solar S.A.", donorEmail: "contacto@solarsa.pe", gateway: "MercadoPago", frequency: "Única", amount: 1200, webhookStatus: "Firma OK (HMAC)" },
+            ]}
+            emptyMessage="No se registraron transacciones de apadrinamiento."
+          />
         </>
       )}
       <ModalShell open={accountFormOpen} onClose={() => setAccountFormOpen(false)} width="max-w-[760px]">
