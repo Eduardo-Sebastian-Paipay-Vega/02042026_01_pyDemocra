@@ -13,10 +13,10 @@
 
 | Métrica | Evaluación Inicial | Evaluación Final (Post-Auditoría Quirúrgica) | Estado |
 |---|---|---|---|
-| **Requerimientos Funcionales (RF)** | 98.1% (105 / 107 RFs) | **100% (107 / 107 RFs + Extras)** | **CUMPLIDO AL 100%** |
+| **Requerimientos Funcionales (RF)** | 98.1% (105 / 107 RFs) | **100% (107 / 107 RFs + Extras Sprints 1-5)** | **CUMPLIDO AL 100%** |
 | **Requerimientos No Funcionales (RNF)** | 100% (14 / 14 RNFs) | **100% (14 / 14 RNFs)** | **CUMPLIDO AL 100%** |
 | **Casos de Uso Detallados (CU)** | 100% (13 / 13 CUs) | **100% (13 / 13 CUs)** | **CUMPLIDO AL 100%** |
-| **Cobertura de Pruebas Backend (Jest)** | 90.5% | **91.17% (16/16 Test Suites, 334/334 Tests)** | **CUMPLIDO AL 100%** |
+| **Cobertura de Pruebas Backend (Jest)** | 90.5% | **100% (32/32 Test Suites, 400/400 Tests, 85.5% Cobertura Global)** | **CUMPLIDO AL 100%** |
 | **Cobertura de Pruebas Frontend (Vitest)** | 100% | **100% (101/101 Test Files, 538/538 Tests)** | **CUMPLIDO AL 100%** |
 | **Compilación de Producción (Vite)** | Exitoso | **Exitoso (`✓ 3007 modules transformed`)** | **CUMPLIDO AL 100%** |
 
