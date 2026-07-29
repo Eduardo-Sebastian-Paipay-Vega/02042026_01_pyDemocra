@@ -925,6 +925,19 @@ export function SystemUsers() {
             </div>
           )}
 
+          <div className="flex items-center gap-2 py-2 border-t border-b border-zinc-800/80 my-1">
+            <input
+              type="checkbox"
+              id="sendVerificationEmail"
+              defaultChecked={true}
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <label htmlFor="sendVerificationEmail" className="text-[12px] font-medium text-zinc-300 cursor-pointer select-none">
+              ✉️ Enviar correo automático de bienvenida y verificación de cuenta (vía Resend API)
+            </label>
+          </div>
+
+
           <div className="flex flex-wrap gap-2">
             <GradientButton
               size="sm"
