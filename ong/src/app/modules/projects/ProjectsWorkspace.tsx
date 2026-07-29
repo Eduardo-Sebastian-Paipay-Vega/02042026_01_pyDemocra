@@ -12,20 +12,24 @@ import {
   Eye,
   FileText,
   FolderKanban,
+  Info,
   Kanban,
   Layers,
   LayoutList,
   MapPin,
   MoreVertical,
+  Package,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  Settings,
+  ShieldAlert,
   Trash2,
+  Upload,
   UserCheck,
   UserPlus,
   Users,
-  Package,
 } from "lucide-react";
 import { ImageUploadField } from "../../components/ui/image-upload-field";
 import {
@@ -105,6 +109,10 @@ const EMPTY_PROJECT_FORM: ProjectFormValues = {
   description: "",
   areaId: "",
   stateCode: "",
+  priority: "media",
+  leaderId: "",
+  assignedVolunteerIds: [],
+  currency: "USD",
   startDate: "",
   endDate: "",
   budget: "0",
@@ -152,13 +160,10 @@ const EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM: ProjectResourceAssignmentFormValue
   quantityAssigned: "0",
 };
 
-function formatCurrency(amount: string | number): string {
+function formatCurrency(amount: string | number, currency = "USD"): string {
   const num = typeof amount === "number" ? amount : parseFloat(amount) || 0;
-  return new Intl.NumberFormat("es-PE", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(num);
+  const symbol = currency === "PEN" ? "S/" : currency === "EUR" ? "€" : "$";
+  return `${symbol} ${num.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function AvatarStack({ count }: { count: number }) {
@@ -241,17 +246,20 @@ function SelectField({
   onChange,
   options,
   placeholder,
+  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: Array<{ value: string; label: string }>;
   placeholder: string;
+  disabled?: boolean;
 }) {
   return (
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors"
+      disabled={disabled}
+      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
         border: "1px solid var(--t-border)",
         background: "var(--t-input-bg)",
@@ -273,11 +281,13 @@ function InputField({
   onChange,
   placeholder,
   type = "text",
+  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   type?: string;
+  disabled?: boolean;
 }) {
   return (
     <input
@@ -285,7 +295,8 @@ function InputField({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors"
+      disabled={disabled}
+      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
         border: "1px solid var(--t-border)",
         background: "var(--t-input-bg)",
@@ -377,6 +388,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10;
+
+  // Estado de pestaña activa del modal de formulario de proyectos
+  const [formTab, setFormTab] = useState<"general" | "team_budget" | "advanced">("general");
 
   const [projectFilters, setProjectFilters] = useSessionStorageState<ProjectListFilters>(
     `${storageKeyPrefix}.project-filters`,
@@ -479,6 +493,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setEditingActivityId(null);
     setEditingAssignment(null);
     setAssignmentFormKind("project-volunteer");
+    setFormTab("general");
     details.clear();
   }, [details.clear, section]);
 
@@ -522,6 +537,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setEditingAssignment(null);
     setAssignmentFormKind("project-volunteer");
     setTaskFormProjectFilter("");
+    setFormTab("general");
   }
 
   function openCreateForm() {
@@ -568,12 +584,17 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       description: row.description ?? "",
       areaId: row.areaId ?? "",
       stateCode: row.stateCode,
+      priority: "media",
+      leaderId: "",
+      assignedVolunteerIds: [],
+      currency: "USD",
       startDate: row.startDate ?? "",
       endDate: row.endDate ?? "",
       budget: row.budget ?? "0",
       imageUrl: row.imageUrl ?? "",
       imageFile: null,
     });
+    setFormTab("general");
     setFormOpen(true);
   }
 
@@ -1838,83 +1859,525 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="max-h-[80vh] overflow-y-auto p-5">{renderDetail()}</div>
       </ModalShell>
 
-      <ModalShell open={formOpen} onClose={closeForm} width="max-w-[980px]">
-        <div className="flex items-start justify-between gap-3 border-b border-[var(--t-border)] px-4 py-3">
-          <div>
-            <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              {section === "projects" ? editingProjectId ? "Editar proyecto" : "Crear proyecto" : section === "tasks" ? editingTaskId ? "Editar tarea" : "Crear tarea" : section === "activities" ? editingActivityId ? "Editar actividad" : "Crear actividad" : editingAssignment ? `Editar ${getAssignmentKindLabel(assignmentFormKind).toLowerCase()}` : "Crear asignacion"}
-            </h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Complete los campos y guarde los cambios.</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={closeForm}>Cerrar</Button>
-        </div>
-        <div className="max-h-[75vh] space-y-3 overflow-y-auto p-4">
-          {section === "projects" ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              <InputField value={projectForm.name} onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))} placeholder="Nombre del proyecto" />
-              <SelectField value={projectForm.areaId} onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))} options={catalogs.areas} placeholder="Area" />
-              <SelectField value={projectForm.stateCode} onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))} options={catalogs.projectStates} placeholder="Estado" />
-              <div className="grid grid-cols-2 gap-3 md:col-span-2">
-                <InputField value={projectForm.startDate} onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))} placeholder="Fecha inicio" type="date" />
-                <InputField value={projectForm.endDate} onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))} placeholder="Fecha fin" type="date" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto ($)</p>
-                <InputField value={projectForm.budget} onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))} placeholder="Presupuesto" type="number" />
-              </div>
-              <div className="md:col-span-2"><ImageUploadField label="Imagen del proyecto (opcional)" existingUrl={projectForm.imageUrl || null} previewFile={projectForm.imageFile} onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))} onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))} /></div>
-              <div className="md:col-span-2"><TextareaField value={projectForm.description} onChange={(value) => setProjectForm((current) => ({ ...current, description: value }))} placeholder="Descripcion del proyecto" /></div>
+      {/* Modal de Creación y Edición Rediseñado con Pestañas (Tabs) y Etiquetas (Labels) */}
+      <ModalShell open={formOpen} onClose={closeForm} width="max-w-[960px]">
+        <div className="border-b border-zinc-800 px-6 py-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+                <FolderKanban className="h-5 w-5 text-indigo-400" />
+                {section === "projects"
+                  ? editingProjectId
+                    ? `Editar Proyecto: ${projectForm.name || ""}`
+                    : "Crear Nuevo Proyecto"
+                  : section === "tasks"
+                  ? editingTaskId
+                    ? "Editar Tarea"
+                    : "Crear Tarea"
+                  : section === "activities"
+                  ? editingActivityId
+                    ? "Editar Actividad"
+                    : "Crear Actividad"
+                  : editingAssignment
+                  ? `Editar ${getAssignmentKindLabel(assignmentFormKind).toLowerCase()}`
+                  : "Crear Asignación"}
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {section === "projects" && projectForm.code ? (
+                  <span className="font-mono text-indigo-400 font-medium">Código: {projectForm.code}</span>
+                ) : (
+                  "Complete los campos obligatorios para guardar la información."
+                )}
+              </p>
             </div>
+            <button
+              onClick={closeForm}
+              className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Navegación por Pestañas (Solo Proyectos) */}
+          {section === "projects" && (
+            <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => setFormTab("general")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  formTab === "general"
+                    ? "bg-indigo-600 text-white shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                }`}
+              >
+                <Info className="h-3.5 w-3.5" />
+                Información General
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormTab("team_budget")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  formTab === "team_budget"
+                    ? "bg-indigo-600 text-white shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                }`}
+              >
+                <Users className="h-3.5 w-3.5" />
+                Equipo y Presupuesto
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormTab("advanced")}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  formTab === "advanced"
+                    ? "bg-indigo-600 text-white shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                }`}
+              >
+                <Settings className="h-3.5 w-3.5" />
+                Configuración Avanzada
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Contenido del Formulario */}
+        <div className="max-h-[72vh] overflow-y-auto p-6 space-y-4">
+          {section === "projects" ? (
+            <>
+              {/* PESTAÑA 1: INFORMACIÓN GENERAL */}
+              {formTab === "general" && (
+                <div className="space-y-4">
+                  {/* FILA 1: Nombre y Código */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                        Nombre del Proyecto <span className="text-red-400">*</span>
+                      </label>
+                      <InputField
+                        value={projectForm.name}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))}
+                        placeholder="Ej. Campaña de Reforestación 2026"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Código ID del Proyecto <span className="text-zinc-500">(Auto-generado / Correlativo)</span>
+                      </label>
+                      <InputField
+                        value={projectForm.code || (editingProjectId ? "" : "Generación automática")}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, code: value }))}
+                        placeholder="PROJ-001"
+                        disabled={Boolean(editingProjectId)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* FILA 2: Área, Estado y Prioridad */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                        Área u Organización <span className="text-red-400">*</span>
+                      </label>
+                      <SelectField
+                        value={projectForm.areaId}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))}
+                        options={catalogs.areas}
+                        placeholder="Seleccionar Área"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                        Estado del Proyecto <span className="text-red-400">*</span>
+                      </label>
+                      <SelectField
+                        value={projectForm.stateCode}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))}
+                        options={catalogs.projectStates}
+                        placeholder="Seleccionar Estado"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Nivel de Prioridad
+                      </label>
+                      <SelectField
+                        value={projectForm.priority || "media"}
+                        onChange={(value) =>
+                          setProjectForm((current) => ({
+                            ...current,
+                            priority: value as ProjectFormValues["priority"],
+                          }))
+                        }
+                        options={[
+                          { value: "baja", label: "🟢 Baja" },
+                          { value: "media", label: "🔵 Media" },
+                          { value: "alta", label: "🔴 Alta" },
+                          { value: "urgente", label: "⚡ Urgente" },
+                        ]}
+                        placeholder="Prioridad"
+                      />
+                    </div>
+                  </div>
+
+                  {/* FILA 3: Descripción */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                      Descripción del Proyecto <span className="text-red-400">*</span>
+                    </label>
+                    <TextareaField
+                      value={projectForm.description}
+                      onChange={(value) => setProjectForm((current) => ({ ...current, description: value }))}
+                      placeholder="Describa detalladamente los objetivos del proyecto, contexto y alcance..."
+                    />
+                  </div>
+
+                  {/* FILA 4: Tarjeta de Vista Previa de Imagen */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-zinc-300">
+                      Imagen / Banner del Proyecto
+                    </label>
+
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-3">
+                      {projectForm.imageUrl || projectForm.imageFile ? (
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            {projectForm.imageFile ? (
+                              <div className="h-14 w-14 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                                Nuevo
+                              </div>
+                            ) : (
+                              <img
+                                src={projectForm.imageUrl}
+                                alt="Portada"
+                                className="h-14 w-14 rounded-xl object-cover border border-zinc-700"
+                              />
+                            )}
+                            <div>
+                              <p className="text-xs font-semibold text-zinc-200">
+                                {projectForm.imageFile ? projectForm.imageFile.name : "Imagen del proyecto"}
+                              </p>
+                              <p className="text-[11px] text-zinc-400">
+                                {projectForm.imageFile
+                                  ? `${(projectForm.imageFile.size / 1024).toFixed(1)} KB`
+                                  : "URL almacenada en Supabase Storage"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <label className="cursor-pointer px-3 py-1.5 rounded-lg border border-zinc-700 text-xs font-medium text-zinc-200 hover:bg-zinc-800 transition-colors flex items-center gap-1.5">
+                              <Upload className="h-3.5 w-3.5" />
+                              Cambiar
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setProjectForm((c) => ({ ...c, imageFile: file }));
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            <button
+                              type="button"
+                              onClick={() => setProjectForm((c) => ({ ...c, imageFile: null, imageUrl: "" }))}
+                              className="px-3 py-1.5 rounded-lg border border-red-500/30 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <ImageUploadField
+                          label="Seleccionar o arrastrar imagen de portada"
+                          existingUrl={null}
+                          previewFile={projectForm.imageFile}
+                          onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))}
+                          onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PESTAÑA 2: EQUIPO Y PRESUPUESTO */}
+              {formTab === "team_budget" && (
+                <div className="space-y-4">
+                  {/* FILA 1: Responsables */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Líder del Proyecto / Responsable
+                      </label>
+                      <SelectField
+                        value={projectForm.leaderId || ""}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, leaderId: value }))}
+                        options={catalogs.volunteers}
+                        placeholder="Asignar Responsable"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Equipo de Colaboradores Vinculados
+                      </label>
+                      <div className="h-10 rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 flex items-center text-xs text-zinc-400">
+                        {catalogs.volunteers.length} voluntarios disponibles para asignación
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FILA 2: Fechas */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Fecha de Inicio
+                      </label>
+                      <InputField
+                        value={projectForm.startDate}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))}
+                        placeholder="Fecha de Inicio"
+                        type="date"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Fecha de Finalización Estimada
+                      </label>
+                      <InputField
+                        value={projectForm.endDate}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))}
+                        placeholder="Fecha de Finalización"
+                        type="date"
+                      />
+                    </div>
+                  </div>
+
+                  {/* FILA 3: Presupuesto y Moneda */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Tipo de Moneda
+                      </label>
+                      <SelectField
+                        value={projectForm.currency || "USD"}
+                        onChange={(value) =>
+                          setProjectForm((current) => ({
+                            ...current,
+                            currency: value as ProjectFormValues["currency"],
+                          }))
+                        }
+                        options={[
+                          { value: "USD", label: "USD ($) - Dólares Estadounidenses" },
+                          { value: "PEN", label: "PEN (S/) - Soles Peruanos" },
+                          { value: "EUR", label: "EUR (€) - Euros" },
+                        ]}
+                        placeholder="Seleccionar Moneda"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Presupuesto Asignado
+                      </label>
+                      <InputField
+                        value={projectForm.budget}
+                        onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))}
+                        placeholder="0.00"
+                        type="number"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PESTAÑA 3: CONFIGURACIÓN AVANZADA / ZONA DE PELIGRO */}
+              {formTab === "advanced" && (
+                <div className="space-y-6">
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-2">
+                    <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                      <Info className="h-4 w-4 text-indigo-400" /> Información del Registro en Base de Datos
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3 text-xs text-zinc-400 pt-2">
+                      <div>ID del Proyecto: <strong className="text-zinc-200 font-mono">{editingProjectId || "Nuevo Registro"}</strong></div>
+                      <div>Tenant ID: <strong className="text-zinc-200 font-mono">Supabase Multi-Tenant</strong></div>
+                    </div>
+                  </div>
+
+                  {editingProjectId && (
+                    <div className="rounded-xl border border-red-500/30 bg-red-950/10 p-4 space-y-3">
+                      <div className="flex items-center gap-2 text-red-400 font-semibold text-xs">
+                        <ShieldAlert className="h-4 w-4" /> Zona de Peligro (Danger Zone)
+                      </div>
+                      <p className="text-xs text-zinc-400">
+                        Archivar o eliminar este proyecto quitará su visualización activa del panel general de la ONG.
+                      </p>
+
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          closeForm();
+                          setPendingAction({
+                            id: editingProjectId,
+                            label: `¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
+                          });
+                          setConfirmOpen(true);
+                        }}
+                        className="flex items-center gap-1.5 text-xs"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Eliminar / Archivar Proyecto
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           ) : null}
+
           {section === "tasks" ? (
             <div className="grid gap-3 md:grid-cols-2">
-              <SelectField
-                value={taskFormProjectFilter}
-                onChange={(value) => {
-                  setTaskFormProjectFilter(value);
-                  setTaskForm((current) => ({ ...current, activityId: "" }));
-                }}
-                options={catalogs.projects}
-                placeholder="Proyecto (para filtrar actividad)"
-              />
-              <SelectField
-                value={taskForm.activityId}
-                onChange={(value) => setTaskForm((current) => ({ ...current, activityId: value }))}
-                options={
-                  taskFormProjectFilter
-                    ? catalogs.activities.filter((a) => a.projectId === taskFormProjectFilter)
-                    : catalogs.activities
-                }
-                placeholder="Actividad"
-              />
-              <SelectField
-                value={taskForm.statusCode}
-                onChange={(value) => setTaskForm((current) => ({ ...current, statusCode: value as TaskFormValues["statusCode"] }))}
-                options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))}
-                placeholder="Estado"
-              />
-              <InputField value={taskForm.deadline} onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))} placeholder="Fecha limite" type="date" />
-              <InputField value={taskForm.title} onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la tarea" />
-              <div className="md:col-span-2">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Proyecto</label>
+                <SelectField
+                  value={taskFormProjectFilter}
+                  onChange={(value) => {
+                    setTaskFormProjectFilter(value);
+                    setTaskForm((current) => ({ ...current, activityId: "" }));
+                  }}
+                  options={catalogs.projects}
+                  placeholder="Proyecto (para filtrar actividad)"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Actividad *</label>
+                <SelectField
+                  value={taskForm.activityId}
+                  onChange={(value) => setTaskForm((current) => ({ ...current, activityId: value }))}
+                  options={
+                    taskFormProjectFilter
+                      ? catalogs.activities.filter((a) => a.projectId === taskFormProjectFilter)
+                      : catalogs.activities
+                  }
+                  placeholder="Actividad"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Estado *</label>
+                <SelectField
+                  value={taskForm.statusCode}
+                  onChange={(value) => setTaskForm((current) => ({ ...current, statusCode: value as TaskFormValues["statusCode"] }))}
+                  options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))}
+                  placeholder="Estado"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Fecha Límite</label>
+                <InputField value={taskForm.deadline} onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))} placeholder="Fecha limite" type="date" />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-xs font-medium text-zinc-300">Título de la Tarea *</label>
+                <InputField value={taskForm.title} onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la tarea" />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-xs font-medium text-zinc-300">Descripción</label>
                 <TextareaField value={taskForm.description} onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la tarea" />
               </div>
             </div>
           ) : null}
+
           {section === "activities" ? (
             <div className="grid gap-3 md:grid-cols-2">
-              <SelectField value={activityForm.projectId} onChange={(value) => setActivityForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" />
-              <SelectField value={activityForm.statusCode} onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))} options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" />
-              <InputField value={activityForm.title} onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la actividad" />
-              <InputField value={activityForm.estimatedHours} onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))} placeholder="Horas estimadas" type="number" />
-              <InputField value={activityForm.startAt} onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))} placeholder="Fecha inicio" type="date" />
-              <InputField value={activityForm.endAt} onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))} placeholder="Fecha fin" type="date" />
-              <div className="md:col-span-2"><SelectField value={activityForm.locationId} onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))} options={catalogs.locations} placeholder="Ubicacion (opcional)" /></div>
-              <div className="md:col-span-2"><TextareaField value={activityForm.description} onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la actividad" /></div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Proyecto *</label>
+                <SelectField value={activityForm.projectId} onChange={(value) => setActivityForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Estado *</label>
+                <SelectField value={activityForm.statusCode} onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))} options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Título de la Actividad *</label>
+                <InputField value={activityForm.title} onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la actividad" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Horas Estimadas</label>
+                <InputField value={activityForm.estimatedHours} onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))} placeholder="Horas estimadas" type="number" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Fecha Inicio</label>
+                <InputField value={activityForm.startAt} onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))} placeholder="Fecha inicio" type="date" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-300">Fecha Fin</label>
+                <InputField value={activityForm.endAt} onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))} placeholder="Fecha fin" type="date" />
+              </div>
+              <div className="md:col-span-2 space-y-1"><label className="text-xs font-medium text-zinc-300">Ubicación</label><SelectField value={activityForm.locationId} onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))} options={catalogs.locations} placeholder="Ubicacion (opcional)" /></div>
+              <div className="md:col-span-2 space-y-1"><label className="text-xs font-medium text-zinc-300">Descripción</label><TextareaField value={activityForm.description} onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la actividad" /></div>
             </div>
           ) : null}
-          {section === "assignments" ? <div className="space-y-4">{!editingAssignment ? <SelectField value={assignmentFormKind} onChange={(value) => setAssignmentFormKind(value as AssignmentKind)} options={[{ value: "project-volunteer", label: "Voluntario en proyecto" }, { value: "activity-volunteer", label: "Voluntario en actividad" }, { value: "project-resource", label: "Recurso de proyecto" }]} placeholder="Tipo de asignacion" /> : null}{assignmentFormKind === "project-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectVolunteerAssignmentForm.projectId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectVolunteerAssignmentForm.volunteerId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><InputField value={projectVolunteerAssignmentForm.role} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en proyecto" /><InputField value={projectVolunteerAssignmentForm.joinedAt} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, joinedAt: value }))} placeholder="Fecha ingreso" type="date" /><label className="flex items-center gap-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}><input type="checkbox" checked={projectVolunteerAssignmentForm.active} onChange={(event) => setProjectVolunteerAssignmentForm((current) => ({ ...current, active: event.target.checked }))} />Asignacion activa</label></div> : null}{assignmentFormKind === "activity-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={activityVolunteerAssignmentForm.activityId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, activityId: value }))} options={catalogs.activities} placeholder="Actividad" /><SelectField value={activityVolunteerAssignmentForm.volunteerId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><div className="md:col-span-2"><InputField value={activityVolunteerAssignmentForm.role} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en actividad" /></div></div> : null}{assignmentFormKind === "project-resource" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectResourceAssignmentForm.projectId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectResourceAssignmentForm.itemId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, itemId: value }))} options={catalogs.items} placeholder="Item" /><InputField value={projectResourceAssignmentForm.quantityRequired} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityRequired: value }))} placeholder="Cantidad requerida" type="number" /><InputField value={projectResourceAssignmentForm.quantityAssigned} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityAssigned: value }))} placeholder="Cantidad asignada" type="number" /></div> : null}</div> : null}
+
+          {section === "assignments" ? (
+            <div className="space-y-4">
+              {!editingAssignment ? <SelectField value={assignmentFormKind} onChange={(value) => setAssignmentFormKind(value as AssignmentKind)} options={[{ value: "project-volunteer", label: "Voluntario en proyecto" }, { value: "activity-volunteer", label: "Voluntario en actividad" }, { value: "project-resource", label: "Recurso de proyecto" }]} placeholder="Tipo de asignacion" /> : null}
+              {assignmentFormKind === "project-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectVolunteerAssignmentForm.projectId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectVolunteerAssignmentForm.volunteerId} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><InputField value={projectVolunteerAssignmentForm.role} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en proyecto" /><InputField value={projectVolunteerAssignmentForm.joinedAt} onChange={(value) => setProjectVolunteerAssignmentForm((current) => ({ ...current, joinedAt: value }))} placeholder="Fecha ingreso" type="date" /><label className="flex items-center gap-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}><input type="checkbox" checked={projectVolunteerAssignmentForm.active} onChange={(event) => setProjectVolunteerAssignmentForm((current) => ({ ...current, active: event.target.checked }))} />Asignacion activa</label></div> : null}
+              {assignmentFormKind === "activity-volunteer" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={activityVolunteerAssignmentForm.activityId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, activityId: value }))} options={catalogs.activities} placeholder="Actividad" /><SelectField value={activityVolunteerAssignmentForm.volunteerId} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, volunteerId: value }))} options={catalogs.volunteers} placeholder="Voluntario" /><div className="md:col-span-2"><InputField value={activityVolunteerAssignmentForm.role} onChange={(value) => setActivityVolunteerAssignmentForm((current) => ({ ...current, role: value }))} placeholder="Rol en actividad" /></div></div> : null}
+              {assignmentFormKind === "project-resource" ? <div className="grid gap-3 md:grid-cols-2"><SelectField value={projectResourceAssignmentForm.projectId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" /><SelectField value={projectResourceAssignmentForm.itemId} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, itemId: value }))} options={catalogs.items} placeholder="Item" /><InputField value={projectResourceAssignmentForm.quantityRequired} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityRequired: value }))} placeholder="Cantidad requerida" type="number" /><InputField value={projectResourceAssignmentForm.quantityAssigned} onChange={(value) => setProjectResourceAssignmentForm((current) => ({ ...current, quantityAssigned: value }))} placeholder="Cantidad asignada" type="number" /></div> : null}
+            </div>
+          ) : null}
         </div>
-        <div className="flex gap-2 border-t border-[var(--t-border)] px-4 py-3"><Button onClick={() => void handleSubmitForm()} disabled={mutations.isSaving}>{mutations.isSaving ? "Guardando..." : "Guardar"}</Button><Button variant="outline" onClick={closeForm}>Cancelar</Button></div>
+
+        {/* Footer del Modal */}
+        <div className="flex items-center justify-between border-t border-zinc-800 px-6 py-3">
+          <div>
+            {section === "projects" && editingProjectId && (
+              <button
+                type="button"
+                onClick={() => {
+                  closeForm();
+                  setPendingAction({
+                    id: editingProjectId,
+                    label: `¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
+                  });
+                  setConfirmOpen(true);
+                }}
+                className="text-xs text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Eliminar Proyecto
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <OutlineButton size="sm" onClick={closeForm}>
+              Cancelar
+            </OutlineButton>
+            <GradientButton
+              size="sm"
+              onClick={() => void handleSubmitForm()}
+              disabled={mutations.isSaving}
+            >
+              {mutations.isSaving
+                ? "Guardando..."
+                : editingProjectId
+                ? "Guardar Cambios"
+                : "Crear Proyecto"}
+            </GradientButton>
+          </div>
+        </div>
       </ModalShell>
 
       <ModalShell open={confirmOpen} onClose={() => setConfirmOpen(false)} width="max-w-[520px]">

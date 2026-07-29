@@ -296,6 +296,10 @@ export interface ProjectFormValues {
   description: string;
   areaId: string;
   stateCode: string;
+  priority?: "baja" | "media" | "alta" | "urgente";
+  leaderId?: string;
+  assignedVolunteerIds?: string[];
+  currency?: "USD" | "PEN" | "EUR";
   startDate: string;
   endDate: string;
   budget: string;
