@@ -17,6 +17,7 @@ import { useReportesFinancieros } from "../modules/resources/hooks/useReportesFi
 import { useTransaccionFinancieraDetail } from "../modules/resources/hooks/useTransaccionFinancieraDetail";
 import { useTransaccionesFinancieras } from "../modules/resources/hooks/useTransaccionesFinancieras";
 import type { FinancialApprovalKind, FinancialCategoryKind } from "../modules/resources/types";
+import { useApadrinamientos } from "../services/recursos/apadrinamientos.service";
 
 const PAGE_SIZE = 20;
 
@@ -156,6 +157,13 @@ export function Finance() {
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptForm, setReceiptForm] = useState({ routeInput: "", fileType: "", file: null as File | null });
   const [receiptError, setReceiptError] = useState<string | null>(null);
+
+  const [sponsorshipSearch, setSponsorshipSearch] = useState("");
+  const [sponsorshipFormOpen, setSponsorshipFormOpen] = useState(false);
+  const [sponsorshipForm, setSponsorshipForm] = useState({ donor_name: "", donor_email: "", gateway_name: "stripe", subscription_frequency: "monthly", amount: "100" });
+  const [sponsorshipError, setSponsorshipError] = useState<string | null>(null);
+
+  const sponsorships = useApadrinamientos(sponsorshipSearch);
 
   const accounts = useCuentasFinancieras({ searchTerm: accountsSearch, state: accountsState, page: accountsPage, pageSize: PAGE_SIZE });
   const categories = useCategoriasFinancieras({ searchTerm: categoriesSearch, state: "all", type: categoriesType, page: categoriesPage, pageSize: PAGE_SIZE });
@@ -377,11 +385,19 @@ export function Finance() {
 
       {view === "sponsorships" && (
         <>
+          <FilterBar
+            searchPlaceholder="Buscar por donante o pasarela..."
+            searchValue={sponsorshipSearch}
+            onSearchChange={(val) => setSponsorshipSearch(val)}
+            filters={[]}
+          />
+          {sponsorships.error && <ErrorBlock message={sponsorships.error} onRetry={sponsorships.refresh} />}
+
           <div className="grid gap-3 md:grid-cols-4">
-            <SummaryField label="Apadrinamientos Activos" value="34" />
-            <SummaryField label="Recaudación Recurrente" value="S/ 8,450.00" />
-            <SummaryField label="Pasarelas Activas" value="Stripe, Culqi, MP" />
-            <SummaryField label="Firma Webhook HMAC" value="Verificada (SHA-256)" />
+            <SummaryField label="Apadrinamientos Registrados" value={String(sponsorships.subscriptions.length)} />
+            <SummaryField label="Recaudación Recurrente Total" value={formatMoney(sponsorships.subscriptions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0))} />
+            <SummaryField label="Pasarelas Conectadas" value="Stripe, Culqi, MP" />
+            <SummaryField label="Verificación Webhook" value="HMAC-SHA256 Activa" />
           </div>
 
           <div className="rounded-2xl p-4 space-y-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
@@ -415,19 +431,22 @@ export function Finance() {
 
           <DataTable
             columns={[
-              { key: "donor", label: "Donante", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.donorName}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.donorEmail}</div></div> },
-              { key: "gateway", label: "Pasarela", render: (item) => <StatusDot variant="info">{item.gateway}</StatusDot> },
-              { key: "type", label: "Frecuencia", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.frequency}</span> },
+              { key: "donor", label: "Donante", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.donor_name}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.donor_email}</div></div> },
+              { key: "gateway", label: "Pasarela", render: (item) => <StatusDot variant="info">{item.gateway_name}</StatusDot> },
+              { key: "type", label: "Frecuencia", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.subscription_frequency}</span> },
               { key: "amount", label: "Monto", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{formatMoney(item.amount)}</span> },
-              { key: "webhook", label: "Estado Webhook", render: (item) => <StatusDot variant="success">{item.webhookStatus}</StatusDot> },
+              { key: "status", label: "Estado BD", render: (item) => <StatusDot variant={item.status === "active" ? "success" : "neutral"}>{item.status}</StatusDot> },
             ]}
-            data={[
-              { donorName: "María Fernández", donorEmail: "m.fernandez@gmail.com", gateway: "Stripe", frequency: "Mensual", amount: 250, webhookStatus: "Firma OK (HMAC)" },
-              { donorName: "Carlos Benítez", donorEmail: "carlos.b@hotmail.com", gateway: "Culqi", frequency: "Mensual", amount: 150, webhookStatus: "Firma OK (HMAC)" },
-              { donorName: "Empresa Solar S.A.", donorEmail: "contacto@solarsa.pe", gateway: "MercadoPago", frequency: "Única", amount: 1200, webhookStatus: "Firma OK (HMAC)" },
-            ]}
-            emptyMessage="No se registraron transacciones de apadrinamiento."
+            data={sponsorships.subscriptions}
+            loading={sponsorships.loading}
+            emptyMessage="No hay registros de apadrinamiento en la base de datos Supabase. Haz clic en 'Nuevo apadrinamiento' para agregar uno."
           />
+
+          <div className="flex gap-2">
+            <GradientButton size="sm" onClick={() => { setSponsorshipForm({ donor_name: "", donor_email: "", gateway_name: "stripe", subscription_frequency: "monthly", amount: "100" }); setSponsorshipError(null); setSponsorshipFormOpen(true); }}>
+              Nuevo apadrinamiento (BD)
+            </GradientButton>
+          </div>
         </>
       )}
       <ModalShell open={accountFormOpen} onClose={() => setAccountFormOpen(false)} width="max-w-[760px]">
@@ -699,6 +718,43 @@ export function Finance() {
               }
             }} disabled={receipts.isCreating}>{receipts.isCreating ? "Guardando..." : "Guardar"}</GradientButton>
             <OutlineButton size="sm" onClick={() => setReceiptOpen(false)} disabled={receipts.isCreating}>Cancelar</OutlineButton>
+          </div>
+        </div>
+      <ModalShell open={sponsorshipFormOpen} onClose={() => setSponsorshipFormOpen(false)} width="max-w-[640px]">
+        <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
+          <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Nuevo apadrinamiento (Supabase DB)</h3>
+          <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setSponsorshipFormOpen(false)}>X</button>
+        </div>
+        <div className="space-y-3 p-4">
+          {sponsorshipError && <ErrorBlock message={sponsorshipError} onRetry={() => setSponsorshipError(null)} />}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <input value={sponsorshipForm.donor_name} onChange={(e) => setSponsorshipForm((curr) => ({ ...curr, donor_name: e.target.value }))} placeholder="Nombre del donante" className="h-9 rounded-xl px-3 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
+            <input value={sponsorshipForm.donor_email} onChange={(e) => setSponsorshipForm((curr) => ({ ...curr, donor_email: e.target.value }))} placeholder="Correo del donante" className="h-9 rounded-xl px-3 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <SelectField value={sponsorshipForm.gateway_name} onChange={(val) => setSponsorshipForm((curr) => ({ ...curr, gateway_name: val }))} options={[{ value: "stripe", label: "Stripe SDK" }, { value: "culqi", label: "Culqi" }, { value: "mercadopago", label: "MercadoPago" }]} />
+            <SelectField value={sponsorshipForm.subscription_frequency} onChange={(val) => setSponsorshipForm((curr) => ({ ...curr, subscription_frequency: val }))} options={[{ value: "monthly", label: "Mensual" }, { value: "annual", label: "Anual" }, { value: "one_time", label: "Única" }]} />
+            <input type="number" value={sponsorshipForm.amount} onChange={(e) => setSponsorshipForm((curr) => ({ ...curr, amount: e.target.value }))} placeholder="Monto (PEN)" className="h-9 rounded-xl px-3 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
+          </div>
+          <div className="flex gap-2">
+            <GradientButton size="sm" onClick={async () => {
+              if (!sponsorshipForm.donor_name.trim() || !sponsorshipForm.donor_email.trim()) { setSponsorshipError("Nombre y correo del donante son obligatorios."); return; }
+              try {
+                await sponsorships.create({
+                  donor_name: sponsorshipForm.donor_name.trim(),
+                  donor_email: sponsorshipForm.donor_email.trim(),
+                  gateway_name: sponsorshipForm.gateway_name,
+                  subscription_frequency: sponsorshipForm.subscription_frequency,
+                  amount: Number(sponsorshipForm.amount || 0),
+                });
+                toast.success("Apadrinamiento registrado en la base de datos.");
+                setSponsorshipFormOpen(false);
+                sponsorships.refresh();
+              } catch (err) {
+                setSponsorshipError(err instanceof Error ? err.message : "Error al registrar apadrinamiento.");
+              }
+            }}>Guardar en BD</GradientButton>
+            <OutlineButton size="sm" onClick={() => setSponsorshipFormOpen(false)}>Cancelar</OutlineButton>
           </div>
         </div>
       </ModalShell>
