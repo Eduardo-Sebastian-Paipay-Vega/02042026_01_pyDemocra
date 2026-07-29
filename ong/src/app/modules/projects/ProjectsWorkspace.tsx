@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import {
   AlertCircle,
+  BadgeCheck,
   Building2,
   Calendar,
   CheckCircle2,
@@ -12,6 +13,7 @@ import {
   Eye,
   FileText,
   FolderKanban,
+  Globe,
   Info,
   Kanban,
   Layers,
@@ -50,6 +52,7 @@ import { useProjectCatalogs } from "./hooks/useProjectCatalogs";
 import { useProjectDetails } from "./hooks/useProjectDetails";
 import { useProjectMutations } from "./hooks/useProjectMutations";
 import { useProjectSectionData } from "./hooks/useProjectSectionData";
+import { createHoras } from "../../services/operacion/horas.service";
 import type {
   ActivityDetailData,
   ActivityFormValues,
@@ -166,6 +169,46 @@ function formatCurrency(amount: string | number, currency = "USD"): string {
   return `${symbol} ${num.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function formatDateString(isoStr: string | null): string {
+  if (!isoStr) return "";
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    return new Intl.DateTimeFormat("es-PE", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return isoStr;
+  }
+}
+
+function calculateDateDurationDays(startAt: string | null, endAt: string | null): string | null {
+  if (!startAt || !endAt) return null;
+  try {
+    const d1 = new Date(startAt);
+    const d2 = new Date(endAt);
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return null;
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} día${diffDays === 1 ? "" : "s"}`;
+  } catch {
+    return null;
+  }
+}
+
+function formatActivityWindow(startAt: string | null, endAt: string | null): string {
+  if (!startAt && !endAt) return "Sin definir";
+  const startFmt = formatDateString(startAt);
+  const endFmt = formatDateString(endAt);
+  if (startFmt && endFmt) {
+    if (startFmt === endFmt) return startFmt;
+    return `${startFmt} - ${endFmt}`;
+  }
+  return startFmt || endFmt || "Sin definir";
+}
+
 function AvatarStack({ count }: { count: number }) {
   if (count <= 0) {
     return <span className="text-xs text-zinc-500 italic">Sin asignar</span>;
@@ -239,6 +282,36 @@ function exportProjectsToCSV(projects: ProjectRow[]) {
   link.click();
   document.body.removeChild(link);
   toast.success("Listado de proyectos exportado a CSV exitosamente.");
+}
+
+function exportActivitiesToCSV(activities: ActivityRow[]) {
+  if (!activities || activities.length === 0) {
+    toast.error("No hay actividades para exportar.");
+    return;
+  }
+  const headers = ["Actividad", "Proyecto", "Estado", "Ubicacion", "HorasEstimadas", "HorasRegistradas", "Asignados", "FechaInicio", "FechaFin"];
+  const rows = activities.map((a) => [
+    `"${a.title || ""}"`,
+    `"${a.projectName || ""}"`,
+    `"${a.statusLabel || ""}"`,
+    `"${a.locationName || "Virtual"}"`,
+    a.estimatedHours ?? 0,
+    a.registeredHours ?? 0,
+    a.assignedVolunteers ?? 0,
+    `"${formatDateString(a.startAt)}"`,
+    `"${formatDateString(a.endAt)}"`,
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `actividades_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Reporte de actividades exportado a CSV exitosamente.");
 }
 
 function SelectField({
@@ -367,12 +440,6 @@ function getActivityStatusVariant(statusKind?: string) {
   return "warning";
 }
 
-function formatActivityWindow(startAt: string | null, endAt: string | null): string {
-  if (!startAt && !endAt) return "Sin definir";
-  if (startAt && endAt) return `${startAt} - ${endAt}`;
-  return startAt ?? endAt ?? "Sin definir";
-}
-
 function getAssignmentKindLabel(kind: AssignmentKind) {
   if (kind === "project-volunteer") return "Voluntario en proyecto";
   if (kind === "activity-volunteer") return "Voluntario en actividad";
@@ -391,6 +458,14 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   // Estado de pestaña activa del modal de formulario de proyectos
   const [formTab, setFormTab] = useState<"general" | "team_budget" | "advanced">("general");
+
+  // Estado del Modal para Registrar Horas de Voluntariado
+  const [registerHoursOpen, setRegisterHoursOpen] = useState(false);
+  const [selectedActivityForHours, setSelectedActivityForHours] = useState<ActivityRow | null>(null);
+  const [hoursVolunteerId, setHoursVolunteerId] = useState<string>("");
+  const [hoursValue, setHoursValue] = useState<string>("1");
+  const [hoursDate, setHoursDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [savingHours, setSavingHours] = useState(false);
 
   const [projectFilters, setProjectFilters] = useSessionStorageState<ProjectListFilters>(
     `${storageKeyPrefix}.project-filters`,
@@ -487,6 +562,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setDetailOpen(false);
     setFormOpen(false);
     setConfirmOpen(false);
+    setRegisterHoursOpen(false);
     setPendingAction(null);
     setEditingProjectId(null);
     setEditingTaskId(null);
@@ -503,7 +579,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const assignmentRows = rows as AssignmentRow[];
   const canManage = catalogs.canManage !== false;
 
-  // KPIs
+  // KPIs Proyectos
   const activeProjectsCount = projectRows.filter(
     (p) =>
       p.stateKind === "success" ||
@@ -523,6 +599,23 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   );
   const taskPercent =
     totalTasksSum > 0 ? Math.round((completedTasksEst / totalTasksSum) * 100) : 0;
+
+  // KPIs Actividades
+  const totalRegisteredHoursSum = activityRows.reduce(
+    (acc, a) => acc + (a.registeredHours || 0),
+    0
+  );
+  const totalEstimatedHoursSum = activityRows.reduce(
+    (acc, a) => acc + (a.estimatedHours || 0),
+    0
+  );
+  const totalAssignedVolunteersSum = activityRows.reduce(
+    (acc, a) => acc + (a.assignedVolunteers || 0),
+    0
+  );
+  const fieldLocationsCount = activityRows.filter(
+    (a) => a.locationName && !a.locationName.toLowerCase().includes("virtual")
+  ).length;
 
   function resetForms() {
     setProjectForm(EMPTY_PROJECT_FORM);
@@ -548,6 +641,44 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   function closeForm() {
     setFormOpen(false);
     resetForms();
+  }
+
+  function openRegisterHoursModal(activity: ActivityRow) {
+    setSelectedActivityForHours(activity);
+    setHoursValue("1");
+    setHoursDate(new Date().toISOString().slice(0, 10));
+    setHoursVolunteerId(catalogs.volunteers[0]?.value || "");
+    setRegisterHoursOpen(true);
+  }
+
+  async function handleSaveRegisterHours() {
+    if (!selectedActivityForHours) return;
+    if (!hoursVolunteerId) {
+      toast.error("Debe seleccionar un voluntario para registrar horas.");
+      return;
+    }
+    const hrs = parseFloat(hoursValue);
+    if (isNaN(hrs) || hrs <= 0) {
+      toast.error("Ingrese un número de horas válido.");
+      return;
+    }
+
+    try {
+      setSavingHours(true);
+      await createHoras({
+        activityId: selectedActivityForHours.id,
+        volunteerId: hoursVolunteerId,
+        minutes: Math.round(hrs * 60),
+        date: hoursDate,
+      });
+      toast.success(`Se registraron ${hrs} horas para la actividad "${selectedActivityForHours.title}".`);
+      setRegisterHoursOpen(false);
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudieron registrar las horas.");
+    } finally {
+      setSavingHours(false);
+    }
   }
 
   async function openDetail(id: string, assignmentKind?: AssignmentKind) {
@@ -925,14 +1056,22 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
+  // Columnas enriquecidas para Actividades (Formato Humano de Fechas + Barra de Horas + Ubicación Mapa)
   const activityColumns: Column<ActivityRow>[] = [
     {
       key: "title",
-      label: "Actividad",
+      label: "Actividad y Proyecto",
       render: (row) => (
-        <div>
-          <div style={{ color: "var(--t-text)" }}>{row.title}</div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div
+          className="cursor-pointer group/act"
+          onClick={() => void openDetail(row.id)}
+          title="Ver detalle de la actividad"
+        >
+          <div className="font-semibold text-zinc-100 group-hover/act:text-indigo-400 group-hover/act:underline transition-colors">
+            {row.title}
+          </div>
+          <div className="mt-0.5 text-[11px] text-zinc-400 font-medium flex items-center gap-1.5">
+            <FolderKanban className="h-3 w-3 text-indigo-400 shrink-0" />
             {row.projectName}
           </div>
         </div>
@@ -949,45 +1088,80 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "schedule",
-      label: "Fechas",
-      render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>
-          {formatActivityWindow(row.startAt, row.endAt)}
-        </span>
-      ),
+      label: "Rango de Fechas",
+      render: (row) => {
+        const duration = calculateDateDurationDays(row.startAt, row.endAt);
+        return (
+          <div className="space-y-0.5">
+            <div className="text-xs text-zinc-200 font-medium flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+              {formatActivityWindow(row.startAt, row.endAt)}
+            </div>
+            {duration && (
+              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700">
+                {duration}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "location",
-      label: "Ubicacion",
-      render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>
-          {row.locationName || "Sin ubicacion"}
-        </span>
-      ),
+      label: "Ubicación",
+      render: (row) => {
+        if (row.locationName && !row.locationName.toLowerCase().includes("virtual")) {
+          return (
+            <Badge variant="outline" className="text-xs border-indigo-500/30 text-indigo-300 bg-indigo-500/10 flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-indigo-400" />
+              {row.locationName}
+            </Badge>
+          );
+        }
+        return (
+          <Badge variant="secondary" className="text-xs text-zinc-400 bg-zinc-800/60 border-zinc-700 flex items-center gap-1">
+            <Globe className="h-3 w-3 text-zinc-500" />
+            {row.locationName || "Virtual"}
+          </Badge>
+        );
+      },
     },
     {
       key: "hours",
-      label: "Horas / Reg.",
+      label: "Horas (Reg. / Est.)",
       render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>
-          {row.estimatedHours ?? 0} est. / {row.registeredHours} reg.
-        </span>
+        <ProgressBar
+          count={row.registeredHours || 0}
+          total={row.estimatedHours || 1}
+        />
       ),
     },
     {
-      key: "tasks",
-      label: "Tareas",
+      key: "team",
+      label: "Asignados",
       render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>{row.taskCount}</span>
+        <div className="flex items-center gap-2">
+          <AvatarStack count={row.assignedVolunteers} />
+        </div>
       ),
     },
     {
-      key: "relations",
-      label: "Asign. / Ev.",
+      key: "quickHours",
+      label: "Registrar",
       render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>
-          {row.assignedVolunteers} / {row.evidenceCount}
-        </span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation();
+            openRegisterHoursModal(row);
+          }}
+          className="h-7 text-[11px] px-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 flex items-center gap-1"
+          title="Registrar horas trabajadas en esta actividad"
+        >
+          <Clock className="h-3 w-3 text-indigo-400" />
+          Reg. Horas
+        </Button>
       ),
     },
   ];
@@ -1039,8 +1213,101 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
-  // Renderizado del Tablero Kanban para Proyectos
+  // Renderizado del Tablero Kanban para Proyectos o Calendario para Actividades
   function renderKanbanBoard() {
+    if (section === "activities") {
+      const states = catalogs.activityStates.length > 0
+        ? catalogs.activityStates
+        : [
+            { code: "planificada", label: "Planificada" },
+            { code: "en_progreso", label: "En Progreso" },
+            { code: "completada", label: "Completada" },
+          ];
+
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-x-auto pb-4">
+          {states.map((st) => {
+            const itemsInState = activityRows.filter(
+              (a) =>
+                a.statusCode === st.code ||
+                a.statusLabel.toLowerCase().includes(st.label.toLowerCase())
+            );
+
+            return (
+              <div
+                key={st.code}
+                className="flex flex-col gap-3 rounded-2xl p-4 min-w-[280px]"
+                style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                  <span className="text-xs font-semibold text-zinc-100 flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                    {st.label}
+                  </span>
+                  <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full font-medium">
+                    {itemsInState.length}
+                  </span>
+                </div>
+
+                {itemsInState.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-zinc-500 italic">
+                    Sin actividades en este estado
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {itemsInState.map((activity) => (
+                      <div
+                        key={activity.id}
+                        onClick={() => void openDetail(activity.id)}
+                        className="group cursor-pointer rounded-xl p-4 bg-zinc-950/40 border border-zinc-800/80 hover:border-indigo-500/60 hover:shadow-lg hover:bg-zinc-900/80 transition-all space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-xs font-semibold text-zinc-100 group-hover:text-indigo-400 transition-colors line-clamp-1">
+                              {activity.title}
+                            </h4>
+                            <p className="text-[11px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                              <FolderKanban className="h-3 w-3 text-indigo-400 shrink-0" />
+                              {activity.projectName}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                          {formatActivityWindow(activity.startAt, activity.endAt)}
+                        </div>
+
+                        <ProgressBar
+                          count={activity.registeredHours || 0}
+                          total={activity.estimatedHours || 1}
+                        />
+
+                        <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80">
+                          <AvatarStack count={activity.assignedVolunteers} />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRegisterHoursModal(activity);
+                            }}
+                            className="h-6 text-[10px] px-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20"
+                          >
+                            + Horas
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
     const states = catalogs.projectStates.length > 0
       ? catalogs.projectStates
       : [
@@ -1236,22 +1503,57 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       );
     }
     if (section === "activities") {
+      if (viewMode === "kanban") {
+        return renderKanbanBoard();
+      }
+
       return (
-        <DataTable
-          columns={activityColumns}
-          data={activityRows}
-          loading={loading}
-          actions={[
-            { label: "Ver detalle", onClick: (row) => void openDetail(row.id) },
-            ...(canManage
-              ? [
-                  { label: "Editar", onClick: (row: ActivityRow) => openActivityEdit(row) },
-                  { label: "Eliminar", onClick: (row: ActivityRow) => requestRowAction(row), variant: "destructive" as const },
-                ]
-              : []),
-          ]}
-          emptyMessage="No se encontraron actividades con los filtros actuales."
-        />
+        <div className="space-y-4">
+          <DataTable
+            columns={activityColumns}
+            data={activityRows}
+            loading={loading}
+            actions={[
+              { label: "Ver detalle", onClick: (row) => void openDetail(row.id) },
+              { label: "Registrar Horas", onClick: (row: ActivityRow) => openRegisterHoursModal(row) },
+              ...(canManage
+                ? [
+                    { label: "Editar", onClick: (row: ActivityRow) => openActivityEdit(row) },
+                    { label: "Eliminar", onClick: (row: ActivityRow) => requestRowAction(row), variant: "destructive" as const },
+                  ]
+                : []),
+            ]}
+            emptyMessage="No se encontraron actividades con los filtros actuales."
+          />
+
+          {/* Footer de Paginación para Actividades */}
+          <div
+            className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <span className="text-xs text-zinc-400">
+              Mostrando <strong className="text-zinc-200">{activityRows.length}</strong> de{" "}
+              <strong className="text-zinc-200">{activityRows.length}</strong> actividades
+            </span>
+            <div className="flex items-center gap-2">
+              <OutlineButton
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </OutlineButton>
+              <span className="text-xs text-zinc-300 px-2 font-medium">Página {currentPage}</span>
+              <OutlineButton
+                size="sm"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage * pageSize >= activityRows.length || activityRows.length === 0}
+              >
+                Siguiente
+              </OutlineButton>
+            </div>
+          </div>
+        </div>
       );
     }
     return (
@@ -1278,7 +1580,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       return (
         <div className="flex flex-col items-center justify-center p-12 space-y-3">
           <RefreshCw className="h-6 w-6 animate-spin text-indigo-400" />
-          <p className="text-xs text-zinc-400">Cargando información completa del proyecto...</p>
+          <p className="text-xs text-zinc-400">Cargando información completa del registro...</p>
         </div>
       );
     }
@@ -1329,7 +1631,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     <div className="flex items-center gap-2 bg-zinc-900/80 backdrop-blur px-3 py-2 rounded-xl border border-zinc-800 text-xs text-zinc-300">
                       <Calendar className="h-4 w-4 text-indigo-400" />
                       <span>
-                        {detail.project.startDate || "N/A"} - {detail.project.endDate || "N/A"}
+                        {formatActivityWindow(detail.project.startDate, detail.project.endDate)}
                       </span>
                     </div>
                   </div>
@@ -1388,7 +1690,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       Registrado por: <strong className="text-zinc-400">{detail.createdBy || "Sistema"}</strong>
                     </span>
                     <span>
-                      Fecha de registro: <strong className="text-zinc-400">{detail.project.createdAt}</strong>
+                      Fecha de registro: <strong className="text-zinc-400">{formatDateString(detail.project.createdAt)}</strong>
                     </span>
                     {detail.updatedBy && (
                       <span>
@@ -1551,7 +1853,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</div><div style={{ color: "var(--t-text)" }}>{detail.task.activityName ?? "Sin actividad asignada"}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getTaskStatusVariant(detail.task.statusKind)}>{detail.task.statusLabel}</StatusDot></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fecha limite</div><div style={{ color: "var(--t-text)" }}>{detail.task.deadline || "Sin fecha"}</div></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fecha limite</div><div style={{ color: "var(--t-text)" }}>{formatDateString(detail.task.deadline) || "Sin fecha"}</div></div>
                 </div>
                 <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.task.description || "Sin descripcion registrada."}</div></div>
               </>
@@ -1567,15 +1869,15 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</div><div style={{ color: "var(--t-text)" }}>{detail.activity.projectName}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getActivityStatusVariant(detail.activity.statusKind)}>{detail.activity.statusLabel}</StatusDot></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Tareas</div><div style={{ color: "var(--t-text)" }}>{detail.linkedTasks.length}</div></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Tareas Vinculadas</div><div style={{ color: "var(--t-text)" }}>{detail.linkedTasks.length}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fechas</div><div style={{ color: "var(--t-text)" }}>{formatActivityWindow(detail.activity.startAt, detail.activity.endAt)}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Ubicacion</div><div style={{ color: "var(--t-text)" }}>{detail.activity.locationName || "Sin ubicacion"}</div></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Ubicacion</div><div style={{ color: "var(--t-text)" }}>{detail.activity.locationName || "Virtual"}</div></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Horas</div><div style={{ color: "var(--t-text)" }}>{detail.activity.estimatedHours ?? 0} h estimadas / {detail.activity.registeredHours} h registradas</div></div>
                 </div>
                 <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.activity.description || "Sin descripcion registrada."}</div></div>
                 <div className="grid gap-3 lg:grid-cols-3">
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Asignaciones</div>{detail.assignments.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin asignaciones.</div> : detail.assignments.map((row) => <div key={row.id} className="py-1"><div style={{ color: "var(--t-text)" }}>{row.volunteerName}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{row.role || "Sin rol"}</div></div>)}</div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Horas</div>{detail.hours.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin horas.</div> : detail.hours.map((row) => <div key={row.id} className="py-1" style={{ color: "var(--t-text)" }}>{row.date} - {row.volunteerName} - {row.hours} h</div>)}</div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Horas</div>{detail.hours.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin horas.</div> : detail.hours.map((row) => <div key={row.id} className="py-1" style={{ color: "var(--t-text)" }}>{formatDateString(row.date)} - {row.volunteerName} - {row.hours} h</div>)}</div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Evidencias</div>{detail.evidences.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin evidencias.</div> : detail.evidences.map((row) => <div key={row.id} className="py-1" style={{ color: "var(--t-text)" }}>{row.evidenceType || "Sin tipo"} - {row.volunteerName}</div>)}</div>
                 </div>
               </>
@@ -1643,7 +1945,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       {catalogsError ? <ErrorBlock message={catalogsError} onRetry={refreshCatalogs} /> : null}
       {error ? <ErrorBlock message={error} onRetry={refresh} /> : null}
 
-      {/* 1. Tarjetas de Resumen (KPIs) en la parte superior (solo vista Proyectos) */}
+      {/* 1. Tarjetas de Resumen (KPIs) en la parte superior (Proyectos y Actividades) */}
       {section === "projects" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div
@@ -1706,6 +2008,76 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <span className="text-2xl font-bold text-zinc-100">{taskPercent}%</span>
               <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
                 Global
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "activities" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">Total Actividades</span>
+              <Calendar className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{activityRows.length}</span>
+              <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Registradas
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">Control de Horas</span>
+              <Clock className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-xl font-bold text-zinc-100">
+                {totalRegisteredHoursSum}h <span className="text-xs text-zinc-400 font-normal">/ {totalEstimatedHoursSum}h</span>
+              </span>
+              <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                {totalEstimatedHoursSum > 0 ? Math.round((totalRegisteredHoursSum / totalEstimatedHoursSum) * 100) : 0}%
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium font-sans">Personal / Voluntarios</span>
+              <Users className="h-4 w-4 text-sky-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{totalAssignedVolunteersSum}</span>
+              <span className="text-xs font-medium text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+                Asignados
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">En Campo</span>
+              <MapPin className="h-4 w-4 text-amber-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{fieldLocationsCount}</span>
+              <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                Ubicaciones
               </span>
             </div>
           </div>
@@ -1790,8 +2162,39 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </>
             )}
 
-            {/* Selector de Vista Tabla vs. Kanban (Solo para Proyectos) */}
-            {section === "projects" && (
+            {section === "activities" && (
+              <>
+                <div className="w-44">
+                  <SelectField
+                    value={activityFilters.projectId === "all" ? "" : activityFilters.projectId}
+                    onChange={(value) =>
+                      setActivityFilters((current) => ({
+                        ...current,
+                        projectId: value || "all",
+                      }))
+                    }
+                    options={catalogs.projects}
+                    placeholder="Todos los proyectos"
+                  />
+                </div>
+                <div className="w-36">
+                  <SelectField
+                    value={activityFilters.statusCode === "all" ? "" : activityFilters.statusCode}
+                    onChange={(value) =>
+                      setActivityFilters((current) => ({
+                        ...current,
+                        statusCode: (value || "all") as ActivityListFilters["statusCode"],
+                      }))
+                    }
+                    options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))}
+                    placeholder="Estado"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Selector de Vista Tabla vs. Kanban / Agenda */}
+            {(section === "projects" || section === "activities") && (
               <div className="flex items-center rounded-xl p-1 bg-zinc-950 border border-zinc-800">
                 <button
                   type="button"
@@ -1803,7 +2206,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   }`}
                 >
                   <LayoutList className="h-3.5 w-3.5" />
-                  Tabla
+                  {section === "activities" ? "Lista" : "Tabla"}
                 </button>
                 <button
                   type="button"
@@ -1815,7 +2218,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   }`}
                 >
                   <Kanban className="h-3.5 w-3.5" />
-                  Kanban
+                  {section === "activities" ? "Agenda" : "Kanban"}
                 </button>
               </div>
             )}
@@ -1831,12 +2234,23 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 Exportar
               </OutlineButton>
             )}
+            {section === "activities" && (
+              <OutlineButton
+                size="sm"
+                onClick={() => exportActivitiesToCSV(activityRows)}
+                className="flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Exportar
+              </OutlineButton>
+            )}
           </div>
         </div>
       </div>
 
       {renderCurrentTable()}
 
+      {/* Modal de Detalle */}
       <ModalShell open={detailOpen} onClose={closeDetail} width="max-w-[1100px]">
         <div className="flex items-start justify-between gap-3 border-b border-[var(--t-border)] px-4 py-3">
           <div>
@@ -1857,6 +2271,80 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
         </div>
         <div className="max-h-[80vh] overflow-y-auto p-5">{renderDetail()}</div>
+      </ModalShell>
+
+      {/* Modal para Registrar Horas de Voluntariado en Actividad */}
+      <ModalShell open={registerHoursOpen} onClose={() => setRegisterHoursOpen(false)} width="max-w-[500px]">
+        <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-indigo-400" />
+              Registrar Horas de Voluntariado
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Actividad: <strong className="text-zinc-200">{selectedActivityForHours?.title}</strong>
+            </p>
+          </div>
+          <button
+            onClick={() => setRegisterHoursOpen(false)}
+            className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+              Voluntario / Colaborador <span className="text-red-400">*</span>
+            </label>
+            <SelectField
+              value={hoursVolunteerId}
+              onChange={(v) => setHoursVolunteerId(v)}
+              options={catalogs.volunteers}
+              placeholder="Seleccionar Voluntario"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-300">
+                Horas Trabajadas <span className="text-red-400">*</span>
+              </label>
+              <InputField
+                value={hoursValue}
+                onChange={(v) => setHoursValue(v)}
+                placeholder="1.5"
+                type="number"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-300">
+                Fecha del Registro <span className="text-red-400">*</span>
+              </label>
+              <InputField
+                value={hoursDate}
+                onChange={(v) => setHoursDate(v)}
+                placeholder="Fecha"
+                type="date"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-zinc-800 px-6 py-3">
+          <OutlineButton size="sm" onClick={() => setRegisterHoursOpen(false)}>
+            Cancelar
+          </OutlineButton>
+          <GradientButton
+            size="sm"
+            onClick={() => void handleSaveRegisterHours()}
+            disabled={savingHours}
+          >
+            {savingHours ? "Registrando..." : "Guardar Horas"}
+          </GradientButton>
+        </div>
       </ModalShell>
 
       {/* Modal de Creación y Edición Rediseñado con Pestañas (Tabs) y Etiquetas (Labels) */}
