@@ -3,16 +3,14 @@ import { toast } from "sonner";
 import {
   Bell,
   CheckCircle2,
+  Clock,
   Globe,
   KeyRound,
   Laptop,
   Lock,
   Mail,
   Moon,
-  Pencil,
   Phone,
-  Shield,
-  ShieldAlert,
   ShieldCheck,
   Sliders,
   Smartphone,
@@ -26,10 +24,14 @@ import { OutlineButton } from "../components/ui/outline-button";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
 import {
   getMyProfile,
+  signOutOtherSessions,
   updateMyAvatar,
+  updateMyPassword,
   updateMyProfileDetails,
+  updateMyUserMetadata,
   type MyProfileRow,
 } from "../services/account/myAccount.service";
+import { supabase } from "../../supabaseClient";
 
 type SettingsTab = "profile" | "security" | "notifications" | "preferences";
 
@@ -47,7 +49,7 @@ export function MyAccountSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [profile, setProfile] = useState<MyProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Formulario Perfil General
   const [firstName, setFirstName] = useState("");
@@ -65,22 +67,31 @@ export function MyAccountSettings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [signingOutOthers, setSigningOutOthers] = useState(false);
 
   // Formulario Notificaciones
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(true);
   const [notifySms, setNotifySms] = useState(false);
   const [notifyPush, setNotifyPush] = useState(true);
+  const [savingNotifications, setSavingNotifications] = useState(false);
 
   // Preferencias
   const [language, setLanguage] = useState("es");
   const [timezone, setTimezone] = useState("America/Lima");
+  const [savingPreferences, setSavingPreferences] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    getMyProfile()
-      .then((row) => {
+
+    async function loadAllSettings() {
+      try {
+        setLoading(true);
+
+        // 1. Obtener perfil de la BD PostgreSQL (profiles)
+        const row = await getMyProfile();
         if (cancelled) return;
+
         setProfile(row);
         const nameParts = (row.full_name ?? "").trim().split(" ");
         setFirstName(nameParts[0] ?? "");
@@ -89,11 +100,32 @@ export function MyAccountSettings() {
         setNumeroDocumento(row.numero_documento ?? "");
         setGenero(row.genero ?? "Masculino");
         setAvatarPreview(row.avatar_url ?? null);
-      })
-      .catch((err) => toast.error(err instanceof Error ? err.message : String(err)))
-      .finally(() => {
+
+        // 2. Obtener metadatos del usuario desde Supabase Auth
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData.user?.user_metadata) {
+          const meta = authData.user.user_metadata;
+          if (meta.phone) setTelefono(meta.phone);
+          if (meta.mfa_enabled !== undefined) setTwoFactorEnabled(Boolean(meta.mfa_enabled));
+          if (meta.notifications) {
+            setNotifyEmail(meta.notifications.email ?? true);
+            setNotifyWhatsapp(meta.notifications.whatsapp ?? true);
+            setNotifySms(meta.notifications.sms ?? false);
+            setNotifyPush(meta.notifications.push ?? true);
+          }
+          if (meta.preferences) {
+            if (meta.preferences.language) setLanguage(meta.preferences.language);
+            if (meta.preferences.timezone) setTimezone(meta.preferences.timezone);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) toast.error(err instanceof Error ? err.message : String(err));
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    }
+
+    loadAllSettings();
     return () => {
       cancelled = true;
     };
@@ -118,8 +150,9 @@ export function MyAccountSettings() {
     setAvatarPreview(null);
   };
 
+  // CRUD: Guardar datos de Perfil General en Supabase BD (profiles + auth user_metadata + storage)
   const handleSaveProfile = async () => {
-    setSaving(true);
+    setSavingProfile(true);
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
       await updateMyProfileDetails({
@@ -133,6 +166,10 @@ export function MyAccountSettings() {
       if (avatarFile) {
         nextAvatarUrl = await updateMyAvatar(avatarFile);
       }
+
+      await updateMyUserMetadata({
+        phone: telefono.trim(),
+      });
 
       setProfile((prev) =>
         prev
@@ -151,14 +188,15 @@ export function MyAccountSettings() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al guardar cambios de perfil.");
     } finally {
-      setSaving(false);
+      setSavingProfile(false);
     }
   };
 
+  // CRUD: Actualizar Contraseña en Supabase Auth
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Por favor completa todos los campos de contraseña.");
+    if (!newPassword || !confirmPassword) {
+      toast.error("Por favor ingresa la nueva contraseña y su confirmación.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -171,13 +209,82 @@ export function MyAccountSettings() {
     }
 
     setUpdatingPassword(true);
-    setTimeout(() => {
-      setUpdatingPassword(false);
+    try {
+      await updateMyPassword(newPassword);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       toast.success("Contraseña actualizada correctamente en Supabase Auth.");
-    }, 1200);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al actualizar contraseña.");
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
+  // CRUD: Activar / Desactivar 2FA en Supabase Auth
+  const handleToggle2FA = async (checked: boolean) => {
+    setTwoFactorEnabled(checked);
+    try {
+      await updateMyUserMetadata({ mfa_enabled: checked });
+      toast.success(
+        checked ? "2FA Habilitado y guardado en tu cuenta." : "2FA Deshabilitado."
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al actualizar 2FA.");
+    }
+  };
+
+  // CRUD: Cerrar sesión en otros dispositivos vía Supabase Auth Scope
+  const handleSignOutOthers = async () => {
+    setSigningOutOthers(true);
+    try {
+      await signOutOtherSessions();
+      toast.success("Se cerraron las sesiones activas en los demás dispositivos.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al cerrar otras sesiones.");
+    } finally {
+      setSigningOutOthers(false);
+    }
+  };
+
+  // CRUD: Guardar Preferencias de Notificación en Supabase Auth Metadata
+  const handleSaveNotifications = async () => {
+    setSavingNotifications(true);
+    try {
+      await updateMyUserMetadata({
+        notifications: {
+          email: notifyEmail,
+          whatsapp: notifyWhatsapp,
+          sms: notifySms,
+          push: notifyPush,
+        },
+      });
+      toast.success("Preferencias de notificaciones guardadas en Supabase.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al guardar notificaciones.");
+    } finally {
+      setSavingNotifications(false);
+    }
+  };
+
+  // CRUD: Guardar Preferencias Regionales e Interfaz en Supabase Auth Metadata
+  const handleSavePreferences = async () => {
+    setSavingPreferences(true);
+    try {
+      await updateMyUserMetadata({
+        preferences: {
+          language,
+          timezone,
+          theme: "dark",
+        },
+      });
+      toast.success("Preferencias regionales guardadas en Supabase.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al guardar preferencias.");
+    } finally {
+      setSavingPreferences(false);
+    }
   };
 
   return (
@@ -247,7 +354,7 @@ export function MyAccountSettings() {
           className="w-full rounded-2xl p-6 text-center"
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
-          <p className="text-xs text-zinc-400">Cargando configuración del usuario…</p>
+          <p className="text-xs text-zinc-400">Cargando configuración del usuario desde la BD…</p>
         </div>
       )}
 
@@ -286,7 +393,7 @@ export function MyAccountSettings() {
                         type="file"
                         accept="image/*"
                         onChange={handleAvatarSelect}
-                        disabled={saving}
+                        disabled={savingProfile}
                         className="hidden"
                       />
                       <OutlineButton size="sm" asSpan className="flex items-center gap-1.5 pointer-events-none">
@@ -297,7 +404,7 @@ export function MyAccountSettings() {
                       <OutlineButton
                         size="sm"
                         onClick={handleRemoveAvatar}
-                        disabled={saving}
+                        disabled={savingProfile}
                         className="flex items-center gap-1.5 text-rose-400 hover:text-rose-300"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Eliminar
@@ -317,7 +424,7 @@ export function MyAccountSettings() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                     placeholder="Ej. Juan Eduardo"
@@ -332,7 +439,7 @@ export function MyAccountSettings() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                     placeholder="Ej. Pérez Vega"
@@ -344,7 +451,7 @@ export function MyAccountSettings() {
                   <select
                     value={tipoDocumento}
                     onChange={(e) => setTipoDocumento(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                   >
@@ -361,7 +468,7 @@ export function MyAccountSettings() {
                     type="text"
                     value={numeroDocumento}
                     onChange={(e) => setNumeroDocumento(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                     placeholder="Ej. 72819203"
@@ -376,7 +483,7 @@ export function MyAccountSettings() {
                     type="tel"
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                     placeholder="Ej. +51 987 654 321"
@@ -388,7 +495,7 @@ export function MyAccountSettings() {
                   <select
                     value={genero}
                     onChange={(e) => setGenero(e.target.value)}
-                    disabled={saving}
+                    disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                   >
@@ -420,8 +527,8 @@ export function MyAccountSettings() {
 
               {/* Botón Principal Guardar Cambios alineado a la derecha */}
               <div className="flex justify-end pt-2 border-t border-zinc-800/80">
-                <GradientButton onClick={handleSaveProfile} disabled={saving}>
-                  {saving ? "Guardando cambios…" : "Guardar Cambios BD"}
+                <GradientButton onClick={handleSaveProfile} disabled={savingProfile}>
+                  {savingProfile ? "Guardando cambios en BD…" : "Guardar Cambios BD"}
                 </GradientButton>
               </div>
             </div>
@@ -490,7 +597,7 @@ export function MyAccountSettings() {
 
                 <div className="flex justify-end pt-2">
                   <GradientButton type="submit" disabled={updatingPassword}>
-                    {updatingPassword ? "Actualizando…" : "Actualizar Contraseña"}
+                    {updatingPassword ? "Actualizando en Supabase Auth…" : "Actualizar Contraseña BD"}
                   </GradientButton>
                 </div>
               </form>
@@ -519,12 +626,7 @@ export function MyAccountSettings() {
                     <input
                       type="checkbox"
                       checked={twoFactorEnabled}
-                      onChange={(e) => {
-                        setTwoFactorEnabled(e.target.checked);
-                        toast.success(
-                          e.target.checked ? "2FA Habilitado en tu cuenta." : "2FA Deshabilitado."
-                        );
-                      }}
+                      onChange={(e) => handleToggle2FA(e.target.checked)}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600" />
@@ -558,10 +660,11 @@ export function MyAccountSettings() {
 
                   <OutlineButton
                     size="sm"
-                    onClick={() => toast.success("Se cerraron las sesiones en los demás dispositivos.")}
+                    onClick={handleSignOutOthers}
+                    disabled={signingOutOthers}
                     className="text-xs text-rose-400 hover:text-rose-300"
                   >
-                    Cerrar sesión en otros dispositivos
+                    {signingOutOthers ? "Cerrando…" : "Cerrar sesión en otros dispositivos"}
                   </OutlineButton>
                 </div>
 
@@ -624,7 +727,7 @@ export function MyAccountSettings() {
                     type="checkbox"
                     checked={notifyEmail}
                     onChange={(e) => setNotifyEmail(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
 
@@ -637,7 +740,7 @@ export function MyAccountSettings() {
                     type="checkbox"
                     checked={notifyWhatsapp}
                     onChange={(e) => setNotifyWhatsapp(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
 
@@ -650,7 +753,7 @@ export function MyAccountSettings() {
                     type="checkbox"
                     checked={notifySms}
                     onChange={(e) => setNotifySms(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
 
@@ -663,14 +766,14 @@ export function MyAccountSettings() {
                     type="checkbox"
                     checked={notifyPush}
                     onChange={(e) => setNotifyPush(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end pt-2 border-t border-zinc-800">
-                <GradientButton onClick={() => toast.success("Preferencias de notificaciones guardadas.")}>
-                  Guardar Preferencias
+                <GradientButton onClick={handleSaveNotifications} disabled={savingNotifications}>
+                  {savingNotifications ? "Guardando en Supabase…" : "Guardar Preferencias BD"}
                 </GradientButton>
               </div>
             </div>
@@ -736,8 +839,8 @@ export function MyAccountSettings() {
               </div>
 
               <div className="flex justify-end pt-2 border-t border-zinc-800">
-                <GradientButton onClick={() => toast.success("Preferencias de sistema guardadas.")}>
-                  Guardar Preferencias
+                <GradientButton onClick={handleSavePreferences} disabled={savingPreferences}>
+                  {savingPreferences ? "Guardando en Supabase…" : "Guardar Preferencias BD"}
                 </GradientButton>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../../../supabaseClient", () => ({
   supabase: {
-    auth: { getUser: vi.fn() },
+    auth: { getUser: vi.fn(), updateUser: vi.fn(), signOut: vi.fn() },
     from: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -242,5 +242,50 @@ describe("updateMyProfileDetails", () => {
     expect(supabase.from).toHaveBeenCalledWith("profiles");
     expect(supabase.update).toHaveBeenCalledWith({ full_name: "Juan Pérez", tipo_documento: "DNI" });
     expect(mockEq).toHaveBeenCalledWith("id", "user-1");
+  });
+});
+
+describe("updateMyPassword", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("llama a supabase.auth.updateUser con la nueva clave", async () => {
+    (supabase.auth.updateUser as any).mockResolvedValue({ data: {}, error: null });
+    const { updateMyPassword } = await import("./myAccount.service");
+    await updateMyPassword("NuevaClave123!");
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: "NuevaClave123!" });
+  });
+
+  it("lanza error si supabase.auth.updateUser falla", async () => {
+    (supabase.auth.updateUser as any).mockResolvedValue({ error: { message: "Clave débil" } });
+    const { updateMyPassword } = await import("./myAccount.service");
+    await expect(updateMyPassword("123")).rejects.toThrow("Clave débil");
+  });
+});
+
+describe("updateMyUserMetadata", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("llama a supabase.auth.updateUser con la data de metadatos", async () => {
+    (supabase.auth.updateUser as any).mockResolvedValue({ data: {}, error: null });
+    const { updateMyUserMetadata } = await import("./myAccount.service");
+    await updateMyUserMetadata({ theme: "dark" });
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith({ data: { theme: "dark" } });
+  });
+});
+
+describe("signOutOtherSessions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("llama a supabase.auth.signOut con scope others", async () => {
+    (supabase.auth.signOut as any).mockResolvedValue({ error: null });
+    const { signOutOtherSessions } = await import("./myAccount.service");
+    await signOutOtherSessions();
+    expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
   });
 });

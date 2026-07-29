@@ -111,3 +111,24 @@ export async function updateMyProfileDetails(input: {
     throw new Error(error.message);
   }
 }
+
+export async function updateMyPassword(newPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function updateMyUserMetadata(metadata: Record<string, any>): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ data: metadata });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function signOutOtherSessions(): Promise<void> {
+  const { error } = await supabase.auth.signOut({ scope: "others" });
+  if (error) {
+    throw new Error(error.message);
+  }
+}
