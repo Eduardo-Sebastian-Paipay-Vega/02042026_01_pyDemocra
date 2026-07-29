@@ -19,8 +19,111 @@ Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (r
 
 1. **Cero `package.json` secundarios**: Ninguna subcarpeta (como `ONG/` u otro submódulo) debe tener su propio `package.json` ni su propia carpeta `node_modules`. Todas las dependencias se instalan en la raíz del proyecto.
 2. **Autenticación compartida nativa**: Todo cliente de Supabase (raíz, ONG, y cualquier módulo futuro) debe inicializarse con el mismo `storageKey` explícito: `storageKey: 'sb-democra-auth-token'`.
-3. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse estrictamente en minúsculas (`/ong/`, `/api/`, etc.).
+3. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse strictly en minúsculas (`/ong/`, `/api/`, etc.).
 4. **El backend vive en `server/`, no en `api/`**: `api/server.js` es solo el adaptador Serverless para Vercel. La lógica real (rutas, middleware, controllers, servicios) pertenece a `server/`.
+
+## Regla obligatoria: Ciberseguridad Esencial, DevSecOps y AppSec
+
+> Vigente desde 2026-07-29. Aplica estrictamente a todo código de frontend, backend, APIs y base de datos.
+
+Antes de escribir o modificar cualquier código de la API, componentes, controladores o base de datos, se debe validar y aplicar el conjunto de controles OWASP AppSec:
+
+1. **OWASP Top 10 & Sanitización de Inputs:**
+   - **XSS:** Sanitizar e inyectar escapado de cadenas HTML en todo input dinámico (`DOMPurify` / JSX nativo). Prohibido usar `dangerouslySetInnerHTML` sin sanitización.
+   - **SQL / NoSQL Injection:** Uso estricto de consultas parametrizadas (`.eq()`, `.in()`, `$1, $2`) o ORM confiable (Supabase JS / Postgres Client). Prohibida la concatenación directa de cadenas en SQL.
+   - **Anti-CSRF:** Atributos `SameSite=Strict/Lax` y `Secure` en cookies de sesión, y validación de tokens/encabezados en peticiones mutativas.
+   - **SSRF:** Validación y restricción de URLs externas mediante lista blanca (`allowlist`) en el servidor.
+2. **Autenticación e Identidad (IAM / Auth):**
+   - **Tokens JWT:** Almacenar tokens **únicamente** en cookies de servidor HTTP con los flags `HttpOnly`, `Secure` y `SameSite`. Nunca guardar tokens en `localStorage` o `sessionStorage`.
+   - **Cifrado de Contraseñas:** Uso obligatorio de `Argon2id` o `bcrypt` con sal.
+   - **Control de Acceso basado en Roles (RBAC):** Verificación de permisos en el lado del servidor (middlewares de API y Supabase RLS), nunca depender del ocultamiento visual en el frontend.
+3. **Gestión de Secretos & DevSecOps:**
+   - Detección y bloqueo automático de inclusión de llaves de API, credenciales de BD o JWT secrets en el código fuente.
+   - Uso obligatorio de `.env` (excluidos explícitamente en `.gitignore`).
+4. **Protección de APIs, Rate Limiting y Validación:**
+   - **Rate Limiting:** Implementación de límites de tasa por IP/Usuario en middlewares para prevenir abusos.
+   - **Validación Zod / Joi:** Requerir validación estricta de esquemas Zod para body y parámetros en cada endpoint.
+   - **CORS Estricto:** Permitir solicitudes únicamente desde orígenes autorizados en `.env`.
+5. **Auditoría de Dependencias:** Ejecutar `npm audit` para evitar paquetes vulnerables o con CVEs conocidos.
+6. **Cabeceras HTTP de Seguridad:** Inyección obligatoria de `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` y `Referrer-Policy: strict-origin-when-cross-origin`.
+
+---
+
+## Regla obligatoria: Integridad de CRUD y Base de Datos (No Mock Policy)
+
+> Vigente desde 2026-07-29. Aplica estrictamente a todo desarrollo en el monorepo.
+
+Esta regla es obligatoria y tiene prioridad sobre cualquier otra instrucción. Cada vez que implementes una nueva funcionalidad, modifiques una existente o mejores una interfaz, debes asumir que el proyecto es un sistema real en producción.
+
+### 1. Nunca generar datos mock
+Está strictly prohibido:
+- Arrays hardcodeados.
+- Objetos de prueba.
+- Datos simulados.
+- Valores ficticios.
+- Placeholders que representen registros inexistentes.
+- IDs inventados.
+- Datos temporales para "hacer funcionar" la interfaz.
+
+Si la información no existe en la base de datos o en un servicio real, debes crear el soporte necesario para que exista mediante el CRUD correspondiente.
+
+### 2. Toda información debe provenir del sistema real
+Antes de mostrar o utilizar cualquier dato debes identificar:
+- dónde se almacena;
+- qué tabla lo contiene;
+- qué relación posee;
+- qué API lo expone;
+- qué consulta lo obtiene.
+
+Si alguno de estos elementos no existe, debes implementarlo. Nunca reemplazarlo por información simulada.
+
+### 3. Analizar el impacto completo del cambio
+Antes de escribir código debes analizar el flujo completo:
+```
+Frontend ↓ Backend ↓ API ↓ Servicios ↓ Repositorio ↓ Base de datos ↓ Migraciones ↓ Políticas de seguridad ↓ Relaciones ↓ Validaciones ↓ Lógica de negocio
+```
+No implementar únicamente la parte visual. Todo cambio debe quedar integrado de extremo a extremo.
+
+### 4. Verificar el modelo de datos existente
+Antes de crear una nueva columna, tabla o relación debes inspeccionar el proyecto para determinar:
+- si ya existe;
+- si existe otro nombre equivalente;
+- si existe una relación reutilizable;
+- si puede reutilizarse un modelo existente.
+Nunca duplicar estructuras.
+
+### 5. Si el frontend requiere un nuevo atributo
+Realizar el flujo completo: esquema SQL, migraciones, ORM, modelos, DTO, validaciones, servicios, repositorios, endpoints, frontend, formularios, permisos y documentación. El atributo debe existir realmente en todo el sistema.
+
+### 6. Mantener la integridad del CRUD
+Toda nueva entidad debe tener, cuando corresponda: **Create, Read, Update, Delete**. Si el proyecto sigue otro patrón (Repository, CQRS, Clean Architecture, DDD, etc.) debes respetarlo. Nunca implementar únicamente el Read para que "funcione".
+
+### 7. Respetar la lógica de negocio existente
+No modificar reglas del sistema únicamente para facilitar la implementación. Nunca romper permisos, autenticación, autorización, RLS, triggers, constraints, índices, relaciones o reglas del dominio.
+
+### 8. Verificación mediante CLI
+Antes de finalizar cualquier tarea debes inspeccionar automáticamente el proyecto utilizando las herramientas disponibles (CLI, ORM, migraciones, Supabase CLI, etc.) para comprobar que la tabla/columna existe, las relaciones son coherentes y el frontend consume datos reales.
+
+### 9. Nunca romper la arquitectura existente
+Identificar el patrón del proyecto, convenciones, estructura de carpetas, naming y estilo de código. Todo cambio debe integrarse respetando dichas convenciones.
+
+### 10. Integración completa y cero deuda técnica
+No dejar implementaciones parciales ni generar TODOs, FIXMEs, mocks temporales o funciones vacías.
+
+### 11. Checklist obligatorio antes de dar la tarea por finalizada
+- ✅ No existe ningún dato mock.
+- ✅ Todo proviene de la base de datos.
+- ✅ Se respetó el CRUD completo.
+- ✅ Las relaciones son válidas.
+- ✅ Las migraciones son coherentes.
+- ✅ No se rompió la lógica de negocio.
+- ✅ No se duplicaron entidades.
+- ✅ El frontend consume datos reales.
+- ✅ Los tipos coinciden.
+- ✅ La implementación funciona de extremo a extremo.
+- ✅ El cambio mantiene la arquitectura existente.
+
+---
 
 ## Regla obligatoria: verificación de impacto en Base de Datos (Supabase CLI)
 

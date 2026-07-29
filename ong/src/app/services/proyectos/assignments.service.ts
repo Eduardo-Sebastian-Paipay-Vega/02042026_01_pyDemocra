@@ -459,13 +459,28 @@ export async function getAssignmentDetail(
       activeState: "all",
     });
 
-    const detail = rows.find((row) => row.id === assignmentId) ?? null;
+    let detail = rows.find((row) => row.id === assignmentId) ?? null;
+    if (!detail) {
+      const allRows = await listAssignments({
+        searchTerm: "",
+        kind: "all",
+        projectId: "all",
+        taskId: "all",
+        activityId: "all",
+        volunteerId: "all",
+        itemId: "all",
+        activeState: "all",
+      });
+      detail = allRows.find((row) => row.id === assignmentId) ?? null;
+    }
+
     if (!detail) {
       return null;
     }
 
+    const effectiveKind = detail.kind;
     const warnings =
-      assignmentKind === "activity-volunteer" || assignmentKind === "project-resource"
+      effectiveKind === "activity-volunteer" || effectiveKind === "project-resource"
         ? [
             "El esquema actual no define un flag de vigencia para esta asignacion; la baja se resuelve con borrado fisico controlado.",
           ]

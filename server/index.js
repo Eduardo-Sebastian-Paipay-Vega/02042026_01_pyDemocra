@@ -37,10 +37,45 @@ const app = express();
 // agregando saltos falsos al header.
 app.set("trust proxy", 1);
 
-// Oculta X-Powered-By y aplica el resto de cabeceras de seguridad por
-// defecto de Helmet. Es una API JSON pura (nunca sirve HTML), así que su CSP
-// por defecto no choca con nada de lo que este servidor responde.
-app.use(helmet());
+// Oculta X-Powered-By y aplica cabeceras HTTP de seguridad OWASP por defecto de Helmet:
+// Content-Security-Policy, HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        fontSrc: ["'self'", "data:"],
+        connectSrc: ["'self'", "https:"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: "deny",
+    },
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin",
+    },
+    noSniff: true,
+    xssFilter: true,
+  })
+);
+
+// Inyección de Permissions-Policy y cabeceras de endurecimiento adicionales
+app.use((_req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+  next();
+});
+
 
 // Mismo origen en producción: el frontend y esta función viven bajo el mismo
 // dominio via el rewrite "/api/:path*" de vercel.json, así que el navegador

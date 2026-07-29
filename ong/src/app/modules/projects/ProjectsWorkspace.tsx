@@ -1836,7 +1836,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         return (
           <div
             className="flex items-center gap-3 cursor-pointer group/ass"
-            onClick={() => void openDetail(row.id)}
+            onClick={() => void openDetail(row.id, row.kind)}
             title="Ver detalle de la asignación"
           >
             {isResource ? (
@@ -1970,7 +1970,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800 text-zinc-200">
               <DropdownMenuItem
-                onClick={() => void openDetail(row.id)}
+                onClick={() => void openDetail(row.id, row.kind)}
                 className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
               >
                 <Eye className="h-3.5 w-3.5 text-indigo-400" />
