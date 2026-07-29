@@ -97,6 +97,8 @@ export function MyProfile() {
     genero: "Masculino",
   });
 
+  const [lastSignInStr, setLastSignInStr] = useState<string>("Sesión activa ahora");
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -109,6 +111,12 @@ export function MyProfile() {
         numero_documento: row.numero_documento ?? "",
         genero: row.genero ?? "Masculino",
       });
+
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData.user?.last_sign_in_at) {
+        const dt = new Date(authData.user.last_sign_in_at);
+        setLastSignInStr(dt.toLocaleString("es-PE", { dateStyle: "medium", timeStyle: "short" }));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -405,7 +413,7 @@ export function MyProfile() {
                 <FieldItem
                   icon={<Clock className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Última Sesión"
-                  value="Hoy a las 17:45 PM (IP 190.235.xxx.xxx)"
+                  value={lastSignInStr}
                 />
               </div>
             </div>

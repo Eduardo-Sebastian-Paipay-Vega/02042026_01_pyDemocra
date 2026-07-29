@@ -44,12 +44,38 @@ const INPUT_STYLE = {
   color: "var(--t-text-secondary)",
 } as const;
 
+function getRealDeviceDetails() {
+  if (typeof window === "undefined" || !navigator?.userAgent) {
+    return { browser: "Navegador Web", os: "Dispositivo Actual", isMobile: false };
+  }
+  const ua = navigator.userAgent;
+  let os = "Sistema Operativo";
+  if (ua.indexOf("Win") !== -1) os = "Windows";
+  else if (ua.indexOf("Mac") !== -1) os = "macOS";
+  else if (ua.indexOf("Linux") !== -1) os = "Linux";
+  else if (ua.indexOf("Android") !== -1) os = "Android";
+  else if (ua.indexOf("like Mac") !== -1 || ua.indexOf("iPhone") !== -1 || ua.indexOf("iPad") !== -1) os = "iOS";
+
+  let browser = "Navegador Web";
+  if (ua.indexOf("Edg") !== -1) browser = "Microsoft Edge";
+  else if (ua.indexOf("Chrome") !== -1) browser = "Google Chrome";
+  else if (ua.indexOf("Firefox") !== -1) browser = "Mozilla Firefox";
+  else if (ua.indexOf("Safari") !== -1) browser = "Apple Safari";
+
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+  return { browser, os, isMobile };
+}
+
 export function MyAccountSettings() {
   const tenantBootstrap = useTenantBootstrap();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [profile, setProfile] = useState<MyProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
+
+  // Detección en vivo de sesión y dispositivo real
+  const [currentDevice] = useState(() => getRealDeviceDetails());
+  const [lastSignInTime, setLastSignInTime] = useState<string>("Sesión activa ahora");
 
   // Formulario Perfil General
   const [firstName, setFirstName] = useState("");
@@ -74,12 +100,10 @@ export function MyAccountSettings() {
   const [notifyWhatsapp, setNotifyWhatsapp] = useState(true);
   const [notifySms, setNotifySms] = useState(false);
   const [notifyPush, setNotifyPush] = useState(true);
-  const [savingNotifications, setSavingNotifications] = useState(false);
 
   // Preferencias
   const [language, setLanguage] = useState("es");
   const [timezone, setTimezone] = useState("America/Lima");
-  const [savingPreferences, setSavingPreferences] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,21 +125,28 @@ export function MyAccountSettings() {
         setGenero(row.genero ?? "Masculino");
         setAvatarPreview(row.avatar_url ?? null);
 
-        // 2. Obtener metadatos del usuario desde Supabase Auth
+        // 2. Obtener datos reales de sesión y metadatos desde Supabase Auth
         const { data: authData } = await supabase.auth.getUser();
-        if (authData.user?.user_metadata) {
-          const meta = authData.user.user_metadata;
-          if (meta.phone) setTelefono(meta.phone);
-          if (meta.mfa_enabled !== undefined) setTwoFactorEnabled(Boolean(meta.mfa_enabled));
-          if (meta.notifications) {
-            setNotifyEmail(meta.notifications.email ?? true);
-            setNotifyWhatsapp(meta.notifications.whatsapp ?? true);
-            setNotifySms(meta.notifications.sms ?? false);
-            setNotifyPush(meta.notifications.push ?? true);
+        if (authData.user) {
+          if (authData.user.last_sign_in_at) {
+            const dt = new Date(authData.user.last_sign_in_at);
+            setLastSignInTime(dt.toLocaleString("es-PE", { dateStyle: "medium", timeStyle: "short" }));
           }
-          if (meta.preferences) {
-            if (meta.preferences.language) setLanguage(meta.preferences.language);
-            if (meta.preferences.timezone) setTimezone(meta.preferences.timezone);
+
+          if (authData.user.user_metadata) {
+            const meta = authData.user.user_metadata;
+            if (meta.phone) setTelefono(meta.phone);
+            if (meta.mfa_enabled !== undefined) setTwoFactorEnabled(Boolean(meta.mfa_enabled));
+            if (meta.notifications) {
+              setNotifyEmail(meta.notifications.email ?? true);
+              setNotifyWhatsapp(meta.notifications.whatsapp ?? true);
+              setNotifySms(meta.notifications.sms ?? false);
+              setNotifyPush(meta.notifications.push ?? true);
+            }
+            if (meta.preferences) {
+              if (meta.preferences.language) setLanguage(meta.preferences.language);
+              if (meta.preferences.timezone) setTimezone(meta.preferences.timezone);
+            }
           }
         }
       } catch (err) {
@@ -250,7 +281,6 @@ export function MyAccountSettings() {
 
   // CRUD: Guardar Preferencias de Notificación en Supabase Auth Metadata
   const handleSaveNotifications = async () => {
-    setSavingNotifications(true);
     try {
       await updateMyUserMetadata({
         notifications: {
@@ -263,14 +293,11 @@ export function MyAccountSettings() {
       toast.success("Preferencias de notificaciones guardadas en Supabase.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al guardar notificaciones.");
-    } finally {
-      setSavingNotifications(false);
     }
   };
 
   // CRUD: Guardar Preferencias Regionales e Interfaz en Supabase Auth Metadata
   const handleSavePreferences = async () => {
-    setSavingPreferences(true);
     try {
       await updateMyUserMetadata({
         preferences: {
@@ -282,8 +309,6 @@ export function MyAccountSettings() {
       toast.success("Preferencias regionales guardadas en Supabase.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al guardar preferencias.");
-    } finally {
-      setSavingPreferences(false);
     }
   };
 
@@ -640,7 +665,7 @@ export function MyAccountSettings() {
                 </p>
               </div>
 
-              {/* Lista de Sesiones Activas */}
+              {/* Lista de Sesiones Activas (Información Real Detección Browser/OS en Vivo) */}
               <div
                 className="rounded-2xl p-6 shadow-sm space-y-4"
                 style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -671,30 +696,20 @@ export function MyAccountSettings() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/40">
                     <div className="flex items-center gap-3">
-                      <Laptop className="h-5 w-5 text-indigo-400" />
+                      {currentDevice.isMobile ? (
+                        <Smartphone className="h-5 w-5 text-indigo-400" />
+                      ) : (
+                        <Laptop className="h-5 w-5 text-indigo-400" />
+                      )}
                       <div>
                         <p className="text-xs font-semibold text-zinc-100 flex items-center gap-2">
-                          Chrome en Windows 11
+                          {`${currentDevice.browser} en ${currentDevice.os}`}
                           <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-normal">
-                            Sesión Actual
+                            Sesión Actual Real
                           </span>
                         </p>
                         <p className="text-[11px] text-zinc-400 mt-0.5">
-                          Lima, Perú • IP: 190.235.112.44 • Activo ahora
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/40">
-                    <div className="flex items-center gap-3">
-                      <Smartphone className="h-5 w-5 text-zinc-400" />
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-100">
-                          Safari en iPhone 14 Pro (iOS)
-                        </p>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">
-                          Lima, Perú • IP: 190.235.112.98 • Último acceso ayer a las 20:15 PM
+                          Último ingreso registrado: {lastSignInTime}
                         </p>
                       </div>
                     </div>
@@ -772,8 +787,8 @@ export function MyAccountSettings() {
               </div>
 
               <div className="flex justify-end pt-2 border-t border-zinc-800">
-                <GradientButton onClick={handleSaveNotifications} disabled={savingNotifications}>
-                  {savingNotifications ? "Guardando en Supabase…" : "Guardar Preferencias BD"}
+                <GradientButton onClick={handleSaveNotifications}>
+                  Guardar Preferencias BD
                 </GradientButton>
               </div>
             </div>
@@ -839,8 +854,8 @@ export function MyAccountSettings() {
               </div>
 
               <div className="flex justify-end pt-2 border-t border-zinc-800">
-                <GradientButton onClick={handleSavePreferences} disabled={savingPreferences}>
-                  {savingPreferences ? "Guardando en Supabase…" : "Guardar Preferencias BD"}
+                <GradientButton onClick={handleSavePreferences}>
+                  Guardar Preferencias BD
                 </GradientButton>
               </div>
             </div>
