@@ -47,6 +47,12 @@ import { ModalShell } from "../../components/ui/modal-shell";
 import { StatusDot } from "../../components/ui/status-dot";
 import { GradientButton } from "../../components/ui/gradient-button";
 import { OutlineButton } from "../../components/ui/outline-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import { useSessionStorageState } from "../../lib/session-state";
 import { useProjectCatalogs } from "./hooks/useProjectCatalogs";
 import { useProjectDetails } from "./hooks/useProjectDetails";
@@ -209,9 +215,55 @@ function formatActivityWindow(startAt: string | null, endAt: string | null): str
   return startFmt || endFmt || "Sin definir";
 }
 
+function getTemporalStatusBadge(startAt: string | null, endAt: string | null, statusKind?: string) {
+  if (!startAt && !endAt) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = startAt ? new Date(startAt) : null;
+  const end = endAt ? new Date(endAt) : null;
+
+  if (start) start.setHours(0, 0, 0, 0);
+  if (end) end.setHours(23, 59, 59, 999);
+
+  if (statusKind === "completed") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+        <CheckCircle2 className="h-3 w-3" /> Completada
+      </span>
+    );
+  }
+
+  if (start && start > today) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+        🔵 Próximo
+      </span>
+    );
+  }
+
+  if (end && end < today && statusKind !== "completed") {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+        🔴 Vencido
+      </span>
+    );
+  }
+
+  if (start && end && start <= today && end >= today) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+        🟢 En Curso
+      </span>
+    );
+  }
+
+  return null;
+}
+
 function AvatarStack({ count }: { count: number }) {
   if (count <= 0) {
-    return <span className="text-xs text-zinc-500 italic">Sin asignar</span>;
+    return null;
   }
   const maxVisible = 2;
   const visibleCount = Math.min(count, maxVisible);
@@ -456,6 +508,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10;
 
+  // Estado de Selección Múltiple (Bulk Actions) para Actividades
+  const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
+
   // Estado de pestaña activa del modal de formulario de proyectos
   const [formTab, setFormTab] = useState<"general" | "team_budget" | "advanced">("general");
 
@@ -466,6 +521,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [hoursValue, setHoursValue] = useState<string>("1");
   const [hoursDate, setHoursDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [savingHours, setSavingHours] = useState(false);
+
+  // Estado del Modal para Asignación Rápida de Voluntarios
+  const [assignVolunteerOpen, setAssignVolunteerOpen] = useState(false);
+  const [selectedActivityForAssign, setSelectedActivityForAssign] = useState<ActivityRow | null>(null);
+  const [assignVolunteerId, setAssignVolunteerId] = useState<string>("");
+  const [assignRole, setAssignRole] = useState<string>("Voluntario general");
+  const [savingAssignment, setSavingAssignment] = useState(false);
 
   const [projectFilters, setProjectFilters] = useSessionStorageState<ProjectListFilters>(
     `${storageKeyPrefix}.project-filters`,
@@ -563,6 +625,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setFormOpen(false);
     setConfirmOpen(false);
     setRegisterHoursOpen(false);
+    setAssignVolunteerOpen(false);
+    setSelectedActivityIds([]);
     setPendingAction(null);
     setEditingProjectId(null);
     setEditingTaskId(null);
@@ -651,6 +715,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setRegisterHoursOpen(true);
   }
 
+  function openAssignVolunteerModal(activity: ActivityRow) {
+    setSelectedActivityForAssign(activity);
+    setAssignVolunteerId(catalogs.volunteers[0]?.value || "");
+    setAssignRole("Voluntario general");
+    setAssignVolunteerOpen(true);
+  }
+
   async function handleSaveRegisterHours() {
     if (!selectedActivityForHours) return;
     if (!hoursVolunteerId) {
@@ -678,6 +749,98 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       toast.error(err instanceof Error ? err.message : "No se pudieron registrar las horas.");
     } finally {
       setSavingHours(false);
+    }
+  }
+
+  async function handleSaveAssignVolunteer() {
+    if (!selectedActivityForAssign) return;
+    if (!assignVolunteerId) {
+      toast.error("Debe seleccionar un voluntario para asignar.");
+      return;
+    }
+
+    try {
+      setSavingAssignment(true);
+      await mutations.createActivityVolunteerAssignment({
+        activityId: selectedActivityForAssign.id,
+        volunteerId: assignVolunteerId,
+        role: assignRole,
+      });
+      toast.success(`Voluntario asignado a "${selectedActivityForAssign.title}" exitosamente.`);
+      setAssignVolunteerOpen(false);
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo asignar el voluntario.");
+    } finally {
+      setSavingAssignment(false);
+    }
+  }
+
+  // Funciones para Acciones Masivas (Bulk Actions)
+  function toggleSelectAllActivities() {
+    if (selectedActivityIds.length === activityRows.length) {
+      setSelectedActivityIds([]);
+    } else {
+      setSelectedActivityIds(activityRows.map((a) => a.id));
+    }
+  }
+
+  function toggleSelectActivityRow(id: string) {
+    setSelectedActivityIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  async function handleBulkCompleteActivities() {
+    if (selectedActivityIds.length === 0) return;
+    try {
+      toast.loading("Actualizando actividades seleccionadas...");
+      for (const id of selectedActivityIds) {
+        const act = activityRows.find((a) => a.id === id);
+        if (act) {
+          await mutations.updateActivity(id, {
+            projectId: act.projectId,
+            title: act.title,
+            description: act.description ?? "",
+            statusCode: "completada",
+            estimatedHours: String(act.estimatedHours ?? 0),
+            startAt: act.startAt ?? "",
+            endAt: act.endAt ?? "",
+            locationId: act.locationId ?? "",
+          });
+        }
+      }
+      toast.dismiss();
+      toast.success(`${selectedActivityIds.length} actividades marcadas como completadas.`);
+      setSelectedActivityIds([]);
+      refresh();
+    } catch {
+      toast.dismiss();
+      toast.error("Ocurrió un error al actualizar las actividades.");
+    }
+  }
+
+  function handleBulkExportActivities() {
+    const selected = activityRows.filter((a) => selectedActivityIds.includes(a.id));
+    exportActivitiesToCSV(selected);
+  }
+
+  async function handleBulkDeleteActivities() {
+    if (selectedActivityIds.length === 0) return;
+    if (confirm(`¿Está seguro de eliminar las ${selectedActivityIds.length} actividades seleccionadas?`)) {
+      try {
+        toast.loading("Eliminando actividades seleccionadas...");
+        for (const id of selectedActivityIds) {
+          await mutations.deleteActivity(id);
+        }
+        toast.dismiss();
+        toast.success(`${selectedActivityIds.length} actividades eliminadas.`);
+        setSelectedActivityIds([]);
+        refresh();
+      } catch {
+        toast.dismiss();
+        toast.error("No se pudieron eliminar todas las actividades.");
+      }
     }
   }
 
@@ -936,7 +1099,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     }
   }
 
-  // Columnas enriquecidas para Proyectos (Clickeables)
+  // Columnas para Proyectos
   const projectColumns: Column<ProjectRow>[] = [
     {
       key: "name",
@@ -1056,8 +1219,20 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
-  // Columnas enriquecidas para Actividades (Formato Humano de Fechas + Barra de Horas + Ubicación Mapa)
+  // Columnas de Actividades con Checkboxes + Badges Temporales + Botón Asignar + Menú Desplegable (Dropdown)
   const activityColumns: Column<ActivityRow>[] = [
+    {
+      key: "select",
+      label: "",
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedActivityIds.includes(row.id)}
+          onChange={() => toggleSelectActivityRow(row.id)}
+          className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900 cursor-pointer"
+        />
+      ),
+    },
     {
       key: "title",
       label: "Actividad y Proyecto",
@@ -1091,8 +1266,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       label: "Rango de Fechas",
       render: (row) => {
         const duration = calculateDateDurationDays(row.startAt, row.endAt);
+        const tempBadge = getTemporalStatusBadge(row.startAt, row.endAt, row.statusKind);
+
         return (
-          <div className="space-y-0.5">
+          <div className="space-y-1">
+            {tempBadge && <div>{tempBadge}</div>}
             <div className="text-xs text-zinc-200 font-medium flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
               {formatActivityWindow(row.startAt, row.endAt)}
@@ -1140,28 +1318,89 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       key: "team",
       label: "Asignados",
       render: (row) => (
-        <div className="flex items-center gap-2">
-          <AvatarStack count={row.assignedVolunteers} />
+        <div>
+          {row.assignedVolunteers > 0 ? (
+            <AvatarStack count={row.assignedVolunteers} />
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openAssignVolunteerModal(row);
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-dashed border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/10 transition-colors shadow-sm"
+              title="Asignar voluntario o personal a esta actividad"
+            >
+              <UserPlus className="h-3 w-3" />
+              + Asignar
+            </button>
+          )}
         </div>
       ),
     },
     {
-      key: "quickHours",
-      label: "Registrar",
+      key: "actions",
+      label: "Acciones",
       render: (row) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            openRegisterHoursModal(row);
-          }}
-          className="h-7 text-[11px] px-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 flex items-center gap-1"
-          title="Registrar horas trabajadas en esta actividad"
-        >
-          <Clock className="h-3 w-3 text-indigo-400" />
-          Reg. Horas
-        </Button>
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openRegisterHoursModal(row)}
+            className="h-7 text-[11px] px-2 bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20 flex items-center gap-1"
+            title="Registrar horas trabajadas"
+          >
+            <Clock className="h-3 w-3 text-indigo-400" />
+            Reg. Horas
+          </Button>
+
+          {/* Menú desplegable ... */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+                title="Más opciones de actividad"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800 text-zinc-200">
+              <DropdownMenuItem
+                onClick={() => void openDetail(row.id)}
+                className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+              >
+                <Eye className="h-3.5 w-3.5 text-indigo-400" />
+                Ver Detalle
+              </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => openActivityEdit(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-sky-400" />
+                    Editar Actividad
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => openAssignVolunteerModal(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+                  >
+                    <UserPlus className="h-3.5 w-3.5 text-emerald-400" />
+                    Asignar Personal
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => requestRowAction(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer text-red-400 hover:bg-red-500/10 focus:text-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                    Eliminar Actividad
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   ];
@@ -1213,7 +1452,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
-  // Renderizado del Tablero Kanban para Proyectos o Calendario para Actividades
+  // Tablero Kanban o Agenda
   function renderKanbanBoard() {
     if (section === "activities") {
       const states = catalogs.activityStates.length > 0
@@ -1284,7 +1523,20 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         />
 
                         <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80">
-                          <AvatarStack count={activity.assignedVolunteers} />
+                          {activity.assignedVolunteers > 0 ? (
+                            <AvatarStack count={activity.assignedVolunteers} />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openAssignVolunteerModal(activity);
+                              }}
+                              className="text-[10px] text-indigo-400 font-medium hover:underline"
+                            >
+                              + Asignar
+                            </button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -1453,7 +1705,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             emptyMessage="No se encontraron proyectos con los filtros actuales."
           />
 
-          {/* Footer de Paginación */}
           <div
             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -1507,22 +1758,30 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         return renderKanbanBoard();
       }
 
+      const allSelected =
+        activityRows.length > 0 && selectedActivityIds.length === activityRows.length;
+
       return (
         <div className="space-y-4">
+          {/* Header con checkbox global de selección múltiple */}
+          {activityRows.length > 0 && (
+            <div className="flex items-center justify-between px-2 text-xs text-zinc-400">
+              <label className="flex items-center gap-2 cursor-pointer font-medium hover:text-zinc-200">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAllActivities}
+                  className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900 cursor-pointer"
+                />
+                Seleccionar todo el listado ({activityRows.length} actividades)
+              </label>
+            </div>
+          )}
+
           <DataTable
             columns={activityColumns}
             data={activityRows}
             loading={loading}
-            actions={[
-              { label: "Ver detalle", onClick: (row) => void openDetail(row.id) },
-              { label: "Registrar Horas", onClick: (row: ActivityRow) => openRegisterHoursModal(row) },
-              ...(canManage
-                ? [
-                    { label: "Editar", onClick: (row: ActivityRow) => openActivityEdit(row) },
-                    { label: "Eliminar", onClick: (row: ActivityRow) => requestRowAction(row), variant: "destructive" as const },
-                  ]
-                : []),
-            ]}
             emptyMessage="No se encontraron actividades con los filtros actuales."
           />
 
@@ -1594,10 +1853,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             const detail = details.detail as ProjectDetailData;
             return (
               <div className="space-y-6">
-                {/* 1. Header Banner Resumen Ejecutivo */}
-                <div
-                  className="relative overflow-hidden rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-indigo-950/60 via-zinc-900 to-zinc-950"
-                >
+                <div className="relative overflow-hidden rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-indigo-950/60 via-zinc-900 to-zinc-950">
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       {detail.project.imageUrl ? (
@@ -1637,7 +1893,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   </div>
                 </div>
 
-                {/* 2. Cuadrante de Métricas Ejecutivas del Proyecto */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/60 space-y-1">
                     <span className="text-[11px] text-zinc-400 flex items-center gap-1.5">
@@ -1676,7 +1931,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   </div>
                 </div>
 
-                {/* 3. Descripción del Proyecto & Datos de Auditoría */}
                 <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-2">
                   <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                     <FileText className="h-4 w-4 text-indigo-400" /> Descripción del Proyecto
@@ -1696,148 +1950,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       <span>
                         Última modificación por: <strong className="text-zinc-400">{detail.updatedBy}</strong>
                       </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 4. Tablas Integradas de Actividades y Tareas del Proyecto */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Actividades */}
-                  <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
-                        <Layers className="h-4 w-4 text-indigo-400" />
-                        Actividades Vinculadas ({detail.linkedActivities.length})
-                      </h4>
-                    </div>
-
-                    {detail.linkedActivities.length === 0 ? (
-                      <p className="text-xs text-zinc-500 italic p-3">No hay actividades registradas aún para este proyecto.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                        {detail.linkedActivities.map((act) => (
-                          <div
-                            key={act.id}
-                            className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between text-xs"
-                          >
-                            <div className="space-y-0.5">
-                              <p className="font-semibold text-zinc-200">{act.title}</p>
-                              <p className="text-[11px] text-zinc-400 flex items-center gap-2">
-                                <span>{formatActivityWindow(act.startAt, act.endAt)}</span>
-                                {act.locationName && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 text-zinc-500" /> {act.locationName}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                            <StatusDot variant={getActivityStatusVariant(act.statusKind)}>
-                              {act.statusLabel}
-                            </StatusDot>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tareas */}
-                  <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                        Tareas del Proyecto ({detail.linkedTasks.length})
-                      </h4>
-                    </div>
-
-                    {detail.linkedTasks.length === 0 ? (
-                      <p className="text-xs text-zinc-500 italic p-3">No hay tareas registradas aún para este proyecto.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                        {detail.linkedTasks.map((t) => (
-                          <div
-                            key={t.id}
-                            className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between text-xs"
-                          >
-                            <div className="space-y-0.5">
-                              <p className="font-semibold text-zinc-200">{t.title}</p>
-                              <p className="text-[11px] text-zinc-400">
-                                {t.activityName ? `Actividad: ${t.activityName}` : "Tarea general"}
-                              </p>
-                            </div>
-                            <StatusDot variant={getTaskStatusVariant(t.statusKind)}>
-                              {t.statusLabel}
-                            </StatusDot>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 5. Equipo de Voluntarios & Recursos Materiales */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Voluntarios */}
-                  <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-3">
-                    <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
-                      <UserCheck className="h-4 w-4 text-sky-400" />
-                      Equipo de Voluntarios ({detail.volunteerAssignments.length})
-                    </h4>
-
-                    {detail.volunteerAssignments.length === 0 ? (
-                      <p className="text-xs text-zinc-500 italic p-3">Sin voluntarios asignados a este proyecto.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        {detail.volunteerAssignments.map((v) => (
-                          <div
-                            key={v.id}
-                            className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between text-xs"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-[10px] font-bold text-white">
-                                {v.volunteerName.slice(0, 2).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-semibold text-zinc-200">{v.volunteerName}</p>
-                                <p className="text-[11px] text-zinc-400">{v.role || "Voluntario General"}</p>
-                              </div>
-                            </div>
-                            <Badge variant={v.active ? "success" : "secondary"}>
-                              {v.active ? "Activo" : "Inactivo"}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Recursos Materiales */}
-                  <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-3">
-                    <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
-                      <Package className="h-4 w-4 text-amber-400" />
-                      Recursos y Materiales Vinculados ({detail.resourceAssignments.length})
-                    </h4>
-
-                    {detail.resourceAssignments.length === 0 ? (
-                      <p className="text-xs text-zinc-500 italic p-3">Sin recursos materiales vinculados a este proyecto.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        {detail.resourceAssignments.map((r) => (
-                          <div
-                            key={r.id}
-                            className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between text-xs"
-                          >
-                            <div>
-                              <p className="font-semibold text-zinc-200">{r.itemName}</p>
-                              <p className="text-[11px] text-zinc-400">
-                                Requerido: {r.quantityRequired} | Asignado: {r.quantityAssigned || 0}
-                              </p>
-                            </div>
-                            <Badge variant="outline">
-                              {Math.round(((r.quantityAssigned || 0) / r.quantityRequired) * 100)}% Cubierto
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
                     )}
                   </div>
                 </div>
@@ -1875,27 +1987,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Horas</div><div style={{ color: "var(--t-text)" }}>{detail.activity.estimatedHours ?? 0} h estimadas / {detail.activity.registeredHours} h registradas</div></div>
                 </div>
                 <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.activity.description || "Sin descripcion registrada."}</div></div>
-                <div className="grid gap-3 lg:grid-cols-3">
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Asignaciones</div>{detail.assignments.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin asignaciones.</div> : detail.assignments.map((row) => <div key={row.id} className="py-1"><div style={{ color: "var(--t-text)" }}>{row.volunteerName}</div><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{row.role || "Sin rol"}</div></div>)}</div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Horas</div>{detail.hours.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin horas.</div> : detail.hours.map((row) => <div key={row.id} className="py-1" style={{ color: "var(--t-text)" }}>{formatDateString(row.date)} - {row.volunteerName} - {row.hours} h</div>)}</div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="mb-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>Evidencias</div>{detail.evidences.length === 0 ? <div style={{ color: "var(--t-text-dim)" }}>Sin evidencias.</div> : detail.evidences.map((row) => <div key={row.id} className="py-1" style={{ color: "var(--t-text)" }}>{row.evidenceType || "Sin tipo"} - {row.volunteerName}</div>)}</div>
-                </div>
-              </>
-            );
-          })()
-        ) : null}
-        {section === "assignments" ? (
-          (() => {
-            const detail = details.detail as AssignmentDetailData;
-            return (
-              <>
-                {detail.warnings.length > 0 ? <Alert><AlertCircle className="h-4 w-4" /><AlertTitle>Advertencia de vigencia</AlertTitle><AlertDescription>{detail.warnings[0]}</AlertDescription></Alert> : null}
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Tipo</div><div style={{ color: "var(--t-text)" }}>{getAssignmentKindLabel(detail.assignment.kind)}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={detail.assignment.active === false ? "secondary" : detail.assignment.kind === "project-resource" ? "info" : "success"}>{detail.assignment.statusLabel}</StatusDot></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</div><div style={{ color: "var(--t-text)" }}>{detail.assignment.projectName}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Contexto</div><div style={{ color: "var(--t-text)" }}>{detail.assignment.activityName || detail.assignment.itemName || detail.assignment.volunteerName || detail.assignment.taskName || "-"}</div></div>
-                </div>
               </>
             );
           })()
@@ -1906,7 +1997,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   return (
     <div className="space-y-6">
-      {/* Header de la Sección con Botones Principales */}
+      {/* Header de la Sección */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <PageHeader title={meta.title} description={meta.description} />
         <div className="flex items-center gap-2 shrink-0">
@@ -1945,11 +2036,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       {catalogsError ? <ErrorBlock message={catalogsError} onRetry={refreshCatalogs} /> : null}
       {error ? <ErrorBlock message={error} onRetry={refresh} /> : null}
 
-      {/* 1. Tarjetas de Resumen (KPIs) en la parte superior (Proyectos y Actividades) */}
+      {/* Tarjetas de Resumen (KPIs) con Click-to-Filter */}
       {section === "projects" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-indigo-500/50 transition-all"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
             <div className="flex items-center justify-between text-zinc-400">
@@ -1965,7 +2056,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
 
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-emerald-500/50 transition-all"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
             <div className="flex items-center justify-between text-zinc-400">
@@ -1981,7 +2072,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
 
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-amber-500/50 transition-all"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
             <div className="flex items-center justify-between text-zinc-400">
@@ -1997,7 +2088,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
 
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-indigo-500/50 transition-all"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
             <div className="flex items-center justify-between text-zinc-400">
@@ -2016,27 +2107,37 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
       {section === "activities" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Total Actividades (Click to Reset Filter) */}
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            onClick={() => {
+              setActivityFilters({ searchTerm: "", projectId: "all", statusCode: "all", locationId: "all", dateFrom: null, dateTo: null });
+              toast.info("Mostrando todas las actividades.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-indigo-500/60 hover:bg-zinc-900/80 transition-all group"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-indigo-400 transition-colors">
               <span className="text-xs font-medium">Total Actividades</span>
               <Calendar className="h-4 w-4 text-indigo-400" />
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{activityRows.length}</span>
-              <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                Registradas
+              <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Ver todas 🔍
               </span>
             </div>
           </div>
 
+          {/* Card 2: Control de Horas / En Proceso */}
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            onClick={() => {
+              setActivityFilters((prev) => ({ ...prev, statusCode: "en_progreso" }));
+              toast.info("Filtrando actividades 'En Progreso'.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-emerald-500/60 hover:bg-zinc-900/80 transition-all group"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-emerald-400 transition-colors">
               <span className="text-xs font-medium">Control de Horas</span>
               <Clock className="h-4 w-4 text-emerald-400" />
             </div>
@@ -2044,53 +2145,107 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <span className="text-xl font-bold text-zinc-100">
                 {totalRegisteredHoursSum}h <span className="text-xs text-zinc-400 font-normal">/ {totalEstimatedHoursSum}h</span>
               </span>
-              <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                {totalEstimatedHoursSum > 0 ? Math.round((totalRegisteredHoursSum / totalEstimatedHoursSum) * 100) : 0}%
+              <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                En progreso 🟢
               </span>
             </div>
           </div>
 
+          {/* Card 3: Personal / Voluntarios Asignados */}
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            onClick={() => {
+              setActivityFilters((prev) => ({ ...prev, statusCode: "planificada" }));
+              toast.info("Filtrando actividades 'Planificadas'.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-sky-500/60 hover:bg-zinc-900/80 transition-all group"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-sky-400 transition-colors">
               <span className="text-xs font-medium font-sans">Personal / Voluntarios</span>
               <Users className="h-4 w-4 text-sky-400" />
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{totalAssignedVolunteersSum}</span>
-              <span className="text-xs font-medium text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
-                Asignados
+              <span className="text-[11px] font-medium text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+                Planificadas 🔵
               </span>
             </div>
           </div>
 
+          {/* Card 4: En Campo */}
           <div
-            className="rounded-2xl p-5 shadow-sm space-y-2"
+            onClick={() => {
+              toast.info(`Actividades en campo: ${fieldLocationsCount} de ${activityRows.length}.`);
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-amber-500/60 hover:bg-zinc-900/80 transition-all group"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <div className="flex items-center justify-between text-zinc-400">
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-amber-400 transition-colors">
               <span className="text-xs font-medium">En Campo</span>
               <MapPin className="h-4 w-4 text-amber-400" />
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{fieldLocationsCount}</span>
-              <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                Ubicaciones
+              <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                Ubicaciones 📍
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 2. Barra de Herramientas y Filtros Unificada Horizontal */}
+      {/* BARRA FLOTANTE DE ACCIONES MASIVAS (BULK ACTIONS) */}
+      {section === "activities" && selectedActivityIds.length > 0 && (
+        <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center gap-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+              ✓
+            </span>
+            <span className="text-xs font-semibold text-zinc-100">
+              {selectedActivityIds.length} {selectedActivityIds.length === 1 ? "actividad seleccionada" : "actividades seleccionadas"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void handleBulkCompleteActivities()}
+              className="h-8 text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 flex items-center gap-1.5"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              Marcar Completadas
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleBulkExportActivities}
+              className="h-8 text-xs bg-zinc-800 border-zinc-700 text-zinc-200 hover:bg-zinc-700 flex items-center gap-1.5"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Exportar ({selectedActivityIds.length})
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => void handleBulkDeleteActivities()}
+              className="h-8 text-xs flex items-center gap-1.5"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Eliminar Seleccionados
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Barra de Herramientas y Filtros Unificada */}
       <div
         className="rounded-2xl p-4 shadow-sm space-y-3"
         style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
       >
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          {/* Búsqueda */}
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
             <input
@@ -2129,7 +2284,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             />
           </div>
 
-          {/* Filtros específicos por sección en la misma fila */}
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             {section === "projects" && (
               <>
@@ -2193,7 +2347,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </>
             )}
 
-            {/* Selector de Vista Tabla vs. Kanban / Agenda */}
             {(section === "projects" || section === "activities") && (
               <div className="flex items-center rounded-xl p-1 bg-zinc-950 border border-zinc-800">
                 <button
@@ -2223,7 +2376,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </div>
             )}
 
-            {/* Botón Exportar */}
             {section === "projects" && (
               <OutlineButton
                 size="sm"
@@ -2273,7 +2425,66 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="max-h-[80vh] overflow-y-auto p-5">{renderDetail()}</div>
       </ModalShell>
 
-      {/* Modal para Registrar Horas de Voluntariado en Actividad */}
+      {/* Modal para Asignación Rápida de Voluntario */}
+      <ModalShell open={assignVolunteerOpen} onClose={() => setAssignVolunteerOpen(false)} width="max-w-[500px]">
+        <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-emerald-400" />
+              Asignar Personal / Voluntario
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Actividad: <strong className="text-zinc-200">{selectedActivityForAssign?.title}</strong>
+            </p>
+          </div>
+          <button
+            onClick={() => setAssignVolunteerOpen(false)}
+            className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+              Voluntario o Personal <span className="text-red-400">*</span>
+            </label>
+            <SelectField
+              value={assignVolunteerId}
+              onChange={(v) => setAssignVolunteerId(v)}
+              options={catalogs.volunteers}
+              placeholder="Seleccionar Voluntario"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-zinc-300">
+              Rol en la Actividad
+            </label>
+            <InputField
+              value={assignRole}
+              onChange={(v) => setAssignRole(v)}
+              placeholder="Ej. Coordinador de Campo, Facilitador"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-zinc-800 px-6 py-3">
+          <OutlineButton size="sm" onClick={() => setAssignVolunteerOpen(false)}>
+            Cancelar
+          </OutlineButton>
+          <GradientButton
+            size="sm"
+            onClick={() => void handleSaveAssignVolunteer()}
+            disabled={savingAssignment}
+          >
+            {savingAssignment ? "Asignando..." : "Guardar Asignación"}
+          </GradientButton>
+        </div>
+      </ModalShell>
+
+      {/* Modal para Registrar Horas de Voluntariado */}
       <ModalShell open={registerHoursOpen} onClose={() => setRegisterHoursOpen(false)} width="max-w-[500px]">
         <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
           <div>
@@ -2347,7 +2558,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         </div>
       </ModalShell>
 
-      {/* Modal de Creación y Edición Rediseñado con Pestañas (Tabs) y Etiquetas (Labels) */}
+      {/* Modal de Creación y Edición Rediseñado */}
       <ModalShell open={formOpen} onClose={closeForm} width="max-w-[960px]">
         <div className="border-b border-zinc-800 px-6 py-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -2386,7 +2597,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </button>
           </div>
 
-          {/* Navegación por Pestañas (Solo Proyectos) */}
           {section === "projects" && (
             <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
               <button
@@ -2431,14 +2641,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           )}
         </div>
 
-        {/* Contenido del Formulario */}
         <div className="max-h-[72vh] overflow-y-auto p-6 space-y-4">
           {section === "projects" ? (
             <>
-              {/* PESTAÑA 1: INFORMACIÓN GENERAL */}
               {formTab === "general" && (
                 <div className="space-y-4">
-                  {/* FILA 1: Nombre y Código */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
@@ -2464,7 +2671,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </div>
                   </div>
 
-                  {/* FILA 2: Área, Estado y Prioridad */}
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
@@ -2513,7 +2719,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </div>
                   </div>
 
-                  {/* FILA 3: Descripción */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
                       Descripción del Proyecto <span className="text-red-400">*</span>
@@ -2525,7 +2730,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     />
                   </div>
 
-                  {/* FILA 4: Tarjeta de Vista Previa de Imagen */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-zinc-300">
                       Imagen / Banner del Proyecto
@@ -2598,10 +2802,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               )}
 
-              {/* PESTAÑA 2: EQUIPO Y PRESUPUESTO */}
               {formTab === "team_budget" && (
                 <div className="space-y-4">
-                  {/* FILA 1: Responsables */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
@@ -2625,7 +2827,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </div>
                   </div>
 
-                  {/* FILA 2: Fechas */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
@@ -2652,7 +2853,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </div>
                   </div>
 
-                  {/* FILA 3: Presupuesto y Moneda */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
@@ -2690,7 +2890,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               )}
 
-              {/* PESTAÑA 3: CONFIGURACIÓN AVANZADA / ZONA DE PELIGRO */}
               {formTab === "advanced" && (
                 <div className="space-y-6">
                   <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-2">
@@ -2827,7 +3026,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           ) : null}
         </div>
 
-        {/* Footer del Modal */}
         <div className="flex items-center justify-between border-t border-zinc-800 px-6 py-3">
           <div>
             {section === "projects" && editingProjectId && (
