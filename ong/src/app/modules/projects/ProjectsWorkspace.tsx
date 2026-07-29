@@ -411,6 +411,34 @@ function exportTasksToCSV(tasks: TaskRow[]) {
   toast.success("Reporte de tareas exportado a CSV exitosamente.");
 }
 
+function exportAssignmentsToCSV(assignments: AssignmentRow[]) {
+  if (!assignments || assignments.length === 0) {
+    toast.error("No hay asignaciones para exportar.");
+    return;
+  }
+  const headers = ["AsignadoA", "Tipo", "Proyecto", "Actividad", "RolOCantidad", "Estado", "Actualizado"];
+  const rows = assignments.map((a) => [
+    `"${a.volunteerName || a.itemName || "Sin asignación"}"`,
+    `"${getAssignmentKindLabel(a.kind)}"`,
+    `"${a.projectName || ""}"`,
+    `"${a.activityName || a.itemName || "-"}"`,
+    `"${a.role || (a.quantityRequired !== null ? `${a.quantityAssigned ?? 0}/${a.quantityRequired}` : "-")}"`,
+    `"${a.active === false ? "Inactiva" : "Vigente"}"`,
+    `"${formatDateString(a.updatedAt) || formatDateString(a.createdAt) || "Reciente"}"`,
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `asignaciones_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Reporte de asignaciones exportado a CSV exitosamente.");
+}
+
 function renderTaskPriorityBadge(priority?: string) {
   const p = priority?.toLowerCase() || "media";
   if (p === "baja") {
@@ -1796,30 +1824,112 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   const assignmentColumns: Column<AssignmentRow>[] = [
     {
+      key: "assignedTo",
+      label: "Asignado A",
+      render: (row) => {
+        const isResource = row.kind === "project-resource";
+        const assignedName = row.volunteerName || row.itemName || "Sin asignación";
+        const subtext = isResource
+          ? (row.itemName ? `Recurso Material` : "Equipo / Insumo")
+          : (row.volunteerId ? `Voluntario Registrado` : "Personal de ONG");
+
+        return (
+          <div
+            className="flex items-center gap-3 cursor-pointer group/ass"
+            onClick={() => void openDetail(row.id)}
+            title="Ver detalle de la asignación"
+          >
+            {isResource ? (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover/ass:bg-purple-500/20 transition-colors shadow-sm">
+                <Package className="h-5 w-5" />
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover/ass:bg-indigo-500/20 font-bold text-xs transition-colors shadow-sm">
+                {assignedName !== "Sin asignación" ? (
+                  assignedName.slice(0, 2).toUpperCase()
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+              </div>
+            )}
+            <div className="truncate max-w-[200px]">
+              <span className="font-semibold text-zinc-100 group-hover/ass:text-indigo-400 group-hover/ass:underline transition-colors block truncate">
+                {assignedName}
+              </span>
+              <span className="text-[11px] text-zinc-400 font-mono block truncate">
+                {subtext}
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       key: "kind",
       label: "Tipo",
-      render: (row) => <Badge variant="outline">{getAssignmentKindLabel(row.kind)}</Badge>,
+      render: (row) => {
+        if (row.kind === "project-resource") {
+          return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <Package className="h-3.5 w-3.5" />
+              Equipo / Material
+            </span>
+          );
+        }
+        if (row.kind === "activity-volunteer") {
+          return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <User className="h-3.5 w-3.5" />
+              Voluntario (Actividad)
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <User className="h-3.5 w-3.5" />
+            Voluntario (Proyecto)
+          </span>
+        );
+      },
     },
     {
       key: "context",
-      label: "Contexto",
+      label: "Contexto (Proyecto / Actividad)",
       render: (row) => (
-        <div>
-          <div style={{ color: "var(--t-text)" }}>{row.projectName}</div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.activityName ?? row.itemName ?? row.volunteerName ?? row.taskName ?? "-"}
+        <div className="space-y-0.5 max-w-[220px]">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-100 truncate">
+            <FolderKanban className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+            <span className="truncate">{row.projectName}</span>
           </div>
+          {row.activityName && (
+            <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 truncate">
+              <Layers className="h-3 w-3 text-sky-400 shrink-0" />
+              <span className="truncate">{row.activityName}</span>
+            </div>
+          )}
         </div>
       ),
     },
     {
       key: "roleOrQty",
       label: "Rol / Cantidad",
-      render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>
-          {row.role ?? (row.quantityRequired !== null ? `${row.quantityAssigned ?? 0}/${row.quantityRequired}` : "-")}
-        </span>
-      ),
+      render: (row) => {
+        if (row.role) {
+          return (
+            <span className="text-xs text-zinc-300 bg-zinc-800/80 px-2.5 py-1 rounded-lg border border-zinc-700 font-medium">
+              {row.role}
+            </span>
+          );
+        }
+        if (row.quantityRequired !== null) {
+          return (
+            <span className="text-xs text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/20 font-mono font-semibold">
+              {row.quantityAssigned ?? 0} / {row.quantityRequired} unidades
+            </span>
+          );
+        }
+        return <span className="text-xs text-zinc-500">-</span>;
+      },
     },
     {
       key: "status",
@@ -1830,14 +1940,64 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             row.active === false ? "secondary" : row.kind === "project-resource" ? "info" : "success"
           }
         >
-          {row.statusLabel}
+          {row.active === false ? "Inactiva / Finalizada" : "Vigente / Activa"}
         </StatusDot>
       ),
     },
     {
       key: "updated",
       label: "Actualizado",
-      render: (row) => <span style={{ color: "var(--t-text-secondary)" }}>{row.updatedAt}</span>,
+      render: (row) => (
+        <span className="text-xs text-zinc-400 font-mono">
+          {formatDateString(row.updatedAt) || formatDateString(row.createdAt) || "Reciente"}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      render: (row) => (
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+                title="Más opciones de la asignación"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800 text-zinc-200">
+              <DropdownMenuItem
+                onClick={() => void openDetail(row.id)}
+                className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+              >
+                <Eye className="h-3.5 w-3.5 text-indigo-400" />
+                Ver Detalle
+              </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => openAssignmentEdit(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-sky-400" />
+                    Editar / Reasignar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => requestRowAction(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer text-red-400 hover:bg-red-500/10 focus:text-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                    Desvincular / Eliminar
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
     },
   ];
 
@@ -2802,6 +2962,119 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             );
           })()
         ) : null}
+        {section === "assignments" ? (
+          (() => {
+            const detail = details.detail as AssignmentDetailData;
+            const assignment = detail.assignment;
+            const isResource = assignment.kind === "project-resource";
+            const assignedName = assignment.volunteerName || assignment.itemName || "Sin asignación";
+
+            return (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="relative overflow-hidden rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-purple-950/60 via-zinc-900 to-zinc-950 space-y-3 shadow-lg">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex items-center flex-wrap gap-2 text-xs text-zinc-400 font-medium">
+                        <span className="flex items-center gap-1 bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-800 text-zinc-300">
+                          <FolderKanban className="h-3.5 w-3.5 text-indigo-400" />
+                          <span>Proyecto: <strong className="text-zinc-100 font-semibold">{assignment.projectName}</strong></span>
+                        </span>
+                        {assignment.activityName && (
+                          <>
+                            <span className="text-zinc-600">/</span>
+                            <span className="flex items-center gap-1 bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-800 text-zinc-300">
+                              <Layers className="h-3.5 w-3.5 text-sky-400" />
+                              <span>Actividad: <strong className="text-zinc-100 font-semibold">{assignment.activityName}</strong></span>
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <h2 className="text-xl font-bold text-zinc-100 tracking-tight pt-1 flex items-center gap-2">
+                        {isResource ? <Package className="h-5 w-5 text-purple-400" /> : <User className="h-5 w-5 text-indigo-400" />}
+                        {assignedName}
+                      </h2>
+
+                      <div className="flex items-center flex-wrap gap-2 pt-1">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          {assignment.active === false ? "Inactiva / Finalizada" : "Vigente / Activa"}
+                        </span>
+
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                          {getAssignmentKindLabel(assignment.kind)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-800">
+                      {canManage && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              closeDetail();
+                              openAssignmentEdit(assignment);
+                            }}
+                            className="h-8 text-xs bg-zinc-800/90 border-zinc-700 text-zinc-200 hover:bg-zinc-700 flex items-center gap-1.5"
+                          >
+                            <Pencil className="h-3.5 w-3.5 text-indigo-400" />
+                            Editar Rol
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              closeDetail();
+                              requestRowAction(assignment);
+                            }}
+                            className="h-8 text-xs flex items-center gap-1.5"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Desvincular
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      {isResource ? <Package className="h-3.5 w-3.5 text-purple-400" /> : <User className="h-3.5 w-3.5 text-indigo-400" />} Entidad Asignada
+                    </span>
+                    <p className="text-sm font-semibold text-zinc-100">{assignedName}</p>
+                    <p className="text-[11px] text-zinc-400">{isResource ? "Recurso de Inventario" : "Personal Voluntario"}</p>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      <FolderKanban className="h-3.5 w-3.5 text-sky-400" /> Rol o Cantidad
+                    </span>
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {assignment.role || (assignment.quantityRequired !== null ? `${assignment.quantityAssigned ?? 0} / ${assignment.quantityRequired} unidades` : "Sin especificidad")}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">Responsabilidad asignada</p>
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-amber-400" /> Última Actualización
+                    </span>
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {formatDateString(assignment.updatedAt) || formatDateString(assignment.createdAt) || "Reciente"}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">Fecha de registro operativo</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()
+        ) : null}
         {section === "activities" ? (
           (() => {
             const detail = details.detail as ActivityDetailData;
@@ -2929,6 +3202,96 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <span className="text-2xl font-bold text-zinc-100">{taskPercent}%</span>
               <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
                 Global
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "assignments" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            onClick={() => {
+              setAssignmentFilters({ searchTerm: "", kind: "all", projectId: "all" });
+              toast.info("Mostrando todas las asignaciones.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-indigo-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-indigo-400 transition-colors">
+              <span className="text-xs font-medium">Total Asignaciones</span>
+              <Users className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{assignmentRows.length}</span>
+              <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Registradas
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setAssignmentFilters((prev) => ({ ...prev, kind: "project-volunteer" }));
+              toast.info("Filtrando asignaciones de Voluntarios.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-sky-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-sky-400 transition-colors">
+              <span className="text-xs font-medium">Voluntarios / Personal</span>
+              <User className="h-4 w-4 text-sky-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">
+                {assignmentRows.filter((a) => a.kind === "project-volunteer" || a.kind === "activity-volunteer").length}
+              </span>
+              <span className="text-[11px] font-medium text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
+                Activos
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setAssignmentFilters((prev) => ({ ...prev, kind: "project-resource" }));
+              toast.info("Filtrando Recursos Materiales / Equipos.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-purple-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-purple-400 transition-colors">
+              <span className="text-xs font-medium">Recursos Materiales</span>
+              <Package className="h-4 w-4 text-purple-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">
+                {assignmentRows.filter((a) => a.kind === "project-resource").length}
+              </span>
+              <span className="text-[11px] font-medium text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                Equipos
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              const activeCount = assignmentRows.filter((a) => a.active !== false).length;
+              toast.info(`Asignaciones vigentes: ${activeCount} de ${assignmentRows.length}.`);
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-emerald-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-emerald-400 transition-colors">
+              <span className="text-xs font-medium">Asignaciones Vigentes</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">
+                {assignmentRows.filter((a) => a.active !== false).length}
+              </span>
+              <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                Vigentes
               </span>
             </div>
           </div>
@@ -3353,6 +3716,49 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     placeholder="Estado"
                   />
                 </div>
+              </>
+            )}
+
+            {section === "assignments" && (
+              <>
+                <div className="w-44">
+                  <SelectField
+                    value={assignmentFilters.projectId === "all" ? "" : assignmentFilters.projectId}
+                    onChange={(value) =>
+                      setAssignmentFilters((current) => ({
+                        ...current,
+                        projectId: value || "all",
+                      }))
+                    }
+                    options={catalogs.projects}
+                    placeholder="Todos los proyectos"
+                  />
+                </div>
+                <div className="w-48">
+                  <SelectField
+                    value={assignmentFilters.kind === "all" ? "" : assignmentFilters.kind}
+                    onChange={(value) =>
+                      setAssignmentFilters((current) => ({
+                        ...current,
+                        kind: (value || "all") as AssignmentListFilters["kind"],
+                      }))
+                    }
+                    options={[
+                      { value: "project-volunteer", label: "Voluntario (Proyecto)" },
+                      { value: "activity-volunteer", label: "Voluntario (Actividad)" },
+                      { value: "project-resource", label: "Recurso Material" },
+                    ]}
+                    placeholder="Tipo de Asignación"
+                  />
+                </div>
+                <OutlineButton
+                  size="sm"
+                  onClick={() => exportAssignmentsToCSV(assignmentRows)}
+                  className="flex items-center gap-1.5 h-9 text-xs bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800"
+                >
+                  <Download className="h-3.5 w-3.5 text-indigo-400" />
+                  Exportar
+                </OutlineButton>
               </>
             )}
 
