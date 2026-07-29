@@ -20,6 +20,7 @@ import {
   User,
   UserCheck,
 } from "lucide-react";
+import { supabase } from "../../supabaseClient";
 import { PageHeader } from "../components/shared/PageHeader";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
 import {
