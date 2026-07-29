@@ -22,6 +22,15 @@ Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (r
 3. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse estrictamente en minúsculas (`/ong/`, `/api/`, etc.).
 4. **El backend vive en `server/`, no en `api/`**: `api/server.js` es solo el adaptador Serverless para Vercel. La lógica real (rutas, middleware, controllers, servicios) pertenece a `server/`.
 
+## Regla obligatoria: verificación de impacto en Base de Datos (Supabase CLI)
+
+> Vigente desde 2026-07-28.
+
+Todo cambio lógico dentro del código fuente (frontend o backend) y la agregación de una nueva función debe ser auditado y revisado para verificar si requiere modificaciones, nuevos campos o tablas en la Base de Datos.
+
+1. **Revisión de Impacto Relacional:** Antes de dar por completada la implementación de una función o cambio de lógica, se debe auditar si requiere persistencia, columnas adicionales o nuevas estructuras en la BD.
+2. **Verificación Directa mediante Supabase CLI:** Ante cualquier duda sobre la existencia o estructura actual del esquema en Supabase, se debe verificar activamente mediante el CLI de Supabase (`npx supabase`), inspeccionando las migraciones (`supabase/migrations/`) o ejecutando verificaciones remotas.
+
 ## Regla obligatoria: auditoría de cambios y versionado
 
 Cada vez que se realice un **cambio importante** (nueva funcionalidad, refactorización, corrección de error relevante, cambio de arquitectura, modificación de base de datos, cambio de UI significativo, etc.), se debe:
