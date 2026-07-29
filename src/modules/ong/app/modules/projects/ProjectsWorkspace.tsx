@@ -783,6 +783,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     (a) => a.locationName && !a.locationName.toLowerCase().includes("virtual")
   ).length;
 
+  // KPIs Tareas
+  const tasksOverdueCount = taskRows.filter((t) => isTaskOverdue(t.deadline, t.statusCode)).length;
+  const tasksInProgressCount = taskRows.filter(
+    (t) => !isTaskOverdue(t.deadline, t.statusCode) && (t.statusCode === "en_progreso" || t.statusCode === "pendiente")
+  ).length;
+  const tasksCompletedCount = taskRows.filter((t) => t.statusCode === "completada").length;
+
   function resetForms() {
     setProjectForm(EMPTY_PROJECT_FORM);
     setTaskForm(EMPTY_TASK_FORM);
