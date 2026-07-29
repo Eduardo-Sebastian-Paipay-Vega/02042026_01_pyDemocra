@@ -720,6 +720,8 @@ export function Finance() {
             <OutlineButton size="sm" onClick={() => setReceiptOpen(false)} disabled={receipts.isCreating}>Cancelar</OutlineButton>
           </div>
         </div>
+      </ModalShell>
+
       <ModalShell open={sponsorshipFormOpen} onClose={() => setSponsorshipFormOpen(false)} width="max-w-[640px]">
         <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Nuevo apadrinamiento (Supabase DB)</h3>
