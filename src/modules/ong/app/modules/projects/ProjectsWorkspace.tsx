@@ -134,7 +134,12 @@ const EMPTY_TASK_FORM: TaskFormValues = {
   title: "",
   description: "",
   statusCode: "pendiente",
+  priority: "media",
+  estimatedHours: "0",
   deadline: "",
+  assignedVolunteerIds: [],
+  attachedFile: null,
+  sendEmailNotification: true,
 };
 
 const EMPTY_ACTIVITY_FORM: ActivityFormValues = {
@@ -371,6 +376,95 @@ function exportActivitiesToCSV(activities: ActivityRow[]) {
   toast.success("Reporte de actividades exportado a CSV exitosamente.");
 }
 
+function exportTasksToCSV(tasks: TaskRow[]) {
+  if (!tasks || tasks.length === 0) {
+    toast.error("No hay tareas para exportar.");
+    return;
+  }
+  const headers = ["Tarea", "Actividad", "Prioridad", "Estado", "FechaLimite", "Vencida", "Asignados"];
+  const rows = tasks.map((t) => [
+    `"${t.title || ""}"`,
+    `"${t.activityName || "Sin actividad"}"`,
+    `"${t.priority || "media"}"`,
+    `"${t.statusLabel || ""}"`,
+    `"${t.deadline ? formatDateString(t.deadline) : "Sin fecha"}"`,
+    isTaskOverdue(t.deadline, t.statusCode) ? "SI" : "NO",
+    t.volunteerCount || 0,
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `tareas_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Reporte de tareas exportado a CSV exitosamente.");
+}
+
+function renderTaskPriorityBadge(priority?: string) {
+  const p = priority?.toLowerCase() || "media";
+  if (p === "baja") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        🟢 Baja
+      </span>
+    );
+  }
+  if (p === "alta") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+        🔴 Alta
+      </span>
+    );
+  }
+  if (p === "urgente") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 shadow-sm animate-pulse">
+        ⚡ Urgente
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+      🟡 Media
+    </span>
+  );
+}
+
+function isTaskOverdue(deadline?: string | null, statusCode?: string | null): boolean {
+  if (!deadline) return false;
+  const isDone = statusCode?.toLowerCase().includes("completad") || statusCode?.toLowerCase().includes("finalizad");
+  if (isDone) return false;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const cleanDeadline = deadline.slice(0, 10);
+  return cleanDeadline < todayStr;
+}
+
+function formatTaskDeadline(deadline?: string | null, statusCode?: string | null) {
+  if (!deadline) return <span className="text-zinc-500 text-xs">Sin fecha</span>;
+  const cleanDate = deadline.slice(0, 10);
+  const dateObj = new Date(cleanDate + "T00:00:00");
+  const formatted = formatDateString(deadline);
+
+  const overdue = isTaskOverdue(deadline, statusCode);
+  if (overdue) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = today.getTime() - dateObj.getTime();
+    const diffDays = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+    return (
+      <div className="inline-flex items-center gap-1.5 text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/20 font-semibold">
+        <span>🚨 {formatted}</span>
+        <span className="text-[10px] opacity-90">({diffDays === 1 ? "Vencida hoy/ayer" : `Vencida hace ${diffDays}d`})</span>
+      </div>
+    );
+  }
+  return <span className="text-xs text-zinc-300 font-medium">📅 {formatted}</span>;
+}
+
 function SelectField({
   value,
   onChange,
@@ -513,8 +607,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10;
 
-  // Estado de Selección Múltiple (Bulk Actions) para Actividades
+  // Estado de Selección Múltiple (Bulk Actions) para Actividades y Tareas
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
 
   // Estado de pestaña activa del modal de formulario de proyectos
   const [formTab, setFormTab] = useState<"general" | "team_budget" | "advanced">("general");
@@ -848,6 +943,93 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     }
   }
 
+  function toggleSelectAllTasks() {
+    if (selectedTaskIds.length === taskRows.length) {
+      setSelectedTaskIds([]);
+    } else {
+      setSelectedTaskIds(taskRows.map((t) => t.id));
+    }
+  }
+
+  function toggleSelectTaskRow(id: string) {
+    setSelectedTaskIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  async function handleBulkCompleteTasks() {
+    if (selectedTaskIds.length === 0) return;
+    try {
+      toast.loading("Actualizando tareas seleccionadas...");
+      for (const id of selectedTaskIds) {
+        const task = taskRows.find((t) => t.id === id);
+        if (task) {
+          await mutations.updateTask(id, {
+            activityId: task.activityId ?? "",
+            title: task.title,
+            description: task.description ?? "",
+            statusCode: "completada",
+            priority: task.priority || "media",
+            deadline: task.deadline ?? "",
+          });
+        }
+      }
+      toast.dismiss();
+      toast.success(`${selectedTaskIds.length} tareas marcadas como completadas.`);
+      setSelectedTaskIds([]);
+      refresh();
+    } catch {
+      toast.dismiss();
+      toast.error("Ocurrió un error al actualizar las tareas.");
+    }
+  }
+
+  function handleBulkExportTasks() {
+    const selected = taskRows.filter((t) => selectedTaskIds.includes(t.id));
+    exportTasksToCSV(selected);
+  }
+
+  async function handleBulkDeleteTasks() {
+    if (selectedTaskIds.length === 0) return;
+    if (confirm(`¿Está seguro de eliminar las ${selectedTaskIds.length} tareas seleccionadas?`)) {
+      try {
+        toast.loading("Eliminando tareas seleccionadas...");
+        for (const id of selectedTaskIds) {
+          await mutations.cancelTask(id);
+        }
+        toast.dismiss();
+        toast.success(`${selectedTaskIds.length} tareas eliminadas.`);
+        setSelectedTaskIds([]);
+        refresh();
+      } catch {
+        toast.dismiss();
+        toast.error("No se pudieron eliminar todas las tareas.");
+      }
+    }
+  }
+
+  async function handleQuickToggleTaskComplete(task: TaskRow) {
+    const isDone = task.statusCode === "completada";
+    const newStatusCode = isDone ? "pendiente" : "completada";
+    try {
+      toast.loading(isDone ? "Reabriendo tarea..." : "Marcando tarea como completada...");
+      await mutations.updateTask(task.id, {
+        activityId: task.activityId ?? "",
+        title: task.title,
+        description: task.description ?? "",
+        statusCode: newStatusCode,
+        priority: task.priority || "media",
+        deadline: task.deadline ?? "",
+      });
+      toast.dismiss();
+      toast.success(isDone ? `Tarea "${task.title}" reabierta.` : `Tarea "${task.title}" completada.`);
+      refresh();
+    } catch {
+      toast.dismiss();
+      toast.error("No se pudo actualizar el estado de la tarea.");
+    }
+  }
+
   async function openDetail(id: string, assignmentKind?: AssignmentKind) {
     setDetailOpen(true);
     await details.load({ section, id, assignmentKind });
@@ -903,7 +1085,12 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       title: row.title,
       description: row.description ?? "",
       statusCode: row.statusCode,
+      priority: row.priority || "media",
+      estimatedHours: String(row.estimatedHours ?? 0),
       deadline: row.deadline ?? "",
+      assignedVolunteerIds: row.assignedVolunteerIds ?? [],
+      attachedFile: null,
+      sendEmailNotification: true,
     });
     setFormOpen(true);
   }
@@ -1205,16 +1392,63 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   const taskColumns: Column<TaskRow>[] = [
     {
-      key: "title",
-      label: "Tarea",
+      key: "select",
+      label: "",
       render: (row) => (
-        <div>
-          <div style={{ color: "var(--t-text)" }}>{row.title}</div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.activityName ?? "Sin actividad asignada"}
-          </div>
-        </div>
+        <input
+          type="checkbox"
+          checked={selectedTaskIds.includes(row.id)}
+          onChange={() => toggleSelectTaskRow(row.id)}
+          className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900 cursor-pointer"
+        />
       ),
+    },
+    {
+      key: "title",
+      label: "Tarea y Actividad",
+      render: (row) => {
+        const isDone = row.statusCode === "completada";
+        const isOverdue = isTaskOverdue(row.deadline, row.statusCode);
+
+        return (
+          <div className="flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              checked={isDone}
+              onChange={() => void handleQuickToggleTaskComplete(row)}
+              title={isDone ? "Marcar como pendiente" : "Marcar como completada"}
+              className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+            />
+            <div
+              className="cursor-pointer group/task"
+              onClick={() => void openDetail(row.id)}
+              title="Ver detalle de la tarea"
+            >
+              <div
+                className={`font-semibold text-zinc-100 group-hover/task:text-indigo-400 transition-colors ${
+                  isDone ? "line-through text-zinc-500" : ""
+                }`}
+              >
+                {row.title}
+              </div>
+              <div className="mt-0.5 text-[11px] text-zinc-400 font-medium flex items-center gap-1.5">
+                <Calendar className="h-3 w-3 text-indigo-400 shrink-0" />
+                {row.activityName || "Sin actividad asignada"}
+              </div>
+              {isOverdue && (
+                <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 font-semibold">
+                  🚨 Vencida
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "priority",
+      label: "Prioridad",
+      render: (row) => renderTaskPriorityBadge(row.priority || "media"),
     },
     {
       key: "state",
@@ -1227,16 +1461,104 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "deadline",
-      label: "Fecha limite",
-      render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>{row.deadline || "Sin fecha"}</span>
-      ),
+      label: "Fecha Límite",
+      render: (row) => formatTaskDeadline(row.deadline, row.statusCode),
     },
     {
       key: "team",
-      label: "Voluntarios",
+      label: "Asignados",
       render: (row) => (
-        <span style={{ color: "var(--t-text-secondary)" }}>{row.volunteerCount}</span>
+        <div>
+          {row.volunteerCount > 0 ? (
+            <AvatarStack count={row.volunteerCount} />
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openAssignVolunteerModal({
+                  id: row.activityId || row.id,
+                  projectId: "",
+                  projectName: row.activityName || "Tarea",
+                  title: row.title,
+                  description: row.description,
+                  estimatedHours: row.estimatedHours ?? 0,
+                  statusCode: "en_progreso",
+                  statusLabel: "En Progreso",
+                  statusKind: "in-progress",
+                  startAt: null,
+                  endAt: row.deadline,
+                  locationId: null,
+                  locationName: null,
+                  assignedVolunteers: row.volunteerCount,
+                  registeredHours: 0,
+                  evidenceCount: 0,
+                  taskCount: 0,
+                  createdAt: row.createdAt,
+                  updatedAt: row.updatedAt,
+                });
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border border-dashed border-indigo-500/40 text-indigo-400 hover:bg-indigo-500/10 transition-colors shadow-sm"
+              title="Asignar voluntario a esta tarea"
+            >
+              <UserPlus className="h-3 w-3" />
+              + Asignar
+            </button>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      render: (row) => (
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
+                title="Más opciones de la tarea"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800 text-zinc-200">
+              <DropdownMenuItem
+                onClick={() => void openDetail(row.id)}
+                className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+              >
+                <Eye className="h-3.5 w-3.5 text-indigo-400" />
+                Ver Detalle
+              </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => openTaskEdit(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-sky-400" />
+                    Editar Tarea
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => void handleQuickToggleTaskComplete(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer hover:bg-zinc-800"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    {row.statusCode === "completada" ? "Reabrir Tarea" : "Marcar Completada"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => requestRowAction(row)}
+                    className="flex items-center gap-2 text-xs cursor-pointer text-red-400 hover:bg-red-500/10 focus:text-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                    Eliminar Tarea
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   ];
@@ -1473,6 +1795,133 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   ];
 
   function renderKanbanBoard() {
+    if (section === "tasks") {
+      const states = [
+        { code: "pendiente", label: "Por Hacer" },
+        { code: "en_progreso", label: "En Progreso" },
+        { code: "en_revision", label: "En Revisión" },
+        { code: "completada", label: "Completada" },
+      ];
+
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto pb-4">
+          {states.map((st) => {
+            const itemsInState = taskRows.filter(
+              (t) =>
+                t.statusCode === st.code ||
+                (st.code === "pendiente" && t.statusCode === "pendiente")
+            );
+
+            return (
+              <div
+                key={st.code}
+                className="flex flex-col gap-3 rounded-2xl p-4 min-w-[280px]"
+                style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                  <span className="text-xs font-semibold text-zinc-100 flex items-center gap-2">
+                    <CheckSquare className="h-3.5 w-3.5 text-indigo-400" />
+                    {st.label}
+                  </span>
+                  <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full font-medium">
+                    {itemsInState.length}
+                  </span>
+                </div>
+
+                {itemsInState.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-zinc-500 italic">
+                    Sin tareas en este estado
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {itemsInState.map((task) => {
+                      const isDone = task.statusCode === "completada";
+                      const isOverdue = isTaskOverdue(task.deadline, task.statusCode);
+
+                      return (
+                        <div
+                          key={task.id}
+                          className={`group cursor-pointer rounded-xl p-4 bg-zinc-950/40 border transition-all space-y-3 ${
+                            isOverdue
+                              ? "border-red-500/40 bg-red-950/10 hover:border-red-500"
+                              : "border-zinc-800/80 hover:border-indigo-500/60 hover:bg-zinc-900/80"
+                          }`}
+                          onClick={() => void openDetail(task.id)}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2">
+                              <input
+                                type="checkbox"
+                                checked={isDone}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  void handleQuickToggleTaskComplete(task);
+                                }}
+                                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                              />
+                              <div>
+                                <h4 className={`text-xs font-semibold text-zinc-100 group-hover:text-indigo-400 transition-colors line-clamp-2 ${isDone ? "line-through text-zinc-500" : ""}`}>
+                                  {task.title}
+                                </h4>
+                                <p className="text-[11px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                                  <Calendar className="h-3 w-3 text-indigo-400 shrink-0" />
+                                  {task.activityName || "Sin actividad"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2">
+                            <div>{renderTaskPriorityBadge(task.priority || "media")}</div>
+                            <div>{formatTaskDeadline(task.deadline, task.statusCode)}</div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80">
+                            {task.volunteerCount > 0 ? (
+                              <AvatarStack count={task.volunteerCount} />
+                            ) : (
+                              <span className="text-[10px] text-zinc-500 italic">Sin asignar</span>
+                            )}
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="h-6 w-6 rounded border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center"
+                                >
+                                  <MoreVertical className="h-3 w-3" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40 bg-zinc-900 border-zinc-800 text-zinc-200">
+                                <DropdownMenuItem onClick={() => void openDetail(task.id)} className="text-xs">
+                                  Ver Detalle
+                                </DropdownMenuItem>
+                                {canManage && (
+                                  <>
+                                    <DropdownMenuItem onClick={() => openTaskEdit(task)} className="text-xs">
+                                      Editar Tarea
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => requestRowAction(task)} className="text-xs text-red-400">
+                                      Eliminar Tarea
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
     if (section === "activities") {
       const states = catalogs.activityStates.length > 0
         ? catalogs.activityStates
@@ -2207,6 +2656,90 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         </div>
       )}
 
+      {section === "tasks" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            onClick={() => {
+              setTaskFilters({ searchTerm: "", activityId: "all", statusCode: "all", priority: "all" });
+              toast.info("Mostrando todas las tareas.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-indigo-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-indigo-400 transition-colors">
+              <span className="text-xs font-medium">Total Tareas</span>
+              <CheckSquare className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{taskRows.length}</span>
+              <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Registradas 📋
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setTaskFilters((prev) => ({ ...prev, statusCode: "en_progreso" }));
+              toast.info("Filtrando tareas 'En Progreso'.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-amber-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-amber-400 transition-colors">
+              <span className="text-xs font-medium">En Progreso</span>
+              <Clock className="h-4 w-4 text-amber-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{tasksInProgressCount}</span>
+              <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                🟡 En Proc
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setTaskFilters((prev) => ({ ...prev, statusCode: "completada" }));
+              toast.info("Filtrando tareas 'Completadas'.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-emerald-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-emerald-400 transition-colors">
+              <span className="text-xs font-medium">Completadas</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{tasksCompletedCount}</span>
+              <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                ✅ Completadas
+              </span>
+            </div>
+          </div>
+
+          <div
+            onClick={() => {
+              setTaskFilters((prev) => ({ ...prev, statusCode: "vencidas" }));
+              toast.info("Filtrando tareas 'Vencidas'.");
+            }}
+            className="rounded-2xl p-5 shadow-sm space-y-2 cursor-pointer hover:border-red-500/60 hover:bg-zinc-900/80 transition-all group"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400 group-hover:text-red-400 transition-colors">
+              <span className="text-xs font-medium">Tareas Vencidas</span>
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-red-400">{tasksOverdueCount}</span>
+              <span className="text-[11px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">
+                🚨 Vencidas
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* BARRA FLOTANTE DE ACCIONES MASIVAS */}
       {section === "activities" && selectedActivityIds.length > 0 && (
         <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
@@ -2244,6 +2777,51 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               size="sm"
               variant="destructive"
               onClick={() => void handleBulkDeleteActivities()}
+              className="h-8 text-xs flex items-center gap-1.5"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Eliminar Seleccionados
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {section === "tasks" && selectedTaskIds.length > 0 && (
+        <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center gap-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+              ✓
+            </span>
+            <span className="text-xs font-semibold text-zinc-100">
+              {selectedTaskIds.length} {selectedTaskIds.length === 1 ? "tarea seleccionada" : "tareas seleccionadas"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void handleBulkCompleteTasks()}
+              className="h-8 text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 flex items-center gap-1.5"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              Marcar Completadas
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleBulkExportTasks}
+              className="h-8 text-xs bg-zinc-800 border-zinc-700 text-zinc-200 hover:bg-zinc-700 flex items-center gap-1.5"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Exportar ({selectedTaskIds.length})
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => void handleBulkDeleteTasks()}
               className="h-8 text-xs flex items-center gap-1.5"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -2360,7 +2938,61 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </>
             )}
 
-            {(section === "projects" || section === "activities") && (
+            {section === "tasks" && (
+              <>
+                <div className="w-44">
+                  <SelectField
+                    value={taskFilters.activityId === "all" ? "" : taskFilters.activityId}
+                    onChange={(value) =>
+                      setTaskFilters((current) => ({
+                        ...current,
+                        activityId: value || "all",
+                      }))
+                    }
+                    options={catalogs.activities.map((a) => ({ value: a.id, label: a.title }))}
+                    placeholder="Todas las actividades"
+                  />
+                </div>
+                <div className="w-36">
+                  <SelectField
+                    value={taskFilters.priority === "all" || !taskFilters.priority ? "" : taskFilters.priority}
+                    onChange={(value) =>
+                      setTaskFilters((current) => ({
+                        ...current,
+                        priority: (value || "all") as TaskListFilters["priority"],
+                      }))
+                    }
+                    options={[
+                      { value: "baja", label: "🟢 Baja" },
+                      { value: "media", label: "🟡 Media" },
+                      { value: "alta", label: "🔴 Alta" },
+                      { value: "urgente", label: "⚡ Urgente" },
+                    ]}
+                    placeholder="Prioridad"
+                  />
+                </div>
+                <div className="w-36">
+                  <SelectField
+                    value={taskFilters.statusCode === "all" ? "" : taskFilters.statusCode}
+                    onChange={(value) =>
+                      setTaskFilters((current) => ({
+                        ...current,
+                        statusCode: (value || "all") as TaskListFilters["statusCode"],
+                      }))
+                    }
+                    options={[
+                      { value: "pendiente", label: "Por Hacer" },
+                      { value: "en_progreso", label: "En Progreso" },
+                      { value: "completada", label: "Completada" },
+                      { value: "vencidas", label: "🚨 Vencidas" },
+                    ]}
+                    placeholder="Estado"
+                  />
+                </div>
+              </>
+            )}
+
+            {(section === "projects" || section === "activities" || section === "tasks") && (
               <div className="flex items-center rounded-xl p-1 bg-zinc-950 border border-zinc-800">
                 <button
                   type="button"
@@ -2393,6 +3025,17 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <OutlineButton
                 size="sm"
                 onClick={() => exportProjectsToCSV(projectRows)}
+                className="flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Exportar
+              </OutlineButton>
+            )}
+
+            {section === "tasks" && (
+              <OutlineButton
+                size="sm"
+                onClick={() => exportTasksToCSV(taskRows)}
                 className="flex items-center gap-1.5"
               >
                 <Download className="h-3.5 w-3.5" />
@@ -2948,52 +3591,174 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           ) : null}
 
           {section === "tasks" ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Proyecto</label>
-                <SelectField
-                  value={taskFormProjectFilter}
-                  onChange={(value) => {
-                    setTaskFormProjectFilter(value);
-                    setTaskForm((current) => ({ ...current, activityId: "" }));
-                  }}
-                  options={catalogs.projects}
-                  placeholder="Proyecto (para filtrar actividad)"
+            <div className="space-y-4">
+              {/* FILA 1: Contexto de Proyecto y Actividad */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Proyecto <span className="text-zinc-500">(Filtro de actividad)</span>
+                  </label>
+                  <SelectField
+                    value={taskFormProjectFilter}
+                    onChange={(value) => {
+                      setTaskFormProjectFilter(value);
+                      setTaskForm((current) => ({ ...current, activityId: "" }));
+                    }}
+                    options={catalogs.projects}
+                    placeholder="Seleccionar Proyecto"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Actividad Vinculada <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={taskForm.activityId}
+                    onChange={(value) => setTaskForm((current) => ({ ...current, activityId: value }))}
+                    options={
+                      taskFormProjectFilter
+                        ? catalogs.activities.filter((a) => a.projectId === taskFormProjectFilter)
+                        : catalogs.activities
+                    }
+                    placeholder="Seleccionar Actividad"
+                  />
+                </div>
+              </div>
+
+              {/* FILA 2: Título de la Tarea */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">
+                  Título de la Tarea <span className="text-red-400">*</span>
+                </label>
+                <InputField
+                  value={taskForm.title}
+                  onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))}
+                  placeholder="Ej. Preparar material impreso para la capacitación..."
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Actividad *</label>
-                <SelectField
-                  value={taskForm.activityId}
-                  onChange={(value) => setTaskForm((current) => ({ ...current, activityId: value }))}
-                  options={
-                    taskFormProjectFilter
-                      ? catalogs.activities.filter((a) => a.projectId === taskFormProjectFilter)
-                      : catalogs.activities
-                  }
-                  placeholder="Actividad"
+
+              {/* FILA 3: Asignación, Prioridad y Estado */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Responsable / Asignado <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={taskForm.assignedVolunteerIds && taskForm.assignedVolunteerIds[0] ? taskForm.assignedVolunteerIds[0] : ""}
+                    onChange={(value) =>
+                      setTaskForm((current) => ({
+                        ...current,
+                        assignedVolunteerIds: value ? [value] : [],
+                      }))
+                    }
+                    options={catalogs.volunteers}
+                    placeholder="👤 Asignar Responsable"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Nivel de Prioridad <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={taskForm.priority || "media"}
+                    onChange={(value) =>
+                      setTaskForm((current) => ({
+                        ...current,
+                        priority: value as TaskFormValues["priority"],
+                      }))
+                    }
+                    options={[
+                      { value: "baja", label: "🟢 Baja" },
+                      { value: "media", label: "🟡 Media" },
+                      { value: "alta", label: "🔴 Alta" },
+                      { value: "urgente", label: "⚡ Urgente" },
+                    ]}
+                    placeholder="Seleccionar Prioridad"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Estado Inicial <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={taskForm.statusCode}
+                    onChange={(value) =>
+                      setTaskForm((current) => ({
+                        ...current,
+                        statusCode: value as TaskFormValues["statusCode"],
+                      }))
+                    }
+                    options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))}
+                    placeholder="Seleccionar Estado"
+                  />
+                </div>
+              </div>
+
+              {/* FILA 4: Fechas y Estimación */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">Fecha Límite de Entrega</label>
+                  <InputField
+                    value={taskForm.deadline}
+                    onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))}
+                    placeholder="Fecha limite"
+                    type="date"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">Tiempo Estimado (Horas)</label>
+                  <InputField
+                    value={taskForm.estimatedHours || "0"}
+                    onChange={(value) => setTaskForm((current) => ({ ...current, estimatedHours: value }))}
+                    placeholder="Ej. 3 hrs"
+                    type="number"
+                  />
+                </div>
+              </div>
+
+              {/* FILA 5: Descripción */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">Descripción / Instrucciones Detalladas</label>
+                <TextareaField
+                  value={taskForm.description}
+                  onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))}
+                  placeholder="Detallar pasos clave o requerimientos para completar la tarea..."
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Estado *</label>
-                <SelectField
-                  value={taskForm.statusCode}
-                  onChange={(value) => setTaskForm((current) => ({ ...current, statusCode: value as TaskFormValues["statusCode"] }))}
-                  options={catalogs.taskStates.map((item) => ({ value: item.code, label: item.label }))}
-                  placeholder="Estado"
+
+              {/* FILA 6: Archivos y Notificación */}
+              <div className="space-y-3 pt-2">
+                <label className="text-xs font-medium text-zinc-300">
+                  Adjuntar Referencias / Archivos Guía <span className="text-zinc-500">(Opcional - PDF, PNG, DOCX)</span>
+                </label>
+                <ImageUploadField
+                  label="📁 Arrastra un archivo de referencia o haz clic para subir (Máx 5MB)"
+                  existingUrl={null}
+                  previewFile={taskForm.attachedFile || null}
+                  onFileSelect={(file) => setTaskForm((current) => ({ ...current, attachedFile: file }))}
+                  onClear={() => setTaskForm((current) => ({ ...current, attachedFile: null }))}
                 />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Fecha Límite</label>
-                <InputField value={taskForm.deadline} onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))} placeholder="Fecha limite" type="date" />
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-medium text-zinc-300">Título de la Tarea *</label>
-                <InputField value={taskForm.title} onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la tarea" />
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-xs font-medium text-zinc-300">Descripción</label>
-                <TextareaField value={taskForm.description} onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la tarea" />
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="sendEmailTask"
+                    checked={taskForm.sendEmailNotification !== false}
+                    onChange={(e) =>
+                      setTaskForm((current) => ({
+                        ...current,
+                        sendEmailNotification: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                  <label htmlFor="sendEmailTask" className="text-xs text-zinc-300 cursor-pointer select-none">
+                    Notificar automáticamente por correo electrónico al responsable asignado 📧
+                  </label>
+                </div>
               </div>
             </div>
           ) : null}

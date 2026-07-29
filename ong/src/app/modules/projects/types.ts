@@ -84,10 +84,13 @@ export interface ProjectListFilters {
   areaId: string | "all";
 }
 
+export type TaskPriority = "baja" | "media" | "alta" | "urgente";
+
 export interface TaskListFilters {
   searchTerm: string;
   activityId: string | "all";
-  statusCode: TaskStatusCode | "all";
+  statusCode: TaskStatusCode | "all" | "vencidas";
+  priority?: TaskPriority | "all";
 }
 
 export interface ActivityListFilters {
@@ -182,7 +185,10 @@ export interface TaskRow {
   statusCode: TaskStatusCode;
   statusLabel: string;
   statusKind: TaskStatusKind;
+  priority?: TaskPriority;
+  estimatedHours?: number | null;
   deadline: string | null;
+  assignedVolunteerIds?: string[];
   volunteerCount: number;
   createdAt: string;
   updatedAt: string;
@@ -312,7 +318,12 @@ export interface TaskFormValues {
   title: string;
   description: string;
   statusCode: TaskStatusCode;
+  priority?: TaskPriority;
+  estimatedHours?: string;
   deadline: string;
+  assignedVolunteerIds?: string[];
+  attachedFile?: File | null;
+  sendEmailNotification?: boolean;
 }
 
 export interface ActivityFormValues {
