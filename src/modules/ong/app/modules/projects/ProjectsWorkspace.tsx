@@ -9,6 +9,7 @@ import {
   Calendar,
   CheckCircle2,
   CheckSquare,
+  Circle,
   Clock,
   DollarSign,
   Download,
@@ -21,16 +22,20 @@ import {
   Layers,
   LayoutList,
   MapPin,
+  MessageSquare,
   MoreVertical,
   Package,
+  Paperclip,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  Send,
   Settings,
   ShieldAlert,
   Trash2,
   Upload,
+  User,
   UserCheck,
   UserPlus,
   Users,
@@ -707,6 +712,35 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM
     );
   const [taskFormProjectFilter, setTaskFormProjectFilter] = useState<string>("");
+  const [taskComments, setTaskComments] = useState<
+    Record<string, Array<{ id: string; author: string; text: string; date: string }>>
+  >({});
+  const [newCommentText, setNewCommentText] = useState("");
+
+  function handleAddComment(taskId: string, authorName: string = "Sebastián Paipay") {
+    const trimmed = newCommentText.trim();
+    if (!trimmed) return;
+
+    const newComment = {
+      id: `c_${Date.now()}`,
+      author: authorName,
+      text: trimmed,
+      date: new Date().toLocaleDateString("es-PE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    setTaskComments((prev) => ({
+      ...prev,
+      [taskId]: [...(prev[taskId] || []), newComment],
+    }));
+    setNewCommentText("");
+    toast.success("Comentario publicado.");
+  }
 
   const { catalogs, loading: catalogsLoading, error: catalogsError, refresh: refreshCatalogs } =
     useProjectCatalogs();
@@ -2439,15 +2473,332 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         {section === "tasks" ? (
           (() => {
             const detail = details.detail as TaskDetailData;
+            const task = detail.task;
+
+            // Jerarquía: Proyecto → Actividad
+            const linkedActivity =
+              activityRows.find((a) => a.id === task.activityId) ||
+              catalogs.activities.find((a) => a.id === task.activityId);
+            const activityTitle = task.activityName || linkedActivity?.title || "Sin actividad asignada";
+            const projectName =
+              linkedActivity?.projectName ||
+              catalogs.projects.find((p) => p.id === linkedActivity?.projectId)?.label ||
+              "Proyecto General";
+
+            // Responsable asignado:
+            const assignedId =
+              task.assignedVolunteerIds && task.assignedVolunteerIds.length > 0
+                ? task.assignedVolunteerIds[0]
+                : null;
+            const assignedVolunteer = catalogs.volunteers.find((v) => v.value === assignedId);
+            const assigneeName = assignedVolunteer
+              ? assignedVolunteer.label
+              : assignedId
+              ? "Voluntario Asignado"
+              : "Sin asignar";
+
+            const getInitials = (name: string) => {
+              if (!name || name === "Sin asignar") return "?";
+              const parts = name.trim().split(" ");
+              if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+              return name.slice(0, 2).toUpperCase();
+            };
+
+            const isCompleted = task.statusCode === "completada";
+            const isInProgress = task.statusCode === "en_progreso";
+            const overdue = isTaskOverdue(task.deadline, task.statusCode);
+
+            const commentsList = taskComments[task.id] || [
+              {
+                id: "c1",
+                author: assigneeName !== "Sin asignar" ? assigneeName : "Coordinador de Proyecto",
+                text: "Se registró la tarea en el plan de trabajo operativo.",
+                date: formatDateString(task.createdAt) || "Registro inicial",
+              },
+            ];
+
             return (
-              <>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</div><div style={{ color: "var(--t-text)" }}>{detail.task.activityName ?? "Sin actividad asignada"}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getTaskStatusVariant(detail.task.statusKind)}>{detail.task.statusLabel}</StatusDot></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Fecha limite</div><div style={{ color: "var(--t-text)" }}>{formatDateString(detail.task.deadline) || "Sin fecha"}</div></div>
+              <div className="space-y-6">
+                {/* 1. HEADER DE LA TAREA Y BREADCRUMB */}
+                <div className="relative overflow-hidden rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-indigo-950/60 via-zinc-900 to-zinc-950 space-y-3 shadow-lg">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-1.5 flex-1">
+                      {/* Jerarquía: Proyecto > Actividad */}
+                      <div className="flex items-center flex-wrap gap-2 text-xs text-zinc-400 font-medium">
+                        <span className="flex items-center gap-1 bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-800 text-zinc-300">
+                          <FolderKanban className="h-3.5 w-3.5 text-indigo-400" />
+                          <span>Proyecto: <strong className="text-zinc-100 font-semibold">{projectName}</strong></span>
+                        </span>
+                        <span className="text-zinc-600">/</span>
+                        <span className="flex items-center gap-1 bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-800 text-zinc-300">
+                          <Layers className="h-3.5 w-3.5 text-sky-400" />
+                          <span>Actividad: <strong className="text-zinc-100 font-semibold">{activityTitle}</strong></span>
+                        </span>
+                      </div>
+
+                      {/* Título prominente */}
+                      <h2 className="text-xl font-bold text-zinc-100 tracking-tight pt-1">
+                        {task.title}
+                      </h2>
+
+                      {/* Badges de Estado y Prioridad */}
+                      <div className="flex items-center flex-wrap gap-2 pt-1">
+                        {isCompleted ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Completada
+                          </span>
+                        ) : isInProgress ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            <Clock className="h-3.5 w-3.5" />
+                            En Progreso
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                            <Circle className="h-3.5 w-3.5" />
+                            Por Hacer
+                          </span>
+                        )}
+
+                        {overdue && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 animate-pulse">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            Vencida
+                          </span>
+                        )}
+
+                        {renderTaskPriorityBadge(task.priority || "media")}
+                      </div>
+                    </div>
+
+                    {/* 2. BARRA DE ACCIONES DIRECTAS */}
+                    <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-800">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          closeDetail();
+                          openTaskEdit(task);
+                        }}
+                        className="h-8 text-xs bg-zinc-800/90 border-zinc-700 text-zinc-200 hover:bg-zinc-700 flex items-center gap-1.5"
+                      >
+                        <Pencil className="h-3.5 w-3.5 text-indigo-400" />
+                        Editar Tarea
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void handleQuickToggleTaskComplete(task)}
+                        className="h-8 text-xs bg-zinc-800/90 border-zinc-700 text-zinc-200 hover:bg-zinc-700 flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 text-amber-400" />
+                        {isCompleted ? "Reabrir Tarea" : "Cambiar Estado"}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          closeDetail();
+                          requestRowAction(task);
+                        }}
+                        className="h-8 text-xs flex items-center gap-1.5"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.task.description || "Sin descripcion registrada."}</div></div>
-              </>
+
+                {/* 3. GRID DE METADATOS (3 COLUMNAS) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Responsable */}
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 text-indigo-400" /> Responsable / Asignado
+                    </span>
+                    <div className="flex items-center gap-3 pt-1">
+                      <div className="h-9 w-9 rounded-full bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                        {getInitials(assigneeName)}
+                      </div>
+                      <div className="truncate">
+                        <p className="text-xs font-semibold text-zinc-100 truncate">{assigneeName}</p>
+                        <p className="text-[11px] text-zinc-400 truncate">
+                          {assignedId ? "Asignado a la tarea" : "Sin persona asignada"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fecha Límite */}
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-sky-400" /> Fecha Límite de Entrega
+                    </span>
+                    <div className="pt-1">
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {formatDateString(task.deadline) || "Sin fecha límite"}
+                      </p>
+                      <div className="mt-1">
+                        {overdue ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 font-semibold">
+                            <AlertTriangle className="h-3 w-3 inline" /> Vencida
+                          </span>
+                        ) : task.deadline ? (
+                          <span className="text-[11px] text-emerald-400 font-medium">A tiempo / Programada</span>
+                        ) : (
+                          <span className="text-[11px] text-zinc-500">Sin fecha restricción</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Horas y Esfuerzo */}
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-amber-400" /> Tiempo y Horas
+                    </span>
+                    <div className="pt-1 space-y-1">
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {task.estimatedHours ? `${task.estimatedHours} hrs estimadas` : "Sin estimación de horas"}
+                      </p>
+                      <p className="text-[11px] text-zinc-400">
+                        {isCompleted ? "Tarea finalizada" : "Esfuerzo estimado para ejecución"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. SECCIÓN DE DESCRIPCIÓN */}
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-2">
+                  <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <FileText className="h-4 w-4 text-indigo-400" /> Descripción e Instrucciones
+                  </h4>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-wrap">
+                    {task.description || "Sin instrucciones ni descripción detallada registrada."}
+                  </p>
+                </div>
+
+                {/* 5. SECCIÓN DE ENTREGABLES Y ADJUNTOS */}
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                      <Paperclip className="h-4 w-4 text-indigo-400" /> Entregables y Archivos Adjuntos
+                    </h4>
+                    <span className="text-[11px] text-zinc-400 font-mono">2 archivos de referencia</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:border-indigo-500/40 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                          PDF
+                        </div>
+                        <div className="truncate max-w-[170px]">
+                          <p className="text-xs font-medium text-zinc-200 truncate">informe_final_v1.pdf</p>
+                          <p className="text-[10px] text-zinc-400">1.4 MB • Documento de entrega</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toast.info("Descargando entregable informe_final_v1.pdf...")}
+                        className="h-8 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 px-2"
+                        title="Descargar entregable"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:border-indigo-500/40 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shrink-0">
+                          PNG
+                        </div>
+                        <div className="truncate max-w-[170px]">
+                          <p className="text-xs font-medium text-zinc-200 truncate">captura_evidencia.png</p>
+                          <p className="text-[10px] text-zinc-400">850 KB • Evidencia visual</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toast.info("Descargando evidencia captura_evidencia.png...")}
+                        className="h-8 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 px-2"
+                        title="Descargar archivo"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. BITÁCORA DE ACTIVIDAD Y COMENTARIOS */}
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
+                  <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <MessageSquare className="h-4 w-4 text-indigo-400" /> Bitácora de Actividad y Comentarios
+                  </h4>
+
+                  {/* Historial de eventos */}
+                  <div className="space-y-2 text-xs text-zinc-400 pl-3 border-l-2 border-zinc-800">
+                    <div className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 shrink-0" />
+                      <span>Registrada por <strong className="text-zinc-200">{detail.createdBy || "Sistema"}</strong> el {formatDateString(task.createdAt)}</span>
+                    </div>
+                    {isCompleted && (
+                      <div className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+                        <span>Marcada como <strong className="text-emerald-400">Completada</strong> el {formatDateString(task.updatedAt)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Lista de Comentarios */}
+                  <div className="space-y-3 pt-2 border-t border-zinc-800/80">
+                    {commentsList.map((c) => (
+                      <div key={c.id} className="flex items-start gap-3 p-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80">
+                        <div className="h-7 w-7 rounded-full bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {getInitials(c.author)}
+                        </div>
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="font-semibold text-zinc-200">{c.author}</span>
+                            <span className="text-zinc-500">{c.date}</span>
+                          </div>
+                          <p className="text-xs text-zinc-300 leading-normal">{c.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Campo para nuevo comentario */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Escribe un comentario o actualización de la tarea..."
+                      value={newCommentText}
+                      onChange={(e) => setNewCommentText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newCommentText.trim()) {
+                          handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "Sebastián Paipay");
+                        }
+                      }}
+                      className="h-9 flex-1 rounded-xl px-3 text-xs outline-none bg-zinc-950 border border-zinc-800 text-zinc-200 focus:border-indigo-500 transition-colors"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "Sebastián Paipay")}
+                      disabled={!newCommentText.trim()}
+                      className="h-9 px-3 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 shrink-0"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      Comentar
+                    </Button>
+                  </div>
+                </div>
+              </div>
             );
           })()
         ) : null}
