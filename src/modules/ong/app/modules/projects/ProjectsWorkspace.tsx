@@ -410,28 +410,32 @@ function renderTaskPriorityBadge(priority?: string) {
   const p = priority?.toLowerCase() || "media";
   if (p === "baja") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-        🟢 Baja
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        Baja
       </span>
     );
   }
   if (p === "alta") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-        🔴 Alta
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+        <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+        Alta
       </span>
     );
   }
   if (p === "urgente") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 shadow-sm animate-pulse">
-        ⚡ Urgente
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 shadow-sm animate-pulse">
+        <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+        Urgente
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-      🟡 Media
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+      Media
     </span>
   );
 }
@@ -459,7 +463,7 @@ function formatTaskDeadline(deadline?: string | null, statusCode?: string | null
     const diffDays = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
     return (
       <div className="inline-flex items-center gap-1.5 text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-lg border border-red-500/20 font-semibold">
-        <span>🚨 {formatted}</span>
+        <span>{formatted}</span>
         <span className="text-[10px] opacity-90">({diffDays === 1 ? "Vencida hoy/ayer" : `Vencida hace ${diffDays}d`})</span>
       </div>
     );
@@ -1446,7 +1450,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </div>
               {isOverdue && (
                 <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 font-semibold">
-                  🚨 Vencida
+                  Vencida
                 </div>
               )}
             </div>
@@ -2597,7 +2601,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{activityRows.length}</span>
               <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                Ver todas 🔍
+                Ver todas
               </span>
             </div>
           </div>
@@ -2619,7 +2623,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 {totalRegisteredHoursSum}h <span className="text-xs text-zinc-400 font-normal">/ {totalEstimatedHoursSum}h</span>
               </span>
               <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                En progreso 🟢
+                En progreso
               </span>
             </div>
           </div>
@@ -2639,7 +2643,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{totalAssignedVolunteersSum}</span>
               <span className="text-[11px] font-medium text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
-                Planificadas 🔵
+                Planificadas
               </span>
             </div>
           </div>
@@ -2658,7 +2662,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{fieldLocationsCount}</span>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                Ubicaciones 📍
+                Ubicaciones
               </span>
             </div>
           </div>
@@ -2682,7 +2686,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{taskRows.length}</span>
               <span className="text-[11px] font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                Registradas 📋
+                Registradas
               </span>
             </div>
           </div>
@@ -2702,7 +2706,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{tasksInProgressCount}</span>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                🟡 En Proc
+                En Progreso
               </span>
             </div>
           </div>
@@ -2722,7 +2726,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{tasksCompletedCount}</span>
               <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                ✅ Completadas
+                Completadas
               </span>
             </div>
           </div>
@@ -2742,7 +2746,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-red-400">{tasksOverdueCount}</span>
               <span className="text-[11px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">
-                🚨 Vencidas
+                Vencidas
               </span>
             </div>
           </div>
@@ -2972,10 +2976,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       }))
                     }
                     options={[
-                      { value: "baja", label: "🟢 Baja" },
-                      { value: "media", label: "🟡 Media" },
-                      { value: "alta", label: "🔴 Alta" },
-                      { value: "urgente", label: "⚡ Urgente" },
+                      { value: "baja", label: "Baja" },
+                      { value: "media", label: "Media" },
+                      { value: "alta", label: "Alta" },
+                      { value: "urgente", label: "Urgente" },
                     ]}
                     placeholder="Prioridad"
                   />
@@ -2993,7 +2997,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       { value: "pendiente", label: "Por Hacer" },
                       { value: "en_progreso", label: "En Progreso" },
                       { value: "completada", label: "Completada" },
-                      { value: "vencidas", label: "🚨 Vencidas" },
+                      { value: "vencidas", label: "Vencidas" },
                     ]}
                     placeholder="Estado"
                   />
@@ -3661,7 +3665,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       }))
                     }
                     options={catalogs.volunteers}
-                    placeholder="👤 Asignar Responsable"
+                    placeholder="Asignar Responsable"
                   />
                 </div>
 
@@ -3678,10 +3682,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       }))
                     }
                     options={[
-                      { value: "baja", label: "🟢 Baja" },
-                      { value: "media", label: "🟡 Media" },
-                      { value: "alta", label: "🔴 Alta" },
-                      { value: "urgente", label: "⚡ Urgente" },
+                      { value: "baja", label: "Baja" },
+                      { value: "media", label: "Media" },
+                      { value: "alta", label: "Alta" },
+                      { value: "urgente", label: "Urgente" },
                     ]}
                     placeholder="Seleccionar Prioridad"
                   />
@@ -3744,7 +3748,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   Adjuntar Referencias / Archivos Guía <span className="text-zinc-500">(Opcional - PDF, PNG, DOCX)</span>
                 </label>
                 <ImageUploadField
-                  label="📁 Arrastra un archivo de referencia o haz clic para subir (Máx 5MB)"
+                  label="Arrastra un archivo de referencia o haz clic para subir (Máx 5MB)"
                   existingUrl={null}
                   previewFile={taskForm.attachedFile || null}
                   onFileSelect={(file) => setTaskForm((current) => ({ ...current, attachedFile: file }))}
@@ -3765,7 +3769,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                   <label htmlFor="sendEmailTask" className="text-xs text-zinc-300 cursor-pointer select-none">
-                    Notificar automáticamente por correo electrónico al responsable asignado 📧
+                    Notificar automáticamente por correo electrónico al responsable asignado
                   </label>
                 </div>
               </div>
@@ -3828,10 +3832,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       }))
                     }
                     options={[
-                      { value: "baja", label: "🟢 Baja" },
-                      { value: "media", label: "🔵 Media" },
-                      { value: "alta", label: "🔴 Alta" },
-                      { value: "urgente", label: "⚡ Urgente" },
+                      { value: "baja", label: "Baja" },
+                      { value: "media", label: "Media" },
+                      { value: "alta", label: "Alta" },
+                      { value: "urgente", label: "Urgente" },
                     ]}
                     placeholder="Prioridad"
                   />
