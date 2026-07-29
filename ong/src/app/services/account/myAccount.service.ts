@@ -84,3 +84,30 @@ export async function updateMyAvatar(file: File): Promise<string> {
 
   return upload.publicUrl;
 }
+
+export async function updateMyProfileDetails(input: {
+  full_name?: string;
+  tipo_documento?: string;
+  numero_documento?: string;
+  genero?: string;
+}): Promise<void> {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    throw new Error(userError?.message ?? "No hay sesión activa.");
+  }
+
+  const payload: Record<string, any> = {};
+  if (input.full_name !== undefined) payload.full_name = input.full_name.trim();
+  if (input.tipo_documento !== undefined) payload.tipo_documento = input.tipo_documento.trim();
+  if (input.numero_documento !== undefined) payload.numero_documento = input.numero_documento.trim();
+  if (input.genero !== undefined) payload.genero = input.genero.trim();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(payload)
+    .eq("id", userData.user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}

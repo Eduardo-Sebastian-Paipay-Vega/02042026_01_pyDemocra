@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { toast } from "sonner";
 import {
   Briefcase,
   Building2,
@@ -21,18 +22,25 @@ import {
 } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
-import { getMyProfile, type MyProfileRow } from "../services/account/myAccount.service";
+import {
+  getMyProfile,
+  updateMyProfileDetails,
+  type MyProfileRow,
+} from "../services/account/myAccount.service";
 import { GradientButton } from "../components/ui/gradient-button";
 import { OutlineButton } from "../components/ui/outline-button";
+import { ModalShell } from "../components/ui/modal-shell";
 
 function FieldItem({
   icon,
   label,
   value,
+  onComplete,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | null | undefined;
+  onComplete?: () => void;
 }) {
   const isValueEmpty = !value || value.trim() === "" || value === "—";
 
@@ -55,13 +63,14 @@ function FieldItem({
           <span className="text-xs italic" style={{ color: "var(--t-text-dim)", opacity: 0.7 }}>
             No especificado
           </span>
-          <Link
-            to="/app/ong/account/settings"
+          <button
+            type="button"
+            onClick={onComplete}
             className="text-[11px] font-medium hover:underline"
             style={{ color: "var(--t-primary, #6366f1)" }}
           >
             Completar
-          </Link>
+          </button>
         </div>
       ) : (
         <span className="text-xs font-semibold break-words" style={{ color: "var(--t-text)" }}>
@@ -78,22 +87,61 @@ export function MyProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    getMyProfile()
-      .then((row) => {
-        if (!cancelled) setProfile(row);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+  // Estado del Modal de Edición CRUD
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "",
+    tipo_documento: "DNI",
+    numero_documento: "",
+    genero: "Masculino",
+  });
+
+  const loadProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const row = await getMyProfile();
+      setProfile(row);
+      setForm({
+        full_name: row.full_name ?? "",
+        tipo_documento: row.tipo_documento ?? "DNI",
+        numero_documento: row.numero_documento ?? "",
+        genero: row.genero ?? "Masculino",
       });
-    return () => {
-      cancelled = true;
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
   }, []);
+
+  const handleSaveProfile = async () => {
+    if (!form.full_name.trim()) {
+      toast.error("El nombre completo es obligatorio.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateMyProfileDetails({
+        full_name: form.full_name,
+        tipo_documento: form.tipo_documento,
+        numero_documento: form.numero_documento,
+        genero: form.genero,
+      });
+      toast.success("Perfil actualizado en la base de datos Supabase.");
+      setEditModalOpen(false);
+      await loadProfile();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al actualizar perfil.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const email = tenantBootstrap.context?.user.email ?? null;
   const tenantNameLabel = tenantBootstrap.context?.tenant.name ?? null;
@@ -188,12 +236,14 @@ export function MyProfile() {
 
                 {/* Botones de acción principal y secundario */}
                 <div className="flex items-center gap-2.5 pt-2 sm:pt-0">
-                  <Link to="/app/ong/account/settings">
-                    <GradientButton size="sm" className="flex items-center gap-2">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Editar Perfil
-                    </GradientButton>
-                  </Link>
+                  <GradientButton
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={() => setEditModalOpen(true)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar Perfil
+                  </GradientButton>
                   <Link to="/app/ong/settings/security">
                     <OutlineButton size="sm" className="flex items-center gap-2">
                       <Settings className="h-3.5 w-3.5" />
@@ -234,21 +284,25 @@ export function MyProfile() {
                   icon={<User className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Nombre Completo"
                   value={profile?.full_name}
+                  onComplete={() => setEditModalOpen(true)}
                 />
                 <FieldItem
                   icon={<FileText className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Tipo de Documento"
                   value={profile?.tipo_documento}
+                  onComplete={() => setEditModalOpen(true)}
                 />
                 <FieldItem
                   icon={<CreditCard className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Número de Documento"
                   value={profile?.numero_documento}
+                  onComplete={() => setEditModalOpen(true)}
                 />
                 <FieldItem
                   icon={<UserCheck className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Género"
                   value={profile?.genero}
+                  onComplete={() => setEditModalOpen(true)}
                 />
                 <FieldItem
                   icon={<Mail className="h-3.5 w-3.5 text-indigo-400" />}
@@ -259,6 +313,7 @@ export function MyProfile() {
                   icon={<Phone className="h-3.5 w-3.5 text-indigo-400" />}
                   label="Teléfono"
                   value={null}
+                  onComplete={() => setEditModalOpen(true)}
                 />
               </div>
             </div>
@@ -309,7 +364,7 @@ export function MyProfile() {
               </div>
             </div>
 
-            {/* Card 3: Seguridad & Actividad Reciente (Full Width en LG) */}
+            {/* Card 3: Seguridad & Actividad Reciente */}
             <div
               className="lg:col-span-2 rounded-2xl p-6 shadow-sm space-y-4"
               style={{
@@ -357,6 +412,113 @@ export function MyProfile() {
           </div>
         </div>
       )}
+
+      {/* Modal Shell de Edición de Perfil (CRUD Supabase DB) */}
+      <ModalShell open={editModalOpen} onClose={() => setEditModalOpen(false)} width="max-w-[640px]">
+        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+          <h3 className="text-base font-semibold" style={{ color: "var(--t-text)" }}>
+            Editar Perfil de Usuario (BD)
+          </h3>
+          <button
+            type="button"
+            className="rounded-lg p-1 text-xs text-zinc-400 hover:text-white"
+            onClick={() => setEditModalOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-4 p-5">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
+              Nombre Completo
+            </label>
+            <input
+              type="text"
+              value={form.full_name}
+              onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
+              placeholder="Ej. Juan Pérez"
+              className="h-10 w-full rounded-xl px-3.5 text-xs outline-none"
+              style={{
+                border: "1px solid var(--t-border)",
+                background: "var(--t-input-bg)",
+                color: "var(--t-text-secondary)",
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
+                Tipo de Documento
+              </label>
+              <select
+                value={form.tipo_documento}
+                onChange={(e) => setForm((prev) => ({ ...prev, tipo_documento: e.target.value }))}
+                className="h-10 w-full rounded-xl px-3.5 text-xs outline-none"
+                style={{
+                  border: "1px solid var(--t-border)",
+                  background: "var(--t-input-bg)",
+                  color: "var(--t-text-secondary)",
+                }}
+              >
+                <option value="DNI">DNI</option>
+                <option value="CE">Carnet de Extranjería (CE)</option>
+                <option value="PASAPORTE">Pasaporte</option>
+                <option value="RUC">RUC</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
+                Número de Documento
+              </label>
+              <input
+                type="text"
+                value={form.numero_documento}
+                onChange={(e) => setForm((prev) => ({ ...prev, numero_documento: e.target.value }))}
+                placeholder="Ej. 72819203"
+                className="h-10 w-full rounded-xl px-3.5 text-xs outline-none"
+                style={{
+                  border: "1px solid var(--t-border)",
+                  background: "var(--t-input-bg)",
+                  color: "var(--t-text-secondary)",
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
+              Género
+            </label>
+            <select
+              value={form.genero}
+              onChange={(e) => setForm((prev) => ({ ...prev, genero: e.target.value }))}
+              className="h-10 w-full rounded-xl px-3.5 text-xs outline-none"
+              style={{
+                border: "1px solid var(--t-border)",
+                background: "var(--t-input-bg)",
+                color: "var(--t-text-secondary)",
+              }}
+            >
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro</option>
+              <option value="Prefiero no decir">Prefiero no decir</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-2.5 pt-3">
+            <OutlineButton size="sm" onClick={() => setEditModalOpen(false)} disabled={saving}>
+              Cancelar
+            </OutlineButton>
+            <GradientButton size="sm" onClick={handleSaveProfile} disabled={saving}>
+              {saving ? "Guardando en BD…" : "Guardar Cambios BD"}
+            </GradientButton>
+          </div>
+        </div>
+      </ModalShell>
     </div>
   );
 }

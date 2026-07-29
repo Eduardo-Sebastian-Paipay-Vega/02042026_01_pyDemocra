@@ -222,3 +222,23 @@ describe("updateMyAvatar", () => {
     );
   });
 });
+
+describe("updateMyProfileDetails", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("actualiza los campos en profiles", async () => {
+    (supabase.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    });
+    (supabase.update as any).mockResolvedValue({ error: null });
+
+    const { updateMyProfileDetails } = await import("./myAccount.service");
+    await updateMyProfileDetails({ full_name: "Juan Pérez", tipo_documento: "DNI" });
+
+    expect(supabase.from).toHaveBeenCalledWith("profiles");
+    expect(supabase.update).toHaveBeenCalledWith({ full_name: "Juan Pérez", tipo_documento: "DNI" });
+  });
+});
