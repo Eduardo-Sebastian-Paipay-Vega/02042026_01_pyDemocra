@@ -320,10 +320,15 @@ export interface ActivityFormValues {
   title: string;
   description: string;
   statusCode: ActivityStatusCode;
+  priority?: "baja" | "media" | "alta" | "urgente";
+  modality?: "presencial" | "virtual";
+  meetingUrl?: string;
   startAt: string;
   endAt: string;
   locationId: string;
   estimatedHours: string;
+  assignedVolunteerIds?: string[];
+  sendEmailNotification?: boolean;
 }
 
 export interface ProjectVolunteerAssignmentFormValues {

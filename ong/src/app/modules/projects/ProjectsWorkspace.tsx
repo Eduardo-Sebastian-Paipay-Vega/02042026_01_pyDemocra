@@ -142,10 +142,15 @@ const EMPTY_ACTIVITY_FORM: ActivityFormValues = {
   title: "",
   description: "",
   statusCode: "planificada",
+  priority: "media",
+  modality: "presencial",
+  meetingUrl: "",
   estimatedHours: "0",
   startAt: "",
   endAt: "",
   locationId: "",
+  assignedVolunteerIds: [],
+  sendEmailNotification: true,
 };
 
 const EMPTY_PROJECT_VOLUNTEER_ASSIGNMENT_FORM: ProjectVolunteerAssignmentFormValues = {
@@ -776,7 +781,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     }
   }
 
-  // Funciones para Acciones Masivas (Bulk Actions)
   function toggleSelectAllActivities() {
     if (selectedActivityIds.length === activityRows.length) {
       setSelectedActivityIds([]);
@@ -911,10 +915,15 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       title: row.title,
       description: row.description ?? "",
       statusCode: row.statusCode,
+      priority: "media",
+      modality: row.locationName?.toLowerCase().includes("virtual") ? "virtual" : "presencial",
+      meetingUrl: "",
       estimatedHours: String(row.estimatedHours ?? 0),
       startAt: row.startAt ?? "",
       endAt: row.endAt ?? "",
       locationId: row.locationId ?? "",
+      assignedVolunteerIds: [],
+      sendEmailNotification: true,
     });
     setFormOpen(true);
   }
@@ -1049,8 +1058,21 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           await mutations.updateActivity(editingActivityId, activityForm);
           toast.success("Actividad actualizada.");
         } else {
-          await mutations.createActivity(activityForm);
-          toast.success("Actividad creada.");
+          const newActivity = await mutations.createActivity(activityForm);
+          if (newActivity && activityForm.assignedVolunteerIds && activityForm.assignedVolunteerIds.length > 0) {
+            for (const volunteerId of activityForm.assignedVolunteerIds) {
+              await mutations.createActivityVolunteerAssignment({
+                activityId: newActivity.id,
+                volunteerId,
+                role: "Voluntario asignado",
+              });
+            }
+          }
+          if (activityForm.sendEmailNotification) {
+            toast.success("Actividad creada y notificación enviada a los miembros por correo.");
+          } else {
+            toast.success("Actividad creada exitosamente.");
+          }
         }
       } else if (assignmentFormKind === "project-volunteer") {
         if (editingAssignment) {
@@ -1219,7 +1241,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
-  // Columnas de Actividades con Checkboxes + Badges Temporales + Botón Asignar + Menú Desplegable (Dropdown)
   const activityColumns: Column<ActivityRow>[] = [
     {
       key: "select",
@@ -1354,7 +1375,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             Reg. Horas
           </Button>
 
-          {/* Menú desplegable ... */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -1452,7 +1472,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
-  // Tablero Kanban o Agenda
   function renderKanbanBoard() {
     if (section === "activities") {
       const states = catalogs.activityStates.length > 0
@@ -1763,7 +1782,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
       return (
         <div className="space-y-4">
-          {/* Header con checkbox global de selección múltiple */}
           {activityRows.length > 0 && (
             <div className="flex items-center justify-between px-2 text-xs text-zinc-400">
               <label className="flex items-center gap-2 cursor-pointer font-medium hover:text-zinc-200">
@@ -1785,7 +1803,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             emptyMessage="No se encontraron actividades con los filtros actuales."
           />
 
-          {/* Footer de Paginación para Actividades */}
           <div
             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -2036,7 +2053,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       {catalogsError ? <ErrorBlock message={catalogsError} onRetry={refreshCatalogs} /> : null}
       {error ? <ErrorBlock message={error} onRetry={refresh} /> : null}
 
-      {/* Tarjetas de Resumen (KPIs) con Click-to-Filter */}
+      {/* Tarjetas de Resumen (KPIs) */}
       {section === "projects" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div
@@ -2107,7 +2124,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
       {section === "activities" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Actividades (Click to Reset Filter) */}
           <div
             onClick={() => {
               setActivityFilters({ searchTerm: "", projectId: "all", statusCode: "all", locationId: "all", dateFrom: null, dateTo: null });
@@ -2128,7 +2144,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </div>
           </div>
 
-          {/* Card 2: Control de Horas / En Proceso */}
           <div
             onClick={() => {
               setActivityFilters((prev) => ({ ...prev, statusCode: "en_progreso" }));
@@ -2151,7 +2166,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </div>
           </div>
 
-          {/* Card 3: Personal / Voluntarios Asignados */}
           <div
             onClick={() => {
               setActivityFilters((prev) => ({ ...prev, statusCode: "planificada" }));
@@ -2172,7 +2186,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </div>
           </div>
 
-          {/* Card 4: En Campo */}
           <div
             onClick={() => {
               toast.info(`Actividades en campo: ${fieldLocationsCount} de ${activityRows.length}.`);
@@ -2194,7 +2207,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         </div>
       )}
 
-      {/* BARRA FLOTANTE DE ACCIONES MASIVAS (BULK ACTIONS) */}
+      {/* BARRA FLOTANTE DE ACCIONES MASIVAS */}
       {section === "activities" && selectedActivityIds.length > 0 && (
         <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
           <div className="flex items-center gap-3">
@@ -2576,7 +2589,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   : section === "activities"
                   ? editingActivityId
                     ? "Editar Actividad"
-                    : "Crear Actividad"
+                    : "Crear Nueva Actividad"
                   : editingAssignment
                   ? `Editar ${getAssignmentKindLabel(assignmentFormKind).toLowerCase()}`
                   : "Crear Asignación"}
@@ -2985,34 +2998,238 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             </div>
           ) : null}
 
+          {/* FORMULARIO DE CREAR / EDITAR ACTIVIDAD ENRIQUECIDO */}
           {section === "activities" ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Proyecto *</label>
-                <SelectField value={activityForm.projectId} onChange={(value) => setActivityForm((current) => ({ ...current, projectId: value }))} options={catalogs.projects} placeholder="Proyecto" />
+            <div className="space-y-4">
+              {/* FILA 1: Proyecto y Estado */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                    Proyecto Asociado <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={activityForm.projectId}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, projectId: value }))}
+                    options={catalogs.projects}
+                    placeholder="Seleccionar Proyecto"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                    Estado Inicial <span className="text-red-400">*</span>
+                  </label>
+                  <SelectField
+                    value={activityForm.statusCode}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))}
+                    options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))}
+                    placeholder="Seleccionar Estado"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Estado *</label>
-                <SelectField value={activityForm.statusCode} onChange={(value) => setActivityForm((current) => ({ ...current, statusCode: value as ActivityFormValues["statusCode"] }))} options={catalogs.activityStates.map((item) => ({ value: item.code, label: item.label }))} placeholder="Estado" />
+
+              {/* FILA 2: Título y Prioridad */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                    Título de la Actividad <span className="text-red-400">*</span>
+                  </label>
+                  <InputField
+                    value={activityForm.title}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))}
+                    placeholder="Ej. Taller de Capacitación en Campo"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Nivel de Prioridad
+                  </label>
+                  <SelectField
+                    value={activityForm.priority || "media"}
+                    onChange={(value) =>
+                      setActivityForm((current) => ({
+                        ...current,
+                        priority: value as ActivityFormValues["priority"],
+                      }))
+                    }
+                    options={[
+                      { value: "baja", label: "🟢 Baja" },
+                      { value: "media", label: "🔵 Media" },
+                      { value: "alta", label: "🔴 Alta" },
+                      { value: "urgente", label: "⚡ Urgente" },
+                    ]}
+                    placeholder="Prioridad"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Título de la Actividad *</label>
-                <InputField value={activityForm.title} onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))} placeholder="Titulo de la actividad" />
+
+              {/* FILA 3: Fechas y Horas Estimadas */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                    Fecha Inicio <span className="text-red-400">*</span>
+                  </label>
+                  <InputField
+                    value={activityForm.startAt}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))}
+                    placeholder="Fecha inicio"
+                    type="date"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
+                    Fecha Fin <span className="text-red-400">*</span>
+                  </label>
+                  <InputField
+                    value={activityForm.endAt}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))}
+                    placeholder="Fecha fin"
+                    type="date"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-300">
+                    Horas Estimadas
+                  </label>
+                  <InputField
+                    value={activityForm.estimatedHours}
+                    onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))}
+                    placeholder="10"
+                    type="number"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Horas Estimadas</label>
-                <InputField value={activityForm.estimatedHours} onChange={(value) => setActivityForm((current) => ({ ...current, estimatedHours: value }))} placeholder="Horas estimadas" type="number" />
+
+              {/* FILA 4: Conmutador de Modalidad (Presencial / Virtual) y Ubicación / Enlace */}
+              <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-3">
+                <label className="text-xs font-semibold text-zinc-200">
+                  Tipo de Modalidad
+                </label>
+
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-300">
+                    <input
+                      type="radio"
+                      name="modality"
+                      value="presencial"
+                      checked={(activityForm.modality || "presencial") === "presencial"}
+                      onChange={() => setActivityForm((c) => ({ ...c, modality: "presencial" }))}
+                      className="text-indigo-600 focus:ring-indigo-500"
+                    />
+                    📍 Presencial (En Campo / Sede)
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-300">
+                    <input
+                      type="radio"
+                      name="modality"
+                      value="virtual"
+                      checked={activityForm.modality === "virtual"}
+                      onChange={() => setActivityForm((c) => ({ ...c, modality: "virtual" }))}
+                      className="text-indigo-600 focus:ring-indigo-500"
+                    />
+                    🌐 Virtual (Reunión Online)
+                  </label>
+                </div>
+
+                {(activityForm.modality || "presencial") === "presencial" ? (
+                  <div className="space-y-1.5 pt-2">
+                    <label className="text-xs font-medium text-zinc-300">
+                      Ubicación / Sede de la Actividad
+                    </label>
+                    <SelectField
+                      value={activityForm.locationId}
+                      onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))}
+                      options={catalogs.locations}
+                      placeholder="Seleccionar Sede / Ubicación"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 pt-2">
+                    <label className="text-xs font-medium text-zinc-300">
+                      Enlace de la Reunión (Google Meet / Zoom / Teams)
+                    </label>
+                    <InputField
+                      value={activityForm.meetingUrl || ""}
+                      onChange={(value) => setActivityForm((current) => ({ ...current, meetingUrl: value }))}
+                      placeholder="https://meet.google.com/abc-defg-hij"
+                    />
+                  </div>
+                )}
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Fecha Inicio</label>
-                <InputField value={activityForm.startAt} onChange={(value) => setActivityForm((current) => ({ ...current, startAt: value }))} placeholder="Fecha inicio" type="date" />
+
+              {/* FILA 5: Asignación de Personal / Voluntarios */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">
+                  Asignar Personal / Voluntarios a la Actividad
+                </label>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-3 max-h-40 overflow-y-auto space-y-2">
+                  {catalogs.volunteers.length === 0 ? (
+                    <p className="text-xs text-zinc-500 italic">No hay voluntarios registrados disponibles.</p>
+                  ) : (
+                    catalogs.volunteers.map((vol) => {
+                      const isAssigned = (activityForm.assignedVolunteerIds || []).includes(vol.value);
+                      return (
+                        <label
+                          key={vol.value}
+                          className={`flex items-center justify-between p-2 rounded-lg text-xs cursor-pointer border transition-colors ${
+                            isAssigned
+                              ? "bg-indigo-600/10 border-indigo-500/40 text-indigo-300"
+                              : "bg-zinc-900/60 border-zinc-800 text-zinc-300 hover:bg-zinc-800/80"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isAssigned}
+                              onChange={() => {
+                                setActivityForm((c) => {
+                                  const currentList = c.assignedVolunteerIds || [];
+                                  const nextList = currentList.includes(vol.value)
+                                    ? currentList.filter((id) => id !== vol.value)
+                                    : [...currentList, vol.value];
+                                  return { ...c, assignedVolunteerIds: nextList };
+                                });
+                              }}
+                              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span>{vol.label}</span>
+                          </div>
+                          {isAssigned && <span className="text-[10px] font-semibold text-indigo-400">Asignado ✓</span>}
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-300">Fecha Fin</label>
-                <InputField value={activityForm.endAt} onChange={(value) => setActivityForm((current) => ({ ...current, endAt: value }))} placeholder="Fecha fin" type="date" />
+
+              {/* FILA 6: Descripción u Objetivos */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">
+                  Descripción u Objetivos de la Actividad
+                </label>
+                <TextareaField
+                  value={activityForm.description}
+                  onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))}
+                  placeholder="Detalle de las tareas a realizar durante la jornada, requerimientos y metas..."
+                />
               </div>
-              <div className="md:col-span-2 space-y-1"><label className="text-xs font-medium text-zinc-300">Ubicación</label><SelectField value={activityForm.locationId} onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))} options={catalogs.locations} placeholder="Ubicacion (opcional)" /></div>
-              <div className="md:col-span-2 space-y-1"><label className="text-xs font-medium text-zinc-300">Descripción</label><TextareaField value={activityForm.description} onChange={(value) => setActivityForm((current) => ({ ...current, description: value }))} placeholder="Descripcion de la actividad" /></div>
+
+              {/* FILA 7: Checkbox de Notificación Automática */}
+              <div className="pt-2 border-t border-zinc-800/80">
+                <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer font-medium">
+                  <input
+                    type="checkbox"
+                    checked={activityForm.sendEmailNotification ?? true}
+                    onChange={(e) => setActivityForm((c) => ({ ...c, sendEmailNotification: e.target.checked }))}
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>[✓] Enviar notificación automática por correo a los miembros asignados</span>
+                </label>
+              </div>
             </div>
           ) : null}
 
@@ -3058,9 +3275,21 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             >
               {mutations.isSaving
                 ? "Guardando..."
-                : editingProjectId
+                : section === "projects"
+                ? editingProjectId
+                  ? "Guardar Cambios"
+                  : "Crear Proyecto"
+                : section === "tasks"
+                ? editingTaskId
+                  ? "Guardar Cambios"
+                  : "Crear Tarea"
+                : section === "activities"
+                ? editingActivityId
+                  ? "Guardar Cambios"
+                  : "Crear Actividad"
+                : editingAssignment
                 ? "Guardar Cambios"
-                : "Crear Proyecto"}
+                : "Crear Asignación"}
             </GradientButton>
           </div>
         </div>
