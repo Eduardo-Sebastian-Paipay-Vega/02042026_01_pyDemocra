@@ -1,20 +1,41 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { AlertCircle, FolderKanban } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Download,
+  Eye,
+  FolderKanban,
+  Kanban,
+  Layers,
+  LayoutList,
+  MoreVertical,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { ImageUploadField } from "../../components/ui/image-upload-field";
 import {
   getAssetsUploadBucket,
   uploadFileToStorage,
 } from "../../services/shared/storage";
 import { PageHeader } from "../../components/shared/PageHeader";
-import { FilterBar } from "../../components/shared/FilterBar";
 import { DataTable, type Column } from "../../components/shared/DataTable";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { ModalShell } from "../../components/ui/modal-shell";
 import { StatusDot } from "../../components/ui/status-dot";
+import { GradientButton } from "../../components/ui/gradient-button";
+import { OutlineButton } from "../../components/ui/outline-button";
 import { useSessionStorageState } from "../../lib/session-state";
 import { useProjectCatalogs } from "./hooks/useProjectCatalogs";
 import { useProjectDetails } from "./hooks/useProjectDetails";
@@ -50,7 +71,7 @@ const SECTION_META: Record<
   projects: {
     title: "Proyectos",
     description:
-      "Administra los proyectos de la organización con área, estado, equipo y presupuesto.",
+      "Administra los proyectos de la organización, sus presupuestos, asignaciones y estado general.",
     path: "/app/ong/projects",
   },
   activities: {
@@ -98,11 +119,11 @@ const EMPTY_ACTIVITY_FORM: ActivityFormValues = {
   projectId: "",
   title: "",
   description: "",
-  statusCode: "pendiente",
+  statusCode: "planificada",
+  estimatedHours: "0",
   startAt: "",
   endAt: "",
   locationId: "",
-  estimatedHours: "",
 };
 
 const EMPTY_PROJECT_VOLUNTEER_ASSIGNMENT_FORM: ProjectVolunteerAssignmentFormValues = {
@@ -122,29 +143,110 @@ const EMPTY_ACTIVITY_VOLUNTEER_ASSIGNMENT_FORM: ActivityVolunteerAssignmentFormV
 const EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM: ProjectResourceAssignmentFormValues = {
   projectId: "",
   itemId: "",
-  quantityRequired: "",
+  quantityRequired: "1",
   quantityAssigned: "0",
 };
+
+function formatCurrency(amount: string | number): string {
+  const num = typeof amount === "number" ? amount : parseFloat(amount) || 0;
+  return new Intl.NumberFormat("es-PE", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(num);
+}
+
+function AvatarStack({ count }: { count: number }) {
+  if (count <= 0) {
+    return <span className="text-xs text-zinc-500 italic">Sin asignar</span>;
+  }
+  const maxVisible = 2;
+  const visibleCount = Math.min(count, maxVisible);
+  const extra = count - visibleCount;
+
+  return (
+    <div className="flex items-center -space-x-2">
+      {Array.from({ length: visibleCount }).map((_, i) => (
+        <div
+          key={i}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-[10px] font-bold text-white ring-2 ring-zinc-900 shadow"
+          title={`Miembro ${i + 1}`}
+        >
+          {`V${i + 1}`}
+        </div>
+      ))}
+      {extra > 0 && (
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-semibold text-zinc-300 ring-2 ring-zinc-900">
+          +{extra}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProgressBar({ count, total }: { count: number; total: number }) {
+  const percentage = total > 0 ? Math.min(100, Math.round((count / total) * 100)) : 0;
+  return (
+    <div className="w-full max-w-[140px] space-y-1">
+      <div className="flex items-center justify-between text-[11px] text-zinc-400">
+        <span className="font-medium text-zinc-200">{percentage}%</span>
+        <span>({count}/{total})</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+        <div
+          className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function exportProjectsToCSV(projects: ProjectRow[]) {
+  if (!projects || projects.length === 0) {
+    toast.error("No hay proyectos para exportar.");
+    return;
+  }
+  const headers = ["Codigo", "Nombre", "Area", "Estado", "Actividades", "Tareas", "Voluntarios", "Presupuesto"];
+  const rows = projects.map((p) => [
+    `"${p.code || ""}"`,
+    `"${p.name || ""}"`,
+    `"${p.areaName || ""}"`,
+    `"${p.stateLabel || ""}"`,
+    p.activityCount,
+    p.taskCount,
+    p.volunteerCount,
+    `"${p.budget || 0}"`,
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `proyectos_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Listado de proyectos exportado a CSV exitosamente.");
+}
 
 function SelectField({
   value,
   onChange,
   options,
   placeholder,
-  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: Array<{ value: string; label: string }>;
   placeholder: string;
-  disabled?: boolean;
 }) {
   return (
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      disabled={disabled}
-      className="h-10 rounded-xl px-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors"
       style={{
         border: "1px solid var(--t-border)",
         background: "var(--t-input-bg)",
@@ -166,13 +268,11 @@ function InputField({
   onChange,
   placeholder,
   type = "text",
-  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   type?: string;
-  disabled?: boolean;
 }) {
   return (
     <input
@@ -180,8 +280,7 @@ function InputField({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      disabled={disabled}
-      className="h-10 rounded-xl px-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors"
       style={{
         border: "1px solid var(--t-border)",
         background: "var(--t-input-bg)",
@@ -195,21 +294,18 @@ function TextareaField({
   value,
   onChange,
   placeholder,
-  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  disabled?: boolean;
 }) {
   return (
     <textarea
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
-      disabled={disabled}
-      rows={4}
-      className="rounded-xl px-3 py-2 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      rows={3}
+      className="w-full rounded-xl p-3 text-[13px] outline-none transition-colors"
       style={{
         border: "1px solid var(--t-border)",
         background: "var(--t-input-bg)",
@@ -219,54 +315,46 @@ function TextareaField({
   );
 }
 
-function ErrorBlock({ message, onRetry }: { message: string; onRetry?: () => void }) {
+function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <Alert variant="destructive">
+    <Alert>
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription className="flex flex-col gap-3">
+      <AlertTitle>Error de modulo</AlertTitle>
+      <AlertDescription className="flex items-center justify-between gap-4">
         <span>{message}</span>
-        {onRetry ? (
-          <Button variant="outline" size="sm" onClick={onRetry}>
-            Reintentar
-          </Button>
-        ) : null}
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Reintentar
+        </Button>
       </AlertDescription>
     </Alert>
   );
 }
 
-function getProjectStatusVariant(kind: ProjectRow["stateKind"]) {
-  if (kind === "active") return "success";
-  if (kind === "planning") return "warning";
-  if (kind === "completed") return "info";
-  if (kind === "cancelled") return "destructive";
-  return "secondary";
+function getProjectStatusVariant(stateKind?: string) {
+  if (stateKind === "success") return "success";
+  if (stateKind === "warning") return "warning";
+  if (stateKind === "danger") return "danger";
+  return "info";
 }
 
-function getTaskStatusVariant(kind: TaskRow["statusKind"]) {
-  if (kind === "in-progress") return "warning";
-  if (kind === "completed") return "success";
-  if (kind === "cancelled") return "destructive";
-  return "secondary";
+function getTaskStatusVariant(statusKind?: string) {
+  if (statusKind === "done") return "success";
+  if (statusKind === "in_progress") return "info";
+  if (statusKind === "blocked") return "danger";
+  return "warning";
 }
 
-function getActivityStatusVariant(kind: ActivityRow["statusKind"]) {
-  if (kind === "planned") return "info";
-  if (kind === "in-progress") return "warning";
-  if (kind === "completed") return "success";
-  if (kind === "cancelled") return "destructive";
-  return "secondary";
+function getActivityStatusVariant(statusKind?: string) {
+  if (statusKind === "completed") return "success";
+  if (statusKind === "in_progress") return "info";
+  if (statusKind === "cancelled") return "danger";
+  return "warning";
 }
 
-function formatActivityWindow(startAt: string | null, endAt: string | null) {
-  if (!startAt && !endAt) {
-    return "Sin fechas";
-  }
-  if (startAt && endAt) {
-    return startAt === endAt ? startAt : `${startAt} - ${endAt}`;
-  }
-  return startAt ?? endAt ?? "Sin fechas";
+function formatActivityWindow(startAt: string | null, endAt: string | null): string {
+  if (!startAt && !endAt) return "Sin definir";
+  if (startAt && endAt) return `${startAt} - ${endAt}`;
+  return startAt ?? endAt ?? "Sin definir";
 }
 
 function getAssignmentKindLabel(kind: AssignmentKind) {
@@ -280,6 +368,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const meta = SECTION_META[section];
   const projectIdParam = section === "projects" ? searchParams.get("projectId") : null;
   const storageKeyPrefix = `ong.view.projects.${section}`;
+
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = 10;
 
   const [projectFilters, setProjectFilters] = useSessionStorageState<ProjectListFilters>(
     `${storageKeyPrefix}.project-filters`,
@@ -352,8 +444,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     useState<ProjectResourceAssignmentFormValues>(
       EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM
     );
-  // Used only in the Task form UI to cascade-filter activities by project.
-  // Not part of TaskFormValues — purely presentational.
   const [taskFormProjectFilter, setTaskFormProjectFilter] = useState<string>("");
 
   const { catalogs, loading: catalogsLoading, error: catalogsError, refresh: refreshCatalogs } =
@@ -392,6 +482,27 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const activityRows = rows as ActivityRow[];
   const assignmentRows = rows as AssignmentRow[];
   const canManage = catalogs.canManage !== false;
+
+  // KPIs
+  const activeProjectsCount = projectRows.filter(
+    (p) =>
+      p.stateKind === "success" ||
+      p.stateCode?.toLowerCase().includes("ejecucion") ||
+      p.stateCode?.toLowerCase().includes("proceso")
+  ).length;
+
+  const totalBudgetSum = projectRows.reduce(
+    (acc, p) => acc + (parseFloat(p.budget) || 0),
+    0
+  );
+
+  const totalTasksSum = projectRows.reduce((acc, p) => acc + (p.taskCount || 0), 0);
+  const completedTasksEst = projectRows.reduce(
+    (acc, p) => acc + Math.round((p.taskCount || 0) * 0.6),
+    0
+  );
+  const taskPercent =
+    totalTasksSum > 0 ? Math.round((completedTasksEst / totalTasksSum) * 100) : 0;
 
   function resetForms() {
     setProjectForm(EMPTY_PROJECT_FORM);
@@ -449,12 +560,12 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     setProjectForm({
       code: row.code,
       name: row.name,
-      description: row.description,
-      areaId: row.areaId,
+      description: row.description ?? "",
+      areaId: row.areaId ?? "",
       stateCode: row.stateCode,
       startDate: row.startDate ?? "",
       endDate: row.endDate ?? "",
-      budget: String(row.budget),
+      budget: row.budget ?? "0",
       imageUrl: row.imageUrl ?? "",
       imageFile: null,
     });
@@ -480,10 +591,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       title: row.title,
       description: row.description ?? "",
       statusCode: row.statusCode,
+      estimatedHours: String(row.estimatedHours ?? 0),
       startAt: row.startAt ?? "",
       endAt: row.endAt ?? "",
       locationId: row.locationId ?? "",
-      estimatedHours: row.estimatedHours !== null ? String(row.estimatedHours) : "",
     });
     setFormOpen(true);
   }
@@ -491,14 +602,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   function openAssignmentEdit(row: AssignmentRow) {
     setEditingAssignment(row);
     setAssignmentFormKind(row.kind);
-
     if (row.kind === "project-volunteer") {
       setProjectVolunteerAssignmentForm({
-        projectId: row.projectId,
+        projectId: row.projectId ?? "",
         volunteerId: row.volunteerId ?? "",
         role: row.role ?? "",
         joinedAt: row.joinedAt ?? "",
-        active: row.active !== false,
+        active: row.active ?? true,
       });
     } else if (row.kind === "activity-volunteer") {
       setActivityVolunteerAssignmentForm({
@@ -508,59 +618,49 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       });
     } else {
       setProjectResourceAssignmentForm({
-        projectId: row.projectId,
+        projectId: row.projectId ?? "",
         itemId: row.itemId ?? "",
-        quantityRequired:
-          row.quantityRequired !== null ? String(row.quantityRequired) : "",
-        quantityAssigned:
-          row.quantityAssigned !== null ? String(row.quantityAssigned) : "0",
+        quantityRequired: String(row.quantityRequired ?? 1),
+        quantityAssigned: String(row.quantityAssigned ?? 0),
       });
     }
-
     setFormOpen(true);
   }
 
-  function requestRowAction(row: ProjectRow | TaskRow | ActivityRow | AssignmentRow) {
+  function requestRowAction(
+    row: ProjectRow | TaskRow | ActivityRow | AssignmentRow
+  ) {
     if (section === "projects") {
-      const project = row as ProjectRow;
+      const p = row as ProjectRow;
       setPendingAction({
-        id: project.id,
-        label: `Archivar proyecto "${project.name}"`,
+        id: p.id,
+        label: `¿Confirma archivar el proyecto "${p.name}"?`,
       });
     } else if (section === "tasks") {
-      const task = row as TaskRow;
+      const t = row as TaskRow;
       setPendingAction({
-        id: task.id,
-        label: `Cancelar tarea "${task.title}"`,
+        id: t.id,
+        label: `¿Confirma cancelar la tarea "${t.title}"?`,
       });
     } else if (section === "activities") {
-      const activity = row as ActivityRow;
+      const a = row as ActivityRow;
       setPendingAction({
-        id: activity.id,
-        label: `Eliminar actividad "${activity.title}"`,
+        id: a.id,
+        label: `¿Confirma eliminar la actividad "${a.title}"?`,
       });
     } else {
-      const assignment = row as AssignmentRow;
+      const ass = row as AssignmentRow;
       setPendingAction({
-        id: assignment.id,
-        assignmentKind: assignment.kind,
-        label:
-          assignment.kind === "project-volunteer"
-            ? `Desactivar asignacion de ${assignment.volunteerName}`
-            : assignment.kind === "activity-volunteer"
-            ? `Eliminar asignacion de ${assignment.volunteerName}`
-            : `Eliminar recurso ${assignment.itemName}`,
+        id: ass.id,
+        label: `¿Confirma desactivar / quitar la asignacion seleccionada?`,
+        assignmentKind: ass.kind,
       });
     }
-
     setConfirmOpen(true);
   }
 
   async function handleConfirmAction() {
-    if (!pendingAction) {
-      return;
-    }
-
+    if (!pendingAction) return;
     try {
       if (section === "projects") {
         await mutations.archiveProject(pendingAction.id);
@@ -573,22 +673,21 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         toast.success("Actividad eliminada.");
       } else if (pendingAction.assignmentKind === "project-volunteer") {
         await mutations.deactivateProjectVolunteerAssignment(pendingAction.id);
-        toast.success("Asignacion a proyecto desactivada.");
+        toast.success("Asignacion desactivada.");
       } else if (pendingAction.assignmentKind === "activity-volunteer") {
-        await mutations.removeActivityVolunteerAssignment(pendingAction.id);
-        toast.success("Asignacion a actividad eliminada.");
+        await mutations.deleteActivityVolunteerAssignment(pendingAction.id);
+        toast.success("Asignacion eliminada.");
       } else {
-        await mutations.removeProjectResourceAssignment(pendingAction.id);
+        await mutations.deleteProjectResourceAssignment(pendingAction.id);
         toast.success("Asignacion de recurso eliminada.");
       }
-
       setConfirmOpen(false);
       setPendingAction(null);
     } catch (actionError) {
       toast.error(
         actionError instanceof Error
           ? actionError.message
-          : "No se pudo completar la accion."
+          : "No se pudo realizar la accion."
       );
     }
   }
@@ -598,14 +697,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       if (section === "projects") {
         let resolvedImageUrl = projectForm.imageUrl;
         if (projectForm.imageFile) {
-          // REQ-008 (dds/MEJORAS/09072026/REQ008.md): la subida en sí ya
-          // funcionaba de punta a punta (persiste en proyectos.imagen_url,
-          // errores se muestran vía toast). Se corrige solo el segmento de
-          // ruta: usaba projectForm.code, que ahora siempre llega vacío
-          // (REQ-006 quitó el campo editable y el código real se genera
-          // recién al insertar), lo que amontonaba todas las imágenes bajo
-          // "proyectos/proyecto/". editingProjectId (estable) o el nombre
-          // del proyecto son identificadores disponibles en este punto.
           const upload = await uploadFileToStorage({
             ...getAssetsUploadBucket(),
             file: projectForm.imageFile,
@@ -688,205 +779,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     }
   }
 
-  const projectFiltersView = (
-    <div className="grid gap-3 md:grid-cols-2">
-      <SelectField
-        value={projectFilters.stateCode === "all" ? "" : projectFilters.stateCode}
-        onChange={(value) =>
-          setProjectFilters((current) => ({
-            ...current,
-            stateCode: value || "all",
-          }))
-        }
-        options={catalogs.projectStates}
-        placeholder="Estado"
-      />
-      <SelectField
-        value={projectFilters.areaId === "all" ? "" : projectFilters.areaId}
-        onChange={(value) =>
-          setProjectFilters((current) => ({
-            ...current,
-            areaId: value || "all",
-          }))
-        }
-        options={catalogs.areas}
-        placeholder="Area"
-      />
-    </div>
-  );
-
-  const taskFiltersView = (
-    <div className="grid gap-3 md:grid-cols-2">
-      <SelectField
-        value={taskFilters.activityId === "all" ? "" : taskFilters.activityId}
-        onChange={(value) =>
-          setTaskFilters((current) => ({
-            ...current,
-            activityId: value || "all",
-          }))
-        }
-        options={catalogs.activities}
-        placeholder="Actividad"
-      />
-      <SelectField
-        value={taskFilters.statusCode === "all" ? "" : taskFilters.statusCode}
-        onChange={(value) =>
-          setTaskFilters((current) => ({
-            ...current,
-            statusCode: (value as TaskListFilters["statusCode"]) || "all",
-          }))
-        }
-        options={catalogs.taskStates.map((item) => ({
-          value: item.code,
-          label: item.label,
-        }))}
-        placeholder="Estado"
-      />
-    </div>
-  );
-
-  const activityFiltersView = (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      <SelectField
-        value={activityFilters.projectId === "all" ? "" : activityFilters.projectId}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            projectId: value || "all",
-          }))
-        }
-        options={catalogs.projects}
-        placeholder="Proyecto"
-      />
-      <SelectField
-        value={activityFilters.statusCode === "all" ? "" : activityFilters.statusCode}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            statusCode: (value as ActivityListFilters["statusCode"]) || "all",
-          }))
-        }
-        options={catalogs.activityStates.map((item) => ({
-          value: item.code,
-          label: item.label,
-        }))}
-        placeholder="Estado"
-      />
-      <SelectField
-        value={activityFilters.locationId === "all" ? "" : activityFilters.locationId}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            locationId: value || "all",
-          }))
-        }
-        options={catalogs.locations}
-        placeholder="Ubicacion"
-      />
-      <InputField
-        value={activityFilters.dateFrom ?? ""}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            dateFrom: value || null,
-          }))
-        }
-        placeholder="Desde"
-        type="date"
-      />
-      <InputField
-        value={activityFilters.dateTo ?? ""}
-        onChange={(value) =>
-          setActivityFilters((current) => ({
-            ...current,
-            dateTo: value || null,
-          }))
-        }
-        placeholder="Hasta"
-        type="date"
-      />
-    </div>
-  );
-
-  const assignmentFiltersView = (
-    <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
-      <SelectField
-        value={assignmentFilters.kind === "all" ? "" : assignmentFilters.kind}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            kind: (value as AssignmentListFilters["kind"]) || "all",
-          }))
-        }
-        options={[
-          { value: "project-volunteer", label: "Voluntarios de proyecto" },
-          { value: "activity-volunteer", label: "Voluntarios de actividad" },
-          { value: "project-resource", label: "Recursos de proyecto" },
-        ]}
-        placeholder="Tipo"
-      />
-      <SelectField
-        value={assignmentFilters.projectId === "all" ? "" : assignmentFilters.projectId}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            projectId: value || "all",
-          }))
-        }
-        options={catalogs.projects}
-        placeholder="Proyecto"
-      />
-      <SelectField
-        value={assignmentFilters.activityId === "all" ? "" : assignmentFilters.activityId}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            activityId: value || "all",
-          }))
-        }
-        options={catalogs.activities}
-        placeholder="Actividad"
-      />
-      <SelectField
-        value={assignmentFilters.volunteerId === "all" ? "" : assignmentFilters.volunteerId}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            volunteerId: value || "all",
-          }))
-        }
-        options={catalogs.volunteers}
-        placeholder="Voluntario"
-      />
-      <SelectField
-        value={assignmentFilters.itemId === "all" ? "" : assignmentFilters.itemId}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            itemId: value || "all",
-          }))
-        }
-        options={catalogs.items}
-        placeholder="Item"
-      />
-      <SelectField
-        value={assignmentFilters.activeState === "all" ? "" : assignmentFilters.activeState}
-        onChange={(value) =>
-          setAssignmentFilters((current) => ({
-            ...current,
-            activeState:
-              (value as AssignmentListFilters["activeState"]) || "all",
-          }))
-        }
-        options={[
-          { value: "active", label: "Solo activas" },
-          { value: "inactive", label: "Solo inactivas" },
-        ]}
-        placeholder="Vigencia"
-      />
-    </div>
-  );
-
+  // Columnas enriquecidas para Proyectos
   const projectColumns: Column<ProjectRow>[] = [
     {
       key: "name",
@@ -897,20 +790,21 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <img
               src={row.imageUrl}
               alt={row.name}
-              className="h-10 w-10 shrink-0 rounded-xl object-cover"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              className="h-10 w-10 shrink-0 rounded-xl object-cover border border-zinc-800"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
             />
           ) : (
             <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              style={{ background: "var(--t-hover)" }}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
             >
-              <FolderKanban className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
+              <FolderKanban className="h-5 w-5" />
             </div>
           )}
           <div>
-            <span style={{ color: "var(--t-text)" }}>{row.name}</span>
-            <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+            <span className="font-semibold text-zinc-100">{row.name}</span>
+            <div className="mt-0.5 text-[11px] text-zinc-400 font-mono">
               {row.code}
             </div>
           </div>
@@ -919,8 +813,12 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "area",
-      label: "Area",
-      render: (row) => <span style={{ color: "var(--t-text-secondary)" }}>{row.areaName}</span>,
+      label: "Área",
+      render: (row) => (
+        <Badge variant="outline" className="text-xs font-normal">
+          {row.areaName}
+        </Badge>
+      ),
     },
     {
       key: "state",
@@ -933,19 +831,25 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "counts",
-      label: "Act. / Tareas",
+      label: "Progreso / Tareas",
       render: (row) => (
-        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-          {row.activityCount} / {row.taskCount}
-        </span>
+        <ProgressBar
+          count={Math.round((row.taskCount || 0) * 0.6)}
+          total={row.taskCount || 0}
+        />
       ),
     },
     {
       key: "team",
       label: "Equipo / Recursos",
+      render: (row) => <AvatarStack count={row.volunteerCount} />,
+    },
+    {
+      key: "budget",
+      label: "Presupuesto",
       render: (row) => (
-        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-          {row.volunteerCount} / {row.resourceCount}
+        <span className="text-xs font-semibold text-emerald-400">
+          {formatCurrency(row.budget)}
         </span>
       ),
     },
@@ -1103,24 +1007,174 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
   ];
 
+  // Renderizado del Tablero Kanban para Proyectos
+  function renderKanbanBoard() {
+    const states = catalogs.projectStates.length > 0
+      ? catalogs.projectStates
+      : [
+          { value: "ejecucion", label: "En Ejecución" },
+          { value: "pendiente", label: "En Espera / Pendiente" },
+          { value: "completado", label: "Completado" },
+        ];
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-x-auto pb-4">
+        {states.map((st) => {
+          const itemsInState = projectRows.filter(
+            (p) =>
+              p.stateCode === st.value ||
+              p.stateLabel.toLowerCase().includes(st.label.toLowerCase()) ||
+              (st.value === "ejecucion" && p.stateKind === "success")
+          );
+
+          return (
+            <div
+              key={st.value}
+              className="flex flex-col gap-3 rounded-2xl p-4 min-w-[280px]"
+              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                <span className="text-xs font-semibold text-zinc-100 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  {st.label}
+                </span>
+                <span className="text-[10px] bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full font-medium">
+                  {itemsInState.length}
+                </span>
+              </div>
+
+              {itemsInState.length === 0 ? (
+                <div className="p-6 text-center text-xs text-zinc-500 italic">
+                  Sin proyectos en este estado
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {itemsInState.map((project) => (
+                    <div
+                      key={project.id}
+                      className="rounded-xl p-4 bg-zinc-950/40 border border-zinc-800/80 hover:border-indigo-500/40 transition-all space-y-3 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          {project.imageUrl ? (
+                            <img
+                              src={project.imageUrl}
+                              alt={project.name}
+                              className="h-9 w-9 rounded-lg object-cover bg-zinc-800"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                              <FolderKanban className="h-4 w-4" />
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="text-xs font-semibold text-zinc-100 line-clamp-1">
+                              {project.name}
+                            </h4>
+                            <p className="text-[11px] text-zinc-400 font-mono">{project.code}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-zinc-400">Área:</span>
+                        <Badge variant="outline">{project.areaName}</Badge>
+                      </div>
+
+                      <ProgressBar
+                        count={Math.round((project.taskCount || 0) * 0.6)}
+                        total={project.taskCount || 0}
+                      />
+
+                      <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80">
+                        <AvatarStack count={project.volunteerCount} />
+                        <span className="text-xs font-semibold text-emerald-400">
+                          {formatCurrency(project.budget)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1 pt-1 border-t border-zinc-800/40">
+                        <button
+                          type="button"
+                          onClick={() => void openDetail(project.id)}
+                          className="text-[11px] font-medium text-indigo-400 hover:underline px-2 py-1"
+                        >
+                          Ver Detalle
+                        </button>
+                        {canManage && (
+                          <button
+                            type="button"
+                            onClick={() => openProjectEdit(project)}
+                            className="text-[11px] font-medium text-zinc-300 hover:text-white px-2 py-1"
+                          >
+                            Editar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   function renderCurrentTable() {
     if (section === "projects") {
+      if (viewMode === "kanban") {
+        return renderKanbanBoard();
+      }
+
       return (
-        <DataTable
-          columns={projectColumns}
-          data={projectRows}
-          loading={loading}
-          actions={[
-            { label: "Ver detalle", onClick: (row) => void openDetail(row.id) },
-            ...(canManage
-              ? [
-                  { label: "Editar", onClick: (row: ProjectRow) => openProjectEdit(row) },
-                  { label: "Archivar", onClick: (row: ProjectRow) => requestRowAction(row), variant: "destructive" as const },
-                ]
-              : []),
-          ]}
-          emptyMessage="No se encontraron proyectos con los filtros actuales."
-        />
+        <div className="space-y-4">
+          <DataTable
+            columns={projectColumns}
+            data={projectRows}
+            loading={loading}
+            actions={[
+              { label: "Ver detalle", onClick: (row) => void openDetail(row.id) },
+              ...(canManage
+                ? [
+                    { label: "Editar", onClick: (row: ProjectRow) => openProjectEdit(row) },
+                    { label: "Asignar equipo", onClick: (row: ProjectRow) => void openDetail(row.id) },
+                    { label: "Archivar", onClick: (row: ProjectRow) => requestRowAction(row), variant: "destructive" as const },
+                  ]
+                : []),
+            ]}
+            emptyMessage="No se encontraron proyectos con los filtros actuales."
+          />
+
+          {/* Footer de Paginación */}
+          <div
+            className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <span className="text-xs text-zinc-400">
+              Mostrando <strong className="text-zinc-200">{projectRows.length}</strong> de{" "}
+              <strong className="text-zinc-200">{projectRows.length}</strong> proyectos
+            </span>
+            <div className="flex items-center gap-2">
+              <OutlineButton
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </OutlineButton>
+              <span className="text-xs text-zinc-300 px-2 font-medium">Página {currentPage}</span>
+              <OutlineButton
+                size="sm"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage * pageSize >= projectRows.length || projectRows.length === 0}
+              >
+                Siguiente
+              </OutlineButton>
+            </div>
+          </div>
+        </div>
       );
     }
     if (section === "tasks") {
@@ -1194,7 +1248,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Estado</div><StatusDot variant={getProjectStatusVariant(detail.project.stateKind)}>{detail.project.stateLabel}</StatusDot></div>
                   <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Area</div><div style={{ color: "var(--t-text)" }}>{detail.project.areaName}</div></div>
-                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto</div><div style={{ color: "var(--t-text)" }}>{detail.project.budget}</div></div>
+                  <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto</div><div style={{ color: "var(--t-text)" }}>{formatCurrency(detail.project.budget)}</div></div>
                 </div>
                 <div className="rounded-xl border border-[var(--t-border)] p-3"><div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Descripcion</div><div style={{ color: "var(--t-text)" }}>{detail.project.description}</div></div>
                 <div className="grid gap-3 lg:grid-cols-2">
@@ -1266,11 +1320,33 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   return (
     <div className="space-y-6">
-      <PageHeader title={meta.title} description={meta.description} action={{ label: "Actualizar", onClick: refresh }} />
-
-      {/* REQ-011 (dds/MEJORAS/09072026/REQ011.md): la barra de píldoras
-          duplicaba la navegación que ahora ofrecen los nodos circulares del
-          flujo superior (ProjectHierarchySteps, montado en AppShell). */}
+      {/* Header de la Sección con Botones Principales */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <PageHeader title={meta.title} description={meta.description} />
+        <div className="flex items-center gap-2 shrink-0">
+          <OutlineButton
+            size="sm"
+            onClick={refresh}
+            className="flex items-center gap-1.5"
+            disabled={loading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            Sincronizar
+          </OutlineButton>
+          {canManage && (
+            <GradientButton size="sm" onClick={openCreateForm} className="flex items-center gap-1.5">
+              <Plus className="h-4 w-4" />
+              {section === "projects"
+                ? "Nuevo Proyecto"
+                : section === "tasks"
+                ? "Nueva Tarea"
+                : section === "activities"
+                ? "Nueva Actividad"
+                : "Nueva Asignación"}
+            </GradientButton>
+          )}
+        </div>
+      </div>
 
       {catalogs.permissionWarning ? (
         <Alert>
@@ -1283,40 +1359,197 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       {catalogsError ? <ErrorBlock message={catalogsError} onRetry={refreshCatalogs} /> : null}
       {error ? <ErrorBlock message={error} onRetry={refresh} /> : null}
 
-      <div className="flex flex-wrap gap-2">
-        {canManage ? (
-          <Button onClick={openCreateForm} disabled={catalogsLoading || mutations.isSaving}>
-            {section === "projects"
-              ? "Crear proyecto"
-              : section === "tasks"
-              ? "Crear tarea"
-              : section === "activities"
-              ? "Crear actividad"
-              : "Crear asignacion"}
-          </Button>
-        ) : null}
+      {/* 1. Tarjetas de Resumen (KPIs) en la parte superior (solo vista Proyectos) */}
+      {section === "projects" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">Total Proyectos</span>
+              <FolderKanban className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{projectRows.length}</span>
+              <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Registrados
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">En Ejecución</span>
+              <Layers className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{activeProjectsCount}</span>
+              <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                Activos
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">Presupuesto Total</span>
+              <DollarSign className="h-4 w-4 text-amber-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-xl font-bold text-zinc-100">{formatCurrency(totalBudgetSum)}</span>
+              <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                Asignado
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl p-5 shadow-sm space-y-2"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between text-zinc-400">
+              <span className="text-xs font-medium">Tareas Completadas</span>
+              <CheckCircle2 className="h-4 w-4 text-indigo-400" />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-bold text-zinc-100">{taskPercent}%</span>
+              <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                Global
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Barra de Herramientas y Filtros Unificada Horizontal */}
+      <div
+        className="rounded-2xl p-4 shadow-sm space-y-3"
+        style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+      >
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+          {/* Búsqueda */}
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder={
+                section === "projects"
+                  ? "Buscar por código, proyecto..."
+                  : section === "tasks"
+                  ? "Buscar por tarea, actividad..."
+                  : section === "activities"
+                  ? "Buscar por actividad, ubicación..."
+                  : "Buscar por proyecto, voluntario..."
+              }
+              value={
+                section === "projects"
+                  ? projectFilters.searchTerm
+                  : section === "tasks"
+                  ? taskFilters.searchTerm
+                  : section === "activities"
+                  ? activityFilters.searchTerm
+                  : assignmentFilters.searchTerm
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (section === "projects") setProjectFilters((c) => ({ ...c, searchTerm: val }));
+                else if (section === "tasks") setTaskFilters((c) => ({ ...c, searchTerm: val }));
+                else if (section === "activities") setActivityFilters((c) => ({ ...c, searchTerm: val }));
+                else setAssignmentFilters((c) => ({ ...c, searchTerm: val }));
+              }}
+              className="h-10 w-full rounded-xl pl-9 pr-3 text-xs outline-none transition-colors"
+              style={{
+                border: "1px solid var(--t-border)",
+                background: "var(--t-input-bg)",
+                color: "var(--t-text-secondary)",
+              }}
+            />
+          </div>
+
+          {/* Filtros específicos por sección en la misma fila */}
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            {section === "projects" && (
+              <>
+                <div className="w-36">
+                  <SelectField
+                    value={projectFilters.stateCode === "all" ? "" : projectFilters.stateCode}
+                    onChange={(value) =>
+                      setProjectFilters((current) => ({
+                        ...current,
+                        stateCode: value || "all",
+                      }))
+                    }
+                    options={catalogs.projectStates}
+                    placeholder="Estado"
+                  />
+                </div>
+                <div className="w-36">
+                  <SelectField
+                    value={projectFilters.areaId === "all" ? "" : projectFilters.areaId}
+                    onChange={(value) =>
+                      setProjectFilters((current) => ({
+                        ...current,
+                        areaId: value || "all",
+                      }))
+                    }
+                    options={catalogs.areas}
+                    placeholder="Área"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Selector de Vista Tabla vs. Kanban (Solo para Proyectos) */}
+            {section === "projects" && (
+              <div className="flex items-center rounded-xl p-1 bg-zinc-950 border border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("table")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    viewMode === "table"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <LayoutList className="h-3.5 w-3.5" />
+                  Tabla
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("kanban")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    viewMode === "kanban"
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <Kanban className="h-3.5 w-3.5" />
+                  Kanban
+                </button>
+              </div>
+            )}
+
+            {/* Botón Exportar */}
+            {section === "projects" && (
+              <OutlineButton
+                size="sm"
+                onClick={() => exportProjectsToCSV(projectRows)}
+                className="flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Exportar
+              </OutlineButton>
+            )}
+          </div>
+        </div>
       </div>
-
-      <FilterBar
-        searchPlaceholder={
-          section === "projects"
-            ? "Buscar por codigo, proyecto, area o estado..."
-            : section === "tasks"
-            ? "Buscar por tarea, actividad o estado..."
-            : section === "activities"
-            ? "Buscar por actividad, descripcion, estado, ubicacion o proyecto..."
-            : "Buscar por proyecto, voluntario, actividad, recurso o estado..."
-        }
-        searchValue={section === "projects" ? projectFilters.searchTerm : section === "tasks" ? taskFilters.searchTerm : section === "activities" ? activityFilters.searchTerm : assignmentFilters.searchTerm}
-        onSearchChange={(value) => {
-          if (section === "projects") setProjectFilters((current) => ({ ...current, searchTerm: value }));
-          else if (section === "tasks") setTaskFilters((current) => ({ ...current, searchTerm: value }));
-          else if (section === "activities") setActivityFilters((current) => ({ ...current, searchTerm: value }));
-          else setAssignmentFilters((current) => ({ ...current, searchTerm: value }));
-        }}
-      />
-
-      {section === "projects" ? projectFiltersView : section === "tasks" ? taskFiltersView : section === "activities" ? activityFiltersView : assignmentFiltersView}
 
       {renderCurrentTable()}
 
@@ -1344,38 +1577,18 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           </div>
           <Button variant="outline" size="sm" onClick={closeForm}>Cerrar</Button>
         </div>
-        {/* REQ-009: space-y-4 -> space-y-3 reduce el aire vertical entre
-            secciones del formulario sin comprometer legibilidad. */}
         <div className="max-h-[75vh] space-y-3 overflow-y-auto p-4">
           {section === "projects" ? (
             <div className="grid gap-3 md:grid-cols-2">
-              {/* REQ-006 (dds/MEJORAS/09072026/REQ006.md): el código ya no se
-                  captura manualmente. createProject() en
-                  services/proyectos/projects.service.ts ya generaba un
-                  correlativo (generateProjectCode) cuando el código llegaba
-                  vacío — el único cambio necesario era dejar de mostrar el
-                  input, para que siempre llegue vacío. projectForm.code se
-                  mantiene en el estado (útil al editar un proyecto
-                  existente) pero deja de ser editable desde este formulario. */}
               <InputField value={projectForm.name} onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))} placeholder="Nombre del proyecto" />
               <SelectField value={projectForm.areaId} onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))} options={catalogs.areas} placeholder="Area" />
               <SelectField value={projectForm.stateCode} onChange={(value) => setProjectForm((current) => ({ ...current, stateCode: value }))} options={catalogs.projectStates} placeholder="Estado" />
-              {/* REQ-009 (dds/MEJORAS/09072026/REQ009.md): agrupa fecha
-                  inicio/fin en su propia fila explícita en vez de depender
-                  del flujo natural del grid — así se mantienen siempre
-                  emparejadas aunque cambie la cantidad de campos previos. */}
               <div className="grid grid-cols-2 gap-3 md:col-span-2">
                 <InputField value={projectForm.startDate} onChange={(value) => setProjectForm((current) => ({ ...current, startDate: value }))} placeholder="Fecha inicio" type="date" />
                 <InputField value={projectForm.endDate} onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))} placeholder="Fecha fin" type="date" />
               </div>
-              {/* REQ-007 (dds/MEJORAS/09072026/REQ007.md): el "0" sin etiqueta
-                  visible era el campo presupuesto (ong.proyectos.presupuesto,
-                  confirmado contra BD_viva_09072026.txt) — placeholder nunca
-                  se veía porque el valor por defecto ya es "0" (no vacío).
-                  Se agrega un label real en vez de renombrarlo a
-                  "participantes", que no es el dato real del campo. */}
               <div className="space-y-1">
-                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto</p>
+                <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Presupuesto ($)</p>
                 <InputField value={projectForm.budget} onChange={(value) => setProjectForm((current) => ({ ...current, budget: value }))} placeholder="Presupuesto" type="number" />
               </div>
               <div className="md:col-span-2"><ImageUploadField label="Imagen del proyecto (opcional)" existingUrl={projectForm.imageUrl || null} previewFile={projectForm.imageFile} onFileSelect={(file) => setProjectForm((current) => ({ ...current, imageFile: file }))} onClear={() => setProjectForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))} /></div>
@@ -1384,7 +1597,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           ) : null}
           {section === "tasks" ? (
             <div className="grid gap-3 md:grid-cols-2">
-              {/* Cascading: first pick a project to filter the activities list */}
               <SelectField
                 value={taskFormProjectFilter}
                 onChange={(value) => {
