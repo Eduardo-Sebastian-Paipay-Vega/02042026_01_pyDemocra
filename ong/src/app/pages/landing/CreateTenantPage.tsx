@@ -116,7 +116,7 @@ export function CreateTenantPage() {
   }
 
 
-  // Handler Step 2: Registrar Usuario Auth en Supabase & Avanzar a OTP
+  // Handler Step 2: Registrar Usuario Auth en Supabase & Despachar OTP vía Resend
   async function handleStep2Submit(e: React.FormEvent) {
     e.preventDefault();
     setGlobalError(null);
@@ -128,7 +128,7 @@ export function CreateTenantPage() {
 
     setBootstrapping(true);
     try {
-      // Registrar usuario en Supabase Auth
+      // 1. Registrar usuario en Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -141,8 +141,19 @@ export function CreateTenantPage() {
         },
       });
 
-      if (authError) {
+      if (authError && !authError.message.includes("User already registered")) {
         throw new Error(authError.message || "Error al crear la cuenta de usuario.");
+      }
+
+      // 2. Despachar el código OTP por correo vía Resend API
+      try {
+        await fetch("/api/onboarding/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, fullName }),
+        });
+      } catch (sendErr) {
+        console.warn("Fallo al enviar correo OTP", sendErr);
       }
 
       setOtpSent(true);
@@ -154,6 +165,7 @@ export function CreateTenantPage() {
       setBootstrapping(false);
     }
   }
+
 
   // Handler Step 3: Verificar OTP o Continuar
   async function handleVerifyOtp(e: React.FormEvent) {

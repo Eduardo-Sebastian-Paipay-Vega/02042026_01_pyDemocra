@@ -6,7 +6,10 @@ import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js
 import { emailService } from "../services/email/index.js";
 import { getEmailConfig } from "../services/email/config/email.config.js";
 
+import { sendStepUpOtp } from "../services/otp-mailer.js";
+
 const router = express.Router();
+
 
 const VERIFY_TOKEN_TTL_HOURS = 24;
 
@@ -257,6 +260,37 @@ router.get("/validate-ruc/:ruc", async (req, res) => {
     });
   }
 });
+
+// POST /api/onboarding/send-otp
+// Genera y despacha el correo OTP de 6 digitos via Resend API
+router.post("/send-otp", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim();
+    if (!email || !email.includes("@")) {
+      return sendError(res, 400, "IAM-001", {
+        error_type: "validation",
+        message: "El correo electronico es requerido.",
+      });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const result = await sendStepUpOtp({
+      toEmail: email,
+      otpCode,
+      ttlMinutes: 10,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: `Codigo OTP despachado a ${email}`,
+      provider: result.provider || "resend",
+      debugCode: config.exposeDebugOtp ? otpCode : undefined,
+    });
+  } catch (error) {
+    return sendUnexpectedError(res, error, "IAM-001");
+  }
+});
+
 
 // POST /api/onboarding/bootstrap-tenant
 // Envuelve public.fn_bootstrap_tenant (ver
