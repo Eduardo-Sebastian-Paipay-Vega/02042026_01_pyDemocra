@@ -53,7 +53,7 @@ describe("loadEmailConfig", () => {
 
     expect(cfg.apiKey).toBe("re_test_123");
     expect(cfg.fromName).toBe("Democra");
-    expect(cfg.fromEmail).toBe("onboarding@resend.dev");
+    expect(cfg.fromEmail).toBe("onboarding@democra.pro");
     expect(cfg.appUrl).toBe("https://www.democra.pro");
     expect(cfg.logoUrl).toBe("https://www.democra.pro/brand/d-core-monogram.png");
     expect(cfg.maxRetries).toBe(3);
