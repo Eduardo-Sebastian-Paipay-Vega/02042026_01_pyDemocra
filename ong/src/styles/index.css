@@ -16,6 +16,27 @@ body {
     color 180ms ease-out;
 }
 
+/* Fix bright white/yellow background in Webkit Autofill (Chrome/Safari) for Dark Mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-text-fill-color: #F5F5F5 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #18181b inset !important;
+  box-shadow: 0 0 0px 1000px #18181b inset !important;
+  transition: background-color 50000s ease-in-out 0s !important;
+  caret-color: #F5F5F5 !important;
+}
+
+
 .ong-field-control {
   color-scheme: inherit;
 }

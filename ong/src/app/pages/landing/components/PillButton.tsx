@@ -7,6 +7,7 @@ interface PillButtonProps {
   onClick?: () => void;
   className?: string;
   type?: "button" | "submit";
+  disabled?: boolean;
 }
 
 const sizes = {
@@ -21,6 +22,7 @@ const base = [
   "hover:-translate-y-[2px]",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055FF]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070707]",
   "active:translate-y-0 active:scale-[0.98]",
+  "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none",
 ].join(" ");
 
 export function PillButton({
@@ -30,12 +32,14 @@ export function PillButton({
   onClick,
   className = "",
   type = "button",
+  disabled = false,
 }: PillButtonProps) {
   if (variant === "primary") {
     return (
       <button
         type={type}
         onClick={onClick}
+        disabled={disabled}
         className={[
           base,
           sizes[size],
@@ -58,6 +62,7 @@ export function PillButton({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={[
         base,
         sizes[size],
@@ -71,3 +76,4 @@ export function PillButton({
     </button>
   );
 }
+
