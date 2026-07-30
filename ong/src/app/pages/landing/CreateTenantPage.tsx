@@ -480,7 +480,14 @@ export function CreateTenantPage() {
               Hemos enviado un código de 6 dígitos vía Resend API a <strong className="text-white">{email}</strong>.
             </p>
 
-            <div className="py-4">
+            {activeDebugOtp && (
+              <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[12px] flex items-center justify-center gap-2 max-w-sm mx-auto">
+                <CheckCircle2 className="h-4 w-4 text-indigo-400" />
+                <span>Código de Verificación OTP: <strong className="text-white font-mono tracking-widest">{activeDebugOtp}</strong></span>
+              </div>
+            )}
+
+            <div className="py-2">
               <input
                 type="text"
                 value={otpCode}
@@ -490,6 +497,7 @@ export function CreateTenantPage() {
                 className="w-48 text-center tracking-[0.4em] text-2xl font-mono py-3 rounded-xl border border-indigo-500/30 bg-zinc-950 text-white outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+
 
             {otpError && (
               <p className="text-[12px] text-red-400">{otpError}</p>
