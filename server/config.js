@@ -14,7 +14,7 @@ export const config = {
   otpTtlMinutes: Number(process.env.MFA_OTP_TTL_MINUTES || 10),
   otpEmailProvider: (process.env.OTP_EMAIL_PROVIDER || "none").toLowerCase(),
   otpFromEmail: process.env.OTP_FROM_EMAIL || "",
-  otpFromName: process.env.OTP_FROM_NAME || "Solaris Security",
+  otpFromName: process.env.OTP_FROM_NAME || "Democra Security",
   sessionTtlHours: Number(process.env.SESSION_TTL_HOURS || 8),
   maxPinAttempts: Number(process.env.MAX_PIN_ATTEMPTS || 5),
   pinBlockMinutes: Number(process.env.PIN_BLOCK_MINUTES || 15),
