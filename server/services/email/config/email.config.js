@@ -44,8 +44,10 @@ export function loadEmailConfig() {
     fromName: readEnv("EMAIL_FROM_NAME") || readEnv("OTP_FROM_NAME") || "Democra",
     fromEmail:
       readEnv("EMAIL_FROM_ADDRESS") ||
-      readEnv("OTP_FROM_EMAIL") ||
-      "no-reply@democra.pro",
+      (readEnv("OTP_FROM_EMAIL") && !readEnv("OTP_FROM_EMAIL").includes("yourdomain.com")
+        ? readEnv("OTP_FROM_EMAIL")
+        : "onboarding@resend.dev"),
+
     replyTo: readEnv("EMAIL_REPLY_TO") || null,
     appName: readEnv("APP_NAME") || "Democra",
     appUrl,
