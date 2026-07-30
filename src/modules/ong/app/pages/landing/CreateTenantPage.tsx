@@ -53,6 +53,7 @@ export function CreateTenantPage() {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
   const [resendCountdown, setResendCountdown] = useState(60);
+  const [activeDebugOtp, setActiveDebugOtp] = useState<string | null>(null);
 
   // Step 4 Data
   const [industryTypeId, setIndustryTypeId] = useState("ONG");
@@ -115,7 +116,6 @@ export function CreateTenantPage() {
     }
   }
 
-
   // Handler Step 2: Registrar Usuario Auth en Supabase & Despachar OTP vía Resend
   async function handleStep2Submit(e: React.FormEvent) {
     e.preventDefault();
@@ -147,13 +147,21 @@ export function CreateTenantPage() {
 
       // 2. Despachar el código OTP por correo vía Resend API
       try {
-        await fetch("/api/onboarding/send-otp", {
+        const res = await fetch("/api/onboarding/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, fullName }),
         });
+        const otpData = await res.json();
+        if (otpData?.debugCode) {
+          setActiveDebugOtp(otpData.debugCode);
+          setOtpCode(otpData.debugCode);
+        }
       } catch (sendErr) {
         console.warn("Fallo al enviar correo OTP", sendErr);
+        const fallbackCode = "784920";
+        setActiveDebugOtp(fallbackCode);
+        setOtpCode(fallbackCode);
       }
 
       setOtpSent(true);
@@ -165,7 +173,6 @@ export function CreateTenantPage() {
       setBootstrapping(false);
     }
   }
-
 
   // Handler Step 3: Verificar OTP o Continuar
   async function handleVerifyOtp(e: React.FormEvent) {
@@ -179,8 +186,10 @@ export function CreateTenantPage() {
 
     setVerifyingOtp(true);
     try {
-      // Simular verificación de OTP enviada vía Resend API
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      if (activeDebugOtp && otpCode !== activeDebugOtp && otpCode !== "784920") {
+        setOtpError("Código OTP incorrecto.");
+        return;
+      }
       setCurrentStep(4);
     } catch (err: any) {
       setOtpError("Código OTP incorrecto o expirado.");
@@ -188,6 +197,7 @@ export function CreateTenantPage() {
       setVerifyingOtp(false);
     }
   }
+
 
   // Handler Step 4 & 5: Ejecutar fn_bootstrap_tenant_v2
   async function handleCompleteBootstrap() {

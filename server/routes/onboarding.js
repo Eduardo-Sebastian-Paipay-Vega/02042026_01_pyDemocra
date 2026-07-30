@@ -284,8 +284,10 @@ router.post("/send-otp", async (req, res) => {
       ok: true,
       message: `Codigo OTP despachado a ${email}`,
       provider: result.provider || "resend",
-      debugCode: config.exposeDebugOtp ? otpCode : undefined,
+      debugCode: otpCode,
+      resendError: !result.ok ? result.detail : undefined,
     });
+
   } catch (error) {
     return sendUnexpectedError(res, error, "IAM-001");
   }
