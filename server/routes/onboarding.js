@@ -297,35 +297,39 @@ router.post("/bootstrap-tenant", async (req, res) => {
     const docType = body.doc_type ? String(body.doc_type).trim() : undefined;
     const docNumber = body.doc_number ? String(body.doc_number).trim() : undefined;
     const phoneNumber = body.phone_number ? String(body.phone_number).trim() : undefined;
+    const useV2 = body.use_v2 === true || Boolean(tradeName || address || docType || docNumber || phoneNumber);
 
-    // Intentar invocar fn_bootstrap_tenant_v2 si esta desplegada, con fallback a fn_bootstrap_tenant
-    let tenantResult = await authContext.userClient.rpc("fn_bootstrap_tenant_v2", {
-      p_user_id: authContext.user.id,
-      p_razon_social: tenantName,
-      p_tax_id: taxId,
-      p_industry_type_id: industryTypeId,
-      ...(tradeName ? { p_trade_name: tradeName } : {}),
-      ...(address ? { p_address: address } : {}),
-      ...(docType ? { p_doc_type: docType } : {}),
-      ...(docNumber ? { p_doc_number: docNumber } : {}),
-      ...(phoneNumber ? { p_phone_number: phoneNumber } : {}),
-      ...(planId ? { p_plan_id: planId } : {}),
-      ...(billingDay ? { p_billing_day: billingDay } : {}),
-    });
+    let tenantId = null;
+    let error = null;
 
-    let tenantId = tenantResult.data?.tenant_id || (typeof tenantResult.data === "string" ? tenantResult.data : null);
-    let error = tenantResult.error;
+    if (useV2) {
+      const tenantResult = await authContext.userClient.rpc("fn_bootstrap_tenant_v2", {
+        p_user_id: authContext.user.id,
+        p_razon_social: tenantName,
+        p_tax_id: taxId,
+        p_industry_type_id: industryTypeId,
+        ...(tradeName ? { p_trade_name: tradeName } : {}),
+        ...(address ? { p_address: address } : {}),
+        ...(docType ? { p_doc_type: docType } : {}),
+        ...(docNumber ? { p_doc_number: docNumber } : {}),
+        ...(phoneNumber ? { p_phone_number: phoneNumber } : {}),
+        ...(planId ? { p_plan_id: planId } : {}),
+        ...(billingDay ? { p_billing_day: billingDay } : {}),
+      });
 
-    if (error && error.message?.includes("Could not find the function")) {
-      const fallbackResult = await authContext.userClient.rpc("fn_bootstrap_tenant", {
+      tenantId = tenantResult.data?.tenant_id || (typeof tenantResult.data === "string" ? tenantResult.data : null);
+      error = tenantResult.error;
+    } else {
+      const tenantResult = await authContext.userClient.rpc("fn_bootstrap_tenant", {
         p_tenant_name: tenantName,
         p_tax_id: taxId,
         p_industry_type_id: industryTypeId,
         ...(planId ? { p_plan_id: planId } : {}),
         ...(billingDay ? { p_billing_day: billingDay } : {}),
       });
-      tenantId = fallbackResult.data;
-      error = fallbackResult.error;
+
+      tenantId = tenantResult.data;
+      error = tenantResult.error;
     }
 
     if (error) {
@@ -334,6 +338,7 @@ router.post("/bootstrap-tenant", async (req, res) => {
         message: error.message,
       });
     }
+
 
 
     await issueVerificationEmail({
