@@ -12,7 +12,7 @@ export const config = {
   openAiBaseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
   otpPepper: process.env.MFA_OTP_PEPPER || "dev-local-pepper",
   otpTtlMinutes: Number(process.env.MFA_OTP_TTL_MINUTES || 10),
-  otpEmailProvider: (process.env.OTP_EMAIL_PROVIDER || "none").toLowerCase(),
+  otpEmailProvider: (process.env.OTP_EMAIL_PROVIDER || (process.env.RESEND_API_KEY ? "resend" : "none")).toLowerCase(),
   otpFromEmail: process.env.OTP_FROM_EMAIL || "",
   otpFromName: process.env.OTP_FROM_NAME || "Democra Security",
   sessionTtlHours: Number(process.env.SESSION_TTL_HOURS || 8),

@@ -155,14 +155,12 @@ export function CreateTenantPage() {
         const otpData = await res.json();
         if (otpData?.debugCode) {
           setActiveDebugOtp(otpData.debugCode);
-          setOtpCode(otpData.debugCode);
         }
       } catch (sendErr) {
         console.warn("Fallo al enviar correo OTP", sendErr);
-        const fallbackCode = "784920";
-        setActiveDebugOtp(fallbackCode);
-        setOtpCode(fallbackCode);
+        setActiveDebugOtp("784920");
       }
+
 
       setOtpSent(true);
       setResendCountdown(60);
