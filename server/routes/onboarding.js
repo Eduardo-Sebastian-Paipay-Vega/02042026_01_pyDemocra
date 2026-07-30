@@ -152,6 +152,16 @@ router.get("/validate-ruc/:ruc", async (req, res) => {
       });
     }
 
+    // RUC de prueba asignado para desarrollo (PAIPAY VEGA EDUARDO SEBASTIAN)
+    if (ruc === "10731840275") {
+      return res.status(200).json({
+        tax_id: ruc,
+        tenant_name: "PAIPAY VEGA EDUARDO SEBASTIAN",
+        estado: "ACTIVO",
+        condicion: "HABIDO",
+      });
+    }
+
     if (!config.rucApiUrl || !config.rucApiToken) {
       return sendError(res, 503, "TEN-001", {
         error_type: "configuration",
@@ -159,6 +169,8 @@ router.get("/validate-ruc/:ruc", async (req, res) => {
         retry_allowed: false,
       });
     }
+
+
 
     const endpoint = buildRucUrl(config.rucApiUrl, ruc, config.rucApiToken);
     const response = await fetch(endpoint, {
