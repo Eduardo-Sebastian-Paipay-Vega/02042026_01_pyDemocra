@@ -292,24 +292,49 @@ router.post("/bootstrap-tenant", async (req, res) => {
       });
     }
 
-    const { data: tenantId, error } = await authContext.userClient.rpc("fn_bootstrap_tenant", {
-      p_tenant_name: tenantName,
+    const tradeName = body.trade_name ? String(body.trade_name).trim() : undefined;
+    const address = body.address ? String(body.address).trim() : undefined;
+    const docType = body.doc_type ? String(body.doc_type).trim() : undefined;
+    const docNumber = body.doc_number ? String(body.doc_number).trim() : undefined;
+    const phoneNumber = body.phone_number ? String(body.phone_number).trim() : undefined;
+
+    // Intentar invocar fn_bootstrap_tenant_v2 si esta desplegada, con fallback a fn_bootstrap_tenant
+    let tenantResult = await authContext.userClient.rpc("fn_bootstrap_tenant_v2", {
+      p_user_id: authContext.user.id,
+      p_razon_social: tenantName,
       p_tax_id: taxId,
       p_industry_type_id: industryTypeId,
+      ...(tradeName ? { p_trade_name: tradeName } : {}),
+      ...(address ? { p_address: address } : {}),
+      ...(docType ? { p_doc_type: docType } : {}),
+      ...(docNumber ? { p_doc_number: docNumber } : {}),
+      ...(phoneNumber ? { p_phone_number: phoneNumber } : {}),
       ...(planId ? { p_plan_id: planId } : {}),
       ...(billingDay ? { p_billing_day: billingDay } : {}),
     });
 
+    let tenantId = tenantResult.data?.tenant_id || (typeof tenantResult.data === "string" ? tenantResult.data : null);
+    let error = tenantResult.error;
+
+    if (error && error.message?.includes("Could not find the function")) {
+      const fallbackResult = await authContext.userClient.rpc("fn_bootstrap_tenant", {
+        p_tenant_name: tenantName,
+        p_tax_id: taxId,
+        p_industry_type_id: industryTypeId,
+        ...(planId ? { p_plan_id: planId } : {}),
+        ...(billingDay ? { p_billing_day: billingDay } : {}),
+      });
+      tenantId = fallbackResult.data;
+      error = fallbackResult.error;
+    }
+
     if (error) {
-      // fn_bootstrap_tenant lanza RAISE EXCEPTION con mensajes de validacion
-      // propios (RUC invalido, billing_day fuera de rango, no autenticado) —
-      // se devuelven tal cual en vez de un 500 generico, son accionables por
-      // el cliente.
       return sendError(res, 400, "TEN-001", {
         error_type: "validation",
         message: error.message,
       });
     }
+
 
     await issueVerificationEmail({
       userId: authContext.user.id,
