@@ -281,9 +281,9 @@ export function CreateTenantPage() {
                 onChange={(e) => setTenantName(e.target.value)}
                 placeholder="Autocompletado desde SUNAT"
                 className={inputClass}
-                required
               />
             </div>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -318,7 +318,7 @@ export function CreateTenantPage() {
               </div>
             )}
 
-            <PillButton type="submit" className="w-full mt-4" disabled={validatingRuc}>
+            <PillButton type="button" onClick={(e: any) => handleValidateRuc(e)} className="w-full mt-4" disabled={validatingRuc}>
               {validatingRuc ? (
                 <span className="flex items-center justify-center gap-2">
                   <RefreshCw className="h-4 w-4 animate-spin" /> Validando con SUNAT...
@@ -329,6 +329,7 @@ export function CreateTenantPage() {
                 </span>
               )}
             </PillButton>
+
           </form>
         )}
 
