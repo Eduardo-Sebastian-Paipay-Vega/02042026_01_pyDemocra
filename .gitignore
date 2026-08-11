@@ -60,3 +60,6 @@ Landing Page Design Request/
 
 node.zip
 node_modules_trash_*
+
+.vercel
+.env*
