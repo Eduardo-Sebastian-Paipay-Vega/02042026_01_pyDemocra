@@ -603,3 +603,4 @@ MIT — ver [LICENSE](LICENSE).
 ---
 
 <sub>📖 Documentación técnica adicional disponible en [`docs/portfolio/`](docs/portfolio/)</sub>
+ 
