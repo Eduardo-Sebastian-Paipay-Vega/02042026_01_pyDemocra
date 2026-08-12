@@ -267,6 +267,10 @@ const spanishRouteRedirects = [
   { path: "/carnets", element: <LegacyPathRedirect to="/app/ong/people/id-cards" /> },
   { path: "/eventos", element: <LegacyPathRedirect to="/app/ong/projects/activities" /> },
   { path: "/asistencias", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
+  { path: "/horas", element: <LegacyPathRedirect to="/app/ong/operation/hours" /> },
+  { path: "/evidencias", element: <LegacyPathRedirect to="/app/ong/operation/evidence" /> },
+  { path: "/operacion", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
+  { path: "/operacion/*", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
   { path: "/inventario", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
   { path: "/transferencias", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
   { path: "/finanzas", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
@@ -363,6 +367,14 @@ export const router = createBrowserRouter(
           element: <MyAccountSettings />,
         },
         {
+          path: "operation",
+          element: <Navigate to="/app/ong/operation/attendance" replace />,
+        },
+        {
+          path: "operation/activities",
+          element: <Navigate to="/app/ong/projects/activities" replace />,
+        },
+        {
           path: "operation/attendance",
           ...protectedPage("operation-attendance", <Attendance />),
         },
@@ -373,6 +385,18 @@ export const router = createBrowserRouter(
         {
           path: "operation/evidence",
           ...protectedPage("operation-evidence", <Evidence />),
+        },
+        {
+          path: "operation/asistencias",
+          element: <Navigate to="/app/ong/operation/attendance" replace />,
+        },
+        {
+          path: "operation/horas",
+          element: <Navigate to="/app/ong/operation/hours" replace />,
+        },
+        {
+          path: "operation/evidencias",
+          element: <Navigate to="/app/ong/operation/evidence" replace />,
         },
         {
           path: "projects",

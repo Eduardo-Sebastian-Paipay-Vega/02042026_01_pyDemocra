@@ -53,7 +53,7 @@ function buildEntityTargetPath(
 
   if (type === "activity") {
     params.set("activityId", entityId);
-    return `/app/ong/operation/activities?${params.toString()}`;
+    return `/app/ong/projects/activities?${params.toString()}`;
   }
 
   params.set("requestId", entityId);
