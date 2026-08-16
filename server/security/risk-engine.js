@@ -1,6 +1,6 @@
 import { config } from "../config.js";
 import { serviceClient } from "../supabase.js";
-import { sendStepUpOtp } from "../services/otp-mailer.js";
+import { sendStepUpOtp } from "../core/services/otp-mailer.js";
 import { applyTenantScope, assertTenantScope } from "../utils/tenant-scope.js";
 import {
   generateOtpCode,

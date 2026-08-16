@@ -7,7 +7,7 @@ jest.mock("../supabase.js", () => ({
   serviceClient: { from: jest.fn() },
 }));
 
-jest.mock("../services/otp-mailer.js", () => ({
+jest.mock("../core/services/otp-mailer.js", () => ({
   __esModule: true,
   sendStepUpOtp: jest.fn(),
 }));
@@ -15,7 +15,7 @@ jest.mock("../services/otp-mailer.js", () => ({
 // eslint-disable-next-line import/first
 import { serviceClient } from "../supabase.js";
 // eslint-disable-next-line import/first
-import { sendStepUpOtp } from "../services/otp-mailer.js";
+import { sendStepUpOtp } from "../core/services/otp-mailer.js";
 // eslint-disable-next-line import/first
 import {
   evaluateRiskEngine,

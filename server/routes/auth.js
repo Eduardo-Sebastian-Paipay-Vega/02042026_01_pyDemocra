@@ -17,7 +17,7 @@ import {
   verifyPinHash,
 } from "../utils/security.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
-import { emailService } from "../services/email/index.js";
+import { emailService } from "../core/services/email/index.js";
 
 const router = express.Router();
 

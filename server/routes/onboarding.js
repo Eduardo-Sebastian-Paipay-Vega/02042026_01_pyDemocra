@@ -3,10 +3,10 @@ import express from "express";
 import { config } from "../config.js";
 import { resolveAuthContext, serviceClient } from "../supabase.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
-import { emailService } from "../services/email/index.js";
-import { getEmailConfig } from "../services/email/config/email.config.js";
+import { emailService } from "../core/services/email/index.js";
+import { getEmailConfig } from "../core/services/email/config/email.config.js";
 
-import { sendStepUpOtp } from "../services/otp-mailer.js";
+import { sendStepUpOtp } from "../core/services/otp-mailer.js";
 
 const router = express.Router();
 
