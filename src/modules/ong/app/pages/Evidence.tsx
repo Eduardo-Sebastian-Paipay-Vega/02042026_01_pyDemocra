@@ -45,10 +45,10 @@ import {
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
-import { StatusDot } from "../components/ui/status-dot";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { ModalShell } from "../components/ui/modal-shell";
+import { StatusDot } from "@/core/components/ui/status-dot";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { ModalShell } from "@/core/components/ui/modal-shell";
 import { useOperationEvidence } from "../modules/operation/useOperationEvidence";
 import type { EvidenceFilters, OperationEvidenceRow } from "../modules/operation/types";
 

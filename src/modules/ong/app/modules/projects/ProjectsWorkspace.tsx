@@ -40,26 +40,26 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { ImageUploadField } from "../../components/ui/image-upload-field";
+import { ImageUploadField } from "@/core/components/ui/image-upload-field";
 import {
   getAssetsUploadBucket,
   uploadFileToStorage,
 } from "../../services/shared/storage";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { DataTable, type Column } from "../../components/shared/DataTable";
-import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
-import { Badge } from "../../components/ui/badge";
-import { Button } from "../../components/ui/button";
-import { ModalShell } from "../../components/ui/modal-shell";
-import { StatusDot } from "../../components/ui/status-dot";
-import { GradientButton } from "../../components/ui/gradient-button";
-import { OutlineButton } from "../../components/ui/outline-button";
+import { Alert, AlertDescription, AlertTitle } from "@/core/components/ui/alert";
+import { Badge } from "@/core/components/ui/badge";
+import { Button } from "@/core/components/ui/button";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { StatusDot } from "@/core/components/ui/status-dot";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
+} from "@/core/components/ui/dropdown-menu";
 import { useSessionStorageState } from "../../lib/session-state";
 import { useProjectCatalogs } from "./hooks/useProjectCatalogs";
 import { useProjectDetails } from "./hooks/useProjectDetails";

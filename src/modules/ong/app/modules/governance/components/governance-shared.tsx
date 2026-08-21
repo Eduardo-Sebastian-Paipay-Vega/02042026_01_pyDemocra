@@ -1,4 +1,4 @@
-import { StatusDot } from "../../../components/ui/status-dot";
+import { StatusDot } from "@/core/components/ui/status-dot";
 
 export function GovernanceErrorBlock({
   message,

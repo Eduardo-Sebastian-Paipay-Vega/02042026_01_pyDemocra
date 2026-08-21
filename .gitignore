@@ -58,8 +58,18 @@ Desktop.ini
 # Exportaciones de referencia de diseño (no forman parte de la app)
 Landing Page Design Request/
 
+# Archivos y copias basura
 node.zip
 node_modules_trash_*
+node_modules_old*
+node_modules_broken
+.pnpm-store*
+.npm-temp-cache
+_tmp_*
+_chk/
+_cov/
+_pv/
+graphify-out/
 
+# Vercel
 .vercel
-.env*

@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
-import { ModalShell } from "../components/ui/modal-shell";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import {
   NotificationsCodePreview,
   NotificationsDetailField,

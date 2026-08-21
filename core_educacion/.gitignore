@@ -1,0 +1,57 @@
+# Node & Monorepo Dependencies
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+
+# Next.js & React Build Outputs
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Environment & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Database & ORM
+prisma/migrations/*_*/
+!prisma/migrations/*/migration.sql
+
+# Test & Coverage
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*-debug.log*
+
+# Vite & Frontend Tools
+.cache/
+.vite/
+vite.config.*.timestamp-*
+.claude-replay.*
+.tmp-*

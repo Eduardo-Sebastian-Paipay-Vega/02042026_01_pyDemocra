@@ -39,10 +39,10 @@ import {
 
 import { PageHeader } from "../components/shared/PageHeader";
 import { DataTable, type Column } from "../components/shared/DataTable";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
-import { ModalShell } from "../components/ui/modal-shell";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
 import {
   fetchDashboardActivityDetail,
   fetchDashboardAdmissionDetail,

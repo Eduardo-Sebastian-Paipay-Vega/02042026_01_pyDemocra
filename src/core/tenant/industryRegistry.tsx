@@ -1,42 +1,14 @@
-import { OngShell } from "../../industries/ong/OngShell";
-import { ONG_MODULE_IDS } from "../../industries/ong/registry";
 import type { IndustryDefinition, IndustryId } from "./registry-types";
 
-const INDUSTRY_REGISTRY: IndustryDefinition[] = [
-  {
-    id: "ong",
-    name: "ONG",
-    description: "Shell operativo completo para organizaciones sin fines de lucro.",
-    status: "active",
-    basePath: "/app/ong",
-    shell: OngShell,
-    supportedModuleIds: [...ONG_MODULE_IDS],
-    fallbackRouteId: "home",
-    landingPriorityRouteIds: [
-      "home",
-      "projects",
-      "operation-activities",
-      "operation-hours",
-      "volunteers",
-      "admission-requests",
-      "inventory",
-      "finance",
-      "notifications-history",
-      "system-users",
-      "roles",
-      "security",
-    ],
-  },
-  {
-    id: "gym",
-    name: "Gym",
-    description: "Industria registrada para futura integracion dentro del mismo runtime.",
-    status: "planned",
-    basePath: "/app/gym",
-    supportedModuleIds: [],
-    fallbackRouteId: null,
-    landingPriorityRouteIds: [],
-  },
+// Vite inyectará automáticamente todos los registry.tsx que encuentre en industries/
+const modules = import.meta.glob('../../industries/*/registry.tsx', { eager: true });
+
+// Mapea dinámicamente las industrias que tengan INDUSTRY_DEFINITION exportado
+const dynamicIndustries: IndustryDefinition[] = Object.values(modules)
+  .map((mod: any) => mod.INDUSTRY_DEFINITION)
+  .filter(Boolean);
+
+const PLANNED_INDUSTRIES: IndustryDefinition[] = [
   {
     id: "health",
     name: "Health",
@@ -57,6 +29,11 @@ const INDUSTRY_REGISTRY: IndustryDefinition[] = [
     fallbackRouteId: null,
     landingPriorityRouteIds: [],
   },
+];
+
+const INDUSTRY_REGISTRY: IndustryDefinition[] = [
+  ...dynamicIndustries,
+  ...PLANNED_INDUSTRIES,
 ];
 
 export function listIndustryDefinitions() {

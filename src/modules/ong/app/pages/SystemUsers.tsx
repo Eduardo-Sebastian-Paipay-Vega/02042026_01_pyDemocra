@@ -5,10 +5,10 @@ import { KeyRound, Shield, UserCog } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
-import { ModalShell } from "../components/ui/modal-shell";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import { useSystemUserAssignments } from "../modules/settings/hooks/useSystemUserAssignments";
 import { useSystemUsers } from "../modules/settings/hooks/useSystemUsers";
 import type {

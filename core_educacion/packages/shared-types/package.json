@@ -1,0 +1,8 @@
+{
+  "name": "@educacion/shared-types",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "db:types": "supabase gen types typescript --project-id qafvnjoqvdtnrdvlnwco --schema core,educa,finanzas,bienestar,institution,ia,identidad,telemetria,public > src/database.types.ts"
+  }
+}

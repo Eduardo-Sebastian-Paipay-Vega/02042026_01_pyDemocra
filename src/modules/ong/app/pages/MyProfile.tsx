@@ -28,9 +28,9 @@ import {
   updateMyProfileDetails,
   type MyProfileRow,
 } from "../services/account/myAccount.service";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { ModalShell } from "../components/ui/modal-shell";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { ModalShell } from "@/core/components/ui/modal-shell";
 
 function FieldItem({
   icon,

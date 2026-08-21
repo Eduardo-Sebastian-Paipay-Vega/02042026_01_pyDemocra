@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { DataTable, type Column, type RowAction } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
-import { GradientButton } from "../components/ui/gradient-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import { useIdCards } from "../modules/people/hooks/useIdCards";
 import { useIdCardMutations } from "../modules/people/hooks/useIdCardMutations";
 import {

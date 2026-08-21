@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { CreditCard, Download, ImagePlus, RefreshCcw } from "lucide-react";
-import { ModalShell } from "../../../components/ui/modal-shell";
-import { GradientButton } from "../../../components/ui/gradient-button";
-import { OutlineButton } from "../../../components/ui/outline-button";
-import { StatusDot } from "../../../components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import { useIdCardTemplateDetail } from "../hooks/useIdCardTemplateDetail";
 import {
   buildIdCardQrPayload,

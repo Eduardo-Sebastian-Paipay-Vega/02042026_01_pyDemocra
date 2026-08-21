@@ -19,8 +19,8 @@ import {
   User,
 } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
 import {
   getMyProfile,

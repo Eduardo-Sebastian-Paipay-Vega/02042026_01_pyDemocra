@@ -2,9 +2,13 @@
   "functions": {
     "api/server.js": {
       "maxDuration": 10
+    },
+    "api/educacion.ts": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
+    { "source": "/api/educacion/:path*", "destination": "/api/educacion" },
     { "source": "/api/:path*", "destination": "/api/server" },
     { "source": "/ong", "destination": "/ong/index.html" },
     { "source": "/ong/:path*", "destination": "/ong/index.html" },

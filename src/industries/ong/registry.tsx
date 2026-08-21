@@ -23,9 +23,9 @@ import {
   UserCog,
   UserPlus,
   Users,
-  Video,
-} from "lucide-react";
-import type { RegisteredModuleDefinition } from "../../core/tenant/registry-types";
+import { Video } from "lucide-react";
+import type { RegisteredModuleDefinition, IndustryDefinition } from "../../core/tenant/registry-types";
+import { OngShell } from "./OngShell";
 import { AccessControl } from "../../modules/ong/app/pages/AccessControl";
 import { Activities } from "../../modules/ong/app/pages/Activities";
 import { AdmissionDocuments } from "../../modules/ong/app/pages/AdmissionDocuments";
@@ -729,3 +729,31 @@ export const ongModuleDefinitions: RegisteredModuleDefinition[] = [
     ],
   },
 ];
+
+export const INDUSTRY_DEFINITION: IndustryDefinition = {
+  id: "ong",
+  name: "ONG",
+  description: "Shell operativo completo para organizaciones sin fines de lucro.",
+  status: "active",
+  basePath: "/app/ong",
+  shell: OngShell,
+  supportedModuleIds: [...ONG_MODULE_IDS],
+  fallbackRouteId: "home",
+  landingPriorityRouteIds: [
+    "home",
+    "projects",
+    "operation-activities",
+    "operation-hours",
+    "volunteers",
+    "admission-requests",
+    "inventory",
+    "finance",
+    "notifications-history",
+    "system-users",
+    "roles",
+    "security",
+  ],
+};
+
+e x p o r t   c o n s t   M O D U L E _ D E F I N I T I O N S   =   o n g M o d u l e D e f i n i t i o n s ;  
+ 

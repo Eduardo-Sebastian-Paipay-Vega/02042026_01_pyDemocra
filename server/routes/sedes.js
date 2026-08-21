@@ -2,11 +2,11 @@ import express from "express";
 import { resolveAuthContext, serviceClient } from "../supabase.js";
 import { applyTenantScope, assertTenantScope } from "../utils/tenant-scope.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
-import { requireFinancialWriteAccess } from "../middleware/financial-state.js";
+import { requireTenantWriteAccess } from "../security/tenant-guards.js";
 
 const router = express.Router();
 
-router.use(requireFinancialWriteAccess());
+router.use(requireTenantWriteAccess());
 
 // Antes de este router no existia NINGUN camino (ni Express ni Supabase
 // directo desde el frontend) para crear/editar/desactivar sedes de un tenant

@@ -1,0 +1,31 @@
+{
+  "name": "educacion-os-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo Enterprise para EDUCACION OS / Democra School — Infraestructura Operacional Educativa",
+  "scripts": {
+    "dev": "pnpm --recursive run dev",
+    "build": "pnpm --recursive run build",
+    "lint": "pnpm --recursive run lint",
+    "db:generate": "pnpm --filter @educacion/database generate",
+    "db:push": "pnpm --filter @educacion/database push",
+    "db:types": "supabase gen types typescript --local > packages/shared-types/src/database.types.ts",
+    "supabase:start": "supabase start --workdir packages/database/supabase",
+    "supabase:stop": "supabase stop --workdir packages/database/supabase",
+    "supabase:reset": "supabase db reset --workdir packages/database/supabase",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.23",
+    "pg": "^8.23.0"
+  }
+}

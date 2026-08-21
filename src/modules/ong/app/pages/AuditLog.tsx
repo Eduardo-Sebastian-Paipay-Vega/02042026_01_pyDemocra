@@ -4,8 +4,8 @@ import { FileText, History, ShieldAlert } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
-import { ModalShell } from "../components/ui/modal-shell";
-import { StatusDot } from "../components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import { useGovernanceAuditLog } from "../modules/governance/hooks/useGovernanceAuditLog";
 import type { GovernanceAuditEvent } from "../modules/governance/types";
 import {

@@ -1,4 +1,3 @@
-import { ongModuleDefinitions } from "../../industries/ong/registry";
 import type {
   IndustryId,
   RegisteredModuleDefinition,
@@ -6,7 +5,12 @@ import type {
   TenantRouteId,
 } from "./registry-types";
 
-const MODULE_REGISTRY: RegisteredModuleDefinition[] = [...ongModuleDefinitions];
+// Vite inyectará automáticamente todos los registry.tsx que encuentre en industries/
+const modules = import.meta.glob('../../industries/*/registry.tsx', { eager: true });
+
+// Extrae todos los MODULE_DEFINITIONS de cada industria y los aplana en un solo array
+const MODULE_REGISTRY: RegisteredModuleDefinition[] = Object.values(modules)
+  .flatMap((mod: any) => mod.MODULE_DEFINITIONS || []);
 
 function toTenantRouteDefinition(
   moduleDefinition: RegisteredModuleDefinition

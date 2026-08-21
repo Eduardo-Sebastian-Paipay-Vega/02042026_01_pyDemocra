@@ -2,11 +2,11 @@ import express from "express";
 import { resolveAuthContext, serviceClient } from "../supabase.js";
 import { applyTenantScope, assertTenantScope } from "../utils/tenant-scope.js";
 import { getBearerToken, sendError, sendUnexpectedError } from "../utils/http.js";
-import { requireFinancialWriteAccess } from "../middleware/financial-state.js";
+import { requireTenantWriteAccess } from "../security/tenant-guards.js";
 
 const router = express.Router();
 
-router.use(requireFinancialWriteAccess());
+router.use(requireTenantWriteAccess());
 
 async function resolveIamContext(req, res) {
   const accessToken = getBearerToken(req);

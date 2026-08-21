@@ -71,6 +71,10 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
+      "/api/educacion": {
+        target: "http://localhost:8788",
+        changeOrigin: true,
+      },
       "/api": {
         target: "http://localhost:8787",
         changeOrigin: true,

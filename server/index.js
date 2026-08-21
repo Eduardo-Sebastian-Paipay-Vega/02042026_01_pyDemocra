@@ -13,6 +13,11 @@ import auditRoutes from "./routes/audit.js";
 import iamRoutes from "./routes/iam.js";
 import onboardingRoutes from "./routes/onboarding.js";
 import sedesRoutes from "./routes/sedes.js";
+import gymRoutes from "./domains/gym/routes/index.js";
+import { initOngDomain } from "./domains/ong/index.js";
+
+// Inicializa dominios que inyectan reglas de negocio al core
+initOngDomain();
 
 // process.cwd() en vez de import.meta.url: este servidor siempre se arranca
 // desde la raiz del repo (node server/index.js, ver scripts de package.json,
@@ -189,6 +194,7 @@ app.use("/api/security", auditRoutes);
 app.use("/api/iam", iamRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/sedes", sedesRoutes);
+app.use("/api/gym", gymRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

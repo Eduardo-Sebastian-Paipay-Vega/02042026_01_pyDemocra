@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { type FieldErrors, useFieldArray, useForm } from "react-hook-form";
 import { Briefcase, FileText, ShieldCheck, UserRound } from "lucide-react";
-import { ModalShell } from "../../../components/ui/modal-shell";
-import { GradientButton } from "../../../components/ui/gradient-button";
-import { OutlineButton } from "../../../components/ui/outline-button";
-import { StatusDot } from "../../../components/ui/status-dot";
+import { ModalShell } from "@/core/components/ui/modal-shell";
+import { GradientButton } from "@/core/components/ui/gradient-button";
+import { OutlineButton } from "@/core/components/ui/outline-button";
+import { StatusDot } from "@/core/components/ui/status-dot";
 import { useFilePreview } from "../../../lib/use-file-preview";
 import { adaptVolunteerFormToUpsertInput } from "../../../services/personas/form-adapters";
 import type { VolunteerCatalogData, VolunteerDetailData, VolunteerUpsertInput } from "../types";
