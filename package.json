@@ -2,6 +2,7 @@
   "name": "vanilla-migrated",
   "private": true,
   "version": "1.0.0",
+  "author": "EDUARDO SEBASTIAN PAIPAY VEGA <paipayvegabastian@gmail.com> (democra.pro)",
   "type": "module",
   "scripts": {
     "dev": "npm run dev:all",

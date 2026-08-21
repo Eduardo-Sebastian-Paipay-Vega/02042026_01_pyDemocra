@@ -17,10 +17,11 @@ Detalle completo, comandos y solución de problemas comunes en **`SETUP.md`** (r
 
 ## Reglas de Oro de Arquitectura y Desarrollo
 
-1. **Cero `package.json` secundarios**: Ninguna subcarpeta (como `ONG/` u otro submódulo) debe tener su propio `package.json` ni su propia carpeta `node_modules`. Todas las dependencias se instalan en la raíz del proyecto.
-2. **Autenticación compartida nativa**: Todo cliente de Supabase (raíz, ONG, y cualquier módulo futuro) debe inicializarse con el mismo `storageKey` explícito: `storageKey: 'sb-democra-auth-token'`.
-3. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse strictly en minúsculas (`/ong/`, `/api/`, etc.).
-4. **El backend vive en `server/`, no en `api/`**: `api/server.js` es solo el adaptador Serverless para Vercel. La lógica real (rutas, middleware, controllers, servicios) pertenece a `server/`.
+1. **Arquitectura "Core y Ramas" (Monolito Centralizado)**: El proyecto funciona estrictamente con una base central (el "Core") en la raíz del repositorio. Cada nuevo módulo de industria o funcionalidad (como `ONG`, `educacion`, `gym`) actúa como una "rama" que se conecta a este Core, nunca como un proyecto independiente. Por ello, **debe existir un único `.env`**, un único `package.json` y un único `.git` en toda la estructura.
+2. **Cero `package.json` secundarios**: Ninguna subcarpeta (como `ONG/` u otro submódulo) debe tener su propio `package.json` ni su propia carpeta `node_modules`. Todas las dependencias se instalan en la raíz del proyecto.
+3. **Autenticación compartida nativa**: Todo cliente de Supabase (raíz, ONG, y cualquier módulo futuro) debe inicializarse con el mismo `storageKey` explícito: `storageKey: 'sb-democra-auth-token'`.
+4. **URLs y rutas en minúsculas**: Por convención y compatibilidad con Vercel/Linux, todas las rutas del navegador y nombres de carpetas de módulo deben escribirse strictly en minúsculas (`/ong/`, `/api/`, etc.).
+5. **El backend vive en `server/`, no en `api/`**: `api/server.js` es solo el adaptador Serverless para Vercel. La lógica real (rutas, middleware, controllers, servicios) pertenece a `server/`.
 
 ## Regla obligatoria: Ciberseguridad Esencial, DevSecOps y AppSec
 
@@ -91,6 +92,7 @@ Antes de crear una nueva columna, tabla o relación debes inspeccionar el proyec
 - si existe una relación reutilizable;
 - si puede reutilizarse un modelo existente.
 Nunca duplicar estructuras.
+> **Importante:** El archivo `BD.json` (en la raíz del proyecto) es la fuente de información más actualizada de la base de datos viva y sirve como el mapa oficial del esquema (actualizado al 21/08/2026). Consúltalo siempre para resolver dudas de estructura.
 
 ### 5. Si el frontend requiere un nuevo atributo
 Realizar el flujo completo: esquema SQL, migraciones, ORM, modelos, DTO, validaciones, servicios, repositorios, endpoints, frontend, formularios, permisos y documentación. El atributo debe existir realmente en todo el sistema.

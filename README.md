@@ -598,7 +598,7 @@ MIT — ver [LICENSE](LICENSE).
 
 ## Autor
 
-**Eduardo Sebastian Paipay Vega** — [@EduardoBastian2005](https://github.com/EduardoBastian2005)
+**EDUARDO SEBASTIAN PAIPAY VEGA** — paipayvegabastian@gmail.com de democra.pro
 
 ---
 
