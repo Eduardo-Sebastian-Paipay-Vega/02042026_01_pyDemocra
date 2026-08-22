@@ -8,6 +8,7 @@ import { GradientButton } from "../components/ui/gradient-button";
 import { ModalShell } from "../components/ui/modal-shell";
 import { OutlineButton } from "../components/ui/outline-button";
 import { StatusDot } from "../components/ui/status-dot";
+import { useDebouncedValue } from "../lib/useDebouncedValue";
 import { useAprobacionDetail } from "../modules/operation/hooks/useAprobacionDetail";
 import { useAprobacionesOperacion } from "../modules/operation/hooks/useAprobacionesOperacion";
 import type { ApprovalStatusKind, OperationApprovalRow } from "../modules/operation/types";
@@ -39,16 +40,16 @@ const columns: Column<OperationApprovalRow>[] = [
   {
     key: "volunteer",
     label: "Voluntario",
-    render: (item) => <span style={{ color: "var(--t-text)" }}>{item.subjectName}</span>,
+    render: (item) => <span style={{ color: "var(--t-text)" }}>{item.subjectName || "-"}</span>,
   },
   {
     key: "activity",
     label: "Actividad",
     render: (item) => (
       <div>
-        <div style={{ color: "var(--t-text-secondary)" }}>{item.entityTitle}</div>
+        <div style={{ color: "var(--t-text-secondary)" }}>{item.entityTitle || "-"}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.entitySubtitle}
+          {item.entitySubtitle || "-"}
         </div>
       </div>
     ),
@@ -58,20 +59,21 @@ const columns: Column<OperationApprovalRow>[] = [
     label: "Contexto",
     render: (item) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-        <div>{item.contextDate}</div>
-        <div>{item.contextMeta}</div>
+        <div>{item.contextDate || "-"}</div>
+        <div>{item.contextMeta || "-"}</div>
       </div>
     ),
   },
   {
     key: "status",
     label: "Estado",
-    render: (item) => <StatusDot variant={item.statusVariant}>{item.statusName}</StatusDot>,
+    render: (item) => <StatusDot variant={item.statusVariant}>{item.statusName || "-"}</StatusDot>,
   },
 ];
 
 export function HoursApproval() {
   const [searchValue, setSearchValue] = useState("");
+  const debouncedSearchValue = useDebouncedValue(searchValue, 350);
   const [statusFilter, setStatusFilter] = useState<"all" | ApprovalStatusKind>("pending");
   const [volunteerFilter, setVolunteerFilter] = useState<string | "all">("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -88,7 +90,6 @@ export function HoursApproval() {
   const {
     loading,
     error,
-    warnings,
     rows,
     approvalStates,
     volunteerOptions,
@@ -96,7 +97,7 @@ export function HoursApproval() {
     resolve,
     refresh,
   } = useAprobacionesOperacion({
-    searchTerm: searchValue,
+    searchTerm: debouncedSearchValue,
     entityType: HOURS_APPROVAL_ENTITY,
     entityId: "",
     status: statusFilter,
@@ -172,7 +173,7 @@ export function HoursApproval() {
         <PageHeader
           title="Aprobacion de horas"
           description="Revisión y aprobación de registros de horas reportados por los voluntarios."
-          action={{ label: "Actualizar", onClick: refresh }}
+          action={{ label: loading ? "Sincronizando..." : "Sincronizar", onClick: refresh, disabled: loading }}
         />
       </motion.div>
 
@@ -200,14 +201,6 @@ export function HoursApproval() {
         <motion.div variants={fadeUp}>
           <div className="rounded-2xl px-4 py-3 text-[12px]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
             <p style={{ color: "var(--t-text-secondary)" }}>{error}</p>
-          </div>
-        </motion.div>
-      )}
-
-      {warnings.length > 0 && (
-        <motion.div variants={fadeUp}>
-          <div className="rounded-2xl px-4 py-3 text-[12px]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-            {warnings.map((warning) => <p key={warning} style={{ color: "var(--t-text-tertiary)" }}>{warning}</p>)}
           </div>
         </motion.div>
       )}
@@ -240,16 +233,14 @@ export function HoursApproval() {
           {!detailLoading && !detailError && detail && (
             <>
               <div className="flex flex-wrap gap-2">
-                <StatusDot variant={detail.approval.statusVariant}>{detail.approval.statusName}</StatusDot>
-                <StatusDot variant="secondary">{detail.approval.subjectName}</StatusDot>
+                <StatusDot variant={detail.approval.statusVariant}>{detail.approval.statusName || "-"}</StatusDot>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>ID aprobacion</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.id}</p></div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Voluntario</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.subjectName}</p></div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.entityTitle}</p></div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.entitySubtitle}</p></div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Solicitado por</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{`${detail.approval.requestedBy} (${detail.approval.requestedAt})`}</p></div>
-                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Resuelto por</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{`${detail.approval.approvedBy} (${detail.approval.approvedAt})`}</p></div>
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Voluntario</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.subjectName || "-"}</p></div>
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Actividad</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.entityTitle || "-"}</p></div>
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Proyecto</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{detail.approval.entitySubtitle || "-"}</p></div>
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Solicitado por</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{`${detail.approval.requestedBy || "-"} (${detail.approval.requestedAt || "-"})`}</p></div>
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}><p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>Resuelto por</p><p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{`${detail.approval.approvedBy || "-"} (${detail.approval.approvedAt || "-"})`}</p></div>
               </div>
               <div className="rounded-2xl px-4 py-3 text-[12px]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
                 <p style={{ color: "var(--t-text-secondary)" }}>{detail.approval.comment || "Sin comentario de resolucion."}</p>

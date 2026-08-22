@@ -10,7 +10,7 @@ async function nextSequential(
 ): Promise<string> {
   const pattern = `${prefix}-%`;
   let query = supabase
-    .schema(schema)
+    .schema(schema as any)
     .from(table)
     .select(codeColumn)
     .like(codeColumn, pattern)

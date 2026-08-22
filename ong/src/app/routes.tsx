@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate, useLocation } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
@@ -115,32 +115,24 @@ const CreateTenantPage = lazy(() =>
 // (mayúsculas) es solo una ruta de archivo, no afecta la URL del navegador.
 const ROUTER_BASENAME = "/ong";
 
-function RootEntryRedirect() {
-  const { loading, status, message, context, resolveInitialPath } = useTenantBootstrap();
+function RootEntry() {
+  const { loading, status, context, resolveInitialPath } = useTenantBootstrap();
 
   if (loading) {
     return <TenantBootstrapLoadingScreen />;
   }
 
-  if (status === "unauthenticated") {
-    return <Navigate to="/login" replace />;
+  // Si ya tiene sesión activa, redirige al sistema internamente
+  if (status === "ready" && context) {
+    return <Navigate to={resolveInitialPath() ?? resolveTenantInitialPath(context)} replace />;
   }
 
-  if (!context || status !== "ready") {
-    return <TenantStatusScreen status={status} message={message} context={context} />;
-  }
-
-  if (context.financialPolicy.isSuspended) {
-    return (
-      <TenantStatusScreen
-        status="error"
-        message={context.financialPolicy.message}
-        context={context}
-      />
-    );
-  }
-
-  return <Navigate to={resolveInitialPath() ?? resolveTenantInitialPath(context)} replace />;
+  // Si no está listo (unauthenticated), muestra el Landing Page
+  return (
+    <Suspense fallback={<TenantBootstrapLoadingScreen />}>
+      <LandingPage />
+    </Suspense>
+  );
 }
 
 function ShellIndexRedirect() {
@@ -306,15 +298,11 @@ export const router = createBrowserRouter(
   [
     {
       path: "/",
-      element: <RootEntryRedirect />,
+      element: <RootEntry />,
     },
     {
       path: "/login",
       Component: Login,
-    },
-    {
-      path: "/landing",
-      Component: LandingPage,
     },
     {
       element: <PublicLayout />,

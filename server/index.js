@@ -13,6 +13,8 @@ import auditRoutes from "./routes/audit.js";
 import iamRoutes from "./routes/iam.js";
 import onboardingRoutes from "./routes/onboarding.js";
 import sedesRoutes from "./routes/sedes.js";
+import tenantSettingsRoutes from "./routes/tenant-settings.js";
+import profileRoutes from "./routes/profile.js";
 import gymRoutes from "./domains/gym/routes/index.js";
 import { initOngDomain } from "./domains/ong/index.js";
 
@@ -184,6 +186,8 @@ const authLimiter = rateLimit({
 // el limiter corra primero; /risk-evaluate queda fuera a propósito porque ya
 // tiene su propio motor de riesgo/bloqueo (ver security/risk-engine.js) y no
 // es en sí mismo un punto de adivinar credenciales.
+import educRoutes from "./domains/educ/routes/index.js";
+
 app.use("/api/auth/terminal-login", authLimiter);
 app.use("/api/auth/step-up/verify-otp", authLimiter);
 app.use("/api/auth/step-up/resend-otp", authLimiter);
@@ -194,7 +198,10 @@ app.use("/api/security", auditRoutes);
 app.use("/api/iam", iamRoutes);
 app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/sedes", sedesRoutes);
+app.use("/api/core/tenant/settings", tenantSettingsRoutes);
+app.use("/api/core/profile/preferences", profileRoutes);
 app.use("/api/gym", gymRoutes);
+app.use("/api/educ", educRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

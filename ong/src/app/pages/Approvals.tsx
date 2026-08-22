@@ -8,6 +8,7 @@ import { StatusDot } from "../components/ui/status-dot";
 import { GradientButton } from "../components/ui/gradient-button";
 import { OutlineButton } from "../components/ui/outline-button";
 import { ModalShell } from "../components/ui/modal-shell";
+import { useDebouncedValue } from "../lib/useDebouncedValue";
 import { useAprobacionDetail } from "../modules/operation/hooks/useAprobacionDetail";
 import { useAprobacionesOperacion } from "../modules/operation/hooks/useAprobacionesOperacion";
 import type { ApprovalStatusKind, OperationApprovalRow } from "../modules/operation/types";
@@ -129,12 +130,12 @@ const columns: Column<OperationApprovalRow>[] = [
     label: "Registro",
     render: (item) => (
       <div>
-        <div style={{ color: "var(--t-text)" }}>{item.entityTitle}</div>
+        <div style={{ color: "var(--t-text)" }}>{item.entityTitle || "-"}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.subjectName !== "-" ? `${item.subjectName} · ${item.entitySubtitle}` : item.entitySubtitle}
+          {item.subjectName && item.subjectName !== "-" ? `${item.subjectName} · ${item.entitySubtitle || "-"}` : (item.entitySubtitle || "-")}
         </div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.entityId}
+          {item.entityId || "-"}
         </div>
       </div>
     ),
@@ -142,14 +143,14 @@ const columns: Column<OperationApprovalRow>[] = [
   {
     key: "status",
     label: "Estado",
-    render: (item) => <StatusDot variant={item.statusVariant}>{item.statusName}</StatusDot>,
+    render: (item) => <StatusDot variant={item.statusVariant}>{item.statusName || "-"}</StatusDot>,
   },
   {
     key: "requested",
     label: "Solicitado",
     render: (item) => (
       <span className="text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-        {item.requestedBy} - {item.requestedAt}
+        {item.requestedBy || "-"} - {item.requestedAt || "-"}
       </span>
     ),
   },
@@ -158,7 +159,7 @@ const columns: Column<OperationApprovalRow>[] = [
     label: "Resuelto",
     render: (item) => (
       <span className="text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-        {item.approvedBy} - {item.approvedAt}
+        {item.approvedBy || "-"} - {item.approvedAt || "-"}
       </span>
     ),
   },
@@ -166,7 +167,11 @@ const columns: Column<OperationApprovalRow>[] = [
 
 export function Approvals() {
   const [searchValue, setSearchValue] = useState("");
+  const debouncedSearchValue = useDebouncedValue(searchValue, 350);
+
   const [hoursIdFilter, setHoursIdFilter] = useState("");
+  const debouncedHoursIdFilter = useDebouncedValue(hoursIdFilter, 350);
+
   const [volunteerFilter, setVolunteerFilter] = useState<string | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ApprovalStatusKind>("all");
   const [dateFrom, setDateFrom] = useState("");
@@ -189,7 +194,6 @@ export function Approvals() {
   const {
     loading,
     error,
-    warnings,
     rows,
     total,
     approvalStates,
@@ -200,9 +204,9 @@ export function Approvals() {
     resolve,
     refresh,
   } = useAprobacionesOperacion({
-    searchTerm: searchValue,
+    searchTerm: debouncedSearchValue,
     entityType: "all",
-    entityId: hoursIdFilter,
+    entityId: debouncedHoursIdFilter,
     status: statusFilter,
     requestedById: volunteerFilter,
     approvedById: "all",
@@ -435,19 +439,8 @@ export function Approvals() {
         <PageHeader
           title="Bandeja de aprobaciones"
           description="Bandeja de aprobaciones pendientes: horas, evidencias y solicitudes de voluntarios."
-          action={{ label: "Actualizar", onClick: refresh }}
+          action={{ label: loading ? "Sincronizando..." : "Sincronizar", onClick: refresh, disabled: loading }}
         />
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
-          <GradientButton size="sm" onClick={openCreateModal}>
-            Solicitar revisión
-          </GradientButton>
-          <OutlineButton size="sm" onClick={refresh}>
-            Refrescar
-          </OutlineButton>
-        </div>
       </motion.div>
 
       <motion.div variants={fadeUp}>
@@ -506,21 +499,6 @@ export function Approvals() {
       {error && (
         <motion.div variants={fadeUp}>
           <ErrorBlock message={error} onRetry={refresh} />
-        </motion.div>
-      )}
-
-      {warnings.length > 0 && (
-        <motion.div variants={fadeUp}>
-          <div
-            className="rounded-2xl px-4 py-3 text-[12px]"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-          >
-            {warnings.map((warning) => (
-              <p key={warning} style={{ color: "var(--t-text-tertiary)" }}>
-                {warning}
-              </p>
-            ))}
-          </div>
         </motion.div>
       )}
 
@@ -705,25 +683,22 @@ export function Approvals() {
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusDot variant={detail.approval.statusVariant}>
-                  {detail.approval.statusName}
+                  {detail.approval.statusName || "-"}
                 </StatusDot>
-                <StatusDot variant="secondary">{detail.context.kind}</StatusDot>
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="ID aprobación" value={detail.approval.id} />
-                <DetailField label="Entidad tipo" value={detail.approval.entityTable} />
-                <DetailField label="Entidad id" value={detail.approval.entityId} />
-                <DetailField label="Voluntario" value={detail.approval.subjectName} />
+                <DetailField label="Voluntario" value={detail.approval.subjectName || "-"} />
+                <DetailField label="Proyecto / Subtítulo" value={detail.approval.entitySubtitle || "-"} />
                 <DetailField
                   label="Solicitado por"
-                  value={`${detail.approval.requestedBy} (${detail.approval.requestedAt})`}
+                  value={`${detail.approval.requestedBy || "-"} (${detail.approval.requestedAt || "-"})`}
                 />
                 <DetailField
                   label="Resuelto por"
-                  value={`${detail.approval.approvedBy} (${detail.approval.approvedAt})`}
+                  value={`${detail.approval.approvedBy || "-"} (${detail.approval.approvedAt || "-"})`}
                 />
-                <DetailField label="Comentario" value={detail.approval.comment || "-"} />
+                <DetailField label="Comentario de resolución" value={detail.approval.comment || "-"} />
               </div>
 
               <div
@@ -731,18 +706,18 @@ export function Approvals() {
                 style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
               >
                 <p className="text-[12px]" style={{ color: "var(--t-text)" }}>
-                  {detail.context.title}
+                  {detail.context.title || "-"}
                 </p>
                 <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                  {detail.context.summary}
+                  {detail.context.summary || "-"}
                 </p>
 
                 <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                  {detail.context.fields.map((field) => (
+                  {detail.context.fields.filter(f => !['Modulo', 'Schema', 'Tabla', 'Entidad'].includes(f.label)).map((field) => (
                     <DetailField
                       key={`${field.label}-${field.value}`}
                       label={field.label}
-                      value={field.value}
+                      value={field.value || "-"}
                     />
                   ))}
                 </div>

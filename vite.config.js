@@ -70,6 +70,7 @@ export default defineConfig({
       // conviene que cada módulo resuelva contra su propia carpeta).
       "@": resolve(__dirname, "src"),
       "@ong": resolve(__dirname, "ong/src"),
+      "@educ": resolve(__dirname, "educ/src"),
     },
   },
   // Requerido por el módulo ONG: imports "raw" de SVG/CSV.

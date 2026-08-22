@@ -21,9 +21,11 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@ong/*": ["ong/src/*"],
+      "@educ/*": ["educ/src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "ong/src", "educ/src"],
   "exclude": ["node_modules", "dist", "server"]
 }

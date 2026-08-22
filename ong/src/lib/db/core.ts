@@ -141,8 +141,8 @@ export function assertServerOnlyClientUsage(clientName: string): void {
 export function createSupabaseClient<TDatabase = any>(
   url: string,
   key: string,
-  options?: SupabaseClientOptions<"public">
-): SupabaseClient<TDatabase> {
+  options?: any
+): any {
   if (!url || !key) {
     throw new Error("Supabase client initialization requires both URL and key.");
   }

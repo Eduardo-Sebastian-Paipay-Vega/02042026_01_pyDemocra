@@ -1,4 +1,4 @@
-﻿import {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -22,7 +22,6 @@ import {
   DollarSign,
   FileText,
   FolderKanban,
-  Globe,
   GraduationCap,
   Heart,
   Home,
@@ -349,22 +348,7 @@ export function Sidebar({
         </button>
       </div>
 
-      <div className="mx-2 mb-2 border-b pb-2" style={{ borderColor: "var(--t-border)" }}>
-        <Link
-          to="/landing"
-          className={cn(
-            "flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ease-out",
-            "hover:bg-[var(--t-hover)] hover:text-[var(--t-primary)]",
-            !showExpandedMode && "justify-center"
-          )}
-          style={{ color: "var(--t-text-secondary)" }}
-          onClick={onCloseMobile}
-          title={!showExpandedMode ? "Pagina publica" : undefined}
-        >
-          <Globe className="h-4 w-4 shrink-0" />
-          {showExpandedMode && <span className="text-[12px]">Pagina publica</span>}
-        </Link>
-      </div>
+
 
       <nav aria-label="Navegacion lateral" className="h-[calc(100vh-104px)] overflow-y-auto py-1 scrollbar-none">
         {categories.map((category) => {

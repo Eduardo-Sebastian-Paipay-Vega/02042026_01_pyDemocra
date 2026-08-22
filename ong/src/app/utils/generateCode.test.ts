@@ -71,7 +71,7 @@ describe("generateItemCode", () => {
   });
 
   it("genera INV-001 cuando no hay codigos previos", async () => {
-    (supabase.limit as any).mockResolvedValueOnce({ data: [], error: null });
+    ((supabase as any).limit as any).mockResolvedValueOnce({ data: [], error: null });
 
     const code = await generateItemCode(null);
 
@@ -81,7 +81,7 @@ describe("generateItemCode", () => {
   });
 
   it("incrementa el ultimo codigo encontrado cuando no hay tenantId", async () => {
-    (supabase.limit as any).mockResolvedValueOnce({
+    ((supabase as any).limit as any).mockResolvedValueOnce({
       data: [{ codigo: "INV-045" }],
       error: null,
     });
@@ -92,19 +92,19 @@ describe("generateItemCode", () => {
   });
 
   it("filtra por tenant_id cuando se provee", async () => {
-    (supabase.eq as any).mockResolvedValueOnce({
+    ((supabase as any).eq as any).mockResolvedValueOnce({
       data: [{ codigo: "INV-099" }],
       error: null,
     });
 
     const code = await generateItemCode("tenant-2");
 
-    expect(supabase.eq).toHaveBeenCalledWith("tenant_id", "tenant-2");
+    expect((supabase as any).eq).toHaveBeenCalledWith("tenant_id", "tenant-2");
     expect(code).toBe("INV-100");
   });
 
   it("hace fallback a un codigo basado en timestamp si la consulta falla", async () => {
-    (supabase.limit as any).mockImplementationOnce(() => {
+    ((supabase as any).limit as any).mockImplementationOnce(() => {
       throw new Error("network down");
     });
 

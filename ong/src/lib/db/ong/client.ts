@@ -26,7 +26,7 @@ export const ongClient = ongModule.getPublicClient<AppDatabase>({
 });
 
 function createServerOnlyClientGuard<TClient>(clientName: string): TClient {
-  return new Proxy({} as TClient, {
+  return new Proxy({} as any, {
     get() {
       throw new Error(
         `${clientName} is server-only and must never be consumed in frontend code.`
