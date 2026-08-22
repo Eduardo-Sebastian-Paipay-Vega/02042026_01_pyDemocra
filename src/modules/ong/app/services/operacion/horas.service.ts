@@ -34,7 +34,7 @@ const HOURS_LIMIT = 500;
 const HOURS_SCHEMA_WARNING =
   "Segun `guidelines/BD/Parte 4- Script maestro documental de ONG modulos complementarios.txt`, `ong.horas_actividad` ya persiste `id_aprobacion` y `comentario_resolucion`; el rango horario sigue sin almacenarse y solo se usa para calcular horas.";
 const HOURS_REMOVE_BLOCKED_MESSAGE =
-  "La anulación lógica de horas no está soportada por el contrato SQL actual de ong.horas_actividad.";
+  "La anulaciÃ³n lÃ³gica de horas no estÃ¡ soportada por el contrato SQL actual de ong.horas_actividad.";
 
 type ActivityLookup = {
   id: string;
@@ -463,7 +463,7 @@ export async function listHoras(
     const warnings = [HOURS_SCHEMA_WARNING];
     const [volunteerOptions, approvalStates] = await Promise.all([
       fetchVolunteerCatalog().catch(() => {
-        warnings.push("No se pudo cargar el catálogo de voluntarios.");
+        warnings.push("No se pudo cargar el catÃ¡logo de voluntarios.");
         return [];
       }),
       buildApprovalStateOptions(),
@@ -623,7 +623,7 @@ export async function createHoras(input: HoursRegisterInput): Promise<MutationFe
     }
 
     if ((input.startTime && !startTime) || (input.endTime && !endTime)) {
-      throw new Error("El rango horario no es válido.");
+      throw new Error("El rango horario no es vÃ¡lido.");
     }
     if ((startTime && !endTime) || (!startTime && endTime)) {
       throw new Error("Debes completar hora de inicio y hora de fin.");
@@ -634,11 +634,11 @@ export async function createHoras(input: HoursRegisterInput): Promise<MutationFe
 
     const resolvedMinutes = resolveHoursFromInput(minutesInput, startTime, endTime);
     if (!resolvedMinutes || resolvedMinutes <= 0) {
-      throw new Error("Debes ingresar minutos positivos o un rango horario válido.");
+      throw new Error("Debes ingresar minutos positivos o un rango horario vÃ¡lido.");
     }
     ensurePositiveMinutes(resolvedMinutes);
     if (!Number.isFinite(resolvedMinutes) || resolvedMinutes > 24 * 60) {
-      throw new Error("Los minutos registrados exceden el máximo permitido.");
+      throw new Error("Los minutos registrados exceden el mÃ¡ximo permitido.");
     }
 
     const tenantId = await getRequiredTenantId();
@@ -682,7 +682,7 @@ export async function updateHoras(input: HoursUpdateInput): Promise<MutationFeed
   try {
     const hoursId = sanitizeOptionalId(input.hoursId);
     if (!hoursId) {
-      throw new Error("No se encontró el registro de horas a editar.");
+      throw new Error("No se encontrÃ³ el registro de horas a editar.");
     }
 
     const tenantId = await getRequiredTenantId();
@@ -729,7 +729,7 @@ export async function updateHoras(input: HoursUpdateInput): Promise<MutationFeed
       throw new Error("La fecha es obligatoria.");
     }
     if ((input.startTime && !startTime) || (input.endTime && !endTime)) {
-      throw new Error("El rango horario no es válido.");
+      throw new Error("El rango horario no es vÃ¡lido.");
     }
     if ((startTime && !endTime) || (!startTime && endTime)) {
       throw new Error("Debes completar hora de inicio y hora de fin.");
@@ -745,11 +745,11 @@ export async function updateHoras(input: HoursUpdateInput): Promise<MutationFeed
       Math.round(current.horas_registradas * 60);
 
     if (!resolvedMinutes || resolvedMinutes <= 0) {
-      throw new Error("Debes ingresar minutos positivos o un rango horario válido.");
+      throw new Error("Debes ingresar minutos positivos o un rango horario vÃ¡lido.");
     }
     ensurePositiveMinutes(resolvedMinutes);
     if (!Number.isFinite(resolvedMinutes) || resolvedMinutes > 24 * 60) {
-      throw new Error("Los minutos registrados exceden el máximo permitido.");
+      throw new Error("Los minutos registrados exceden el mÃ¡ximo permitido.");
     }
 
     const { error: updateError } = await ongSchema()
@@ -788,7 +788,7 @@ export async function resolveHoras(input: HoursResolutionInput): Promise<Mutatio
   try {
     const hoursId = sanitizeOptionalId(input.hoursId);
     if (!hoursId) {
-      throw new Error("No se encontró el registro de horas a resolver.");
+      throw new Error("No se encontrÃ³ el registro de horas a resolver.");
     }
 
     const tenantId = await getRequiredTenantId();
@@ -796,7 +796,7 @@ export async function resolveHoras(input: HoursResolutionInput): Promise<Mutatio
       (item) => item.value === input.targetStateId
     );
     if (!targetState) {
-      throw new Error("El estado de aprobación seleccionado no es válido.");
+      throw new Error("El estado de aprobaciÃ³n seleccionado no es vÃ¡lido.");
     }
     if (targetState.kind === "observed") {
       throw new Error(
@@ -899,3 +899,4 @@ export async function removeHoras(hoursId: string, actorId?: string | null): Pro
     HOURS_REMOVE_BLOCKED_MESSAGE
   );
 }
+

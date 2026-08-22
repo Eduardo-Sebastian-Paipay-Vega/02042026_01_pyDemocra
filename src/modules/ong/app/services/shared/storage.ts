@@ -100,7 +100,7 @@ function assertAllowedFile(
   }
   if (maxSizeBytes && file.size > maxSizeBytes) {
     throw new Error(
-      `El archivo supera el tamaño máximo permitido (${Math.round(maxSizeBytes / (1024 * 1024))} MB).`
+      `El archivo supera el tamaÃ±o mÃ¡ximo permitido (${Math.round(maxSizeBytes / (1024 * 1024))} MB).`
     );
   }
 }
@@ -189,3 +189,4 @@ export function getAdmissionOnboardingEvidenceBucket() {
     maxSizeBytes: MAX_DOCUMENT_BYTES,
   } as const;
 }
+

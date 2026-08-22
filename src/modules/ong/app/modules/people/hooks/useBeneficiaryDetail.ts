@@ -79,3 +79,4 @@ export function useBeneficiaryDetail(beneficiaryId: string | null) {
     replace,
   };
 }
+

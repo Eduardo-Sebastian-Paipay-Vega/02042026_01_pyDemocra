@@ -685,7 +685,7 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
         return {
           status: "license_exceeded",
           context: null,
-          message: `El tenant ha superado el límite de ${maxLicenses} licencias (${activeUsers} usuarios activos). Contacta al soporte para ampliar el plan.`,
+          message: `El tenant ha superado el lÃ­mite de ${maxLicenses} licencias (${activeUsers} usuarios activos). Contacta al soporte para ampliar el plan.`,
           warnings,
         };
       }
@@ -782,3 +782,4 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
     };
   }
 }
+

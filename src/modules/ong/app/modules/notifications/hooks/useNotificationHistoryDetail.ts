@@ -62,3 +62,4 @@ export function useNotificationHistoryDetail(notificationId: string | null) {
     refresh,
   };
 }
+

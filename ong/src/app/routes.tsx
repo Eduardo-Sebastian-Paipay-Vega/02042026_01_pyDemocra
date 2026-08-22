@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter, Navigate, useLocation } from "react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "./components/layout/AppShell";
 import { PublicLayout } from "./components/layout/PublicLayout";
@@ -256,33 +256,40 @@ function LegacyPathRedirect({ to }: { to: string }) {
   return <Navigate to={to} replace />;
 }
 
+function LegacyOngRedirect() {
+  const location = useLocation();
+  // Ensure we only replace the prefix and preserve the rest of the path + query string
+  const newPath = location.pathname.replace('/app/ong', '/app');
+  return <Navigate to={newPath + location.search} replace />;
+}
+
 const protectedPage = (routeId: TenantRouteId, element: ReactNode) => ({
   element: <ProtectedTenantRoute routeId={routeId}>{element}</ProtectedTenantRoute>,
 });
 
 const spanishRouteRedirects = [
-  { path: "/voluntarios", element: <LegacyPathRedirect to="/app/ong/people/volunteers" /> },
-  { path: "/solicitudes-admision", element: <LegacyPathRedirect to="/app/ong/admission/requests" /> },
-  { path: "/beneficiarios", element: <LegacyPathRedirect to="/app/ong/people/beneficiaries" /> },
-  { path: "/carnets", element: <LegacyPathRedirect to="/app/ong/people/id-cards" /> },
-  { path: "/eventos", element: <LegacyPathRedirect to="/app/ong/projects/activities" /> },
-  { path: "/asistencias", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
-  { path: "/horas", element: <LegacyPathRedirect to="/app/ong/operation/hours" /> },
-  { path: "/evidencias", element: <LegacyPathRedirect to="/app/ong/operation/evidence" /> },
-  { path: "/operacion", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
-  { path: "/operacion/*", element: <LegacyPathRedirect to="/app/ong/operation/attendance" /> },
-  { path: "/inventario", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
-  { path: "/transferencias", element: <LegacyPathRedirect to="/app/ong/resources/inventory" /> },
-  { path: "/finanzas", element: <LegacyPathRedirect to="/app/ong/resources/finance" /> },
-  { path: "/apadrinamientos", element: <LegacyPathRedirect to="/app/ong/resources/finance?tab=sponsorships" /> },
-  { path: "/cursos", element: <LegacyPathRedirect to="/app/ong/resources/courses" /> },
-  { path: "/notificaciones", element: <LegacyPathRedirect to="/app/ong/notifications/history" /> },
-  { path: "/configuracion", element: <LegacyPathRedirect to="/app/ong/settings/users" /> },
-  { path: "/auditoria", element: <LegacyPathRedirect to="/app/ong/governance/audit-log" /> },
-  { path: "/reportes", element: <LegacyPathRedirect to="/app/ong/home" /> },
-  { path: "/dashboard", element: <LegacyPathRedirect to="/app/ong/home" /> },
-  { path: "/mi-pase-qr", element: <LegacyPathRedirect to="/app/ong/people/id-cards" /> },
-  { path: "/mi-cuenta", element: <LegacyPathRedirect to="/app/ong/account/profile" /> },
+  { path: "/voluntarios", element: <LegacyPathRedirect to="/app/people/volunteers" /> },
+  { path: "/solicitudes-admision", element: <LegacyPathRedirect to="/app/admission/requests" /> },
+  { path: "/beneficiarios", element: <LegacyPathRedirect to="/app/people/beneficiaries" /> },
+  { path: "/carnets", element: <LegacyPathRedirect to="/app/people/id-cards" /> },
+  { path: "/eventos", element: <LegacyPathRedirect to="/app/projects/activities" /> },
+  { path: "/asistencias", element: <LegacyPathRedirect to="/app/operation/attendance" /> },
+  { path: "/horas", element: <LegacyPathRedirect to="/app/operation/hours" /> },
+  { path: "/evidencias", element: <LegacyPathRedirect to="/app/operation/evidence" /> },
+  { path: "/operacion", element: <LegacyPathRedirect to="/app/operation/attendance" /> },
+  { path: "/operacion/*", element: <LegacyPathRedirect to="/app/operation/attendance" /> },
+  { path: "/inventario", element: <LegacyPathRedirect to="/app/resources/inventory" /> },
+  { path: "/transferencias", element: <LegacyPathRedirect to="/app/resources/inventory" /> },
+  { path: "/finanzas", element: <LegacyPathRedirect to="/app/resources/finance" /> },
+  { path: "/apadrinamientos", element: <LegacyPathRedirect to="/app/resources/finance?tab=sponsorships" /> },
+  { path: "/cursos", element: <LegacyPathRedirect to="/app/resources/courses" /> },
+  { path: "/notificaciones", element: <LegacyPathRedirect to="/app/notifications/history" /> },
+  { path: "/configuracion", element: <LegacyPathRedirect to="/app/settings/users" /> },
+  { path: "/auditoria", element: <LegacyPathRedirect to="/app/governance/audit-log" /> },
+  { path: "/reportes", element: <LegacyPathRedirect to="/app/home" /> },
+  { path: "/dashboard", element: <LegacyPathRedirect to="/app/home" /> },
+  { path: "/mi-pase-qr", element: <LegacyPathRedirect to="/app/people/id-cards" /> },
+  { path: "/mi-cuenta", element: <LegacyPathRedirect to="/app/account/profile" /> },
 ];
 
 const legacyRouteRedirects = listTenantRoutes().map((route) => ({
@@ -339,7 +346,7 @@ export const router = createBrowserRouter(
       ],
     },
     {
-      path: "/app/ong",
+      path: "/app",
       element: <ProtectedTenantShell />,
       children: [
         {
@@ -368,11 +375,11 @@ export const router = createBrowserRouter(
         },
         {
           path: "operation",
-          element: <Navigate to="/app/ong/operation/attendance" replace />,
+          element: <Navigate to="/app/operation/attendance" replace />,
         },
         {
           path: "operation/activities",
-          element: <Navigate to="/app/ong/projects/activities" replace />,
+          element: <Navigate to="/app/projects/activities" replace />,
         },
         {
           path: "operation/attendance",
@@ -388,15 +395,15 @@ export const router = createBrowserRouter(
         },
         {
           path: "operation/asistencias",
-          element: <Navigate to="/app/ong/operation/attendance" replace />,
+          element: <Navigate to="/app/operation/attendance" replace />,
         },
         {
           path: "operation/horas",
-          element: <Navigate to="/app/ong/operation/hours" replace />,
+          element: <Navigate to="/app/operation/hours" replace />,
         },
         {
           path: "operation/evidencias",
-          element: <Navigate to="/app/ong/operation/evidence" replace />,
+          element: <Navigate to="/app/operation/evidence" replace />,
         },
         {
           path: "projects",
@@ -514,6 +521,10 @@ export const router = createBrowserRouter(
     },
     ...legacyRouteRedirects,
     ...spanishRouteRedirects,
+    {
+      path: "/app/ong/*",
+      element: <LegacyOngRedirect />
+    },
     {
       path: "*",
       element: <Navigate to="/" replace />,

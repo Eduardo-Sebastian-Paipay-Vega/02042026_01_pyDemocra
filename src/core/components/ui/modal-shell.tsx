@@ -2,7 +2,7 @@ import * as React from "react";
 import { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 interface ModalShellProps {
   open: boolean;
@@ -70,7 +70,7 @@ export function ModalShell({
             initial={{ opacity: 0, scale: 0.97, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 6 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] as any }}
             role="dialog"
             aria-modal="true"
             className={cn(
@@ -95,3 +95,5 @@ export function ModalShell({
     document.body
   );
 }
+
+

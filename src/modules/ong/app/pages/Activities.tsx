@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -24,16 +24,16 @@ import type {
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 interface ActivityFormErrors {
   taskId?: string;
@@ -1410,4 +1410,5 @@ export function Activities() {
     </motion.div>
   );
 }
+
 

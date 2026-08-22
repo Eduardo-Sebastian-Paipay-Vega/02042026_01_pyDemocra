@@ -179,3 +179,4 @@ export function buildIdCardRenderSubject(options: {
     qrPayload: options.qrPayload?.trim() || buildIdCardQrPayload("[codigo]"),
   };
 }
+

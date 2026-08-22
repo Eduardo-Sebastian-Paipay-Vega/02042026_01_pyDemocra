@@ -43,7 +43,7 @@ function FieldItem({
   value: string | null | undefined;
   onComplete?: () => void;
 }) {
-  const isValueEmpty = !value || value.trim() === "" || value === "—";
+  const isValueEmpty = !value || value.trim() === "" || value === "â€”";
 
   return (
     <div
@@ -88,7 +88,7 @@ export function MyProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estado del Modal de Edición CRUD
+  // Estado del Modal de EdiciÃ³n CRUD
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -98,7 +98,7 @@ export function MyProfile() {
     genero: "Masculino",
   });
 
-  const [lastSignInStr, setLastSignInStr] = useState<string>("Sesión activa ahora");
+  const [lastSignInStr, setLastSignInStr] = useState<string>("SesiÃ³n activa ahora");
 
   const loadProfile = async () => {
     try {
@@ -168,7 +168,7 @@ export function MyProfile() {
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
           <p className="text-[13px]" style={{ color: "var(--t-text-dim)" }}>
-            Cargando información del perfil…
+            Cargando informaciÃ³n del perfilâ€¦
           </p>
         </div>
       )}
@@ -228,7 +228,7 @@ export function MyProfile() {
                     {/* Indicador de estado (online/activo) */}
                     <span
                       className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-zinc-900 shadow-md animate-pulse"
-                      title="Estado: En línea / Activo"
+                      title="Estado: En lÃ­nea / Activo"
                     />
                   </div>
 
@@ -238,12 +238,12 @@ export function MyProfile() {
                     </h2>
                     <p className="text-xs flex items-center gap-1.5 mt-0.5" style={{ color: "var(--t-text-dim)" }}>
                       <Mail className="h-3.5 w-3.5 text-zinc-400" />
-                      {email ?? "—"}
+                      {email ?? "â€”"}
                     </p>
                   </div>
                 </div>
 
-                {/* Botones de acción principal y secundario */}
+                {/* Botones de acciÃ³n principal y secundario */}
                 <div className="flex items-center gap-2.5 pt-2 sm:pt-0">
                   <GradientButton
                     size="sm"
@@ -256,7 +256,7 @@ export function MyProfile() {
                   <Link to="/app/ong/settings/security">
                     <OutlineButton size="sm" className="flex items-center gap-2">
                       <Settings className="h-3.5 w-3.5" />
-                      Configuración
+                      ConfiguraciÃ³n
                     </OutlineButton>
                   </Link>
                 </div>
@@ -264,9 +264,9 @@ export function MyProfile() {
             </div>
           </div>
 
-          {/* Grid Responsivo (2 columnas en pantallas grandes, 1 columna en móviles) */}
+          {/* Grid Responsivo (2 columnas en pantallas grandes, 1 columna en mÃ³viles) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-            {/* Card 1: Información Personal */}
+            {/* Card 1: InformaciÃ³n Personal */}
             <div
               className="rounded-2xl p-6 shadow-sm space-y-4"
               style={{
@@ -280,10 +280,10 @@ export function MyProfile() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold" style={{ color: "var(--t-text)" }}>
-                    Información Personal
+                    InformaciÃ³n Personal
                   </h3>
                   <p className="text-xs" style={{ color: "var(--t-text-dim)" }}>
-                    Datos básicos e identificación del titular
+                    Datos bÃ¡sicos e identificaciÃ³n del titular
                   </p>
                 </div>
               </div>
@@ -303,13 +303,13 @@ export function MyProfile() {
                 />
                 <FieldItem
                   icon={<CreditCard className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Número de Documento"
+                  label="NÃºmero de Documento"
                   value={profile?.numero_documento}
                   onComplete={() => setEditModalOpen(true)}
                 />
                 <FieldItem
                   icon={<UserCheck className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Género"
+                  label="GÃ©nero"
                   value={profile?.genero}
                   onComplete={() => setEditModalOpen(true)}
                 />
@@ -320,14 +320,14 @@ export function MyProfile() {
                 />
                 <FieldItem
                   icon={<Phone className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Teléfono"
+                  label="TelÃ©fono"
                   value={null}
                   onComplete={() => setEditModalOpen(true)}
                 />
               </div>
             </div>
 
-            {/* Card 2: Organización & Permisos */}
+            {/* Card 2: OrganizaciÃ³n & Permisos */}
             <div
               className="rounded-2xl p-6 shadow-sm space-y-4"
               style={{
@@ -341,10 +341,10 @@ export function MyProfile() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold" style={{ color: "var(--t-text)" }}>
-                    Organización & Permisos
+                    OrganizaciÃ³n & Permisos
                   </h3>
                   <p className="text-xs" style={{ color: "var(--t-text-dim)" }}>
-                    Filiación institucional y nivel de acceso
+                    FiliaciÃ³n institucional y nivel de acceso
                   </p>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export function MyProfile() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                 <FieldItem
                   icon={<Building2 className="h-3.5 w-3.5 text-emerald-400" />}
-                  label="Organización"
+                  label="OrganizaciÃ³n"
                   value={tenantNameLabel || "D & L OUTSOURCING INTEGRAL S.A.C."}
                 />
                 <FieldItem
@@ -391,7 +391,7 @@ export function MyProfile() {
                       Seguridad & Actividad Reciente
                     </h3>
                     <p className="text-xs" style={{ color: "var(--t-text-dim)" }}>
-                      Monitoreo de la sesión y protección de credenciales
+                      Monitoreo de la sesiÃ³n y protecciÃ³n de credenciales
                     </p>
                   </div>
                 </div>
@@ -403,17 +403,17 @@ export function MyProfile() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
                 <FieldItem
                   icon={<KeyRound className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Estado de Contraseña"
+                  label="Estado de ContraseÃ±a"
                   value="Protegida (Supabase Auth SHA-256)"
                 />
                 <FieldItem
                   icon={<Lock className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Autenticación 2FA"
+                  label="AutenticaciÃ³n 2FA"
                   value="Habilitado / Verificado"
                 />
                 <FieldItem
                   icon={<Clock className="h-3.5 w-3.5 text-indigo-400" />}
-                  label="Última Sesión"
+                  label="Ãšltima SesiÃ³n"
                   value={lastSignInStr}
                 />
               </div>
@@ -422,7 +422,7 @@ export function MyProfile() {
         </div>
       )}
 
-      {/* Modal Shell de Edición de Perfil (CRUD Supabase DB) */}
+      {/* Modal Shell de EdiciÃ³n de Perfil (CRUD Supabase DB) */}
       <ModalShell open={editModalOpen} onClose={() => setEditModalOpen(false)} width="max-w-[640px]">
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
           <h3 className="text-base font-semibold" style={{ color: "var(--t-text)" }}>
@@ -433,7 +433,7 @@ export function MyProfile() {
             className="rounded-lg p-1 text-xs text-zinc-400 hover:text-white"
             onClick={() => setEditModalOpen(false)}
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -446,7 +446,7 @@ export function MyProfile() {
               type="text"
               value={form.full_name}
               onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
-              placeholder="Ej. Juan Pérez"
+              placeholder="Ej. Juan PÃ©rez"
               className="h-10 w-full rounded-xl px-3.5 text-xs outline-none"
               style={{
                 border: "1px solid var(--t-border)",
@@ -472,7 +472,7 @@ export function MyProfile() {
                 }}
               >
                 <option value="DNI">DNI</option>
-                <option value="CE">Carnet de Extranjería (CE)</option>
+                <option value="CE">Carnet de ExtranjerÃ­a (CE)</option>
                 <option value="PASAPORTE">Pasaporte</option>
                 <option value="RUC">RUC</option>
               </select>
@@ -480,7 +480,7 @@ export function MyProfile() {
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
-                Número de Documento
+                NÃºmero de Documento
               </label>
               <input
                 type="text"
@@ -499,7 +499,7 @@ export function MyProfile() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium" style={{ color: "var(--t-text-dim)" }}>
-              Género
+              GÃ©nero
             </label>
             <select
               value={form.genero}
@@ -523,7 +523,7 @@ export function MyProfile() {
               Cancelar
             </OutlineButton>
             <GradientButton size="sm" onClick={handleSaveProfile} disabled={saving}>
-              {saving ? "Guardando en BD…" : "Guardar Cambios BD"}
+              {saving ? "Guardando en BDâ€¦" : "Guardar Cambios BD"}
             </GradientButton>
           </div>
         </div>
@@ -531,3 +531,4 @@ export function MyProfile() {
     </div>
   );
 }
+

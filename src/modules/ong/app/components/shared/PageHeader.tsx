@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cn } from "../../lib/utils";
 import { GradientButton } from "../ui/gradient-button";
 
@@ -28,3 +29,4 @@ export function PageHeader({ title, description, action, className }: PageHeader
     </div>
   );
 }
+

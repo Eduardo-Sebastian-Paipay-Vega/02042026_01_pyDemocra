@@ -684,3 +684,4 @@ export function AdmissionRequests() {
     </motion.div>
   );
 }
+

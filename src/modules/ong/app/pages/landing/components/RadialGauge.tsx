@@ -1,7 +1,7 @@
 /**
- * RadialGauge — segmented donut / radial ring with gradient fill.
+ * RadialGauge â€” segmented donut / radial ring with gradient fill.
  * Uses inline SVG arc segments. Gradient follows brand:
- * #3D6BFF → #2DBFB0 mapped to fill percentage.
+ * #3D6BFF â†’ #2DBFB0 mapped to fill percentage.
  */
 interface RadialGaugeProps {
   percentage: number;
@@ -103,3 +103,4 @@ export function RadialGauge({
     </div>
   );
 }
+

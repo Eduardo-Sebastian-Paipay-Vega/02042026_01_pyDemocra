@@ -581,3 +581,4 @@ export function getConstraintSearchValue(row: RoleAccessConstraintRow): string {
     `${row.roleName} ${row.sedeName} ${row.ipCidr} ${row.timeStart} ${row.timeEnd}`
   );
 }
+

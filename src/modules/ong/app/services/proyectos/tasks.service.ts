@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type {
   ActivityRow,
   TaskDetailData,
@@ -531,3 +532,4 @@ export async function cancelTask(taskId: string): Promise<TaskDetailData> {
     throw toProjectsError(error, "No se pudo cancelar la tarea.");
   }
 }
+

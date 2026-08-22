@@ -70,3 +70,4 @@ export function useTransaccionInventarioDetail(movementId: string | null) {
     refresh,
   };
 }
+

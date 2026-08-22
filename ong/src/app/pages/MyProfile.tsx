@@ -253,7 +253,7 @@ export function MyProfile() {
                     <Pencil className="h-3.5 w-3.5" />
                     Editar Perfil
                   </GradientButton>
-                  <Link to="/app/ong/settings/security">
+                  <Link to="/app/settings/security">
                     <OutlineButton size="sm" className="flex items-center gap-2">
                       <Settings className="h-3.5 w-3.5" />
                       Configuración

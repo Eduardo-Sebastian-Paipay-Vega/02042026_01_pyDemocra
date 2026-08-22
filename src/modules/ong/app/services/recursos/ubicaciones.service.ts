@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   InventoryLocationCreateInput,
   InventoryLocationDetailData,
   InventoryLocationRow,
@@ -245,3 +245,4 @@ export async function removeOrArchiveUbicacion(locationId: string): Promise<Inve
     throw toOperationError(error, "No se pudo inactivar la ubicacion.");
   }
 }
+

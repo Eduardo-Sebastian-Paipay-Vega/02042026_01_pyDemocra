@@ -97,25 +97,25 @@ const SECTION_META: Record<
     title: "Proyectos",
     description:
       "Administra los proyectos de la organización, sus presupuestos, asignaciones y estado general.",
-    path: "/app/ong/projects",
+    path: "/app/projects",
   },
   activities: {
     title: "Actividades",
     description:
       "Gestiona las actividades de cada proyecto: fechas, ubicación, horas estimadas y voluntarios asignados.",
-    path: "/app/ong/projects/activities",
+    path: "/app/projects/activities",
   },
   tasks: {
     title: "Tareas",
     description:
       "Organiza las tareas vinculadas a las actividades, con estado de avance y fecha límite.",
-    path: "/app/ong/projects/tasks",
+    path: "/app/projects/tasks",
   },
   assignments: {
     title: "Asignaciones",
     description:
       "Administra las asignaciones de voluntarios y recursos en proyectos y actividades.",
-    path: "/app/ong/projects/assignments",
+    path: "/app/projects/assignments",
   },
 };
 

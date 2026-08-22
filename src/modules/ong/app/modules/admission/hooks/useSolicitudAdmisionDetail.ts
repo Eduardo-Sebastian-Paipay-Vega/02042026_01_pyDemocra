@@ -70,3 +70,4 @@ export function useSolicitudAdmisionDetail(requestId: string | null) {
     refresh,
   };
 }
+

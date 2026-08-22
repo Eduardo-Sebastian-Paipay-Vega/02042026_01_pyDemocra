@@ -22,16 +22,16 @@ type MembershipRow = AppDatabase["public"]["Tables"]["memberships"]["Row"];
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 const INPUT_STYLE = {
   border: "1px solid var(--t-border)",
@@ -65,7 +65,7 @@ function buildLinkForm(): LinkFormState {
 const accessLinkColumns: Column<AccessLinkRow>[] = [
   {
     key: "code",
-    label: "Código",
+    label: "CÃ³digo",
     render: (row) => (
       <span style={{ fontFamily: "monospace", fontSize: 13 }}>{row.code}</span>
     ),
@@ -108,7 +108,7 @@ const accessLinkColumns: Column<AccessLinkRow>[] = [
     render: (row) =>
       row.expires_at
         ? new Date(row.expires_at).toLocaleDateString("es-PE")
-        : "—",
+        : "â€”",
   },
 ];
 
@@ -118,7 +118,7 @@ const membershipColumns: Column<MembershipRow>[] = [
     label: "Usuario",
     render: (row) => (
       <span style={{ fontFamily: "monospace", fontSize: 11 }}>
-        {row.user_id.slice(0, 8)}…
+        {row.user_id.slice(0, 8)}â€¦
       </span>
     ),
   },
@@ -142,7 +142,7 @@ const membershipColumns: Column<MembershipRow>[] = [
     key: "joined_at",
     label: "Vinculado",
     render: (row) =>
-      row.joined_at ? new Date(row.joined_at).toLocaleDateString("es-PE") : "—",
+      row.joined_at ? new Date(row.joined_at).toLocaleDateString("es-PE") : "â€”",
   },
 ];
 
@@ -207,7 +207,7 @@ export function AccessControl() {
   async function handleDeactivate(membership: MembershipRow) {
     try {
       await deactivateMembership(membership.id);
-      toast.success("Membresía desactivada.");
+      toast.success("MembresÃ­a desactivada.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo desactivar.");
     }
@@ -262,7 +262,7 @@ export function AccessControl() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Control de acceso (ACE)"
-          description="Gestiona links de acceso y membresías contextuales del tenant."
+          description="Gestiona links de acceso y membresÃ­as contextuales del tenant."
           action={
             activeTab === "links"
               ? { label: "Nuevo link", onClick: openCreate }
@@ -278,7 +278,7 @@ export function AccessControl() {
         </button>
         <button style={tabStyle("memberships")} onClick={() => setActiveTab("memberships")}>
           <Users size={14} />
-          Membresías
+          MembresÃ­as
         </button>
       </motion.div>
 
@@ -305,7 +305,7 @@ export function AccessControl() {
             data={memberships}
             actions={membershipActions}
             loading={membershipsLoading}
-            emptyMessage="No hay membresías registradas."
+            emptyMessage="No hay membresÃ­as registradas."
           />
         </motion.div>
       )}
@@ -359,7 +359,7 @@ export function AccessControl() {
 
           <div>
             <label style={{ fontSize: 12, color: "var(--t-text-muted)", display: "block", marginBottom: 4 }}>
-              Máx. usos
+              MÃ¡x. usos
             </label>
             <input
               type="number"
@@ -404,7 +404,7 @@ export function AccessControl() {
               Cancelar
             </OutlineButton>
             <GradientButton onClick={handleCreateLink} disabled={submitting}>
-              {submitting ? "Creando…" : "Crear link"}
+              {submitting ? "Creandoâ€¦" : "Crear link"}
             </GradientButton>
           </div>
         </div>
@@ -417,7 +417,7 @@ export function AccessControl() {
             <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--t-text)", marginBottom: 4 }}>
               Detalle del link
             </h2>
-            <SettingsDetailField label="Código" value={selectedLink.code} />
+            <SettingsDetailField label="CÃ³digo" value={selectedLink.code} />
             <SettingsDetailField label="Tipo" value={selectedLink.type} />
             <SettingsDetailField label="Contexto" value={selectedLink.target_type} />
             <SettingsDetailField
@@ -447,3 +447,4 @@ export function AccessControl() {
     </motion.div>
   );
 }
+

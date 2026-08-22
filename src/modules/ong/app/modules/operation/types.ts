@@ -497,3 +497,4 @@ export interface ApprovalResolveInput {
   reviewerRole?: string | null;
   comment?: string;
 }
+

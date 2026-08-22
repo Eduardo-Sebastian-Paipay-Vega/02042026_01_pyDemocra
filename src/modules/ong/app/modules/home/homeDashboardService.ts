@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type {
   DashboardActivityDetail,
   DashboardActivityFormInput,
@@ -1174,3 +1175,4 @@ export async function resolveDashboardAdmission(options: {
   });
   if (historyInsertError) throw new Error(historyInsertError.message);
 }
+

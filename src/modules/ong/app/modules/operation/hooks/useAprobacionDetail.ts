@@ -70,3 +70,4 @@ export function useAprobacionDetail(approvalId: string | null) {
     refresh,
   };
 }
+

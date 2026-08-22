@@ -546,7 +546,7 @@ export function Finance() {
           <div className="rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Transaccion</p>
             <p className="mt-1 text-[13px]" style={{ color: "var(--t-text)" }}>{approvalResolutionTarget?.accountName ?? "-"} / {approvalResolutionTarget?.categoryName ?? "-"}</p>
-            <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{approvalResolutionTarget?.date ?? "-"} · {approvalResolutionTarget ? formatMoney(approvalResolutionTarget.amount) : "-"}</p>
+            <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{approvalResolutionTarget?.date ?? "-"} Â· {approvalResolutionTarget ? formatMoney(approvalResolutionTarget.amount) : "-"}</p>
           </div>
           <div className="rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Accion</p>
@@ -600,3 +600,4 @@ export function Finance() {
     </motion.div>
   );
 }
+

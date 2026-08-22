@@ -24,13 +24,13 @@ export function LoginGateway() {
     });
 
     if (authError || !data.session) {
-      setError(authError?.message ?? "No se pudo iniciar sesión. Verifica tus credenciales.");
+      setError(authError?.message ?? "No se pudo iniciar sesiÃ³n. Verifica tus credenciales.");
       setLoading(false);
       return;
     }
 
-    // public.tenants tiene RLS sin políticas (deny-all), así que industry_type_id
-    // no es legible directamente. fn_get_user_redirect_target() (migración
+    // public.tenants tiene RLS sin polÃ­ticas (deny-all), asÃ­ que industry_type_id
+    // no es legible directamente. fn_get_user_redirect_target() (migraciÃ³n
     // 20260706120000) resuelve esto del lado del servidor con SECURITY DEFINER
     // y devuelve solo el destino ('ong' | 'gym' | 'root'), sin exponer la tabla.
     const { data: redirectTarget, error: redirectError } = await supabase.rpc(
@@ -38,26 +38,26 @@ export function LoginGateway() {
     );
 
     if (redirectError) {
-      setError("Sesión iniciada, pero no se pudo determinar tu destino. Intenta de nuevo.");
+      setError("SesiÃ³n iniciada, pero no se pudo determinar tu destino. Intenta de nuevo.");
       setLoading(false);
       return;
     }
 
-    // Uso estricto del resultado: solo 'ong' tiene un módulo real montado en
+    // Uso estricto del resultado: solo 'ong' tiene un mÃ³dulo real montado en
     // este MPA. Cualquier otro valor ('root', 'gym', o uno futuro) se trata
-    // como "sin acceso todavía" — nunca se asume una ruta que no existe.
+    // como "sin acceso todavÃ­a" â€” nunca se asume una ruta que no existe.
     if (redirectTarget === "ong") {
-      // Same-origin MPA: la sesión ya quedó en localStorage bajo AUTH_STORAGE_KEY
-      // (compartido con el cliente Supabase de ONG). Una navegación normal basta
-      // para que /ong la recoja al montar — sin tokens en la URL.
+      // Same-origin MPA: la sesiÃ³n ya quedÃ³ en localStorage bajo AUTH_STORAGE_KEY
+      // (compartido con el cliente Supabase de ONG). Una navegaciÃ³n normal basta
+      // para que /ong la recoja al montar â€” sin tokens en la URL.
       window.location.assign("/ong/");
       return;
     }
 
     setError(
       redirectTarget === "root"
-        ? "Tu cuenta aún no está asociada a ninguna organización."
-        : `Tu cuenta pertenece a un módulo ("${redirectTarget}") que todavía no está disponible en esta plataforma.`
+        ? "Tu cuenta aÃºn no estÃ¡ asociada a ninguna organizaciÃ³n."
+        : `Tu cuenta pertenece a un mÃ³dulo ("${redirectTarget}") que todavÃ­a no estÃ¡ disponible en esta plataforma.`
     );
     setLoading(false);
   }
@@ -93,7 +93,7 @@ export function LoginGateway() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block space-y-1.5">
             <span className="text-[12px] font-medium" style={{ color: "#a0a0a0" }}>
-              Correo electrónico
+              Correo electrÃ³nico
             </span>
             <input
               type="email"
@@ -114,7 +114,7 @@ export function LoginGateway() {
 
           <label className="block space-y-1.5">
             <span className="text-[12px] font-medium" style={{ color: "#a0a0a0" }}>
-              Contraseña
+              ContraseÃ±a
             </span>
             <div className="relative">
               <input
@@ -122,7 +122,7 @@ export function LoginGateway() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 autoComplete="current-password"
                 className="h-11 w-full rounded-2xl px-3 pr-10 text-[13px] outline-none transition-colors placeholder:text-[#404040] disabled:opacity-60"
                 style={{
@@ -183,12 +183,12 @@ export function LoginGateway() {
             )}
           </button>
 
-          {/* REQ-002 (dds/MEJORAS/09072026/REQ002.md): botón auxiliar de
-              asistencia solicitado por el usuario. type="button" explícito
+          {/* REQ-002 (dds/MEJORAS/09072026/REQ002.md): botÃ³n auxiliar de
+              asistencia solicitado por el usuario. type="button" explÃ­cito
               para no interferir con el submit del formulario; reutiliza el
               canal de WhatsApp ya usado en el sitio (ver
-              src/pages/landing/ContactModal.tsx) vía window.open en vez de
-              anidarlo en un <a>, que sería HTML inválido dentro de un botón. */}
+              src/pages/landing/ContactModal.tsx) vÃ­a window.open en vez de
+              anidarlo en un <a>, que serÃ­a HTML invÃ¡lido dentro de un botÃ³n. */}
           <button
             type="button"
             onClick={() =>
@@ -205,17 +205,18 @@ export function LoginGateway() {
               color: "#c0c0c0",
             }}
           >
-            ¿Necesitas ayuda para ingresar?
+            Â¿Necesitas ayuda para ingresar?
           </button>
         </form>
 
         <p className="mt-6 text-center text-[11px]" style={{ color: "#707070" }}>
-          ¿Nuevo en la plataforma?{" "}
+          Â¿Nuevo en la plataforma?{" "}
           <a href="/" style={{ color: "#3b82f6" }}>
-            Ir a la página principal
+            Ir a la pÃ¡gina principal
           </a>
         </p>
       </div>
     </div>
   );
 }
+

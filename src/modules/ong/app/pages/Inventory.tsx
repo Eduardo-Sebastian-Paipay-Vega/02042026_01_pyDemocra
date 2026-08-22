@@ -437,3 +437,4 @@ export function Inventory() {
     </motion.div>
   );
 }
+

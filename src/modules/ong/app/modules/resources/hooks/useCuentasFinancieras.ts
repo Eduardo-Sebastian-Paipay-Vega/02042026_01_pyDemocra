@@ -155,3 +155,4 @@ export function useCuentasFinancieras(filters: FinancialAccountsFilters) {
     refresh,
   };
 }
+

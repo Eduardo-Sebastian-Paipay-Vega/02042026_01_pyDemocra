@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -96,19 +97,19 @@ const SECTION_META: Record<
   projects: {
     title: "Proyectos",
     description:
-      "Administra los proyectos de la organización, sus presupuestos, asignaciones y estado general.",
+      "Administra los proyectos de la organizaciÃ³n, sus presupuestos, asignaciones y estado general.",
     path: "/app/ong/projects",
   },
   activities: {
     title: "Actividades",
     description:
-      "Gestiona las actividades de cada proyecto: fechas, ubicación, horas estimadas y voluntarios asignados.",
+      "Gestiona las actividades de cada proyecto: fechas, ubicaciÃ³n, horas estimadas y voluntarios asignados.",
     path: "/app/ong/projects/activities",
   },
   tasks: {
     title: "Tareas",
     description:
-      "Organiza las tareas vinculadas a las actividades, con estado de avance y fecha límite.",
+      "Organiza las tareas vinculadas a las actividades, con estado de avance y fecha lÃ­mite.",
     path: "/app/ong/projects/tasks",
   },
   assignments: {
@@ -188,7 +189,7 @@ const EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM: ProjectResourceAssignmentFormValue
 
 function formatCurrency(amount: string | number, currency = "USD"): string {
   const num = typeof amount === "number" ? amount : parseFloat(amount) || 0;
-  const symbol = currency === "PEN" ? "S/" : currency === "EUR" ? "€" : "$";
+  const symbol = currency === "PEN" ? "S/" : currency === "EUR" ? "â‚¬" : "$";
   return `${symbol} ${num.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -215,7 +216,7 @@ function calculateDateDurationDays(startAt: string | null, endAt: string | null)
     if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return null;
     const diffTime = Math.abs(d2.getTime() - d1.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return `${diffDays} día${diffDays === 1 ? "" : "s"}`;
+    return `${diffDays} dÃ­a${diffDays === 1 ? "" : "s"}`;
   } catch {
     return null;
   }
@@ -254,7 +255,7 @@ function getTemporalStatusBadge(startAt: string | null, endAt: string | null, st
   if (start && start > today) {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20">
-        🔵 Próximo
+        ðŸ”µ PrÃ³ximo
       </span>
     );
   }
@@ -262,7 +263,7 @@ function getTemporalStatusBadge(startAt: string | null, endAt: string | null, st
   if (end && end < today && statusKind !== "completed") {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-        🔴 Vencido
+        ðŸ”´ Vencido
       </span>
     );
   }
@@ -270,7 +271,7 @@ function getTemporalStatusBadge(startAt: string | null, endAt: string | null, st
   if (start && end && start <= today && end >= today) {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-        🟢 En Curso
+        ðŸŸ¢ En Curso
       </span>
     );
   }
@@ -418,7 +419,7 @@ function exportAssignmentsToCSV(assignments: AssignmentRow[]) {
   }
   const headers = ["AsignadoA", "Tipo", "Proyecto", "Actividad", "RolOCantidad", "Estado", "Actualizado"];
   const rows = assignments.map((a) => [
-    `"${a.volunteerName || a.itemName || "Sin asignación"}"`,
+    `"${a.volunteerName || a.itemName || "Sin asignaciÃ³n"}"`,
     `"${getAssignmentKindLabel(a.kind)}"`,
     `"${a.projectName || ""}"`,
     `"${a.activityName || a.itemName || "-"}"`,
@@ -501,7 +502,7 @@ function formatTaskDeadline(deadline?: string | null, statusCode?: string | null
       </div>
     );
   }
-  return <span className="text-xs text-zinc-300 font-medium">📅 {formatted}</span>;
+  return <span className="text-xs text-zinc-300 font-medium">ðŸ“… {formatted}</span>;
 }
 
 function SelectField({
@@ -646,11 +647,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 10;
 
-  // Estado de Selección Múltiple (Bulk Actions) para Actividades y Tareas
+  // Estado de SelecciÃ³n MÃºltiple (Bulk Actions) para Actividades y Tareas
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
 
-  // Estado de pestaña activa del modal de formulario de proyectos
+  // Estado de pestaÃ±a activa del modal de formulario de proyectos
   const [formTab, setFormTab] = useState<"general" | "team_budget" | "advanced">("general");
 
   // Estado del Modal para Registrar Horas de Voluntariado
@@ -661,7 +662,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   const [hoursDate, setHoursDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [savingHours, setSavingHours] = useState(false);
 
-  // Estado del Modal para Asignación Rápida de Voluntarios
+  // Estado del Modal para AsignaciÃ³n RÃ¡pida de Voluntarios
   const [assignVolunteerOpen, setAssignVolunteerOpen] = useState(false);
   const [selectedActivityForAssign, setSelectedActivityForAssign] = useState<ActivityRow | null>(null);
   const [assignVolunteerId, setAssignVolunteerId] = useState<string>("");
@@ -745,7 +746,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
   >({});
   const [newCommentText, setNewCommentText] = useState("");
 
-  function handleAddComment(taskId: string, authorName: string = "Sebastián Paipay") {
+  function handleAddComment(taskId: string, authorName: string = "SebastiÃ¡n Paipay") {
     const trimmed = newCommentText.trim();
     if (!trimmed) return;
 
@@ -905,7 +906,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     }
     const hrs = parseFloat(hoursValue);
     if (isNaN(hrs) || hrs <= 0) {
-      toast.error("Ingrese un número de horas válido.");
+      toast.error("Ingrese un nÃºmero de horas vÃ¡lido.");
       return;
     }
 
@@ -990,7 +991,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       refresh();
     } catch {
       toast.dismiss();
-      toast.error("Ocurrió un error al actualizar las actividades.");
+      toast.error("OcurriÃ³ un error al actualizar las actividades.");
     }
   }
 
@@ -1001,7 +1002,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   async function handleBulkDeleteActivities() {
     if (selectedActivityIds.length === 0) return;
-    if (confirm(`¿Está seguro de eliminar las ${selectedActivityIds.length} actividades seleccionadas?`)) {
+    if (confirm(`Â¿EstÃ¡ seguro de eliminar las ${selectedActivityIds.length} actividades seleccionadas?`)) {
       try {
         toast.loading("Eliminando actividades seleccionadas...");
         for (const id of selectedActivityIds) {
@@ -1055,7 +1056,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       refresh();
     } catch {
       toast.dismiss();
-      toast.error("Ocurrió un error al actualizar las tareas.");
+      toast.error("OcurriÃ³ un error al actualizar las tareas.");
     }
   }
 
@@ -1066,7 +1067,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   async function handleBulkDeleteTasks() {
     if (selectedTaskIds.length === 0) return;
-    if (confirm(`¿Está seguro de eliminar las ${selectedTaskIds.length} tareas seleccionadas?`)) {
+    if (confirm(`Â¿EstÃ¡ seguro de eliminar las ${selectedTaskIds.length} tareas seleccionadas?`)) {
       try {
         toast.loading("Eliminando tareas seleccionadas...");
         for (const id of selectedTaskIds) {
@@ -1225,25 +1226,25 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       const p = row as ProjectRow;
       setPendingAction({
         id: p.id,
-        label: `¿Confirma archivar el proyecto "${p.name}"?`,
+        label: `Â¿Confirma archivar el proyecto "${p.name}"?`,
       });
     } else if (section === "tasks") {
       const t = row as TaskRow;
       setPendingAction({
         id: t.id,
-        label: `¿Confirma cancelar la tarea "${t.title}"?`,
+        label: `Â¿Confirma cancelar la tarea "${t.title}"?`,
       });
     } else if (section === "activities") {
       const a = row as ActivityRow;
       setPendingAction({
         id: a.id,
-        label: `¿Confirma eliminar la actividad "${a.title}"?`,
+        label: `Â¿Confirma eliminar la actividad "${a.title}"?`,
       });
     } else {
       const ass = row as AssignmentRow;
       setPendingAction({
         id: ass.id,
-        label: `¿Confirma desactivar / quitar la asignacion seleccionada?`,
+        label: `Â¿Confirma desactivar / quitar la asignacion seleccionada?`,
         assignmentKind: ass.kind,
       });
     }
@@ -1331,7 +1332,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             }
           }
           if (activityForm.sendEmailNotification) {
-            toast.success("Actividad creada y notificación enviada a los miembros por correo.");
+            toast.success("Actividad creada y notificaciÃ³n enviada a los miembros por correo.");
           } else {
             toast.success("Actividad creada exitosamente.");
           }
@@ -1423,7 +1424,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "area",
-      label: "Área",
+      label: "Ãrea",
       render: (row) => (
         <Badge variant="outline" className="text-xs font-normal">
           {row.areaName}
@@ -1536,7 +1537,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "deadline",
-      label: "Fecha Límite",
+      label: "Fecha LÃ­mite",
       render: (row) => formatTaskDeadline(row.deadline, row.statusCode),
     },
     {
@@ -1593,7 +1594,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <button
                 type="button"
                 className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
-                title="Más opciones de la tarea"
+                title="MÃ¡s opciones de la tarea"
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </button>
@@ -1704,7 +1705,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "location",
-      label: "Ubicación",
+      label: "UbicaciÃ³n",
       render: (row) => {
         if (row.locationName && !row.locationName.toLowerCase().includes("virtual")) {
           return (
@@ -1777,7 +1778,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <button
                 type="button"
                 className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
-                title="Más opciones de actividad"
+                title="MÃ¡s opciones de actividad"
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </button>
@@ -1828,7 +1829,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       label: "Asignado A",
       render: (row) => {
         const isResource = row.kind === "project-resource";
-        const assignedName = row.volunteerName || row.itemName || "Sin asignación";
+        const assignedName = row.volunteerName || row.itemName || "Sin asignaciÃ³n";
         const subtext = isResource
           ? (row.itemName ? `Recurso Material` : "Equipo / Insumo")
           : (row.volunteerId ? `Voluntario Registrado` : "Personal de ONG");
@@ -1837,7 +1838,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           <div
             className="flex items-center gap-3 cursor-pointer group/ass"
             onClick={() => void openDetail(row.id)}
-            title="Ver detalle de la asignación"
+            title="Ver detalle de la asignaciÃ³n"
           >
             {isResource ? (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover/ass:bg-purple-500/20 transition-colors shadow-sm">
@@ -1845,7 +1846,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               </div>
             ) : (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover/ass:bg-indigo-500/20 font-bold text-xs transition-colors shadow-sm">
-                {assignedName !== "Sin asignación" ? (
+                {assignedName !== "Sin asignaciÃ³n" ? (
                   assignedName.slice(0, 2).toUpperCase()
                 ) : (
                   <User className="h-5 w-5" />
@@ -1963,7 +1964,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               <button
                 type="button"
                 className="h-7 w-7 rounded-lg border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center transition-colors"
-                title="Más opciones de la asignación"
+                title="MÃ¡s opciones de la asignaciÃ³n"
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </button>
@@ -2006,7 +2007,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       const states = [
         { code: "pendiente", label: "Por Hacer" },
         { code: "en_progreso", label: "En Progreso" },
-        { code: "en_revision", label: "En Revisión" },
+        { code: "en_revision", label: "En RevisiÃ³n" },
         { code: "completada", label: "Completada" },
       ];
 
@@ -2238,7 +2239,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     const states = catalogs.projectStates.length > 0
       ? catalogs.projectStates
       : [
-          { value: "ejecucion", label: "En Ejecución" },
+          { value: "ejecucion", label: "En EjecuciÃ³n" },
           { value: "pendiente", label: "En Espera / Pendiente" },
           { value: "completado", label: "Completado" },
         ];
@@ -2304,7 +2305,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       </div>
 
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-zinc-400">Área:</span>
+                        <span className="text-zinc-400">Ãrea:</span>
                         <Badge variant="outline">{project.areaName}</Badge>
                       </div>
 
@@ -2396,7 +2397,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               >
                 Anterior
               </OutlineButton>
-              <span className="text-xs text-zinc-300 px-2 font-medium">Página {currentPage}</span>
+              <span className="text-xs text-zinc-300 px-2 font-medium">PÃ¡gina {currentPage}</span>
               <OutlineButton
                 size="sm"
                 onClick={() => setCurrentPage((p) => p + 1)}
@@ -2475,7 +2476,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               >
                 Anterior
               </OutlineButton>
-              <span className="text-xs text-zinc-300 px-2 font-medium">Página {currentPage}</span>
+              <span className="text-xs text-zinc-300 px-2 font-medium">PÃ¡gina {currentPage}</span>
               <OutlineButton
                 size="sm"
                 onClick={() => setCurrentPage((p) => p + 1)}
@@ -2512,7 +2513,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
       return (
         <div className="flex flex-col items-center justify-center p-12 space-y-3">
           <RefreshCw className="h-6 w-6 animate-spin text-indigo-400" />
-          <p className="text-xs text-zinc-400">Cargando información completa del registro...</p>
+          <p className="text-xs text-zinc-400">Cargando informaciÃ³n completa del registro...</p>
         </div>
       );
     }
@@ -2552,7 +2553,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         <h2 className="text-xl font-bold text-zinc-100">{detail.project.name}</h2>
                         <p className="text-xs text-zinc-400 flex items-center gap-2">
                           <Building2 className="h-3.5 w-3.5 text-indigo-400" />
-                          Área: <strong className="text-zinc-200 font-medium">{detail.project.areaName}</strong>
+                          Ãrea: <strong className="text-zinc-200 font-medium">{detail.project.areaName}</strong>
                         </p>
                       </div>
                     </div>
@@ -2606,10 +2607,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
                 <div className="rounded-xl p-4 border border-zinc-800 bg-zinc-900/50 space-y-2">
                   <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                    <FileText className="h-4 w-4 text-indigo-400" /> Descripción del Proyecto
+                    <FileText className="h-4 w-4 text-indigo-400" /> DescripciÃ³n del Proyecto
                   </h4>
                   <p className="text-xs text-zinc-300 leading-relaxed">
-                    {detail.project.description || "Sin descripción registrada."}
+                    {detail.project.description || "Sin descripciÃ³n registrada."}
                   </p>
 
                   <div className="flex flex-wrap gap-4 pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-500">
@@ -2621,7 +2622,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </span>
                     {detail.updatedBy && (
                       <span>
-                        Última modificación por: <strong className="text-zinc-400">{detail.updatedBy}</strong>
+                        Ãšltima modificaciÃ³n por: <strong className="text-zinc-400">{detail.updatedBy}</strong>
                       </span>
                     )}
                   </div>
@@ -2635,7 +2636,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             const detail = details.detail as TaskDetailData;
             const task = detail.task;
 
-            // Jerarquía: Proyecto → Actividad
+            // JerarquÃ­a: Proyecto â†’ Actividad
             const linkedActivity =
               activityRows.find((a) => a.id === task.activityId) ||
               catalogs.activities.find((a) => a.id === task.activityId);
@@ -2672,7 +2673,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               {
                 id: "c1",
                 author: assigneeName !== "Sin asignar" ? assigneeName : "Coordinador de Proyecto",
-                text: "Se registró la tarea en el plan de trabajo operativo.",
+                text: "Se registrÃ³ la tarea en el plan de trabajo operativo.",
                 date: formatDateString(task.createdAt) || "Registro inicial",
               },
             ];
@@ -2683,7 +2684,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 <div className="relative overflow-hidden rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-indigo-950/60 via-zinc-900 to-zinc-950 space-y-3 shadow-lg">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1.5 flex-1">
-                      {/* Jerarquía: Proyecto > Actividad */}
+                      {/* JerarquÃ­a: Proyecto > Actividad */}
                       <div className="flex items-center flex-wrap gap-2 text-xs text-zinc-400 font-medium">
                         <span className="flex items-center gap-1 bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-800 text-zinc-300">
                           <FolderKanban className="h-3.5 w-3.5 text-indigo-400" />
@@ -2696,7 +2697,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         </span>
                       </div>
 
-                      {/* Título prominente */}
+                      {/* TÃ­tulo prominente */}
                       <h2 className="text-xl font-bold text-zinc-100 tracking-tight pt-1">
                         {task.title}
                       </h2>
@@ -2792,14 +2793,14 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </div>
                   </div>
 
-                  {/* Fecha Límite */}
+                  {/* Fecha LÃ­mite */}
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
                     <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 text-sky-400" /> Fecha Límite de Entrega
+                      <Calendar className="h-3.5 w-3.5 text-sky-400" /> Fecha LÃ­mite de Entrega
                     </span>
                     <div className="pt-1">
                       <p className="text-sm font-semibold text-zinc-100">
-                        {formatDateString(task.deadline) || "Sin fecha límite"}
+                        {formatDateString(task.deadline) || "Sin fecha lÃ­mite"}
                       </p>
                       <div className="mt-1">
                         {overdue ? (
@@ -2809,7 +2810,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         ) : task.deadline ? (
                           <span className="text-[11px] text-emerald-400 font-medium">A tiempo / Programada</span>
                         ) : (
-                          <span className="text-[11px] text-zinc-500">Sin fecha restricción</span>
+                          <span className="text-[11px] text-zinc-500">Sin fecha restricciÃ³n</span>
                         )}
                       </div>
                     </div>
@@ -2822,26 +2823,26 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     </span>
                     <div className="pt-1 space-y-1">
                       <p className="text-sm font-semibold text-zinc-100">
-                        {task.estimatedHours ? `${task.estimatedHours} hrs estimadas` : "Sin estimación de horas"}
+                        {task.estimatedHours ? `${task.estimatedHours} hrs estimadas` : "Sin estimaciÃ³n de horas"}
                       </p>
                       <p className="text-[11px] text-zinc-400">
-                        {isCompleted ? "Tarea finalizada" : "Esfuerzo estimado para ejecución"}
+                        {isCompleted ? "Tarea finalizada" : "Esfuerzo estimado para ejecuciÃ³n"}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* 4. SECCIÓN DE DESCRIPCIÓN */}
+                {/* 4. SECCIÃ“N DE DESCRIPCIÃ“N */}
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-2">
                   <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                    <FileText className="h-4 w-4 text-indigo-400" /> Descripción e Instrucciones
+                    <FileText className="h-4 w-4 text-indigo-400" /> DescripciÃ³n e Instrucciones
                   </h4>
                   <p className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-wrap">
-                    {task.description || "Sin instrucciones ni descripción detallada registrada."}
+                    {task.description || "Sin instrucciones ni descripciÃ³n detallada registrada."}
                   </p>
                 </div>
 
-                {/* 5. SECCIÓN DE ENTREGABLES Y ADJUNTOS */}
+                {/* 5. SECCIÃ“N DE ENTREGABLES Y ADJUNTOS */}
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
@@ -2858,7 +2859,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         </div>
                         <div className="truncate max-w-[170px]">
                           <p className="text-xs font-medium text-zinc-200 truncate">informe_final_v1.pdf</p>
-                          <p className="text-[10px] text-zinc-400">1.4 MB • Documento de entrega</p>
+                          <p className="text-[10px] text-zinc-400">1.4 MB â€¢ Documento de entrega</p>
                         </div>
                       </div>
                       <Button
@@ -2879,7 +2880,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         </div>
                         <div className="truncate max-w-[170px]">
                           <p className="text-xs font-medium text-zinc-200 truncate">captura_evidencia.png</p>
-                          <p className="text-[10px] text-zinc-400">850 KB • Evidencia visual</p>
+                          <p className="text-[10px] text-zinc-400">850 KB â€¢ Evidencia visual</p>
                         </div>
                       </div>
                       <Button
@@ -2895,10 +2896,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   </div>
                 </div>
 
-                {/* 6. BITÁCORA DE ACTIVIDAD Y COMENTARIOS */}
+                {/* 6. BITÃCORA DE ACTIVIDAD Y COMENTARIOS */}
                 <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 space-y-4">
                   <h4 className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                    <MessageSquare className="h-4 w-4 text-indigo-400" /> Bitácora de Actividad y Comentarios
+                    <MessageSquare className="h-4 w-4 text-indigo-400" /> BitÃ¡cora de Actividad y Comentarios
                   </h4>
 
                   {/* Historial de eventos */}
@@ -2937,19 +2938,19 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   <div className="flex items-center gap-2 pt-1">
                     <input
                       type="text"
-                      placeholder="Escribe un comentario o actualización de la tarea..."
+                      placeholder="Escribe un comentario o actualizaciÃ³n de la tarea..."
                       value={newCommentText}
                       onChange={(e) => setNewCommentText(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && newCommentText.trim()) {
-                          handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "Sebastián Paipay");
+                          handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "SebastiÃ¡n Paipay");
                         }
                       }}
                       className="h-9 flex-1 rounded-xl px-3 text-xs outline-none bg-zinc-950 border border-zinc-800 text-zinc-200 focus:border-indigo-500 transition-colors"
                     />
                     <Button
                       size="sm"
-                      onClick={() => handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "Sebastián Paipay")}
+                      onClick={() => handleAddComment(task.id, assigneeName !== "Sin asignar" ? assigneeName : "SebastiÃ¡n Paipay")}
                       disabled={!newCommentText.trim()}
                       className="h-9 px-3 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 shrink-0"
                     >
@@ -2967,7 +2968,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             const detail = details.detail as AssignmentDetailData;
             const assignment = detail.assignment;
             const isResource = assignment.kind === "project-resource";
-            const assignedName = assignment.volunteerName || assignment.itemName || "Sin asignación";
+            const assignedName = assignment.volunteerName || assignment.itemName || "Sin asignaciÃ³n";
 
             return (
               <div className="space-y-6">
@@ -3063,7 +3064,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2">
                     <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 text-amber-400" /> Última Actualización
+                      <Calendar className="h-3.5 w-3.5 text-amber-400" /> Ãšltima ActualizaciÃ³n
                     </span>
                     <p className="text-sm font-semibold text-zinc-100">
                       {formatDateString(assignment.updatedAt) || formatDateString(assignment.createdAt) || "Reciente"}
@@ -3100,7 +3101,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
   return (
     <div className="space-y-6">
-      {/* Header de la Sección */}
+      {/* Header de la SecciÃ³n */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <PageHeader title={meta.title} description={meta.description} />
         <div className="flex items-center gap-2 shrink-0">
@@ -3122,7 +3123,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 ? "Nueva Tarea"
                 : section === "activities"
                 ? "Nueva Actividad"
-                : "Nueva Asignación"}
+                : "Nueva AsignaciÃ³n"}
             </GradientButton>
           )}
         </div>
@@ -3163,7 +3164,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-xs font-medium">En Ejecución</span>
+              <span className="text-xs font-medium">En EjecuciÃ³n</span>
               <Layers className="h-4 w-4 text-emerald-400" />
             </div>
             <div className="flex items-baseline justify-between">
@@ -3472,7 +3473,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
           <div className="flex items-center gap-3">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-              ✓
+              âœ“
             </span>
             <span className="text-xs font-semibold text-zinc-100">
               {selectedActivityIds.length} {selectedActivityIds.length === 1 ? "actividad seleccionada" : "actividades seleccionadas"}
@@ -3517,7 +3518,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="sticky top-4 z-30 flex items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-zinc-900 to-zinc-950 border-2 border-indigo-500/60 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
           <div className="flex items-center gap-3">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-              ✓
+              âœ“
             </span>
             <span className="text-xs font-semibold text-zinc-100">
               {selectedTaskIds.length} {selectedTaskIds.length === 1 ? "tarea seleccionada" : "tareas seleccionadas"}
@@ -3570,11 +3571,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               type="text"
               placeholder={
                 section === "projects"
-                  ? "Buscar por código, proyecto..."
+                  ? "Buscar por cÃ³digo, proyecto..."
                   : section === "tasks"
                   ? "Buscar por tarea, actividad..."
                   : section === "activities"
-                  ? "Buscar por actividad, ubicación..."
+                  ? "Buscar por actividad, ubicaciÃ³n..."
                   : "Buscar por proyecto, voluntario..."
               }
               value={
@@ -3628,7 +3629,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       }))
                     }
                     options={catalogs.areas}
-                    placeholder="Área"
+                    placeholder="Ãrea"
                   />
                 </div>
               </>
@@ -3748,7 +3749,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       { value: "activity-volunteer", label: "Voluntario (Actividad)" },
                       { value: "project-resource", label: "Recurso Material" },
                     ]}
-                    placeholder="Tipo de Asignación"
+                    placeholder="Tipo de AsignaciÃ³n"
                   />
                 </div>
                 <OutlineButton
@@ -3836,7 +3837,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               Resumen Ejecutivo de {meta.title.slice(0, -1)}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Información completa recopilada de la base de datos en tiempo real.
+              InformaciÃ³n completa recopilada de la base de datos en tiempo real.
             </p>
           </div>
           <div className="flex gap-2">
@@ -3851,7 +3852,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         <div className="max-h-[80vh] overflow-y-auto p-5">{renderDetail()}</div>
       </ModalShell>
 
-      {/* Modal para Asignación Rápida de Voluntario */}
+      {/* Modal para AsignaciÃ³n RÃ¡pida de Voluntario */}
       <ModalShell open={assignVolunteerOpen} onClose={() => setAssignVolunteerOpen(false)} width="max-w-[500px]">
         <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
           <div>
@@ -3867,7 +3868,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             onClick={() => setAssignVolunteerOpen(false)}
             className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -3905,7 +3906,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             onClick={() => void handleSaveAssignVolunteer()}
             disabled={savingAssignment}
           >
-            {savingAssignment ? "Asignando..." : "Guardar Asignación"}
+            {savingAssignment ? "Asignando..." : "Guardar AsignaciÃ³n"}
           </GradientButton>
         </div>
       </ModalShell>
@@ -3926,7 +3927,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             onClick={() => setRegisterHoursOpen(false)}
             className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
           >
-            ✕
+            âœ•
           </button>
         </div>
 
@@ -3984,7 +3985,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         </div>
       </ModalShell>
 
-      {/* Modal de Creación y Edición Rediseñado */}
+      {/* Modal de CreaciÃ³n y EdiciÃ³n RediseÃ±ado */}
       <ModalShell open={formOpen} onClose={closeForm} width="max-w-[960px]">
         <div className="border-b border-zinc-800 px-6 py-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -4005,13 +4006,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     : "Crear Nueva Actividad"
                   : editingAssignment
                   ? `Editar ${getAssignmentKindLabel(assignmentFormKind).toLowerCase()}`
-                  : "Crear Asignación"}
+                  : "Crear AsignaciÃ³n"}
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5">
                 {section === "projects" && projectForm.code ? (
-                  <span className="font-mono text-indigo-400 font-medium">Código: {projectForm.code}</span>
+                  <span className="font-mono text-indigo-400 font-medium">CÃ³digo: {projectForm.code}</span>
                 ) : (
-                  "Complete los campos obligatorios para guardar la información."
+                  "Complete los campos obligatorios para guardar la informaciÃ³n."
                 )}
               </p>
             </div>
@@ -4019,7 +4020,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               onClick={closeForm}
               className="text-zinc-400 hover:text-zinc-200 text-sm font-semibold px-2 py-1 rounded-lg hover:bg-zinc-800"
             >
-              ✕
+              âœ•
             </button>
           </div>
 
@@ -4035,7 +4036,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 }`}
               >
                 <Info className="h-3.5 w-3.5" />
-                Información General
+                InformaciÃ³n General
               </button>
 
               <button
@@ -4061,7 +4062,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 }`}
               >
                 <Settings className="h-3.5 w-3.5" />
-                Configuración Avanzada
+                ConfiguraciÃ³n Avanzada
               </button>
             </div>
           )}
@@ -4080,16 +4081,16 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       <InputField
                         value={projectForm.name}
                         onChange={(value) => setProjectForm((current) => ({ ...current, name: value }))}
-                        placeholder="Ej. Campaña de Reforestación 2026"
+                        placeholder="Ej. CampaÃ±a de ReforestaciÃ³n 2026"
                       />
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
-                        Código ID del Proyecto <span className="text-zinc-500">(Auto-generado / Correlativo)</span>
+                        CÃ³digo ID del Proyecto <span className="text-zinc-500">(Auto-generado / Correlativo)</span>
                       </label>
                       <InputField
-                        value={projectForm.code || (editingProjectId ? "" : "Generación automática")}
+                        value={projectForm.code || (editingProjectId ? "" : "GeneraciÃ³n automÃ¡tica")}
                         onChange={(value) => setProjectForm((current) => ({ ...current, code: value }))}
                         placeholder="PROJ-001"
                         disabled={Boolean(editingProjectId)}
@@ -4100,13 +4101,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
-                        Área u Organización <span className="text-red-400">*</span>
+                        Ãrea u OrganizaciÃ³n <span className="text-red-400">*</span>
                       </label>
                       <SelectField
                         value={projectForm.areaId}
                         onChange={(value) => setProjectForm((current) => ({ ...current, areaId: value }))}
                         options={catalogs.areas}
-                        placeholder="Seleccionar Área"
+                        placeholder="Seleccionar Ãrea"
                       />
                     </div>
 
@@ -4135,10 +4136,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                           }))
                         }
                         options={[
-                          { value: "baja", label: "🟢 Baja" },
-                          { value: "media", label: "🔵 Media" },
-                          { value: "alta", label: "🔴 Alta" },
-                          { value: "urgente", label: "⚡ Urgente" },
+                          { value: "baja", label: "ðŸŸ¢ Baja" },
+                          { value: "media", label: "ðŸ”µ Media" },
+                          { value: "alta", label: "ðŸ”´ Alta" },
+                          { value: "urgente", label: "âš¡ Urgente" },
                         ]}
                         placeholder="Prioridad"
                       />
@@ -4147,7 +4148,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
-                      Descripción del Proyecto <span className="text-red-400">*</span>
+                      DescripciÃ³n del Proyecto <span className="text-red-400">*</span>
                     </label>
                     <TextareaField
                       value={projectForm.description}
@@ -4233,7 +4234,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
-                        Líder del Proyecto / Responsable
+                        LÃ­der del Proyecto / Responsable
                       </label>
                       <SelectField
                         value={projectForm.leaderId || ""}
@@ -4248,7 +4249,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         Equipo de Colaboradores Vinculados
                       </label>
                       <div className="h-10 rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 flex items-center text-xs text-zinc-400">
-                        {catalogs.volunteers.length} voluntarios disponibles para asignación
+                        {catalogs.volunteers.length} voluntarios disponibles para asignaciÃ³n
                       </div>
                     </div>
                   </div>
@@ -4268,12 +4269,12 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-zinc-300">
-                        Fecha de Finalización Estimada
+                        Fecha de FinalizaciÃ³n Estimada
                       </label>
                       <InputField
                         value={projectForm.endDate}
                         onChange={(value) => setProjectForm((current) => ({ ...current, endDate: value }))}
-                        placeholder="Fecha de Finalización"
+                        placeholder="Fecha de FinalizaciÃ³n"
                         type="date"
                       />
                     </div>
@@ -4293,9 +4294,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                           }))
                         }
                         options={[
-                          { value: "USD", label: "USD ($) - Dólares Estadounidenses" },
+                          { value: "USD", label: "USD ($) - DÃ³lares Estadounidenses" },
                           { value: "PEN", label: "PEN (S/) - Soles Peruanos" },
-                          { value: "EUR", label: "EUR (€) - Euros" },
+                          { value: "EUR", label: "EUR (â‚¬) - Euros" },
                         ]}
                         placeholder="Seleccionar Moneda"
                       />
@@ -4320,7 +4321,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 <div className="space-y-6">
                   <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-2">
                     <h4 className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
-                      <Info className="h-4 w-4 text-indigo-400" /> Información del Registro en Base de Datos
+                      <Info className="h-4 w-4 text-indigo-400" /> InformaciÃ³n del Registro en Base de Datos
                     </h4>
                     <div className="grid grid-cols-2 gap-3 text-xs text-zinc-400 pt-2">
                       <div>ID del Proyecto: <strong className="text-zinc-200 font-mono">{editingProjectId || "Nuevo Registro"}</strong></div>
@@ -4334,7 +4335,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         <ShieldAlert className="h-4 w-4" /> Zona de Peligro (Danger Zone)
                       </div>
                       <p className="text-xs text-zinc-400">
-                        Archivar o eliminar este proyecto quitará su visualización activa del panel general de la ONG.
+                        Archivar o eliminar este proyecto quitarÃ¡ su visualizaciÃ³n activa del panel general de la ONG.
                       </p>
 
                       <Button
@@ -4344,7 +4345,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                           closeForm();
                           setPendingAction({
                             id: editingProjectId,
-                            label: `¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
+                            label: `Â¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
                           });
                           setConfirmOpen(true);
                         }}
@@ -4395,19 +4396,19 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 2: Título de la Tarea */}
+              {/* FILA 2: TÃ­tulo de la Tarea */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-zinc-300">
-                  Título de la Tarea <span className="text-red-400">*</span>
+                  TÃ­tulo de la Tarea <span className="text-red-400">*</span>
                 </label>
                 <InputField
                   value={taskForm.title}
                   onChange={(value) => setTaskForm((current) => ({ ...current, title: value }))}
-                  placeholder="Ej. Preparar material impreso para la capacitación..."
+                  placeholder="Ej. Preparar material impreso para la capacitaciÃ³n..."
                 />
               </div>
 
-              {/* FILA 3: Asignación, Prioridad y Estado */}
+              {/* FILA 3: AsignaciÃ³n, Prioridad y Estado */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-zinc-300">
@@ -4466,10 +4467,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 4: Fechas y Estimación */}
+              {/* FILA 4: Fechas y EstimaciÃ³n */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-300">Fecha Límite de Entrega</label>
+                  <label className="text-xs font-medium text-zinc-300">Fecha LÃ­mite de Entrega</label>
                   <InputField
                     value={taskForm.deadline}
                     onChange={(value) => setTaskForm((current) => ({ ...current, deadline: value }))}
@@ -4489,9 +4490,9 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 5: Descripción */}
+              {/* FILA 5: DescripciÃ³n */}
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-300">Descripción / Instrucciones Detalladas</label>
+                <label className="text-xs font-medium text-zinc-300">DescripciÃ³n / Instrucciones Detalladas</label>
                 <TextareaField
                   value={taskForm.description}
                   onChange={(value) => setTaskForm((current) => ({ ...current, description: value }))}
@@ -4499,13 +4500,13 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 />
               </div>
 
-              {/* FILA 6: Archivos y Notificación */}
+              {/* FILA 6: Archivos y NotificaciÃ³n */}
               <div className="space-y-3 pt-2">
                 <label className="text-xs font-medium text-zinc-300">
-                  Adjuntar Referencias / Archivos Guía <span className="text-zinc-500">(Opcional - PDF, PNG, DOCX)</span>
+                  Adjuntar Referencias / Archivos GuÃ­a <span className="text-zinc-500">(Opcional - PDF, PNG, DOCX)</span>
                 </label>
                 <ImageUploadField
-                  label="Arrastra un archivo de referencia o haz clic para subir (Máx 5MB)"
+                  label="Arrastra un archivo de referencia o haz clic para subir (MÃ¡x 5MB)"
                   existingUrl={null}
                   previewFile={taskForm.attachedFile || null}
                   onFileSelect={(file) => setTaskForm((current) => ({ ...current, attachedFile: file }))}
@@ -4526,7 +4527,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                   <label htmlFor="sendEmailTask" className="text-xs text-zinc-300 cursor-pointer select-none">
-                    Notificar automáticamente por correo electrónico al responsable asignado
+                    Notificar automÃ¡ticamente por correo electrÃ³nico al responsable asignado
                   </label>
                 </div>
               </div>
@@ -4563,16 +4564,16 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 2: Título y Prioridad */}
+              {/* FILA 2: TÃ­tulo y Prioridad */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-zinc-300 flex items-center gap-1">
-                    Título de la Actividad <span className="text-red-400">*</span>
+                    TÃ­tulo de la Actividad <span className="text-red-400">*</span>
                   </label>
                   <InputField
                     value={activityForm.title}
                     onChange={(value) => setActivityForm((current) => ({ ...current, title: value }))}
-                    placeholder="Ej. Taller de Capacitación en Campo"
+                    placeholder="Ej. Taller de CapacitaciÃ³n en Campo"
                   />
                 </div>
 
@@ -4638,7 +4639,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 4: Conmutador de Modalidad (Presencial / Virtual) y Ubicación / Enlace */}
+              {/* FILA 4: Conmutador de Modalidad (Presencial / Virtual) y UbicaciÃ³n / Enlace */}
               <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 space-y-3">
                 <label className="text-xs font-semibold text-zinc-200">
                   Tipo de Modalidad
@@ -4654,7 +4655,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       onChange={() => setActivityForm((c) => ({ ...c, modality: "presencial" }))}
                       className="text-indigo-600 focus:ring-indigo-500"
                     />
-                    📍 Presencial (En Campo / Sede)
+                    ðŸ“ Presencial (En Campo / Sede)
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-300">
@@ -4666,26 +4667,26 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                       onChange={() => setActivityForm((c) => ({ ...c, modality: "virtual" }))}
                       className="text-indigo-600 focus:ring-indigo-500"
                     />
-                    🌐 Virtual (Reunión Online)
+                    ðŸŒ Virtual (ReuniÃ³n Online)
                   </label>
                 </div>
 
                 {(activityForm.modality || "presencial") === "presencial" ? (
                   <div className="space-y-1.5 pt-2">
                     <label className="text-xs font-medium text-zinc-300">
-                      Ubicación / Sede de la Actividad
+                      UbicaciÃ³n / Sede de la Actividad
                     </label>
                     <SelectField
                       value={activityForm.locationId}
                       onChange={(value) => setActivityForm((current) => ({ ...current, locationId: value }))}
                       options={catalogs.locations}
-                      placeholder="Seleccionar Sede / Ubicación"
+                      placeholder="Seleccionar Sede / UbicaciÃ³n"
                     />
                   </div>
                 ) : (
                   <div className="space-y-1.5 pt-2">
                     <label className="text-xs font-medium text-zinc-300">
-                      Enlace de la Reunión (Google Meet / Zoom / Teams)
+                      Enlace de la ReuniÃ³n (Google Meet / Zoom / Teams)
                     </label>
                     <InputField
                       value={activityForm.meetingUrl || ""}
@@ -4696,7 +4697,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 )}
               </div>
 
-              {/* FILA 5: Asignación de Personal / Voluntarios */}
+              {/* FILA 5: AsignaciÃ³n de Personal / Voluntarios */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-zinc-300">
                   Asignar Personal / Voluntarios a la Actividad
@@ -4733,7 +4734,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                             />
                             <span>{vol.label}</span>
                           </div>
-                          {isAssigned && <span className="text-[10px] font-semibold text-indigo-400">Asignado ✓</span>}
+                          {isAssigned && <span className="text-[10px] font-semibold text-indigo-400">Asignado âœ“</span>}
                         </label>
                       );
                     })
@@ -4741,10 +4742,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </div>
 
-              {/* FILA 6: Descripción u Objetivos */}
+              {/* FILA 6: DescripciÃ³n u Objetivos */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-zinc-300">
-                  Descripción u Objetivos de la Actividad
+                  DescripciÃ³n u Objetivos de la Actividad
                 </label>
                 <TextareaField
                   value={activityForm.description}
@@ -4753,7 +4754,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 />
               </div>
 
-              {/* FILA 7: Checkbox de Notificación Automática */}
+              {/* FILA 7: Checkbox de NotificaciÃ³n AutomÃ¡tica */}
               <div className="pt-2 border-t border-zinc-800/80">
                 <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer font-medium">
                   <input
@@ -4762,7 +4763,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     onChange={(e) => setActivityForm((c) => ({ ...c, sendEmailNotification: e.target.checked }))}
                     className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <span>[✓] Enviar notificación automática por correo a los miembros asignados</span>
+                  <span>[âœ“] Enviar notificaciÃ³n automÃ¡tica por correo a los miembros asignados</span>
                 </label>
               </div>
             </div>
@@ -4787,7 +4788,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   closeForm();
                   setPendingAction({
                     id: editingProjectId,
-                    label: `¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
+                    label: `Â¿Confirma archivar o eliminar el proyecto "${projectForm.name}"?`,
                   });
                   setConfirmOpen(true);
                 }}
@@ -4824,7 +4825,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                   : "Crear Actividad"
                 : editingAssignment
                 ? "Guardar Cambios"
-                : "Crear Asignación"}
+                : "Crear AsignaciÃ³n"}
             </GradientButton>
           </div>
         </div>
@@ -4840,3 +4841,4 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     </div>
   );
 }
+

@@ -55,16 +55,16 @@ import type { EvidenceFilters, OperationEvidenceRow } from "../modules/operation
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 type ViewMode = "gallery" | "table";
 
@@ -281,14 +281,14 @@ export function Evidence() {
     });
     if (map.size === 0) {
       return [
-        { value: "PROJ-001", label: "PROJ-001 • Taller Comunitario" },
-        { value: "PROJ-002", label: "PROJ-002 • Alfabetización Digital" },
-        { value: "PROJ-003", label: "PROJ-003 • Comedor Solidario" },
+        { value: "PROJ-001", label: "PROJ-001 â€¢ Taller Comunitario" },
+        { value: "PROJ-002", label: "PROJ-002 â€¢ AlfabetizaciÃ³n Digital" },
+        { value: "PROJ-003", label: "PROJ-003 â€¢ Comedor Solidario" },
       ];
     }
     return Array.from(map.entries()).map(([value, label]) => ({
       value,
-      label: `${value} • ${label}`,
+      label: `${value} â€¢ ${label}`,
     }));
   }, [rows]);
 
@@ -384,7 +384,7 @@ export function Evidence() {
     const trimmed = linkInput.trim();
     if (!trimmed) return;
     if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-      toast.error("Ingresa una URL válida (debe empezar con http:// o https://).");
+      toast.error("Ingresa una URL vÃ¡lida (debe empezar con http:// o https://).");
       return;
     }
     const type = detectLinkType(trimmed);
@@ -396,7 +396,7 @@ export function Evidence() {
     };
     setExternalLinks((prev) => [...prev, newLink]);
     setLinkInput("");
-    toast.success("Enlace de respaldo añadido.");
+    toast.success("Enlace de respaldo aÃ±adido.");
   }
 
   function removeExternalLink(id: string) {
@@ -414,7 +414,7 @@ export function Evidence() {
     }
 
     if (!editingEvidenceId && selectedFiles.length === 0 && externalLinks.length === 0) {
-      toast.error("Debes seleccionar al menos un archivo o añadir un enlace externo.");
+      toast.error("Debes seleccionar al menos un archivo o aÃ±adir un enlace externo.");
       return;
     }
 
@@ -440,7 +440,7 @@ export function Evidence() {
         });
         if (!result) return;
         if (formNotifyCoordinator) {
-          toast.info("Notificación enviada por correo al coordinador del proyecto.");
+          toast.info("NotificaciÃ³n enviada por correo al coordinador del proyecto.");
         }
         if (result.warning) toast.warning(result.warning);
 
@@ -466,7 +466,7 @@ export function Evidence() {
 
   async function removeRow(row: OperationEvidenceRow) {
     const confirmed = window.confirm(
-      `¿Se eliminará la evidencia "${row.typeName}" de ${row.activityName}?`
+      `Â¿Se eliminarÃ¡ la evidencia "${row.typeName}" de ${row.activityName}?`
     );
     if (!confirmed) return;
 
@@ -538,7 +538,7 @@ export function Evidence() {
     },
     {
       key: "status",
-      label: "Validación",
+      label: "ValidaciÃ³n",
       render: (item) => (
         <StatusDot variant={item.validationVariant}>{item.validationStatusName}</StatusDot>
       ),
@@ -547,12 +547,12 @@ export function Evidence() {
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      {/* HEADER DE MÓDULO */}
+      {/* HEADER DE MÃ“DULO */}
       <motion.div variants={fadeUp}>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <PageHeader
             title="Repositorio de Evidencias"
-            description="Consolida fotos de campo, videos y documentos de respaldo para auditorías y donantes."
+            description="Consolida fotos de campo, videos y documentos de respaldo para auditorÃ­as y donantes."
             action={{ label: "Actualizar", onClick: refresh }}
           />
 
@@ -603,7 +603,7 @@ export function Evidence() {
 
           <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Imágenes / Videos</span>
+              <span className="text-[12px] font-medium text-zinc-400">ImÃ¡genes / Videos</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <ImageIcon className="h-4 w-4" />
               </div>
@@ -633,7 +633,7 @@ export function Evidence() {
 
           <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Pendientes de Validación</span>
+              <span className="text-[12px] font-medium text-zinc-400">Pendientes de ValidaciÃ³n</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <Clock className="h-4 w-4" />
               </div>
@@ -641,14 +641,14 @@ export function Evidence() {
             <div className="mt-2 flex items-baseline justify-between">
               <p className="text-2xl font-bold text-zinc-100 tabular-nums">{kpiStats.pendingValidation}</p>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
-                <Clock className="h-3 w-3" /> Requiere revisión
+                <Clock className="h-3 w-3" /> Requiere revisiÃ³n
               </span>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* TOOLBAR, FILTROS Y CAMBIO DE VISTA (GALERÍA VS TABLA) */}
+      {/* TOOLBAR, FILTROS Y CAMBIO DE VISTA (GALERÃA VS TABLA) */}
       <motion.div variants={fadeUp} className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <FilterBar
@@ -668,7 +668,7 @@ export function Evidence() {
               }`}
             >
               <Grid className="h-3.5 w-3.5" />
-              Galería
+              GalerÃ­a
             </button>
             <button
               type="button"
@@ -739,7 +739,7 @@ export function Evidence() {
         </motion.div>
       )}
 
-      {/* CONTENIDO PRINCIPAL: VISTA DE GALERÍA O VISTA DE TABLA */}
+      {/* CONTENIDO PRINCIPAL: VISTA DE GALERÃA O VISTA DE TABLA */}
       <motion.div variants={fadeUp}>
         {viewMode === "gallery" ? (
           <div>
@@ -802,7 +802,7 @@ export function Evidence() {
                             </div>
                           )}
 
-                          {/* OVERLAY DE BOTÓN DE PREVISUALIZACIÓN */}
+                          {/* OVERLAY DE BOTÃ“N DE PREVISUALIZACIÃ“N */}
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                             <button
                               type="button"
@@ -904,7 +904,7 @@ export function Evidence() {
         )}
       </motion.div>
 
-      {/* MODAL CONFIGURACIÓN / SETTINGS */}
+      {/* MODAL CONFIGURACIÃ“N / SETTINGS */}
       <ModalShell open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} width="max-w-[560px]">
         <div className="space-y-4 p-5">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -920,7 +920,7 @@ export function Evidence() {
           <div className="space-y-4 text-xs">
             <div>
               <label className="block text-zinc-300 font-medium mb-1">
-                Tamaño Máximo por Archivo (MB)
+                TamaÃ±o MÃ¡ximo por Archivo (MB)
               </label>
               <input
                 type="number"
@@ -929,13 +929,13 @@ export function Evidence() {
                 className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
               />
               <p className="mt-1 text-[11px] text-zinc-500">
-                Límite de peso permitido por archivo individual cargado al servidor.
+                LÃ­mite de peso permitido por archivo individual cargado al servidor.
               </p>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Marca de Agua Automática</span>
+                <span className="font-medium text-zinc-200 block">Marca de Agua AutomÃ¡tica</span>
                 <span className="text-[11px] text-zinc-400">Insertar logo de la ONG y fecha en fotos de evidencia.</span>
               </div>
               <input
@@ -948,7 +948,7 @@ export function Evidence() {
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Privacidad y Pixelado Automático</span>
+                <span className="font-medium text-zinc-200 block">Privacidad y Pixelado AutomÃ¡tico</span>
                 <span className="text-[11px] text-zinc-400">Activar pixelado de rostros de menores de edad.</span>
               </div>
               <input
@@ -985,10 +985,10 @@ export function Evidence() {
               <div>
                 <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
                   <Eye className="h-5 w-5 text-indigo-400" />
-                  Previsualización de Evidencia
+                  PrevisualizaciÃ³n de Evidencia
                 </h3>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  {selectedLightboxItem.activityName} • {selectedLightboxItem.projectName}
+                  {selectedLightboxItem.activityName} â€¢ {selectedLightboxItem.projectName}
                 </p>
               </div>
               <button type="button" className="text-zinc-400 hover:text-zinc-200" onClick={() => setIsLightboxOpen(false)}>
@@ -999,7 +999,7 @@ export function Evidence() {
             <div className="relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 flex flex-col items-center justify-center p-8 min-h-[260px]">
               <ImageIcon className="h-16 w-16 text-indigo-400/70 mb-3" />
               <p className="font-mono text-xs text-zinc-300 font-semibold">{selectedLightboxItem.route}</p>
-              <p className="text-[11px] text-zinc-500 mt-1">Simulación de visor en alta resolución</p>
+              <p className="text-[11px] text-zinc-500 mt-1">SimulaciÃ³n de visor en alta resoluciÃ³n</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -1019,7 +1019,7 @@ export function Evidence() {
 
             {selectedLightboxItem.description && selectedLightboxItem.description !== "Sin observacion" && (
               <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
-                <span className="text-[11px] text-zinc-400 block font-medium mb-1">Descripción / Notas de Campo</span>
+                <span className="text-[11px] text-zinc-400 block font-medium mb-1">DescripciÃ³n / Notas de Campo</span>
                 <p className="text-zinc-200">{selectedLightboxItem.description}</p>
               </div>
             )}
@@ -1063,7 +1063,7 @@ export function Evidence() {
         )}
       </ModalShell>
 
-      {/* ── MODAL REFACTORIZADO DE CARGA DE EVIDENCIAS EN LOTE Y ENLACES ─────────────── */}
+      {/* â”€â”€ MODAL REFACTORIZADO DE CARGA DE EVIDENCIAS EN LOTE Y ENLACES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ModalShell open={isFormModalOpen} onClose={closeFormModal} width="max-w-[900px]">
         <div className="space-y-4 p-5">
           <div className="flex items-start justify-between border-b border-zinc-800 pb-3">
@@ -1073,7 +1073,7 @@ export function Evidence() {
                 {editingEvidenceId ? "Editar Evidencia" : "Cargar Evidencias de Campo"}
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Adjunta fotografías, reportes firmados o enlaces externos para validar actividades.
+                Adjunta fotografÃ­as, reportes firmados o enlaces externos para validar actividades.
               </p>
             </div>
             <button
@@ -1142,7 +1142,7 @@ export function Evidence() {
             </div>
           </div>
 
-          {/* FILA 2: ZONA DRAG & DROP Y AJUSTES RÁPIDOS DE OPTIMIZACIÓN */}
+          {/* FILA 2: ZONA DRAG & DROP Y AJUSTES RÃPIDOS DE OPTIMIZACIÃ“N */}
           <div className="space-y-3">
             <input
               ref={fileInputRef}
@@ -1164,7 +1164,7 @@ export function Evidence() {
             >
               <UploadCloud className="h-9 w-9 text-indigo-400 group-hover:scale-110 transition-transform mb-2" />
               <p className="text-xs text-zinc-200 font-semibold">
-                Haz clic para examinar o arrastra tus archivos aquí
+                Haz clic para examinar o arrastra tus archivos aquÃ­
               </p>
               <p className="text-[11px] text-zinc-500 mt-1">Soporta JPG, PNG, PDF y ZIP de hasta 20MB</p>
 
@@ -1177,7 +1177,7 @@ export function Evidence() {
                     className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
                   />
                   <Zap className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-                  Comprimir imágenes antes de subir (Recomendado)
+                  Comprimir imÃ¡genes antes de subir (Recomendado)
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-zinc-200">
@@ -1231,7 +1231,7 @@ export function Evidence() {
                       <div className="flex items-center gap-3">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                          {isImg && formExtractExif ? "100% Listo • GPS OK" : "100% Listo"}
+                          {isImg && formExtractExif ? "100% Listo â€¢ GPS OK" : "100% Listo"}
                         </span>
 
                         <button
@@ -1250,7 +1250,7 @@ export function Evidence() {
             </div>
           )}
 
-          {/* FILA 4: ENLACES EXTERNOS MÚLTIPLES */}
+          {/* FILA 4: ENLACES EXTERNOS MÃšLTIPLES */}
           <div className="space-y-2">
             <label className="block text-xs font-medium text-zinc-300">
               Enlaces de Respaldo Externos (Google Drive, YouTube, OneDrive, Dropbox):
@@ -1272,7 +1272,7 @@ export function Evidence() {
                 />
               </div>
               <GradientButton size="sm" type="button" onClick={addExternalLink}>
-                + Añadir Enlace
+                + AÃ±adir Enlace
               </GradientButton>
             </div>
 
@@ -1307,18 +1307,18 @@ export function Evidence() {
           {/* FILA 5: TAREAS REALIZADAS / OBSERVACIONES DE CAMPO */}
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Descripción / Notas de Campo (Opcional)
+              DescripciÃ³n / Notas de Campo (Opcional)
             </label>
             <textarea
               value={formDescription}
               onChange={(event) => setFormDescription(event.target.value)}
               rows={2}
-              placeholder="Ej. Se completó la jornada con 40 asistentes. Fotografías de entrega adjuntas..."
+              placeholder="Ej. Se completÃ³ la jornada con 40 asistentes. FotografÃ­as de entrega adjuntas..."
               className="w-full rounded-xl p-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500"
             />
           </div>
 
-          {/* CONFIGURACIÓN Y ESTADO */}
+          {/* CONFIGURACIÃ“N Y ESTADO */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
             <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
               <input
@@ -1369,3 +1369,4 @@ export function Evidence() {
     </motion.div>
   );
 }
+

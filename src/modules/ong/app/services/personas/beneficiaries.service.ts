@@ -80,7 +80,7 @@ function buildDocumentLabel(
     return typeLabel;
   }
 
-  return `${documentNumber} · ${typeLabel}`;
+  return `${documentNumber} Â· ${typeLabel}`;
 }
 
 function buildDisplayLabel(code: string | null, labelMap: Map<string, string>): string {
@@ -755,3 +755,4 @@ export async function updateBeneficiary(
     throw new Error(toFriendlyError(error, "No se pudo actualizar el beneficiario."));
   }
 }
+

@@ -155,7 +155,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre_estado", label: "Nombre" },
@@ -173,7 +173,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre", label: "Nombre" },
@@ -190,7 +190,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre", label: "Nombre" },
@@ -207,7 +207,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre_estado", label: "Nombre" },
@@ -224,7 +224,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre", label: "Nombre" },
@@ -241,7 +241,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre", label: "Nombre" },
@@ -257,7 +257,7 @@ const CATALOG_DEFINITIONS: CatalogDefinition[] = [
     canWrite: false,
     primaryColumn: "codigo",
     sourceReference:
-      "guidelines/BD/Parte 2 - Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 2 - Script maestro documental de ONG mÃ³dulos complementarios.txt",
     fields: [
       { key: "codigo", label: "Codigo" },
       { key: "nombre", label: "Nombre" },
@@ -759,3 +759,4 @@ export async function listGovernanceCatalogEntries(
     );
   }
 }
+

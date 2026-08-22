@@ -12,7 +12,7 @@ export function Hero({ onOpenContact }: HeroProps) {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-6 pt-40 pb-32">
       <div className="max-w-5xl mx-auto w-full text-center relative z-10">
 
-        {/* App icon — brand anchor */}
+        {/* App icon â€” brand anchor */}
         <motion.div
           initial={{ opacity: 0, y: -10, scale: 0.88 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -41,7 +41,7 @@ export function Hero({ onOpenContact }: HeroProps) {
             style={{ background: "var(--blue)", animation: "pulseDot 2.5s ease-in-out infinite" }}
           />
           <span className="text-[11px] text-white/45 font-light tracking-widest uppercase">
-            Gobernanza con IA · 2026
+            Gobernanza con IA Â· 2026
           </span>
         </motion.div>
 
@@ -89,7 +89,7 @@ export function Hero({ onOpenContact }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.38, duration: 0.75, ease: [0.25, 0.4, 0.25, 1] }}
         >
-          Automatización inteligente y decisiones
+          AutomatizaciÃ³n inteligente y decisiones
           <br className="hidden md:block" />
           colectivas en tiempo real.
         </motion.p>
@@ -101,7 +101,7 @@ export function Hero({ onOpenContact }: HeroProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.52, duration: 0.7, ease: [0.25, 0.4, 0.25, 1] }}
         >
-          {/* Primary — solid blue with shimmer sweep */}
+          {/* Primary â€” solid blue with shimmer sweep */}
           <motion.div
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
@@ -157,9 +157,10 @@ export function Hero({ onOpenContact }: HeroProps) {
           animate={{ opacity: 0.5 }}
           transition={{ delay: 0.72, duration: 0.8 }}
         >
-          +2,400 organizaciones confían en democra.pro
+          +2,400 organizaciones confÃ­an en democra.pro
         </motion.p>
       </div>
     </section>
   );
 }
+

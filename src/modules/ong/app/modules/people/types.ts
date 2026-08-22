@@ -473,3 +473,4 @@ export interface IdCardRenderSubject {
   cardCode: string;
   qrPayload: string;
 }
+

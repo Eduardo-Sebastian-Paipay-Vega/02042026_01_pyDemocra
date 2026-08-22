@@ -449,3 +449,4 @@ export async function deleteRole(roleId: string): Promise<void> {
     throw new Error(toFriendlyError(error, "No se pudo eliminar el rol."));
   }
 }
+

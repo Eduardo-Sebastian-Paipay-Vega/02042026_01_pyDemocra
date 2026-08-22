@@ -70,3 +70,4 @@ export function useCuentaFinancieraDetail(accountId: string | null) {
     refresh,
   };
 }
+

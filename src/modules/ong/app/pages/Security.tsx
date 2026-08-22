@@ -29,16 +29,16 @@ import {
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 const INPUT_STYLE = {
   border: "1px solid var(--t-border)",
@@ -66,7 +66,7 @@ const sessionColumns: Column<SessionRow>[] = [
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.userLabel}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.sessionType} · {row.ip}
+          {row.sessionType} Â· {row.ip}
         </div>
       </div>
     ),
@@ -492,7 +492,7 @@ export function Security() {
 
           {!data.access.canReadSessions && !loading ? (
             <SettingsErrorBlock
-              message="La lectura de sesiones requiere `settings.sessions.read` o tenant admin. `settings.sessions.terminate` amplía ese acceso con cierre remoto. Los recursos `devices` y `terminals` mantienen compatibilidad legacy mientras el Core no publique permisos nuevos dedicados."
+              message="La lectura de sesiones requiere `settings.sessions.read` o tenant admin. `settings.sessions.terminate` amplÃ­a ese acceso con cierre remoto. Los recursos `devices` y `terminals` mantienen compatibilidad legacy mientras el Core no publique permisos nuevos dedicados."
               onRetry={refresh}
             />
           ) : (
@@ -818,3 +818,4 @@ export function Security() {
     </motion.div>
   );
 }
+

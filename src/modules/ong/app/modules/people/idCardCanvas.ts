@@ -695,3 +695,4 @@ export async function downloadIdCardPng(
   anchor.download = filename.endsWith(".png") ? filename : `${filename}.png`;
   anchor.click();
 }
+

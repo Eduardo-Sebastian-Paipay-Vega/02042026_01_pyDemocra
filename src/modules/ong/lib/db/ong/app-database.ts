@@ -1062,7 +1062,7 @@ interface ComunicacionPlantillaNotificacionRow {
   updated_by: Uuid | null;
 }
 
-// ── ACE: Access & Context Engine ─────────────────────────────
+// â”€â”€ ACE: Access & Context Engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface PublicAccessLinkRow {
   id: Uuid;
@@ -1149,7 +1149,7 @@ interface PublicVUserSessionContextRow {
   }> | null;
 }
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface AuditoriaAuditLogRow {
   id_audit: Uuid;
@@ -1373,3 +1373,4 @@ export interface AppDatabase {
 }
 
 export type OngDatabase = AppDatabase;
+

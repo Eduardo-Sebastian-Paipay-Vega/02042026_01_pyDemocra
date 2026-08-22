@@ -122,3 +122,4 @@ export interface TenantRouteRedirectDefinition {
   to: string;
   kind: "legacy" | "alias";
 }
+

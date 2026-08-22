@@ -68,3 +68,4 @@ export function useAsistenciaDetail(attendanceId: string | null) {
     refresh,
   };
 }
+

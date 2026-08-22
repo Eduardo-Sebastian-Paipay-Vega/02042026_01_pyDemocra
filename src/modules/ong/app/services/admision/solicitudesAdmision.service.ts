@@ -1377,7 +1377,7 @@ export async function convertSolicitudToVoluntario(
       await changeEstadoAdmision({
         requestId: request.id,
         stateCode: "aprobada",
-        comment: "Conversión a voluntario ejecutada desde admisión.",
+        comment: "ConversiÃ³n a voluntario ejecutada desde admisiÃ³n.",
         actorId,
       });
     }
@@ -2051,3 +2051,4 @@ export async function toggleOnboardingStep(input: {
     throw toOperationError(error, "No se pudo actualizar el onboarding.");
   }
 }
+

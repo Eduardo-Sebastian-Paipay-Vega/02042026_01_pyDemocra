@@ -62,3 +62,4 @@ export function useNotificationTemplateDetail(templateId: string | null) {
     refresh,
   };
 }
+

@@ -834,7 +834,7 @@ export function Dashboard() {
                     type="button"
                     onClick={() => {
                       setIsQuickActionOpen(false);
-                      navigate("/app/ong/operation/hours");
+                      navigate("/app/operation/hours");
                     }}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
                   >
@@ -845,7 +845,7 @@ export function Dashboard() {
                     type="button"
                     onClick={() => {
                       setIsQuickActionOpen(false);
-                      navigate("/app/ong/approvals/hours");
+                      navigate("/app/approvals/hours");
                     }}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
                   >
@@ -867,7 +867,7 @@ export function Dashboard() {
                     type="button"
                     onClick={() => {
                       setIsQuickActionOpen(false);
-                      navigate("/app/ong/admission/requests");
+                      navigate("/app/admission/requests");
                     }}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
                   >
@@ -1065,7 +1065,7 @@ export function Dashboard() {
 
               <OutlineButton
                 size="sm"
-                onClick={() => navigate("/app/ong/projects/activities")}
+                onClick={() => navigate("/app/projects/activities")}
                 className="w-full text-xs text-zinc-300 border-zinc-800 justify-center"
               >
                 Ver Todas las Actividades
@@ -1143,7 +1143,7 @@ export function Dashboard() {
                 <div className="mt-3 space-y-2">
                   <button
                     type="button"
-                    onClick={() => navigate("/app/ong/admission/requests")}
+                    onClick={() => navigate("/app/admission/requests")}
                     className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-indigo-500/40 text-xs transition-colors"
                   >
                     <span className="flex items-center gap-2 text-zinc-200 font-medium">
@@ -1157,7 +1157,7 @@ export function Dashboard() {
 
                   <button
                     type="button"
-                    onClick={() => navigate("/app/ong/approvals/hours")}
+                    onClick={() => navigate("/app/approvals/hours")}
                     className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/40 text-xs transition-colors"
                   >
                     <span className="flex items-center gap-2 text-zinc-200 font-medium">
@@ -1171,7 +1171,7 @@ export function Dashboard() {
 
                   <button
                     type="button"
-                    onClick={() => navigate("/app/ong/operation/evidence")}
+                    onClick={() => navigate("/app/operation/evidence")}
                     className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-purple-500/40 text-xs transition-colors"
                   >
                     <span className="flex items-center gap-2 text-zinc-200 font-medium">

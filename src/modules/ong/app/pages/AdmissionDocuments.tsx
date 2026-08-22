@@ -598,3 +598,4 @@ export function AdmissionDocuments() {
     </motion.div>
   );
 }
+

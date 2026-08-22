@@ -119,3 +119,4 @@ export function useProjectMutations(onSuccess?: () => void) {
       wrapDelete(() => removeProjectResourceAssignment(id)),
   };
 }
+

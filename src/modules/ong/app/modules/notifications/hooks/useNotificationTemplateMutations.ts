@@ -55,3 +55,4 @@ export function useNotificationTemplateMutations(onCompleted?: () => void) {
     toggleActive,
   };
 }
+

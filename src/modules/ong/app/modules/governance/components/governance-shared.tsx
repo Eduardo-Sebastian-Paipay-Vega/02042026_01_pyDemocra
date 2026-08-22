@@ -107,3 +107,4 @@ export function GovernancePermissionBadge({
 }) {
   return <StatusDot variant={allowed ? "success" : "secondary"}>{allowed ? allowedLabel : deniedLabel}</StatusDot>;
 }
+

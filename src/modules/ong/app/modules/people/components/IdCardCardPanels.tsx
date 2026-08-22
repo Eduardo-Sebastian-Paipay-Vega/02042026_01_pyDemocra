@@ -545,3 +545,4 @@ export function IdCardRevokeModal({
     </ModalShell>
   );
 }
+

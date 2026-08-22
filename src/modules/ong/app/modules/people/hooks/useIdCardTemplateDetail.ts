@@ -70,3 +70,4 @@ export function useIdCardTemplateDetail(templateId: string | null) {
     refresh,
   };
 }
+

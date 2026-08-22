@@ -40,7 +40,7 @@ export function useMemberships(filters: MembershipFilters = {}) {
         setState({
           memberships: [],
           loading: false,
-          error: err instanceof Error ? err.message : "No se pudieron cargar las membresías.",
+          error: err instanceof Error ? err.message : "No se pudieron cargar las membresÃ­as.",
         });
       });
 
@@ -64,3 +64,4 @@ export function useMemberships(filters: MembershipFilters = {}) {
     deactivate,
   };
 }
+

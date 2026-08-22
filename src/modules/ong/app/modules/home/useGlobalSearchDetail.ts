@@ -57,3 +57,4 @@ export function useGlobalSearchDetail() {
     retry,
   };
 }
+

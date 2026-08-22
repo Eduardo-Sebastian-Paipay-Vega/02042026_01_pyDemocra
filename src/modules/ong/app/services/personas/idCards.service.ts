@@ -524,7 +524,7 @@ export async function listIdCardWorkspace(): Promise<IdCardWorkspaceData> {
       })
     ),
     warnings: access.warnings.concat(
-      'Credenciales ID opera sobre `ong.id_card_templates`, `ong.id_card_template_fields` y `ong.id_cards` usando `supabase.schema("ong")` segun `guidelines/BD/Parte 4- Script maestro documental de ONG módulos complementarios.txt`.'
+      'Credenciales ID opera sobre `ong.id_card_templates`, `ong.id_card_template_fields` y `ong.id_cards` usando `supabase.schema("ong")` segun `guidelines/BD/Parte 4- Script maestro documental de ONG mÃ³dulos complementarios.txt`.'
     ),
   };
 }
@@ -1106,3 +1106,4 @@ export async function getIdCardDetail(cardId: string): Promise<IdCardDetailData 
     updatedBy: labels.get(card.updated_by ?? "") ?? card.updated_by ?? "Sin dato",
   };
 }
+

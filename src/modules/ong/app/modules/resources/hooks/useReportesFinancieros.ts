@@ -156,3 +156,4 @@ export function useReportesFinancieros(filters: FinancialReportsFilters) {
     refresh,
   };
 }
+

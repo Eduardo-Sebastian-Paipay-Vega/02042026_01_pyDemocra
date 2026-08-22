@@ -382,7 +382,7 @@ function mapRow(
     dateLabel: toDateLabel(row.fecha_operacion),
     entryLabel: toDateTimeLabel(row.check_in_at),
     exitLabel: toDateTimeLabel(row.check_out_at),
-    contextLabel: `${activityName} · ${projectName}`,
+    contextLabel: `${activityName} Â· ${projectName}`,
     status,
     statusVariant: resolveStatusVariant(status),
     stateCode: row.estado,
@@ -900,3 +900,4 @@ export async function removeAsistencia(
     throw toOperationError(error, "No se pudo eliminar logicamente la asistencia.");
   }
 }
+

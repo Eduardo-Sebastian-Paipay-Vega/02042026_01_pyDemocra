@@ -37,7 +37,7 @@ const MAX_SESSION_ROWS = 2_000;
 const MAX_VOLUNTEER_ROWS = 1_000;
 
 const SYSTEM_USERS_UNSUPPORTED_FLOWS = [
-  "Crear `auth.users` y provisionar `public.profiles` iniciales requiere backend seguro/Edge Function/API con service-role y auditoría; el frontend solo habilita acceso institucional sobre perfiles ya existentes del tenant.",
+  "Crear `auth.users` y provisionar `public.profiles` iniciales requiere backend seguro/Edge Function/API con service-role y auditorÃ­a; el frontend solo habilita acceso institucional sobre perfiles ya existentes del tenant.",
   "public.profiles y public.user_roles_sedes no documentan soft delete; la baja operativa revoca filas de public.user_roles_sedes.",
 ];
 
@@ -62,7 +62,7 @@ function buildProfileLabel(
     .filter(Boolean)
     .join(" ")
     .trim();
-  return document ? `${name} · ${document}` : name;
+  return document ? `${name} Â· ${document}` : name;
 }
 
 function buildAssignmentKey(roleId: string, sedeId: string): string {
@@ -82,7 +82,7 @@ function buildVolunteerLabel(
     .trim();
   const email = sanitizeText(row.email ?? null, 180);
 
-  return [name, document, email].filter(Boolean).join(" · ");
+  return [name, document, email].filter(Boolean).join(" Â· ");
 }
 
 function buildSearchValue(row: SystemUserRow): string {
@@ -638,3 +638,4 @@ export async function revokeSystemUserSessions(
     throw new Error("No se pudieron revocar las sesiones del usuario.");
   }
 }
+

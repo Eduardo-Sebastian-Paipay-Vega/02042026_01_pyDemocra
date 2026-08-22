@@ -1040,3 +1040,4 @@ export async function assignVoluntarioActividad(
 ): Promise<ActivityAssignmentRow> {
   return addAsignacionActividad(input);
 }
+

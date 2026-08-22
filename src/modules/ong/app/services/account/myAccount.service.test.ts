@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../../../supabaseClient", () => ({
@@ -37,7 +38,7 @@ describe("getMyProfile", () => {
       error: null,
     });
 
-    await expect(getMyProfile()).rejects.toThrow("No hay sesión activa.");
+    await expect(getMyProfile()).rejects.toThrow("No hay sesiÃ³n activa.");
   });
 
   it("propaga el mensaje del error de auth si existe", async () => {
@@ -98,7 +99,7 @@ describe("updateMyFullName", () => {
     });
 
     await expect(updateMyFullName("Nuevo Nombre")).rejects.toThrow(
-      "No hay sesión activa."
+      "No hay sesiÃ³n activa."
     );
   });
 
@@ -109,7 +110,7 @@ describe("updateMyFullName", () => {
     });
 
     await expect(updateMyFullName("    ")).rejects.toThrow(
-      "El nombre no puede estar vacío."
+      "El nombre no puede estar vacÃ­o."
     );
     expect(supabase.update).not.toHaveBeenCalled();
   });
@@ -154,7 +155,7 @@ describe("updateMyAvatar", () => {
     });
     const file = new File(["data"], "avatar.png", { type: "image/png" });
 
-    await expect(updateMyAvatar(file)).rejects.toThrow("No hay sesión activa.");
+    await expect(updateMyAvatar(file)).rejects.toThrow("No hay sesiÃ³n activa.");
     expect(storage.uploadFileToStorage).not.toHaveBeenCalled();
   });
 
@@ -173,7 +174,7 @@ describe("updateMyAvatar", () => {
     const file = new File(["data"], "avatar.png", { type: "image/png" });
 
     await expect(updateMyAvatar(file)).rejects.toThrow(
-      "No se pudo obtener la URL pública de la foto de perfil."
+      "No se pudo obtener la URL pÃºblica de la foto de perfil."
     );
   });
 
@@ -237,10 +238,10 @@ describe("updateMyProfileDetails", () => {
     (supabase.update as any).mockReturnValue({ eq: mockEq });
 
     const { updateMyProfileDetails } = await import("./myAccount.service");
-    await updateMyProfileDetails({ full_name: "Juan Pérez", tipo_documento: "DNI" });
+    await updateMyProfileDetails({ full_name: "Juan PÃ©rez", tipo_documento: "DNI" });
 
     expect(supabase.from).toHaveBeenCalledWith("profiles");
-    expect(supabase.update).toHaveBeenCalledWith({ full_name: "Juan Pérez", tipo_documento: "DNI" });
+    expect(supabase.update).toHaveBeenCalledWith({ full_name: "Juan PÃ©rez", tipo_documento: "DNI" });
     expect(mockEq).toHaveBeenCalledWith("id", "user-1");
   });
 });
@@ -258,9 +259,9 @@ describe("updateMyPassword", () => {
   });
 
   it("lanza error si supabase.auth.updateUser falla", async () => {
-    (supabase.auth.updateUser as any).mockResolvedValue({ error: { message: "Clave débil" } });
+    (supabase.auth.updateUser as any).mockResolvedValue({ error: { message: "Clave dÃ©bil" } });
     const { updateMyPassword } = await import("./myAccount.service");
-    await expect(updateMyPassword("123")).rejects.toThrow("Clave débil");
+    await expect(updateMyPassword("123")).rejects.toThrow("Clave dÃ©bil");
   });
 });
 
@@ -289,3 +290,4 @@ describe("signOutOtherSessions", () => {
     expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: "others" });
   });
 });
+

@@ -363,3 +363,4 @@ export interface AdmissionOnboardingCloseInput {
   volunteerId: string;
   actorId?: string | null;
 }
+

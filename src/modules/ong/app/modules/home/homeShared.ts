@@ -409,3 +409,4 @@ export async function sumHours(options: {
 
   return Math.round(total * 10) / 10;
 }
+

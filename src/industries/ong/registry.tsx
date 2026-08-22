@@ -23,7 +23,8 @@ import {
   UserCog,
   UserPlus,
   Users,
-import { Video } from "lucide-react";
+  Video
+} from "lucide-react";
 import type { RegisteredModuleDefinition, IndustryDefinition } from "../../core/tenant/registry-types";
 import { OngShell } from "./OngShell";
 import { AccessControl } from "../../modules/ong/app/pages/AccessControl";
@@ -755,5 +756,5 @@ export const INDUSTRY_DEFINITION: IndustryDefinition = {
   ],
 };
 
-e x p o r t   c o n s t   M O D U L E _ D E F I N I T I O N S   =   o n g M o d u l e D e f i n i t i o n s ;  
- 
+export const MODULE_DEFINITIONS = ongModuleDefinitions;
+

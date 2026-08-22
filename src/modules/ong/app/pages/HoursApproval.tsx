@@ -16,16 +16,16 @@ import { HOURS_APPROVAL_ENTITY } from "../services/operacion/aprobaciones.servic
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 const INPUT_STYLE = {
   border: "1px solid var(--t-border)",
@@ -181,7 +181,7 @@ export function HoursApproval() {
       if (!result) {
         return;
       }
-      toast.success("El registro volvió a estado pendiente.");
+      toast.success("El registro volviÃ³ a estado pendiente.");
     } catch (actionError) {
       toast.error(
         actionError instanceof Error
@@ -197,7 +197,7 @@ export function HoursApproval() {
     }
     const targetStateId = stateByKind.get(resolutionTarget.action);
     if (!targetStateId) {
-      setResolutionError("No existe estado configurado para esta acción.");
+      setResolutionError("No existe estado configurado para esta acciÃ³n.");
       return;
     }
     const comment = resolutionComment.trim();
@@ -214,14 +214,14 @@ export function HoursApproval() {
       if (!result) {
         return;
       }
-      toast.success("Aprobación actualizada.");
+      toast.success("AprobaciÃ³n actualizada.");
       closeResolutionModal();
       if (isDetailOpen && detailApprovalId === resolutionTarget.approvalId) {
         refreshDetail();
       }
     } catch (actionError) {
       setResolutionError(
-        actionError instanceof Error ? actionError.message : "No se pudo resolver la aprobación."
+        actionError instanceof Error ? actionError.message : "No se pudo resolver la aprobaciÃ³n."
       );
     }
   }
@@ -230,8 +230,8 @@ export function HoursApproval() {
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeUp}>
         <PageHeader
-          title="Aprobación de horas"
-          description="Gestión de aprobaciones para registros de horas de voluntarios. Resuelve, rechaza o devuelve a pendiente desde esta vista."
+          title="AprobaciÃ³n de horas"
+          description="GestiÃ³n de aprobaciones para registros de horas de voluntarios. Resuelve, rechaza o devuelve a pendiente desde esta vista."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -327,7 +327,7 @@ export function HoursApproval() {
               },
             },
             {
-              label: "Solicitar revisión",
+              label: "Solicitar revisiÃ³n",
               onClick: (item) => void requestReview(item),
             },
             {
@@ -352,10 +352,10 @@ export function HoursApproval() {
         >
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Detalle de aprobación
+              Detalle de aprobaciÃ³n
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Registro de horas vinculado y estado actual de la aprobación.
+              Registro de horas vinculado y estado actual de la aprobaciÃ³n.
             </p>
           </div>
           <button
@@ -405,7 +405,7 @@ export function HoursApproval() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="ID aprobación" value={detail.approval.id} />
+                <DetailField label="ID aprobaciÃ³n" value={detail.approval.id} />
                 <DetailField label="Voluntario" value={detail.approval.subjectName} />
                 <DetailField label="Actividad" value={detail.approval.entityTitle} />
                 <DetailField label="Proyecto" value={detail.approval.entitySubtitle} />
@@ -448,7 +448,7 @@ export function HoursApproval() {
                   style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
                 >
                   <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                    Comentario de resolución
+                    Comentario de resoluciÃ³n
                   </p>
                   <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
                     {detail.approval.comment}
@@ -465,7 +465,7 @@ export function HoursApproval() {
                   }}
                   disabled={isCreating}
                 >
-                  Solicitar revisión
+                  Solicitar revisiÃ³n
                 </OutlineButton>
                 <OutlineButton
                   size="sm"
@@ -504,7 +504,7 @@ export function HoursApproval() {
               {resolutionTarget?.action === "approved" ? "Aprobar horas" : "Rechazar horas"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario es opcional y queda registrado en la aprobación y en el registro de horas.
+              El comentario es opcional y queda registrado en la aprobaciÃ³n y en el registro de horas.
             </p>
           </div>
           <button
@@ -552,3 +552,4 @@ export function HoursApproval() {
     </motion.div>
   );
 }
+

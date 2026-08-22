@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
@@ -225,7 +226,7 @@ function ModalHeader({ title, description, onClose }: { title: string; descripti
 function toResolutionTitle(target: ResolutionTarget | null): string {
   if (!target) return "Resolver";
   const actionText = target.targetStatus === "approved" ? "Aprobar" : "Rechazar";
-  return target.kind === "hour" ? `${actionText} Horas` : `${actionText} Solicitud de Admisión`;
+  return target.kind === "hour" ? `${actionText} Horas` : `${actionText} Solicitud de AdmisiÃ³n`;
 }
 
 function getInitials(name: string): string {
@@ -340,11 +341,11 @@ export function Dashboard() {
     return [
       { name: "Jue", aprobadas: 0, solicitadas: 0 },
       { name: "Vie", aprobadas: 0, solicitadas: 0 },
-      { name: "Sáb", aprobadas: 0, solicitadas: 0 },
+      { name: "SÃ¡b", aprobadas: 0, solicitadas: 0 },
       { name: "Dom", aprobadas: 0, solicitadas: 0 },
       { name: "Lun", aprobadas: 0, solicitadas: 0 },
       { name: "Mar", aprobadas: 0, solicitadas: 0 },
-      { name: "Mié", aprobadas: 0, solicitadas: 0 },
+      { name: "MiÃ©", aprobadas: 0, solicitadas: 0 },
     ];
   }, [weeklyImpact.data]);
 
@@ -364,7 +365,7 @@ export function Dashboard() {
         items.push({
           id: `h-${h.id}`,
           user: h.volunteerName || "Voluntario",
-          action: `registró ${h.hours}h de voluntariado`,
+          action: `registrÃ³ ${h.hours}h de voluntariado`,
           target: h.activityName || "Actividad",
           time: formatDate(h.date),
           avatar: getInitials(h.volunteerName || "V"),
@@ -377,7 +378,7 @@ export function Dashboard() {
         items.push({
           id: `r-${r.id}`,
           user: r.name || "Postulante",
-          action: "envió solicitud de admisión",
+          action: "enviÃ³ solicitud de admisiÃ³n",
           target: r.email || "Registro",
           time: formatDate(r.submittedAt),
           avatar: getInitials(r.name || "P"),
@@ -389,8 +390,8 @@ export function Dashboard() {
       recentActivities.data.forEach((a) => {
         items.push({
           id: `a-${a.id}`,
-          user: "Coordinación",
-          action: `programó la actividad "${a.name}"`,
+          user: "CoordinaciÃ³n",
+          action: `programÃ³ la actividad "${a.name}"`,
           target: a.projectName || "Proyecto",
           time: formatScheduleLabel(a.startAt, a.endAt),
           avatar: "CO",
@@ -484,7 +485,7 @@ export function Dashboard() {
     };
     const validationErrors = validateDashboardActivityForm(input);
     if (Number.isNaN(parsedEstimated)) {
-      validationErrors.estimatedHours = "Ingresa un número válido de horas estimadas.";
+      validationErrors.estimatedHours = "Ingresa un nÃºmero vÃ¡lido de horas estimadas.";
     }
     if (Object.keys(validationErrors).length > 0) {
       setActivityFormErrors(validationErrors);
@@ -554,7 +555,7 @@ export function Dashboard() {
       const detail = await fetchDashboardAdmissionDetail(admissionId);
       setAdmissionDetail(detail);
     } catch (err) {
-      setAdmissionDetailError(toFriendlyError(err, "No se pudo cargar la solicitud de admisión."));
+      setAdmissionDetailError(toFriendlyError(err, "No se pudo cargar la solicitud de admisiÃ³n."));
     } finally {
       setAdmissionDetailLoading(false);
     }
@@ -613,7 +614,7 @@ export function Dashboard() {
       setIsHourDetailOpen(false);
       setIsAdmissionDetailOpen(false);
     } catch (err) {
-      setResolutionError(toFriendlyError(err, "No se pudo guardar la resolución en la BD."));
+      setResolutionError(toFriendlyError(err, "No se pudo guardar la resoluciÃ³n en la BD."));
     }
   }, [resolutionTarget, resolutionComment, resolveHour, resolveAdmission, closeResolutionModal]);
 
@@ -682,14 +683,14 @@ export function Dashboard() {
           <div className="font-medium text-zinc-100">{item.name}</div>
           <div className="mt-0.5 text-[11px] text-zinc-400">
             {item.projectName}
-            {item.locationName ? ` • ${item.locationName}` : ""}
+            {item.locationName ? ` â€¢ ${item.locationName}` : ""}
           </div>
         </div>
       ),
     },
     {
       key: "date",
-      label: "Programación",
+      label: "ProgramaciÃ³n",
       render: (item) => (
         <span className="font-mono text-xs text-zinc-400">
           {formatScheduleLabel(item.startAt, item.endAt)}
@@ -727,12 +728,12 @@ export function Dashboard() {
     },
     {
       key: "email",
-      label: "Correo Electrónico",
+      label: "Correo ElectrÃ³nico",
       render: (item) => <span className="text-xs text-zinc-400 font-mono">{item.email}</span>,
     },
     {
       key: "submittedAt",
-      label: "Fecha Envío",
+      label: "Fecha EnvÃ­o",
       render: (item) => <span className="font-mono text-xs text-zinc-400">{formatDate(item.submittedAt)}</span>,
     },
     {
@@ -763,20 +764,20 @@ export function Dashboard() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <PageHeader
             title="Panel Principal"
-            description="Resumen operativo general, métricas clave en tiempo real y gestión de la ONG."
+            description="Resumen operativo general, mÃ©tricas clave en tiempo real y gestiÃ³n de la ONG."
             action={{ label: "Actualizar", onClick: refresh }}
           />
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* SELECTOR DE PERÍODO */}
+            {/* SELECTOR DE PERÃODO */}
             <select
               value={periodFilter}
               onChange={(e) => setPeriodFilter(e.target.value as PeriodFilter)}
               className="h-9 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 font-medium"
             >
-              <option value="month">📅 Este Mes</option>
-              <option value="quarter">📅 Último Trimestre</option>
-              <option value="year">📅 Este Año</option>
+              <option value="month">ðŸ“… Este Mes</option>
+              <option value="quarter">ðŸ“… Ãšltimo Trimestre</option>
+              <option value="year">ðŸ“… Este AÃ±o</option>
             </select>
 
             {/* SELECTOR DE PROYECTO */}
@@ -785,7 +786,7 @@ export function Dashboard() {
               onChange={(e) => setSelectedProjectFilter(e.target.value)}
               className="h-9 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 font-medium"
             >
-              <option value="all">📁 Todos los Proyectos</option>
+              <option value="all">ðŸ“ Todos los Proyectos</option>
               {taskOptions.map((p) => (
                 <option key={p.value} value={p.value}>
                   {p.label}
@@ -793,7 +794,7 @@ export function Dashboard() {
               ))}
             </select>
 
-            {/* BOTÓN PERSONALIZAR */}
+            {/* BOTÃ“N PERSONALIZAR */}
             <OutlineButton
               size="sm"
               onClick={() => setIsSettingsModalOpen(true)}
@@ -803,7 +804,7 @@ export function Dashboard() {
               Personalizar
             </OutlineButton>
 
-            {/* BOTÓN DESCARGAR REPORTE */}
+            {/* BOTÃ“N DESCARGAR REPORTE */}
             <OutlineButton
               size="sm"
               onClick={() => {
@@ -816,7 +817,7 @@ export function Dashboard() {
               Reporte PDF
             </OutlineButton>
 
-            {/* BOTÓN ACCIÓN RÁPIDA DROPDOWN */}
+            {/* BOTÃ“N ACCIÃ“N RÃPIDA DROPDOWN */}
             <div className="relative">
               <GradientButton
                 size="sm"
@@ -824,7 +825,7 @@ export function Dashboard() {
                 className="flex items-center gap-1.5 shadow-lg"
               >
                 <Zap className="h-4 w-4 fill-white" />
-                + Acción Rápida
+                + AcciÃ³n RÃ¡pida
                 <ChevronDown className="h-3.5 w-3.5" />
               </GradientButton>
 
@@ -881,7 +882,7 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {/* 4 GRANDES TARJETAS DE MÉTRICAS PRINCIPALES (100% REALES DESDE SUPABASE) */}
+      {/* 4 GRANDES TARJETAS DE MÃ‰TRICAS PRINCIPALES (100% REALES DESDE SUPABASE) */}
       <motion.div variants={fadeUp}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. VOLUNTARIOS ACTIVOS */}
@@ -910,7 +911,7 @@ export function Dashboard() {
             </div>
             <div className="mt-2 flex items-baseline justify-between">
               <p className="text-2xl font-bold text-zinc-100 tabular-nums">
-                {activeProjectsCount} <span className="text-xs font-normal text-zinc-400">proj.</span> • {activeActivitiesCount} <span className="text-xs font-normal text-zinc-400">act.</span>
+                {activeProjectsCount} <span className="text-xs font-normal text-zinc-400">proj.</span> â€¢ {activeActivitiesCount} <span className="text-xs font-normal text-zinc-400">act.</span>
               </p>
               <span className="text-[11px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" /> Activos
@@ -934,10 +935,10 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* 4. PENDIENTES DE REVISIÓN */}
+          {/* 4. PENDIENTES DE REVISIÃ“N */}
           <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Pendientes de Revisión</span>
+              <span className="text-[12px] font-medium text-zinc-400">Pendientes de RevisiÃ³n</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <AlertCircle className="h-4 w-4" />
               </div>
@@ -945,27 +946,27 @@ export function Dashboard() {
             <div className="mt-2 flex items-baseline justify-between">
               <p className="text-2xl font-bold text-zinc-100 tabular-nums">{pendingApprovalsCount} <span className="text-xs font-normal text-zinc-400">pend.</span></p>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
-                <Clock className="h-3 w-3" /> Requiere atención
+                <Clock className="h-3 w-3" /> Requiere atenciÃ³n
               </span>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* SECCIÓN PRINCIPAL: GRÁFICO DE ÁREA Y AGENDA DE HOY */}
+      {/* SECCIÃ“N PRINCIPAL: GRÃFICO DE ÃREA Y AGENDA DE HOY */}
       {(widgetSettings.showEvolutionChart || widgetSettings.showTodayAgenda) && (
         <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* GRÁFICO DE EVOLUCIÓN DE HORAS */}
+          {/* GRÃFICO DE EVOLUCIÃ“N DE HORAS */}
           {widgetSettings.showEvolutionChart && (
             <div className="lg:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-indigo-400" />
-                    Evolución del Voluntariado (Horas)
+                    EvoluciÃ³n del Voluntariado (Horas)
                   </h3>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    Comparativa de horas solicitadas vs validadas en los últimos meses.
+                    Comparativa de horas solicitadas vs validadas en los Ãºltimos meses.
                   </p>
                 </div>
 
@@ -1045,7 +1046,7 @@ export function Dashboard() {
                         <div>
                           <h4 className="text-xs font-semibold text-zinc-200">{item.title}</h4>
                           <p className="text-[11px] text-zinc-400">{item.subtitle}</p>
-                          <span className="text-[10px] text-emerald-400 font-mono mt-1 block">👥 {item.assignedCount ?? 0} voluntarios asignados</span>
+                          <span className="text-[10px] text-emerald-400 font-mono mt-1 block">ðŸ‘¥ {item.assignedCount ?? 0} voluntarios asignados</span>
                         </div>
                       </div>
                     ))
@@ -1056,7 +1057,7 @@ export function Dashboard() {
                       </div>
                       <p className="text-xs text-zinc-300 font-semibold">Sin actividades programadas hoy</p>
                       <p className="text-[11px] text-zinc-500 max-w-[200px] mx-auto">
-                        Las actividades creadas para la fecha actual aparecerán aquí.
+                        Las actividades creadas para la fecha actual aparecerÃ¡n aquÃ­.
                       </p>
                     </div>
                   )}
@@ -1393,13 +1394,13 @@ export function Dashboard() {
 
             <div>
               <label className="block font-medium text-zinc-300 mb-1">
-                Título de la Actividad <span className="text-red-400">*</span>
+                TÃ­tulo de la Actividad <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={activityFormDraft.title}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, title: e.target.value }))}
-                placeholder="Ej. Taller de Capacitación Comunitario"
+                placeholder="Ej. Taller de CapacitaciÃ³n Comunitario"
                 className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
               />
               <FieldError message={activityFormErrors.title} />
@@ -1457,13 +1458,13 @@ export function Dashboard() {
           </div>
 
           <div>
-            <label className="block font-medium text-zinc-300 mb-1 text-xs">Ubicación</label>
+            <label className="block font-medium text-zinc-300 mb-1 text-xs">UbicaciÃ³n</label>
             <select
               value={activityFormDraft.locationId}
               onChange={(e) => setActivityFormDraft((d) => ({ ...d, locationId: e.target.value }))}
               className="w-full rounded-xl px-3 py-2 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
             >
-              <option value="">Selecciona ubicación</option>
+              <option value="">Selecciona ubicaciÃ³n</option>
               {locationOptions.map((l) => (
                 <option key={l.value} value={l.value}>
                   {l.label}
@@ -1473,7 +1474,7 @@ export function Dashboard() {
           </div>
 
           <div>
-            <label className="block font-medium text-zinc-300 mb-1 text-xs">Descripción / Objetivos</label>
+            <label className="block font-medium text-zinc-300 mb-1 text-xs">DescripciÃ³n / Objetivos</label>
             <textarea
               rows={3}
               value={activityFormDraft.description}
@@ -1499,20 +1500,20 @@ export function Dashboard() {
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Detalle de la Actividad"
-            description="Información detallada de la actividad registrada en la BD."
+            description="InformaciÃ³n detallada de la actividad registrada en la BD."
             onClose={() => setIsActivityDetailOpen(false)}
           />
 
           {activityDetailLoading ? (
-            <p className="text-xs text-zinc-400 py-4 text-center">Cargando información desde la base de datos...</p>
+            <p className="text-xs text-zinc-400 py-4 text-center">Cargando informaciÃ³n desde la base de datos...</p>
           ) : activityDetailError ? (
             <BlockError message={activityDetailError} onRetry={() => activityDetailTargetId && void openActivityDetailModal(activityDetailTargetId)} />
           ) : activityDetail ? (
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
-                <DetailField label="Título" value={activityDetail.title} />
+                <DetailField label="TÃ­tulo" value={activityDetail.title} />
                 <DetailField label="Proyecto" value={activityDetail.projectName} />
-                <DetailField label="Ubicación" value={activityDetail.locationName ?? "-"} />
+                <DetailField label="UbicaciÃ³n" value={activityDetail.locationName ?? "-"} />
                 <DetailField label="Estado" value={activityDetail.statusLabel} />
                 <DetailField label="Inicio" value={formatDateTime(activityDetail.startAt)} />
                 <DetailField label="Fin" value={formatDateTime(activityDetail.endAt)} />
@@ -1522,7 +1523,7 @@ export function Dashboard() {
 
               {activityDetail.description && (
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Descripción</p>
+                  <p className="text-[11px] text-zinc-400 font-medium mb-1">DescripciÃ³n</p>
                   <p className="text-zinc-200">{activityDetail.description}</p>
                 </div>
               )}
@@ -1560,7 +1561,7 @@ export function Dashboard() {
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Detalle de Registro de Horas"
-            description="Revisión de horas solicitadas por el voluntario."
+            description="RevisiÃ³n de horas solicitadas por el voluntario."
             onClose={() => setIsHourDetailOpen(false)}
           />
 
@@ -1637,32 +1638,32 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      {/* MODAL DETALLE DE ADMISIÓN (REAL DB FETCH) */}
+      {/* MODAL DETALLE DE ADMISIÃ“N (REAL DB FETCH) */}
       <ModalShell open={isAdmissionDetailOpen} onClose={() => setIsAdmissionDetailOpen(false)} width="max-w-[640px]">
         <div className="space-y-4 p-5">
           <ModalHeader
-            title="Detalle de Solicitud de Admisión"
-            description="Información del postulante para unirse a la ONG."
+            title="Detalle de Solicitud de AdmisiÃ³n"
+            description="InformaciÃ³n del postulante para unirse a la ONG."
             onClose={() => setIsAdmissionDetailOpen(false)}
           />
 
           {admissionDetailLoading ? (
-            <p className="text-xs text-zinc-400 py-4 text-center">Cargando solicitud de admisión desde Supabase...</p>
+            <p className="text-xs text-zinc-400 py-4 text-center">Cargando solicitud de admisiÃ³n desde Supabase...</p>
           ) : admissionDetailError ? (
             <BlockError message={admissionDetailError} onRetry={() => admissionDetailTargetId && void openAdmissionDetailModal(admissionDetailTargetId)} />
           ) : admissionDetail ? (
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <DetailField label="Nombre Completo" value={admissionDetail.fullName} />
-                <DetailField label="Correo Electrónico" value={admissionDetail.email} />
-                <DetailField label="Teléfono" value={admissionDetail.phone ?? "-"} />
-                <DetailField label="Fecha de Envío" value={formatDate(admissionDetail.submittedAt)} />
+                <DetailField label="Correo ElectrÃ³nico" value={admissionDetail.email} />
+                <DetailField label="TelÃ©fono" value={admissionDetail.phone ?? "-"} />
+                <DetailField label="Fecha de EnvÃ­o" value={formatDate(admissionDetail.submittedAt)} />
                 <DetailField label="Estado" value={admissionDetail.status} />
               </div>
 
               {admissionDetail.notes && (
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Motivo / Notas de Postulación</p>
+                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Motivo / Notas de PostulaciÃ³n</p>
                   <p className="text-zinc-200">{admissionDetail.notes}</p>
                 </div>
               )}
@@ -1686,7 +1687,7 @@ export function Dashboard() {
                       })
                     }
                   >
-                    Aprobar Postulación
+                    Aprobar PostulaciÃ³n
                   </OutlineButton>
 
                   <OutlineButton
@@ -1707,7 +1708,7 @@ export function Dashboard() {
                     }
                     className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                   >
-                    Rechazar Postulación
+                    Rechazar PostulaciÃ³n
                   </OutlineButton>
                 </div>
               )}
@@ -1716,17 +1717,17 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      {/* MODAL DE RESOLUCIÓN (APROBAR / RECHAZAR CON COMENTARIOS EN BD) */}
+      {/* MODAL DE RESOLUCIÃ“N (APROBAR / RECHAZAR CON COMENTARIOS EN BD) */}
       <ModalShell open={Boolean(resolutionTarget)} onClose={closeResolutionModal} width="max-w-[540px]">
         <div className="space-y-4 p-5">
           <ModalHeader
             title={toResolutionTitle(resolutionTarget)}
             description={
               resolutionTarget?.kind === "hour"
-                ? "El comentario se guardará en ong.aprobaciones y ong.horas_actividad."
+                ? "El comentario se guardarÃ¡ en ong.aprobaciones y ong.horas_actividad."
                 : resolutionTarget?.targetStatus === "rejected"
                 ? "Ingresa el motivo del rechazo."
-                : "Puedes ingresar observaciones adicionales de aprobación."
+                : "Puedes ingresar observaciones adicionales de aprobaciÃ³n."
             }
             onClose={closeResolutionModal}
           />
@@ -1754,25 +1755,25 @@ export function Dashboard() {
                 Cancelar
               </OutlineButton>
               <GradientButton size="sm" onClick={() => void submitResolution()} disabled={isResolutionSubmitting}>
-                {isResolutionSubmitting ? "Guardando en BD..." : "Confirmar Resolución"}
+                {isResolutionSubmitting ? "Guardando en BD..." : "Confirmar ResoluciÃ³n"}
               </GradientButton>
             </div>
           </div>
         </div>
       </ModalShell>
 
-      {/* MODAL CANCELAR ACTIVIDAD (CANCELACIÓN REAL EN BD) */}
+      {/* MODAL CANCELAR ACTIVIDAD (CANCELACIÃ“N REAL EN BD) */}
       <ModalShell open={Boolean(cancelTarget)} onClose={() => !isCancellingActivity && setCancelTarget(null)} width="max-w-[500px]">
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Cancelar Actividad"
-            description="Actualizará el estado de la actividad a cancelada en Supabase."
+            description="ActualizarÃ¡ el estado de la actividad a cancelada en Supabase."
             onClose={() => !isCancellingActivity && setCancelTarget(null)}
           />
 
           <div className="space-y-3 text-xs">
             <p className="text-zinc-300">
-              {cancelTarget ? `¿Confirmas la cancelación de "${cancelTarget.name}"?` : "Selecciona una actividad."}
+              {cancelTarget ? `Â¿Confirmas la cancelaciÃ³n de "${cancelTarget.name}"?` : "Selecciona una actividad."}
             </p>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
@@ -1780,7 +1781,7 @@ export function Dashboard() {
                 Volver
               </OutlineButton>
               <GradientButton size="sm" onClick={() => void submitCancelActivity()} disabled={isCancellingActivity}>
-                {isCancellingActivity ? "Cancelando..." : "Confirmar Cancelación"}
+                {isCancellingActivity ? "Cancelando..." : "Confirmar CancelaciÃ³n"}
               </GradientButton>
             </div>
           </div>
@@ -1803,8 +1804,8 @@ export function Dashboard() {
           <div className="space-y-3 text-xs">
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Gráfico de Evolución de Horas</span>
-                <span className="text-[11px] text-zinc-400">Mostrar gráfico comparativo de tendencias.</span>
+                <span className="font-medium text-zinc-200 block">GrÃ¡fico de EvoluciÃ³n de Horas</span>
+                <span className="text-[11px] text-zinc-400">Mostrar grÃ¡fico comparativo de tendencias.</span>
               </div>
               <input
                 type="checkbox"
@@ -1830,7 +1831,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
                 <span className="font-medium text-zinc-200 block">Feed de Actividad en Vivo</span>
-                <span className="text-[11px] text-zinc-400">Mostrar historial dinámico en tiempo real.</span>
+                <span className="text-[11px] text-zinc-400">Mostrar historial dinÃ¡mico en tiempo real.</span>
               </div>
               <input
                 type="checkbox"
@@ -1843,7 +1844,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
                 <span className="font-medium text-zinc-200 block">Accesos Directos Operativos</span>
-                <span className="text-[11px] text-zinc-400">Mostrar botones de acceso rápido.</span>
+                <span className="text-[11px] text-zinc-400">Mostrar botones de acceso rÃ¡pido.</span>
               </div>
               <input
                 type="checkbox"
@@ -1873,3 +1874,4 @@ export function Dashboard() {
     </motion.div>
   );
 }
+

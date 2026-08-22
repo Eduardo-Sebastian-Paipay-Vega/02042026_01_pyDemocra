@@ -70,3 +70,4 @@ export function useCategoriaFinancieraDetail(categoryId: string | null) {
     refresh,
   };
 }
+

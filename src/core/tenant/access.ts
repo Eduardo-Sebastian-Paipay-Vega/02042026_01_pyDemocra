@@ -162,3 +162,4 @@ export function isFinanciallySuspended(context: TenantContextValue | null | unde
 export function isFinanciallyReadOnly(context: TenantContextValue | null | undefined) {
   return context?.financialPolicy.isReadOnly === true;
 }
+

@@ -1,9 +1,9 @@
 import type { IndustryDefinition, IndustryId } from "./registry-types";
 
-// Vite inyectará automáticamente todos los registry.tsx que encuentre en industries/
+// Vite inyectarÃ¡ automÃ¡ticamente todos los registry.tsx que encuentre en industries/
 const modules = import.meta.glob('../../industries/*/registry.tsx', { eager: true });
 
-// Mapea dinámicamente las industrias que tengan INDUSTRY_DEFINITION exportado
+// Mapea dinÃ¡micamente las industrias que tengan INDUSTRY_DEFINITION exportado
 const dynamicIndustries: IndustryDefinition[] = Object.values(modules)
   .map((mod: any) => mod.INDUSTRY_DEFINITION)
   .filter(Boolean);
@@ -53,3 +53,4 @@ export function isActiveIndustryId(industryId: string | null | undefined): indus
     (definition) => definition.id === industryId && definition.status === "active"
   );
 }
+

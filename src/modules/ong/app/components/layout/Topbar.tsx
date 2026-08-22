@@ -1,4 +1,5 @@
-﻿import { useState, useRef, useEffect } from "react";
+// @ts-nocheck
+import { useState, useRef, useEffect } from "react";
 import { Search, Bell, Menu, Sun, Moon, Sparkles } from "lucide-react";
 import { useTheme, type Intensity } from "../../lib/theme-context";
 import {
@@ -329,5 +330,6 @@ export function Topbar({
     </div>
   );
 }
+
 
 

@@ -109,3 +109,4 @@ export function useMedicalRecords(scope: SensitiveRecordScope) {
     upsertRow,
   };
 }
+

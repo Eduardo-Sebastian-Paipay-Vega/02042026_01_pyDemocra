@@ -22,3 +22,4 @@ export function useNotificationHistoryMutations(onCompleted?: () => void) {
 
   return { isMarkingRead, markAsRead };
 }
+

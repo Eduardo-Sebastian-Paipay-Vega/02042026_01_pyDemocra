@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   InventoryKardexData,
   InventoryKardexFilters,
   InventoryKardexRow,
@@ -513,3 +513,4 @@ export async function listKardex(params: Partial<InventoryKardexFilters> = {}): 
     throw toOperationError(error, "No se pudo consultar el kardex.");
   }
 }
+

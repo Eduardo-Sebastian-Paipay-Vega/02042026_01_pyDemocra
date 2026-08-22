@@ -14,3 +14,4 @@ createRoot(document.getElementById("root")!).render(
 requestAnimationFrame(() => {
   document.documentElement.classList.add("loaded");
 });
+

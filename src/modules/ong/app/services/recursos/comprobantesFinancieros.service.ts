@@ -1,4 +1,4 @@
-﻿import { supabase } from "../../../supabaseClient";
+import { supabase } from "../../../supabaseClient";
 import type { FinancialMutationFeedback, FinancialReceiptCreateInput, FinancialReceiptRow, FinancialReceiptUpdateInput } from "../../modules/resources/types";
 import { finanzasSchema, isRouteValueValid, sanitizeFileName, sanitizeOptionalId, sanitizePath, sanitizeText, toDateTimeLabel, toOperationError } from "./shared";
 
@@ -147,3 +147,4 @@ export async function removeOrVoidComprobanteFinanciero(receiptId: string): Prom
 export async function listComprobantesFinancierosByTransaccion(transactionId: string) {
   return listComprobantesByTransaccion(transactionId);
 }
+

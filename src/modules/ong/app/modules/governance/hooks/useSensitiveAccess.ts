@@ -77,3 +77,4 @@ export function useSensitiveAccess(filters: SensitiveAccessLogFilters) {
     refresh,
   };
 }
+

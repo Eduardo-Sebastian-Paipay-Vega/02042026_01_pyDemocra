@@ -43,7 +43,7 @@ export function VisualShowcase() {
             </span>
           </h2>
           <p className="text-base font-light" style={{ color: "var(--body-fg)" }}>
-            Cada voto cuenta. Cada decisión, documentada.
+            Cada voto cuenta. Cada decisiÃ³n, documentada.
           </p>
         </motion.div>
 
@@ -97,16 +97,16 @@ export function VisualShowcase() {
                       className="text-[10px] font-light tracking-widest uppercase mb-1.5"
                       style={{ color: "var(--body-fg)" }}
                     >
-                      Votación #Q2-2026 · Abierta
+                      VotaciÃ³n #Q2-2026 Â· Abierta
                     </p>
                     <h3 className="text-base font-semibold text-white/90 leading-snug max-w-[240px]">
-                      Asignación de presupuesto tecnológico
+                      AsignaciÃ³n de presupuesto tecnolÃ³gico
                     </h3>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-end gap-2.5 flex-shrink-0">
-                  {/* Live badge — RED pulse per spec */}
+                  {/* Live badge â€” RED pulse per spec */}
                   <div
                     className="flex items-center gap-1.5 rounded-full px-3 py-1"
                     style={{
@@ -189,12 +189,12 @@ export function VisualShowcase() {
                 style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
               >
                 <p className="text-[11px] font-light font-mono" style={{ color: "var(--body-fg)" }}>
-                  287 participantes · Cierra en 4h 22m
+                  287 participantes Â· Cierra en 4h 22m
                 </p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
                   <span className="text-[11px] font-light" style={{ color: "var(--body-fg)" }}>
-                    Quórum alcanzado
+                    QuÃ³rum alcanzado
                   </span>
                 </div>
               </div>
@@ -205,3 +205,4 @@ export function VisualShowcase() {
     </section>
   );
 }
+

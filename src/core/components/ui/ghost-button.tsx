@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 interface GhostButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -37,3 +37,5 @@ export function GhostButton({
     </button>
   );
 }
+
+

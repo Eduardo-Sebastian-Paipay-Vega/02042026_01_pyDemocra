@@ -244,7 +244,7 @@ export function NotificationTemplates() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <PageHeader
         title="Plantillas"
-        description="Crea y administra plantillas de notificación por canal. Cada plantilla puede tener variables JSON y un código de evento para disparos automáticos."
+        description="Crea y administra plantillas de notificaciÃ³n por canal. Cada plantilla puede tener variables JSON y un cÃ³digo de evento para disparos automÃ¡ticos."
         action={
           data.access.canManageTemplates
             ? { label: "Nueva plantilla", onClick: openCreateModal }
@@ -455,7 +455,7 @@ export function NotificationTemplates() {
                 {editingTemplate ? "Editar plantilla" : "Nueva plantilla"}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                {editingTemplate ? "Modifica los campos de la plantilla existente." : "Completa los campos para crear una nueva plantilla de notificación."}
+                {editingTemplate ? "Modifica los campos de la plantilla existente." : "Completa los campos para crear una nueva plantilla de notificaciÃ³n."}
               </p>
             </div>
             <button
@@ -638,3 +638,4 @@ export function NotificationTemplates() {
     </motion.div>
   );
 }
+

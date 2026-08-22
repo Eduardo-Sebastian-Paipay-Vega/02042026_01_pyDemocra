@@ -34,7 +34,7 @@ function LoginPage() {
   const { session, login } = useAuth()
   
   if (session) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/app/dashboard" replace />
   }
   const navigate = useNavigate()
 
@@ -173,7 +173,7 @@ function FinanzasPage() {
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/educ">
       <Routes>
 
         {/* ── Public ──────────────────────────────────────────────────────── */}
@@ -184,7 +184,7 @@ export default function AppRouter() {
         <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
 
           {/* Dashboard */}
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/app/dashboard" element={<DashboardPage />} />
           <Route path="/demi" element={<DemiPage />} />
           <Route path="/profile" element={<ProfilePage userName={''} role={''} onLogout={() => {}} />} />
           <Route path="/settings" element={<SettingsPage />} />

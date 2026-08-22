@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 interface TimelineItem {
   id: string;
@@ -51,3 +51,5 @@ export function Timeline({ items, className }: TimelineProps) {
     </div>
   );
 }
+
+

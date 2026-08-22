@@ -4,12 +4,12 @@ const steps = [
   {
     number: "01",
     title: "Conecta",
-    description: "Crea tu organización en 5 minutos. Invita miembros vía email o SSO.",
+    description: "Crea tu organizaciÃ³n en 5 minutos. Invita miembros vÃ­a email o SSO.",
   },
   {
     number: "02",
     title: "Automatiza",
-    description: "Crea votaciones y encuestas con IA. Deliberación guiada al instante.",
+    description: "Crea votaciones y encuestas con IA. DeliberaciÃ³n guiada al instante.",
   },
   {
     number: "03",
@@ -33,7 +33,7 @@ export function HowItWorks() {
             Empieza en minutos
           </h2>
           <p className="text-base font-light" style={{ color: "var(--body-fg)" }}>
-            Sin configuración compleja. Sin equipos de IT.
+            Sin configuraciÃ³n compleja. Sin equipos de IT.
           </p>
         </motion.div>
 
@@ -80,3 +80,4 @@ export function HowItWorks() {
     </section>
   );
 }
+

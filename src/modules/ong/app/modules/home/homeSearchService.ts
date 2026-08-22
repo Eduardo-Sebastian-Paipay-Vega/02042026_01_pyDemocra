@@ -474,3 +474,4 @@ export async function fetchGlobalSearchDetail(
     ],
   };
 }
+

@@ -15,7 +15,7 @@ const plans = [
     features: [
       "Hasta 10 miembros",
       "5 votaciones activas",
-      "Dashboard básico",
+      "Dashboard bÃ¡sico",
       "Soporte por email",
       "API limitada",
     ],
@@ -32,12 +32,12 @@ const plans = [
       "Hasta 500 miembros",
       "Votaciones ilimitadas",
       "IA incorporada",
-      "Analítica avanzada",
+      "AnalÃ­tica avanzada",
       "API completa + Webhooks",
       "Slack / Teams / Jira",
       "Soporte 24/7 prioritario",
     ],
-    cta: "Prueba 14 días",
+    cta: "Prueba 14 dÃ­as",
     popular: true,
     action: "login" as const,
   },
@@ -49,7 +49,7 @@ const plans = [
     features: [
       "Miembros ilimitados",
       "SSO / SAML",
-      "Auditoría completa",
+      "AuditorÃ­a completa",
       "SLA 99.99%",
       "Onboarding dedicado",
       "GDPR / SOC2",
@@ -90,7 +90,7 @@ export function Pricing({ onOpenContact }: PricingProps) {
           </p>
         </motion.div>
 
-        {/* Cards — stretch to equal height */}
+        {/* Cards â€” stretch to equal height */}
         <div className="grid lg:grid-cols-3 gap-5 max-w-5xl mx-auto items-stretch">
           {plans.map((plan, i) => (
             <motion.div
@@ -102,7 +102,7 @@ export function Pricing({ onOpenContact }: PricingProps) {
               whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
               className="relative flex flex-col"
             >
-              {/* Centered "Más popular" badge — floats above card border */}
+              {/* Centered "MÃ¡s popular" badge â€” floats above card border */}
               {plan.popular && (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
                   <span
@@ -112,7 +112,7 @@ export function Pricing({ onOpenContact }: PricingProps) {
                       boxShadow: "0 0 20px rgba(0,85,255,0.4)",
                     }}
                   >
-                    Más popular
+                    MÃ¡s popular
                   </span>
                 </div>
               )}
@@ -181,11 +181,11 @@ export function Pricing({ onOpenContact }: PricingProps) {
                   </p>
                 </div>
 
-                {/* Features list — grows to fill */}
+                {/* Features list â€” grows to fill */}
                 <div className="space-y-2.5 mb-8 flex-1">
                   {plan.features.map((feat) => (
                     <div key={feat} className="flex items-start gap-2.5">
-                      {/* Blue check — brand color */}
+                      {/* Blue check â€” brand color */}
                       <Check
                         className="w-4 h-4 flex-shrink-0 mt-0.5"
                         style={{ color: "#0055FF", strokeWidth: 2.5 }}
@@ -197,7 +197,7 @@ export function Pricing({ onOpenContact }: PricingProps) {
                   ))}
                 </div>
 
-                {/* CTA button — always at bottom */}
+                {/* CTA button â€” always at bottom */}
                 <button
                   className="w-full h-11 rounded-xl text-sm font-semibold transition-all"
                   style={{
@@ -239,3 +239,4 @@ export function Pricing({ onOpenContact }: PricingProps) {
     </section>
   );
 }
+

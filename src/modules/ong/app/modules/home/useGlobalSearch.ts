@@ -135,3 +135,4 @@ export function useGlobalSearch(limitPerGroup = 6) {
     retry,
   };
 }
+

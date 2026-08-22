@@ -371,7 +371,7 @@ export function VolunteerRegistrationPage() {
           <GlassCard className="px-4 py-3">
             <p className="text-[11px] uppercase tracking-[0.18em] text-[#707070]">Estado</p>
             <p className="mt-1 text-[13px] text-[#F5F5F5]">
-              {preview ? `${preview.status} · ${preview.usesLabel}` : "Pendiente de validacion"}
+              {preview ? `${preview.status} Â· ${preview.usesLabel}` : "Pendiente de validacion"}
             </p>
           </GlassCard>
         </div>
@@ -779,3 +779,4 @@ export function VolunteerRegistrationPage() {
     </div>
   );
 }
+

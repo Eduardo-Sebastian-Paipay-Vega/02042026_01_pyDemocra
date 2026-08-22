@@ -22,7 +22,7 @@ export function GradientBackground() {
         }}
       />
 
-      {/* Blob 1 — electric blue, top-center */}
+      {/* Blob 1 â€” electric blue, top-center */}
       <motion.div
         className="absolute"
         style={{ y: y1, opacity: op1 }}
@@ -40,7 +40,7 @@ export function GradientBackground() {
         />
       </motion.div>
 
-      {/* Blob 2 — deep violet, mid-left */}
+      {/* Blob 2 â€” deep violet, mid-left */}
       <motion.div
         className="absolute inset-0"
         style={{ y: y2, opacity: op2 }}
@@ -58,7 +58,7 @@ export function GradientBackground() {
         />
       </motion.div>
 
-      {/* Blob 3 — dark violet, bottom-right */}
+      {/* Blob 3 â€” dark violet, bottom-right */}
       <motion.div
         className="absolute inset-0"
         style={{ y: y3 }}
@@ -78,7 +78,7 @@ export function GradientBackground() {
         />
       </motion.div>
 
-      {/* Pinpoint accent — electric blue near top */}
+      {/* Pinpoint accent â€” electric blue near top */}
       <motion.div
         className="absolute"
         animate={{ opacity:[0.1,0.2,0.1], scale:[1,1.25,1] }}
@@ -102,3 +102,4 @@ export function GradientBackground() {
     </div>
   );
 }
+

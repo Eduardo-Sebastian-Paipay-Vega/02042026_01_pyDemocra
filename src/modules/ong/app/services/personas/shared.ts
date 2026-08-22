@@ -405,3 +405,4 @@ export async function ensureSensitiveAccess(): Promise<SensitiveAccessState> {
   }
   return accessState;
 }
+

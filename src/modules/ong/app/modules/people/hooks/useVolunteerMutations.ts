@@ -75,3 +75,4 @@ export function useVolunteerMutations(onSuccess?: () => void) {
     deactivate,
   };
 }
+

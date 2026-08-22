@@ -5,7 +5,7 @@ import type {
   TenantRouteId,
 } from "./registry-types";
 
-// Vite inyectará automáticamente todos los registry.tsx que encuentre en industries/
+// Vite inyectarÃ¡ automÃ¡ticamente todos los registry.tsx que encuentre en industries/
 const modules = import.meta.glob('../../industries/*/registry.tsx', { eager: true });
 
 // Extrae todos los MODULE_DEFINITIONS de cada industria y los aplana en un solo array
@@ -59,3 +59,4 @@ export function findTenantRouteByPath(pathname: string) {
     ) ?? null
   );
 }
+

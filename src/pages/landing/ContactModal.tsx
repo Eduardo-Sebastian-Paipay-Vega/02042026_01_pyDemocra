@@ -16,7 +16,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     async (text: string, setter: (v: string) => void, originalLabel: string) => {
       try {
         await navigator.clipboard.writeText(text);
-        setter("¡Copiado!");
+        setter("Â¡Copiado!");
         setTimeout(() => setter(originalLabel), 2000);
       } catch {
         /* clipboard blocked */
@@ -40,7 +40,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
             transition={{ duration: 0.22 }}
           />
 
-          {/* Panel — spring entrance */}
+          {/* Panel â€” spring entrance */}
           <motion.div
             className="democra-modal__panel"
             role="dialog"
@@ -59,13 +59,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 onClick={onClose}
                 aria-label="Cerrar"
               >
-                ×
+                Ã—
               </button>
             </div>
 
             <h2 className="democra-modal__title">Impulsa tu proyecto</h2>
             <p className="democra-modal__desc">
-              Acceso directo a consultoría especializada. Sin intermediarios.
+              Acceso directo a consultorÃ­a especializada. Sin intermediarios.
             </p>
 
             <div className="contact-premium">
@@ -84,7 +84,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                   <span className="contact-premium__hint">Clic para copiar correo</span>
                 </div>
                 <div className="contact-premium__block">
-                  <div className="contact-premium__label">Línea de Consultoría</div>
+                  <div className="contact-premium__label">LÃ­nea de ConsultorÃ­a</div>
                   <button
                     className="contact-premium__value"
                     type="button"
@@ -117,8 +117,8 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 <div className="contact-premium__cta">
                   <div className="contact-premium__title">Soluciones a medida</div>
                   <div className="contact-premium__text">
-                    Escanea el código para una respuesta inmediata vía WhatsApp o
-                    utiliza nuestros accesos rápidos.
+                    Escanea el cÃ³digo para una respuesta inmediata vÃ­a WhatsApp o
+                    utiliza nuestros accesos rÃ¡pidos.
                   </div>
                   <div className="contact-premium__actions">
                     <button
@@ -148,3 +148,4 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     </AnimatePresence>
   );
 }
+

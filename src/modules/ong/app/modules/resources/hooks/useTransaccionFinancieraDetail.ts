@@ -70,3 +70,4 @@ export function useTransaccionFinancieraDetail(transactionId: string | null) {
     refresh,
   };
 }
+

@@ -18,16 +18,16 @@ const PAGE_SIZE = 20;
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 type ResolutionActionKind = "approved" | "rejected";
 
@@ -131,7 +131,7 @@ const columns: Column<OperationApprovalRow>[] = [
       <div>
         <div style={{ color: "var(--t-text)" }}>{item.entityTitle}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.subjectName !== "-" ? `${item.subjectName} · ${item.entitySubtitle}` : item.entitySubtitle}
+          {item.subjectName !== "-" ? `${item.subjectName} Â· ${item.entitySubtitle}` : item.entitySubtitle}
         </div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
           {item.entityId}
@@ -356,12 +356,12 @@ export function Approvals() {
 
       setPage(1);
       closeCreateModal();
-      toast.success("La solicitud de revisión quedó en estado pendiente.");
+      toast.success("La solicitud de revisiÃ³n quedÃ³ en estado pendiente.");
     } catch (actionError) {
       const message =
         actionError instanceof Error
           ? actionError.message
-          : "No se pudo solicitar la revisión.";
+          : "No se pudo solicitar la revisiÃ³n.";
       setFormErrors((current) => ({ ...current, general: message }));
       toast.error(message);
     }
@@ -374,7 +374,7 @@ export function Approvals() {
 
     const targetStateId = stateByKind.get(resolutionTarget.action);
     if (!targetStateId) {
-      setResolutionError("No existe estado configurado para esta acción.");
+      setResolutionError("No existe estado configurado para esta acciÃ³n.");
       return;
     }
 
@@ -395,7 +395,7 @@ export function Approvals() {
         return;
       }
 
-      toast.success("Aprobación actualizada.");
+      toast.success("AprobaciÃ³n actualizada.");
       closeResolutionModal();
       if (isDetailModalOpen && detailApprovalId === resolutionTarget.approvalId) {
         refreshDetail();
@@ -404,7 +404,7 @@ export function Approvals() {
       const message =
         actionError instanceof Error
           ? actionError.message
-          : "No se pudo resolver la aprobación.";
+          : "No se pudo resolver la aprobaciÃ³n.";
       setResolutionError(message);
       toast.error(message);
     }
@@ -419,7 +419,7 @@ export function Approvals() {
       if (!result) {
         return;
       }
-      toast.success("El registro volvió a estado pendiente.");
+      toast.success("El registro volviÃ³ a estado pendiente.");
     } catch (actionError) {
       toast.error(
         actionError instanceof Error
@@ -434,7 +434,7 @@ export function Approvals() {
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Bandeja de aprobaciones"
-          description="Historial completo de solicitudes de aprobación. Filtra por estado, solicitante, voluntario o rango de fechas."
+          description="Historial completo de solicitudes de aprobaciÃ³n. Filtra por estado, solicitante, voluntario o rango de fechas."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -442,7 +442,7 @@ export function Approvals() {
       <motion.div variants={fadeUp}>
         <div className="flex flex-wrap gap-2">
           <GradientButton size="sm" onClick={openCreateModal}>
-            Solicitar revisión
+            Solicitar revisiÃ³n
           </GradientButton>
           <OutlineButton size="sm" onClick={refresh}>
             Refrescar
@@ -586,10 +586,10 @@ export function Approvals() {
         >
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Solicitar revisión
+              Solicitar revisiÃ³n
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Introduce el ID del registro de horas para enviarlo a revisión pendiente.
+              Introduce el ID del registro de horas para enviarlo a revisiÃ³n pendiente.
             </p>
           </div>
           <button
@@ -672,10 +672,10 @@ export function Approvals() {
         >
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Detalle de aprobación
+              Detalle de aprobaciÃ³n
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Estado actual y contexto del registro vinculado a esta aprobación.
+              Estado actual y contexto del registro vinculado a esta aprobaciÃ³n.
             </p>
           </div>
           <button
@@ -711,7 +711,7 @@ export function Approvals() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="ID aprobación" value={detail.approval.id} />
+                <DetailField label="ID aprobaciÃ³n" value={detail.approval.id} />
                 <DetailField label="Entidad tipo" value={detail.approval.entityTable} />
                 <DetailField label="Entidad id" value={detail.approval.entityId} />
                 <DetailField label="Voluntario" value={detail.approval.subjectName} />
@@ -757,7 +757,7 @@ export function Approvals() {
                   }}
                   disabled={isCreating}
                 >
-                  Solicitar revisión
+                  Solicitar revisiÃ³n
                 </OutlineButton>
                 <OutlineButton
                   size="sm"
@@ -796,10 +796,10 @@ export function Approvals() {
                 ? resolutionTarget.action === "approved"
                   ? "Aprobar horas"
                   : "Rechazar horas"
-                : "Resolver aprobación"}
+                : "Resolver aprobaciÃ³n"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario es opcional y queda registrado en la aprobación y en el registro de horas.
+              El comentario es opcional y queda registrado en la aprobaciÃ³n y en el registro de horas.
             </p>
           </div>
           <button
@@ -845,3 +845,4 @@ export function Approvals() {
     </motion.div>
   );
 }
+

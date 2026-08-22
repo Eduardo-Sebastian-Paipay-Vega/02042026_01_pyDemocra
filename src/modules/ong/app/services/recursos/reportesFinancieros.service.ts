@@ -1,4 +1,4 @@
-﻿import type { FinancialExportResult, FinancialReportData, FinancialReportSummaryRow, FinancialReportsFilters, FinancialTransactionRow } from "../../modules/resources/types";
+import type { FinancialExportResult, FinancialReportData, FinancialReportSummaryRow, FinancialReportsFilters, FinancialTransactionRow } from "../../modules/resources/types";
 import { sanitizeText, toOperationError } from "./shared";
 import { listTransaccionesFinancieras } from "./transaccionesFinancieras.service";
 
@@ -86,3 +86,4 @@ export async function exportReporteFinanciero(filters: Partial<FinancialReportsF
     throw toOperationError(error, "No se pudo exportar el reporte financiero.");
   }
 }
+

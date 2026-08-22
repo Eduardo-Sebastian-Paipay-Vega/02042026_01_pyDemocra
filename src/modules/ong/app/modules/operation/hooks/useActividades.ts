@@ -121,3 +121,4 @@ export function useActividades(filters: OperationActivityFilters) {
     refresh,
   };
 }
+

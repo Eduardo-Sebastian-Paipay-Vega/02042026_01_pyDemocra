@@ -210,3 +210,4 @@ export interface GlobalSearchGroupedResults {
   activities: GlobalSearchItem[];
   admissions: GlobalSearchItem[];
 }
+

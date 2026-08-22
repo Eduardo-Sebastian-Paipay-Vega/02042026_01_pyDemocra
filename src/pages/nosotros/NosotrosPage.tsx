@@ -5,7 +5,7 @@ const values = [
   {
     title: "Transparencia",
     description:
-      "Procesos claros, información accesible y rendición de cuentas en cada paso.",
+      "Procesos claros, informaciÃ³n accesible y rendiciÃ³n de cuentas en cada paso.",
     icon: (
       <svg viewBox="0 0 40 40" fill="none" className="w-7 h-7">
         <rect x="8" y="8" width="24" height="24" rx="4" stroke="#0055FF" strokeWidth="1.5" />
@@ -27,7 +27,7 @@ const values = [
   {
     title: "Simplicidad",
     description:
-      "Menos fricción, más acción. Tecnología al servicio de las personas.",
+      "Menos fricciÃ³n, mÃ¡s acciÃ³n. TecnologÃ­a al servicio de las personas.",
     icon: (
       <svg viewBox="0 0 40 40" fill="none" className="w-7 h-7">
         <path d="M12 28L28 12M16 12h12v12" stroke="#0055FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -38,7 +38,7 @@ const values = [
 
 const team = [
   { name: "Eduardo Bastian", role: "Fundador & CEO", initials: "EB" },
-  { name: "Equipo de Producto", role: "Diseño & Ingeniería", initials: "EP" },
+  { name: "Equipo de Producto", role: "DiseÃ±o & IngenierÃ­a", initials: "EP" },
   { name: "Asesores", role: "Impacto Social", initials: "AS" },
 ];
 
@@ -56,7 +56,7 @@ export function NosotrosPage() {
         }}
       />
 
-      {/* ── NAVBAR ─────────────────────────────────────────── */}
+      {/* â”€â”€ NAVBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <header
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 h-16"
         style={{
@@ -88,7 +88,7 @@ export function NosotrosPage() {
       </header>
 
       <main className="relative z-10 pt-16">
-        {/* ── HERO ───────────────────────────────────────────── */}
+        {/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="py-36 px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
@@ -99,7 +99,7 @@ export function NosotrosPage() {
               className="text-xs font-semibold tracking-widest uppercase mb-6"
               style={{ color: "#0055FF" }}
             >
-              Quiénes somos
+              QuiÃ©nes somos
             </p>
             <h1
               className="font-display text-[clamp(3rem,8vw,6rem)] leading-[0.94] mb-7"
@@ -122,13 +122,13 @@ export function NosotrosPage() {
               className="text-lg font-light max-w-xl mx-auto"
               style={{ color: "var(--body-fg, #888)" }}
             >
-              Un equipo comprometido con empoderar organizaciones a través de
-              tecnología que amplifica el impacto social.
+              Un equipo comprometido con empoderar organizaciones a travÃ©s de
+              tecnologÃ­a que amplifica el impacto social.
             </p>
           </motion.div>
         </section>
 
-        {/* ── MISIÓN ─────────────────────────────────────────── */}
+        {/* â”€â”€ MISIÃ“N â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="py-24 px-6">
           <div
             className="absolute left-0 right-0 h-px"
@@ -145,7 +145,7 @@ export function NosotrosPage() {
                 className="text-xs font-semibold tracking-widest uppercase mb-4"
                 style={{ color: "#0055FF" }}
               >
-                Nuestra misión
+                Nuestra misiÃ³n
               </p>
               <h2
                 className="font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.0] mb-5"
@@ -157,9 +157,9 @@ export function NosotrosPage() {
                 className="text-base font-light leading-relaxed"
                 style={{ color: "var(--body-fg, #888)" }}
               >
-                Potenciar organizaciones sin fines de lucro a través de sistemas
-                digitales que simplifican la gestión, amplían el alcance y
-                maximizan el impacto social — de 5 a 50,000 personas sin cambiar
+                Potenciar organizaciones sin fines de lucro a travÃ©s de sistemas
+                digitales que simplifican la gestiÃ³n, amplÃ­an el alcance y
+                maximizan el impacto social â€” de 5 a 50,000 personas sin cambiar
                 de plataforma.
               </p>
             </motion.div>
@@ -202,7 +202,7 @@ export function NosotrosPage() {
           </div>
         </section>
 
-        {/* ── VALORES ────────────────────────────────────────── */}
+        {/* â”€â”€ VALORES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="py-24 px-6">
           <div className="max-w-5xl mx-auto">
             <motion.div
@@ -219,7 +219,7 @@ export function NosotrosPage() {
                 Nuestros valores
               </h2>
               <p className="text-base font-light" style={{ color: "var(--body-fg, #888)" }}>
-                Los principios que guían cada decisión que tomamos.
+                Los principios que guÃ­an cada decisiÃ³n que tomamos.
               </p>
             </motion.div>
 
@@ -264,7 +264,7 @@ export function NosotrosPage() {
           </div>
         </section>
 
-        {/* ── EQUIPO ─────────────────────────────────────────── */}
+        {/* â”€â”€ EQUIPO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="py-24 px-6">
           <div className="max-w-4xl mx-auto">
             <motion.div
@@ -281,7 +281,7 @@ export function NosotrosPage() {
                 El equipo
               </h2>
               <p className="text-base font-light" style={{ color: "var(--body-fg, #888)" }}>
-                Personas apasionadas por el impacto social y la tecnología.
+                Personas apasionadas por el impacto social y la tecnologÃ­a.
               </p>
             </motion.div>
 
@@ -319,7 +319,7 @@ export function NosotrosPage() {
           </div>
         </section>
 
-        {/* ── CTA ────────────────────────────────────────────── */}
+        {/* â”€â”€ CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="py-32 px-6 text-center relative overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none"
@@ -345,13 +345,13 @@ export function NosotrosPage() {
                 textShadow: "0 0 60px rgba(0,85,255,0.35), 0 0 120px rgba(112,0,255,0.15)",
               }}
             >
-              ¿Listo para empezar?
+              Â¿Listo para empezar?
             </h2>
             <p
               className="text-lg font-light mb-10 max-w-md mx-auto"
               style={{ color: "var(--body-fg, #888)" }}
             >
-              Únete a las organizaciones que ya gestionan su impacto con
+              Ãšnete a las organizaciones que ya gestionan su impacto con
               democra.pro
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
@@ -378,15 +378,16 @@ export function NosotrosPage() {
         </section>
       </main>
 
-      {/* ── FOOTER ─────────────────────────────────────────── */}
+      {/* â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <footer
         className="px-6 py-10 text-center"
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
       >
         <p className="text-sm font-light" style={{ color: "rgba(136,136,136,0.5)" }}>
-          © 2026 democra.pro · Perú
+          Â© 2026 democra.pro Â· PerÃº
         </p>
       </footer>
     </div>
   );
 }
+

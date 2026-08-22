@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-/* ─── Types ─── */
+/* â”€â”€â”€ Types â”€â”€â”€ */
 export type Theme = "claro" | "oscuro";
 export type Intensity = "suave" | "normal" | "vibrante";
 
@@ -20,11 +20,11 @@ interface ThemeContextValue {
   vars: Record<string, string>;
 }
 
-/* ─── Token Sets ───
+/* â”€â”€â”€ Token Sets â”€â”€â”€
  * Paleta alineada a LOOK_AND_FEEL_ONG.md: azul de marca (#002EFE) como
- * primario/acción/foco, cian (#00D1FF) reservado a funciones asistidas por
- * IA, semántica completa (éxito/advertencia/error/info) y neutros cálidos
- * (no fríos absolutos). Fondo oscuro profundo pero nunca negro absoluto.
+ * primario/acciÃ³n/foco, cian (#00D1FF) reservado a funciones asistidas por
+ * IA, semÃ¡ntica completa (Ã©xito/advertencia/error/info) y neutros cÃ¡lidos
+ * (no frÃ­os absolutos). Fondo oscuro profundo pero nunca negro absoluto.
  */
 const darkTokens = {
   suave: {
@@ -246,7 +246,7 @@ function getTokens(theme: Theme, intensity: Intensity) {
   return theme === "oscuro" ? darkTokens[intensity] : lightTokens[intensity];
 }
 
-/* ─── Context ─── */
+/* â”€â”€â”€ Context â”€â”€â”€ */
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -303,3 +303,4 @@ export function useTheme() {
   if (!ctx) throw new Error("useTheme must be inside ThemeProvider");
   return ctx;
 }
+

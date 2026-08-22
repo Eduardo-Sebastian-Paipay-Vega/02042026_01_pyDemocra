@@ -7,3 +7,4 @@ export {
   IdCardDetailModal,
   IdCardRevokeModal,
 } from "./IdCardCardPanels";
+

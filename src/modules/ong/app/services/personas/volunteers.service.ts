@@ -110,7 +110,7 @@ function buildDocumentLabel(
     documentTypeCode ??
     "";
 
-  return typeLabel ? `${number} · ${typeLabel}` : number;
+  return typeLabel ? `${number} Â· ${typeLabel}` : number;
 }
 
 function buildDisplayLabel(
@@ -1214,3 +1214,4 @@ export async function deactivateVolunteer(
 
   return detail;
 }
+

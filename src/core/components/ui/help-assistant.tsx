@@ -9,11 +9,11 @@ import {
   AlertTriangle,
   Lightbulb,
 } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 const resources = [
-  { icon: Book, label: "Ver documentación", description: "Guías y referencia", href: "#" },
-  { icon: Mail, label: "Contactar soporte", description: "Escríbenos", href: "#" },
+  { icon: Book, label: "Ver documentaciÃƒÂ³n", description: "GuÃƒÂ­as y referencia", href: "#" },
+  { icon: Mail, label: "Contactar soporte", description: "EscrÃƒÂ­benos", href: "#" },
 ];
 
 const shortcuts = [
@@ -25,13 +25,13 @@ const shortcuts = [
   { keys: ["G", "P"], label: "Ir a Proyectos" },
   { keys: ["G", "R"], label: "Ir a Solicitudes" },
   { keys: ["\u21E7", "N"], label: "Nueva actividad" },
-  { keys: ["/"], label: "Enfocar búsqueda" },
+  { keys: ["/"], label: "Enfocar bÃƒÂºsqueda" },
 ];
 
 const tips = [
   { text: "Aprobaciones pendientes: 2", type: "warning" as const },
-  { text: "4 alertas requieren atención", type: "warning" as const },
-  { text: "Usa G y luego una letra para navegar rápido", type: "tip" as const },
+  { text: "4 alertas requieren atenciÃƒÂ³n", type: "warning" as const },
+  { text: "Usa G y luego una letra para navegar rÃƒÂ¡pido", type: "tip" as const },
 ];
 
 export function HelpAssistant() {
@@ -45,7 +45,7 @@ export function HelpAssistant() {
             initial={{ opacity: 0, y: 12, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] as any }}
             className="absolute bottom-14 right-0 w-[300px] overflow-hidden rounded-2xl backdrop-blur-2xl"
             style={{
               background: "var(--t-elevated)",
@@ -55,7 +55,7 @@ export function HelpAssistant() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-              <span className="text-[13px]" style={{ color: "var(--t-text)" }}>¿Necesitas ayuda?</span>
+              <span className="text-[13px]" style={{ color: "var(--t-text)" }}>Ã‚Â¿Necesitas ayuda?</span>
               <button
                 onClick={() => setOpen(false)}
                 className="flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-[var(--t-hover)]"
@@ -161,3 +161,5 @@ export function HelpAssistant() {
     </div>
   );
 }
+
+

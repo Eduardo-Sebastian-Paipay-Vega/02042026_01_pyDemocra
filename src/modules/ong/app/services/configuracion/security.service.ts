@@ -62,7 +62,7 @@ function buildDeviceLabel(
   row: Pick<PublicDeviceRow, "id" | "device_fingerprint" | "is_trusted">
 ): string {
   const fingerprint = sanitizeText(row.device_fingerprint, 48) || row.id;
-  return row.is_trusted ? `${fingerprint} · confiable` : fingerprint;
+  return row.is_trusted ? `${fingerprint} Â· confiable` : fingerprint;
 }
 
 function buildSecuritySearchValue(values: Array<string | null | undefined>): string {
@@ -276,7 +276,7 @@ export async function getSecuritySettingsData(): Promise<SecuritySettingsData> {
     }));
 
     const sessionLabelById = new Map(
-      sessionRows.map((row): [string, string] => [row.id, `${row.sessionType} · ${row.createdAtLabel}`])
+      sessionRows.map((row): [string, string] => [row.id, `${row.sessionType} Â· ${row.createdAtLabel}`])
     );
 
     const authEventRows: AuthEventRow[] = authEvents.map((row) => ({
@@ -483,3 +483,4 @@ export async function deleteTerminal(terminalId: string): Promise<void> {
     throw new Error(toFriendlyError(error, "No se pudo eliminar el terminal."));
   }
 }
+

@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   FinancialCategoriesData,
   FinancialCategoriesFilters,
   FinancialCategoryCreateInput,
@@ -146,3 +146,4 @@ export async function createCategoria(input: FinancialCategoryCreateInput): Prom
 export async function updateCategoria(input: FinancialCategoryUpdateInput): Promise<FinancialMutationFeedback> { try { const categoryId = sanitizeOptionalId(input.categoryId); if (!categoryId) throw new Error("No se encontro la categoria a editar."); const actorId = await resolveActorId(null); const payload: Record<string, string | boolean | null> = { updated_by: actorId, updated_at: new Date().toISOString() }; if (input.name !== undefined) payload.nombre = sanitizeText(input.name, 100); if (input.type !== undefined) { const type = sanitizeText(input.type, 20).toLowerCase(); if (!["ingreso", "egreso"].includes(type)) throw new Error("El tipo de categoria debe ser ingreso o egreso."); payload.tipo = type; } const { error } = await finanzasSchema().from("categorias").update(payload as any).eq("id", categoryId); if (error) throw new Error(error.message); return { id: categoryId, message: "Categoria actualizada correctamente." }; } catch (error) { throw toOperationError(error, "No se pudo actualizar la categoria."); } }
 
 export async function removeOrArchiveCategoria(categoryId: string): Promise<FinancialMutationFeedback> { try { const id = sanitizeOptionalId(categoryId); if (!id) throw new Error("No se encontro la categoria a eliminar."); const { error } = await finanzasSchema().from("categorias").delete().eq("id", id); if (error) throw new Error(error.message); return { id, message: "Categoria eliminada correctamente." }; } catch (error) { throw toOperationError(error, "No se pudo eliminar la categoria."); } }
+

@@ -315,7 +315,7 @@ function buildMissingContext(approval: ApprovalDbRow) {
 function mapHoursRowToContext(row: OperationHoursRow) {
   return {
     kind: "hours" as const,
-    title: `${row.activityName} · ${row.volunteerName}`,
+    title: `${row.activityName} Â· ${row.volunteerName}`,
     summary: `Registro de ${row.hours}h para ${row.projectName}.`,
     missing: false,
     fields: [
@@ -548,3 +548,4 @@ export async function resolveAprobacion(
 export async function trySyncApprovalForEntity(): Promise<boolean> {
   return true;
 }
+

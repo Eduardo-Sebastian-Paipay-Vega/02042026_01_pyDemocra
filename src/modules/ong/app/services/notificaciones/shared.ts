@@ -286,3 +286,4 @@ export async function resolveNotificationCapabilities(): Promise<NotificationsCa
     };
   }
 }
+

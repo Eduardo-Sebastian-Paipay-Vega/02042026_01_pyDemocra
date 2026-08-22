@@ -112,10 +112,10 @@ function resolveStatusCopy(
 
   if (status === "license_exceeded") {
     return {
-      title: "Límite de licencias alcanzado",
+      title: "LÃ­mite de licencias alcanzado",
       description:
         message ??
-        "El tenant ha superado el número máximo de licencias activas. Contacta al soporte para ampliar el plan.",
+        "El tenant ha superado el nÃºmero mÃ¡ximo de licencias activas. Contacta al soporte para ampliar el plan.",
       icon: ShieldAlert,
     };
   }
@@ -208,7 +208,7 @@ export function TenantStatusScreen({
               className="inline-block rounded-xl px-6 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #3D6BFF 0%, #2DBFB0 100%)" }}
             >
-              Ir a iniciar sesión
+              Ir a iniciar sesiÃ³n
             </Link>
           </div>
         ) : null}
@@ -270,3 +270,4 @@ export function TenantInlineAccessDenied({
     </div>
   );
 }
+

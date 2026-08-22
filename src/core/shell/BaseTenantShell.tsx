@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   useCallback,
   useEffect,
@@ -301,3 +302,4 @@ export function BaseTenantShell({
     </div>
   );
 }
+

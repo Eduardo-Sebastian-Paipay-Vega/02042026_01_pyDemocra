@@ -30,7 +30,7 @@ import type { TenantContextValue, TenantModulesState } from "./bootstrap";
 import { getStoredLastTenantRoute } from "./bootstrap";
 import { canAccessModule, hasAnyPermission } from "./permissions";
 
-export const ONG_SHELL_BASE_PATH = "/app/ong";
+export const ONG_SHELL_BASE_PATH = "/app";
 
 export type TenantRouteId =
   | "home"

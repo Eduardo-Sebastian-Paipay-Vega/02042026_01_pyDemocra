@@ -23,3 +23,4 @@ export function GradientText({
     </Tag>
   );
 }
+

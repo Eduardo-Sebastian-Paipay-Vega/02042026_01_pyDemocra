@@ -719,3 +719,4 @@ export async function getMedicalRecordDetailByVolunteerId(
     updated_by: detail.updatedBy || null,
   };
 }
+

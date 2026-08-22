@@ -66,7 +66,7 @@ const SOFT_DELETE_TABLES: SoftDeleteConfig[] = [
     schemaName: "ong",
     tableName: "asistencias",
     sourceReference:
-      "guidelines/BD/Parte 4- Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 4- Script maestro documental de ONG mÃ³dulos complementarios.txt",
     entityLabel: "Asistencia",
     selectColumns:
       "id, tenant_id, id_actividad, id_voluntario, fecha_operacion, updated_at, updated_by, deleted_at, deleted_by, is_deleted",
@@ -133,7 +133,7 @@ const SOFT_DELETE_TABLES: SoftDeleteConfig[] = [
     schemaName: "ong",
     tableName: "asignaciones_actividad",
     sourceReference:
-      "guidelines/BD/Parte 4- Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 4- Script maestro documental de ONG mÃ³dulos complementarios.txt",
     entityLabel: "Asignacion de actividad",
     selectColumns:
       "id, tenant_id, id_actividad, id_voluntario, updated_at, updated_by, deleted_at, deleted_by, is_deleted",
@@ -200,7 +200,7 @@ const SOFT_DELETE_TABLES: SoftDeleteConfig[] = [
     schemaName: "ong",
     tableName: "recursos_proyecto",
     sourceReference:
-      "guidelines/BD/Parte 4- Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 4- Script maestro documental de ONG mÃ³dulos complementarios.txt",
     entityLabel: "Recurso de proyecto",
     selectColumns:
       "id, tenant_id, id_proyecto, id_item, updated_at, updated_by, deleted_at, deleted_by, is_deleted",
@@ -267,7 +267,7 @@ const SOFT_DELETE_TABLES: SoftDeleteConfig[] = [
     schemaName: "rrhh",
     tableName: "onboarding_voluntario",
     sourceReference:
-      "guidelines/BD/Parte 4- Script maestro documental de ONG módulos complementarios.txt",
+      "guidelines/BD/Parte 4- Script maestro documental de ONG mÃ³dulos complementarios.txt",
     entityLabel: "Onboarding de voluntario",
     selectColumns:
       "id, tenant_id, id_voluntario, id_paso, updated_at, updated_by, deleted_at, deleted_by, is_deleted",
@@ -534,3 +534,4 @@ export async function restoreGovernanceSoftDeletedRecord(
     );
   }
 }
+

@@ -24,16 +24,16 @@ import {
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 const INPUT_STYLE = {
   border: "1px solid var(--t-border)",
@@ -498,7 +498,7 @@ export function Roles() {
                             {permission.id}
                           </p>
                           <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                            {permission.module} · {permission.description}
+                            {permission.module} Â· {permission.description}
                           </p>
                         </div>
                       ))}
@@ -532,7 +532,7 @@ export function Roles() {
                             {assignment.userLabel}
                           </p>
                           <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                            {assignment.sedeName} · {assignment.createdAtLabel}
+                            {assignment.sedeName} Â· {assignment.createdAtLabel}
                           </p>
                         </div>
                       ))}
@@ -707,3 +707,4 @@ export function Roles() {
     </motion.div>
   );
 }
+

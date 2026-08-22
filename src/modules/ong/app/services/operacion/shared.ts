@@ -359,7 +359,7 @@ export function buildScheduleText(startAt: string | null | undefined, endAt: str
   if (endLabel) {
     return `Hasta ${endLabel}`;
   }
-  return "Sin programación documentada";
+  return "Sin programaciÃ³n documentada";
 }
 
 export function isRouteValueValid(value: string): boolean {
@@ -699,7 +699,7 @@ export async function fetchActivityCatalog(): Promise<ActivityCatalogRow[]> {
       id: row.id,
       taskId: row.id_tarea,
       projectId,
-      label: projectLabel ? `${row.titulo} · ${projectLabel}` : row.titulo,
+      label: projectLabel ? `${row.titulo} Â· ${projectLabel}` : row.titulo,
     };
   });
 }
@@ -846,3 +846,4 @@ export function mapActivityRowLabel(value: string | null | undefined): string {
 export function getTaskStatusVariant(status: string | null | undefined): StatusVariant {
   return mapActivityStatusVariant(mapActivityStatusKind(status));
 }
+

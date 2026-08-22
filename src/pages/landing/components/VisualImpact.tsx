@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 
 const metrics = [
-  { value: "87%", label: "Participación media" },
-  { value: "4×",  label: "Velocidad de decisión" },
+  { value: "87%", label: "ParticipaciÃ³n media" },
+  { value: "4Ã—",  label: "Velocidad de decisiÃ³n" },
   { value: "99.9%", label: "Disponibilidad" },
 ];
 
@@ -32,9 +32,9 @@ export function VisualImpact() {
                 backgroundClip: "text",
               }}
             >
-              4×
+              4Ã—
             </span>{" "}
-            más rápidas
+            mÃ¡s rÃ¡pidas
           </h2>
           <p className="text-base font-light" style={{ color: "var(--body-fg)" }}>
             Datos reales de organizaciones que usan democra.pro
@@ -88,3 +88,4 @@ export function VisualImpact() {
     </section>
   );
 }
+

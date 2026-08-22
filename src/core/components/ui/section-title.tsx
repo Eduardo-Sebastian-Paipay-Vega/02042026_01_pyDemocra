@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 interface SectionTitleProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -22,3 +22,5 @@ export function SectionTitle({
     </div>
   );
 }
+
+

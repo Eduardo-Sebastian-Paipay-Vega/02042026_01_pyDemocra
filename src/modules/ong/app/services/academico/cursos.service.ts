@@ -209,3 +209,4 @@ export async function updateEstadoInscripcion(
 
   if (error) throw new Error(toFriendlyError(error, "No se pudo actualizar el estado."));
 }
+

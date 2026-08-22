@@ -7,28 +7,28 @@ import { SegmentedBar } from "./components/SegmentedBar";
 import { RadialGauge } from "./components/RadialGauge";
 import { TestimonialCard } from "./components/TestimonialCard";
 
-/* ─── Content tokens (swap these for your copy) ─── */
+/* â”€â”€â”€ Content tokens (swap these for your copy) â”€â”€â”€ */
 const BRAND_NAME = "Voluntario";
-const PRODUCT_TAGLINE_PRE = "Automatiza tu operación ";
+const PRODUCT_TAGLINE_PRE = "Automatiza tu operaciÃ³n ";
 const PRODUCT_TAGLINE_GRADIENT = "sin perder control";
 const PRODUCT_SUBTITLE =
-  "La plataforma que conecta personas, proyectos y resultados en un solo lugar. Gestiona voluntarios, aprueba horas y mide impacto — todo desde un dashboard unificado.";
+  "La plataforma que conecta personas, proyectos y resultados en un solo lugar. Gestiona voluntarios, aprueba horas y mide impacto â€” todo desde un dashboard unificado.";
 const CTA_PRIMARY = "Empezar ahora";
 const CTA_SECONDARY = "Ver demo";
 
 const METRICS = [
-  { value: 63, desc: "Reducción en tiempo administrativo" },
-  { value: 86, desc: "Satisfacción de voluntarios" },
-  { value: 42, desc: "Aumento en retención anual" },
+  { value: 63, desc: "ReducciÃ³n en tiempo administrativo" },
+  { value: 86, desc: "SatisfacciÃ³n de voluntarios" },
+  { value: 42, desc: "Aumento en retenciÃ³n anual" },
 ];
 
 const GOALS = [
-  "Centralizar gestión de voluntarios y beneficiarios",
+  "Centralizar gestiÃ³n de voluntarios y beneficiarios",
   "Automatizar aprobaciones, horas y evidencia",
   "Visibilidad en tiempo real de proyectos e impacto",
 ];
 const GOALS_NOTE =
-  "Diseñado para organizaciones que quieren escalar su impacto sin aumentar complejidad operativa.";
+  "DiseÃ±ado para organizaciones que quieren escalar su impacto sin aumentar complejidad operativa.";
 
 const MOTIVATION_PERCENT = 78;
 const MOTIVATION_TEXT = "Impacto social";
@@ -36,27 +36,27 @@ const MOTIVATION_TEXT = "Impacto social";
 const TESTIMONIALS = [
   {
     quote:
-      "Pasamos de hojas de cálculo a un sistema real en una semana. Ahora aprobamos horas en minutos, no en días.",
-    name: "Ana Martínez",
+      "Pasamos de hojas de cÃ¡lculo a un sistema real en una semana. Ahora aprobamos horas en minutos, no en dÃ­as.",
+    name: "Ana MartÃ­nez",
     role: "Directora de Operaciones",
   },
   {
     quote:
-      "La visibilidad que tenemos sobre los proyectos ha transformado cómo tomamos decisiones. Datos reales, en tiempo real.",
-    name: "Carlos Ríos",
+      "La visibilidad que tenemos sobre los proyectos ha transformado cÃ³mo tomamos decisiones. Datos reales, en tiempo real.",
+    name: "Carlos RÃ­os",
     role: "Coordinador de Proyectos",
   },
   {
     quote:
-      "Nuestros voluntarios finalmente tienen una experiencia digital a la altura de su compromiso. La adopción fue inmediata.",
-    name: "Lucía Herrera",
-    role: "Líder de Comunidad",
+      "Nuestros voluntarios finalmente tienen una experiencia digital a la altura de su compromiso. La adopciÃ³n fue inmediata.",
+    name: "LucÃ­a Herrera",
+    role: "LÃ­der de Comunidad",
   },
 ];
 
 const NAV_ITEMS = ["Home", "About", "Features", "Pricing", "Contact"];
 
-/* ─── Page ─── */
+/* â”€â”€â”€ Page â”€â”€â”€ */
 export function LandingPage() {
   const [activeNav, setActiveNav] = useState("Home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,16 +69,16 @@ export function LandingPage() {
         backgroundColor: "#070707",
       }}
     >
-      {/* ── Ambient glow blobs ── */}
+      {/* â”€â”€ Ambient glow blobs â”€â”€ */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -left-[15%] -top-[20%] h-[700px] w-[700px] rounded-full bg-[#3D6BFF] opacity-[0.05] blur-[180px]" />
         <div className="absolute right-[-12%] top-[25%] h-[600px] w-[600px] rounded-full bg-[#2DBFB0] opacity-[0.06] blur-[180px]" />
         <div className="absolute bottom-[-10%] left-[25%] h-[500px] w-[500px] rounded-full bg-[#002EFE] opacity-[0.04] blur-[180px]" />
       </div>
 
-      {/* ══════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           TOP NAV
-      ══════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <header className="relative z-20 border-b border-white/[0.06]">
         <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
@@ -168,9 +168,9 @@ export function LandingPage() {
         )}
       </header>
 
-      {/* ══════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           HERO
-      ══════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <section className="relative z-10 py-20 md:py-28 lg:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           {/* Small badge */}
@@ -210,9 +210,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          USER RESEARCH — 3 metric cards
-      ══════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          USER RESEARCH â€” 3 metric cards
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <section className="relative z-10 py-14 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section heading */}
@@ -224,7 +224,7 @@ export function LandingPage() {
               className="text-[24px] md:text-[30px] tracking-[-0.01em]"
               style={{ fontFamily: "'Sora', 'Inter', sans-serif", fontWeight: 700 }}
             >
-              Resultados que hablan por sí solos
+              Resultados que hablan por sÃ­ solos
             </h2>
           </div>
 
@@ -251,13 +251,13 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          GOALS / MOTIVATIONS — two-column
-      ══════════════════════════════════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          GOALS / MOTIVATIONS â€” two-column
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <section className="relative z-10 py-14 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {/* ── User Goals ── */}
+            {/* â”€â”€ User Goals â”€â”€ */}
             <GlassCard className="p-8 md:p-10">
               <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
                 Insights
@@ -303,7 +303,7 @@ export function LandingPage() {
               </p>
             </GlassCard>
 
-            {/* ── Motivations ── */}
+            {/* â”€â”€ Motivations â”€â”€ */}
             <GlassCard className="flex flex-col items-center justify-center p-8 md:p-10">
               <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#3D6BFF]">
                 Insights
@@ -325,9 +325,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           TESTIMONIALS
-      ══════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <section className="relative z-10 py-14 md:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14 text-center">
@@ -350,9 +350,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           CTA BILLBOARD
-      ══════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <section className="relative z-10 py-14 md:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <GlassCard className="relative overflow-hidden px-8 py-14 text-center md:px-16 md:py-20">
@@ -374,12 +374,12 @@ export function LandingPage() {
                 fontSize: "clamp(1.5rem, 3vw + 0.5rem, 2.5rem)",
               }}
             >
-              Lleva tu organización al siguiente nivel con{" "}
-              <GradientText>integración total</GradientText>
+              Lleva tu organizaciÃ³n al siguiente nivel con{" "}
+              <GradientText>integraciÃ³n total</GradientText>
             </h2>
 
             <p className="relative mx-auto mt-5 max-w-[520px] text-[15px] leading-[1.7] text-[#A7A7A7]">
-              Conecta todos los procesos de tu operación en una plataforma
+              Conecta todos los procesos de tu operaciÃ³n en una plataforma
               unificada. Sin fricciones, sin complejidad.
             </p>
 
@@ -397,16 +397,16 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           FOOTER
-      ══════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <footer className="relative z-10 border-t border-white/[0.06] py-10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-4 sm:px-6 md:flex-row lg:px-8">
           <GradientText className="text-[17px] font-bold">
             {BRAND_NAME}
           </GradientText>
           <p className="text-[13px] text-[#707070]">
-            © 2026 {BRAND_NAME}. Todos los derechos reservados.
+            Â© 2026 {BRAND_NAME}. Todos los derechos reservados.
           </p>
           <div className="flex gap-6">
             {["Privacy", "Terms", "Support"].map((item) => (
@@ -423,3 +423,4 @@ export function LandingPage() {
     </div>
   );
 }
+

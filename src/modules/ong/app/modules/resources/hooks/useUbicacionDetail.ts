@@ -70,3 +70,4 @@ export function useUbicacionDetail(locationId: string | null) {
     refresh,
   };
 }
+

@@ -230,3 +230,4 @@ export function useAsistencias(filters: AttendanceFilters) {
     refresh,
   };
 }
+

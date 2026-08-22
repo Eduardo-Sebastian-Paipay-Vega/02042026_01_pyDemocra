@@ -97,3 +97,4 @@ export function useGlobalShortcuts({
     };
   }, [clearG, onNavigate, onOpenCommandPalette, shortcutTargets]);
 }
+

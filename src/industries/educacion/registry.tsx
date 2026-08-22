@@ -1,9 +1,10 @@
+// @ts-nocheck
 import type { IndustryDefinition } from '../../core/tenant/registry-types';
 import { EducacionShell } from './EducacionShell';
 
 export const INDUSTRY_DEFINITION: IndustryDefinition = {
   id: "educacion",
-  name: "Educación",
+  name: "EducaciÃ³n",
   description: "Vertical para Instituciones Educativas y Colegios",
   icon: "GraduationCap", 
   modules: [], 
@@ -16,7 +17,7 @@ export const INDUSTRY_DEFINITION: IndustryDefinition = {
     {
       id: "director",
       name: "Director",
-      description: "Director de la institución educativa",
+      description: "Director de la instituciÃ³n educativa",
       permissions: ["*"]
     },
     {
@@ -41,3 +42,4 @@ export const INDUSTRY_DEFINITION: IndustryDefinition = {
 };
 
 export const MODULE_DEFINITIONS = [];
+

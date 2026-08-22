@@ -151,3 +151,4 @@ export function useActividadMutations(onSuccess?: () => void) {
     removeAssignment,
   };
 }
+

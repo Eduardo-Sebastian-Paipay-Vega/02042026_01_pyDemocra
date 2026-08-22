@@ -124,9 +124,9 @@ export function NotificationHistory() {
   async function handleMarkAsRead(notificationId: string) {
     try {
       await mutations.markAsRead(notificationId);
-      toast.success("Notificación marcada como leída.");
+      toast.success("NotificaciÃ³n marcada como leÃ­da.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo marcar como leída.");
+      toast.error(err instanceof Error ? err.message : "No se pudo marcar como leÃ­da.");
     }
   }
 
@@ -328,7 +328,7 @@ export function NotificationHistory() {
             actions={[
               { label: "Ver detalle", onClick: (row) => openDetailModal(row.id) },
               {
-                label: (row) => (row.isRead ? "Ya leída" : "Marcar como leída"),
+                label: (row) => (row.isRead ? "Ya leÃ­da" : "Marcar como leÃ­da"),
                 onClick: (row) => { if (!row.isRead) void handleMarkAsRead(row.id); },
               },
             ]}
@@ -366,7 +366,7 @@ export function NotificationHistory() {
                 Detalle del historial
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                Estado actual y contexto de la notificación.
+                Estado actual y contexto de la notificaciÃ³n.
               </p>
             </div>
           </div>
@@ -457,7 +457,7 @@ export function NotificationHistory() {
                     onClick={() => void handleMarkAsRead(detail.data!.id)}
                     disabled={mutations.isMarkingRead}
                   >
-                    {mutations.isMarkingRead ? "Marcando..." : "Marcar como leída"}
+                    {mutations.isMarkingRead ? "Marcando..." : "Marcar como leÃ­da"}
                   </OutlineButton>
                 </div>
               )}
@@ -468,3 +468,4 @@ export function NotificationHistory() {
     </motion.div>
   );
 }
+

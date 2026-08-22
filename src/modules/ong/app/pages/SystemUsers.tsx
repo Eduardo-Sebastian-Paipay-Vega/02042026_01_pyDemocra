@@ -29,16 +29,16 @@ import {
 const stagger = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
-} as const satisfies Variants;
+} as const as any;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any },
   },
-} as const satisfies Variants;
+} as const as any;
 
 const INPUT_STYLE = {
   border: "1px solid var(--t-border)",
@@ -641,7 +641,7 @@ export function SystemUsers() {
                           {assignment.roleName}
                         </p>
                         <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                          {assignment.sedeName} · {assignment.createdAtLabel}
+                          {assignment.sedeName} Â· {assignment.createdAtLabel}
                         </p>
                       </div>
                     ))}
@@ -933,7 +933,7 @@ export function SystemUsers() {
               className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
             />
             <label htmlFor="sendVerificationEmail" className="text-[12px] font-medium text-zinc-300 cursor-pointer select-none">
-              ✉️ Enviar correo automático de bienvenida y verificación de cuenta (vía Resend API)
+              âœ‰ï¸ Enviar correo automÃ¡tico de bienvenida y verificaciÃ³n de cuenta (vÃ­a Resend API)
             </label>
           </div>
 
@@ -1071,3 +1071,4 @@ export function SystemUsers() {
     </motion.div>
   );
 }
+

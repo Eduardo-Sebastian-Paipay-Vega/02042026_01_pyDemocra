@@ -55,3 +55,4 @@ export function TestimonialCard({ quote, name, role }: TestimonialCardProps) {
     </GlassCard>
   );
 }
+

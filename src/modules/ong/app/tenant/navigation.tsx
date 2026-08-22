@@ -19,3 +19,4 @@ export type {
   TenantSidebarCategory,
   TenantSidebarItem,
 } from "../../../../core/tenant/registry-types";
+

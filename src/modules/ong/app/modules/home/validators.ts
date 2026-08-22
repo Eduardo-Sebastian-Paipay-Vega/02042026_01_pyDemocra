@@ -117,3 +117,4 @@ export function validateResolutionComment(
 
   return null;
 }
+

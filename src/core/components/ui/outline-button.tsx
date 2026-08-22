@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from '../../../lib/utils';
 
 interface OutlineButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -41,3 +41,5 @@ export function OutlineButton({
     </button>
   );
 }
+
+

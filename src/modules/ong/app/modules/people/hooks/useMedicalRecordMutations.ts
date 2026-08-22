@@ -61,3 +61,4 @@ export function useMedicalRecordMutations(onSuccess?: () => void) {
     saveVolunteer,
   };
 }
+

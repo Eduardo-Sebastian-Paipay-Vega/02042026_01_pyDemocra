@@ -49,3 +49,4 @@ export function KpiCard({ title, value, icon: Icon, trend, className }: KpiCardP
     </motion.div>
   );
 }
+

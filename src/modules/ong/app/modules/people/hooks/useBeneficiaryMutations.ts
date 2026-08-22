@@ -53,3 +53,4 @@ export function useBeneficiaryMutations(onSuccess?: () => void) {
     update,
   };
 }
+

@@ -580,12 +580,12 @@ export async function getNotificationTopbarItems(
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
   const access = await resolveNotificationCapabilities();
   if (!access.currentUserId || !access.tenantId) {
-    throw new Error("No tienes sesión activa.");
+    throw new Error("No tienes sesiÃ³n activa.");
   }
 
   const sanitizedId = sanitizeOptionalId(notificationId);
   if (!sanitizedId) {
-    throw new Error("ID de notificación inválido.");
+    throw new Error("ID de notificaciÃ³n invÃ¡lido.");
   }
 
   const { error } = await comunicacionesSchema()
@@ -658,3 +658,4 @@ export async function getNotificationHistoryEntryById(
     );
   }
 }
+

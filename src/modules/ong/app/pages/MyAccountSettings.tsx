@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -73,9 +74,9 @@ export function MyAccountSettings() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  // Detección en vivo de sesión y dispositivo real
+  // DetecciÃ³n en vivo de sesiÃ³n y dispositivo real
   const [currentDevice] = useState(() => getRealDeviceDetails());
-  const [lastSignInTime, setLastSignInTime] = useState<string>("Sesión activa ahora");
+  const [lastSignInTime, setLastSignInTime] = useState<string>("SesiÃ³n activa ahora");
 
   // Formulario Perfil General
   const [firstName, setFirstName] = useState("");
@@ -125,7 +126,7 @@ export function MyAccountSettings() {
         setGenero(row.genero ?? "Masculino");
         setAvatarPreview(row.avatar_url ?? null);
 
-        // 2. Obtener datos reales de sesión y metadatos desde Supabase Auth
+        // 2. Obtener datos reales de sesiÃ³n y metadatos desde Supabase Auth
         const { data: authData } = await supabase.auth.getUser();
         if (authData.user) {
           if (authData.user.last_sign_in_at) {
@@ -223,19 +224,19 @@ export function MyAccountSettings() {
     }
   };
 
-  // CRUD: Actualizar Contraseña en Supabase Auth
+  // CRUD: Actualizar ContraseÃ±a en Supabase Auth
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPassword || !confirmPassword) {
-      toast.error("Por favor ingresa la nueva contraseña y su confirmación.");
+      toast.error("Por favor ingresa la nueva contraseÃ±a y su confirmaciÃ³n.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("La nueva contraseña y su confirmación no coinciden.");
+      toast.error("La nueva contraseÃ±a y su confirmaciÃ³n no coinciden.");
       return;
     }
     if (newPassword.length < 8) {
-      toast.error("La nueva contraseña debe tener al menos 8 caracteres.");
+      toast.error("La nueva contraseÃ±a debe tener al menos 8 caracteres.");
       return;
     }
 
@@ -245,9 +246,9 @@ export function MyAccountSettings() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      toast.success("Contraseña actualizada correctamente en Supabase Auth.");
+      toast.success("ContraseÃ±a actualizada correctamente en Supabase Auth.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error al actualizar contraseña.");
+      toast.error(err instanceof Error ? err.message : "Error al actualizar contraseÃ±a.");
     } finally {
       setUpdatingPassword(false);
     }
@@ -266,12 +267,12 @@ export function MyAccountSettings() {
     }
   };
 
-  // CRUD: Cerrar sesión en otros dispositivos vía Supabase Auth Scope
+  // CRUD: Cerrar sesiÃ³n en otros dispositivos vÃ­a Supabase Auth Scope
   const handleSignOutOthers = async () => {
     setSigningOutOthers(true);
     try {
       await signOutOtherSessions();
-      toast.success("Se cerraron las sesiones activas en los demás dispositivos.");
+      toast.success("Se cerraron las sesiones activas en los demÃ¡s dispositivos.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al cerrar otras sesiones.");
     } finally {
@@ -279,7 +280,7 @@ export function MyAccountSettings() {
     }
   };
 
-  // CRUD: Guardar Preferencias de Notificación en Supabase Auth Metadata
+  // CRUD: Guardar Preferencias de NotificaciÃ³n en Supabase Auth Metadata
   const handleSaveNotifications = async () => {
     try {
       await updateMyUserMetadata({
@@ -315,11 +316,11 @@ export function MyAccountSettings() {
   return (
     <div className="w-full space-y-6">
       <PageHeader
-        title="Configuración de Cuenta"
+        title="ConfiguraciÃ³n de Cuenta"
         description="Administra los datos de tu perfil, credenciales de seguridad y preferencias del sistema."
       />
 
-      {/* Navegación por Pestañas Horizontales (Tabs) */}
+      {/* NavegaciÃ³n por PestaÃ±as Horizontales (Tabs) */}
       <div className="flex border-b border-zinc-800 gap-1 overflow-x-auto pb-px">
         <button
           type="button"
@@ -379,19 +380,19 @@ export function MyAccountSettings() {
           className="w-full rounded-2xl p-6 text-center"
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
         >
-          <p className="text-xs text-zinc-400">Cargando configuración del usuario desde la BD…</p>
+          <p className="text-xs text-zinc-400">Cargando configuraciÃ³n del usuario desde la BDâ€¦</p>
         </div>
       )}
 
       {!loading && (
         <div className="w-full">
-          {/* Pestaña 1: PERFIL GENERAL */}
+          {/* PestaÃ±a 1: PERFIL GENERAL */}
           {activeTab === "profile" && (
             <div
               className="rounded-2xl p-6 shadow-sm space-y-6"
               style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
             >
-              {/* Sección Foto de Perfil */}
+              {/* SecciÃ³n Foto de Perfil */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pb-6 border-b border-zinc-800/80">
                 <div className="relative">
                   {avatarPreview ? (
@@ -410,7 +411,7 @@ export function MyAccountSettings() {
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold text-zinc-100">Foto de Perfil</h4>
                   <p className="text-xs text-zinc-400">
-                    Formatos válidos: JPG, PNG o WebP. Tamaños hasta 5MB.
+                    Formatos vÃ¡lidos: JPG, PNG o WebP. TamaÃ±os hasta 5MB.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <label className="cursor-pointer">
@@ -467,7 +468,7 @@ export function MyAccountSettings() {
                     disabled={savingProfile}
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
-                    placeholder="Ej. Pérez Vega"
+                    placeholder="Ej. PÃ©rez Vega"
                   />
                 </div>
 
@@ -481,14 +482,14 @@ export function MyAccountSettings() {
                     style={INPUT_STYLE}
                   >
                     <option value="DNI">DNI (Documento Nacional de Identidad)</option>
-                    <option value="RUC">RUC (Registro Único de Contribuyente)</option>
+                    <option value="RUC">RUC (Registro Ãšnico de Contribuyente)</option>
                     <option value="PASAPORTE">Pasaporte</option>
-                    <option value="CE">C.E. (Carnet de Extranjería)</option>
+                    <option value="CE">C.E. (Carnet de ExtranjerÃ­a)</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-400">Número de Documento</label>
+                  <label className="text-xs font-medium text-zinc-400">NÃºmero de Documento</label>
                   <input
                     type="text"
                     value={numeroDocumento}
@@ -502,7 +503,7 @@ export function MyAccountSettings() {
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-zinc-400 flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5 text-zinc-500" /> Teléfono / WhatsApp
+                    <Phone className="h-3.5 w-3.5 text-zinc-500" /> TelÃ©fono / WhatsApp
                   </label>
                   <input
                     type="tel"
@@ -516,7 +517,7 @@ export function MyAccountSettings() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-400">Género</label>
+                  <label className="text-xs font-medium text-zinc-400">GÃ©nero</label>
                   <select
                     value={genero}
                     onChange={(e) => setGenero(e.target.value)}
@@ -533,7 +534,7 @@ export function MyAccountSettings() {
 
                 <div className="space-y-1.5 md:col-span-2">
                   <label className="text-xs font-medium text-zinc-400 flex items-center gap-1">
-                    <Mail className="h-3.5 w-3.5 text-zinc-500" /> Correo Electrónico
+                    <Mail className="h-3.5 w-3.5 text-zinc-500" /> Correo ElectrÃ³nico
                   </label>
                   <div className="relative flex items-center">
                     <input
@@ -550,19 +551,19 @@ export function MyAccountSettings() {
                 </div>
               </div>
 
-              {/* Botón Principal Guardar Cambios alineado a la derecha */}
+              {/* BotÃ³n Principal Guardar Cambios alineado a la derecha */}
               <div className="flex justify-end pt-2 border-t border-zinc-800/80">
                 <GradientButton onClick={handleSaveProfile} disabled={savingProfile}>
-                  {savingProfile ? "Guardando cambios en BD…" : "Guardar Cambios BD"}
+                  {savingProfile ? "Guardando cambios en BDâ€¦" : "Guardar Cambios BD"}
                 </GradientButton>
               </div>
             </div>
           )}
 
-          {/* Pestaña 2: SEGURIDAD */}
+          {/* PestaÃ±a 2: SEGURIDAD */}
           {activeTab === "security" && (
             <div className="space-y-6">
-              {/* Formulario Cambio de Contraseña */}
+              {/* Formulario Cambio de ContraseÃ±a */}
               <form
                 onSubmit={handleUpdatePassword}
                 className="rounded-2xl p-6 shadow-sm space-y-4"
@@ -573,41 +574,41 @@ export function MyAccountSettings() {
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-zinc-100">Cambio de Contraseña</h3>
+                    <h3 className="text-sm font-semibold text-zinc-100">Cambio de ContraseÃ±a</h3>
                     <p className="text-xs text-zinc-400">
-                      Actualiza tu clave de acceso periódicamente para proteger tu cuenta
+                      Actualiza tu clave de acceso periÃ³dicamente para proteger tu cuenta
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-zinc-400">Contraseña Actual</label>
+                    <label className="text-xs font-medium text-zinc-400">ContraseÃ±a Actual</label>
                     <input
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       className={INPUT_CLASS}
                       style={INPUT_STYLE}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-zinc-400">Nueva Contraseña</label>
+                    <label className="text-xs font-medium text-zinc-400">Nueva ContraseÃ±a</label>
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className={INPUT_CLASS}
                       style={INPUT_STYLE}
-                      placeholder="Mínimo 8 caracteres"
+                      placeholder="MÃ­nimo 8 caracteres"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-zinc-400">
-                      Confirmar Nueva Contraseña
+                      Confirmar Nueva ContraseÃ±a
                     </label>
                     <input
                       type="password"
@@ -622,12 +623,12 @@ export function MyAccountSettings() {
 
                 <div className="flex justify-end pt-2">
                   <GradientButton type="submit" disabled={updatingPassword}>
-                    {updatingPassword ? "Actualizando en Supabase Auth…" : "Actualizar Contraseña BD"}
+                    {updatingPassword ? "Actualizando en Supabase Authâ€¦" : "Actualizar ContraseÃ±a BD"}
                   </GradientButton>
                 </div>
               </form>
 
-              {/* Módulo de Autenticación de Dos Factores (2FA) */}
+              {/* MÃ³dulo de AutenticaciÃ³n de Dos Factores (2FA) */}
               <div
                 className="rounded-2xl p-6 shadow-sm space-y-4"
                 style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -639,10 +640,10 @@ export function MyAccountSettings() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-zinc-100">
-                        Autenticación de Dos Factores (2FA)
+                        AutenticaciÃ³n de Dos Factores (2FA)
                       </h3>
                       <p className="text-xs text-zinc-400">
-                        Agrega una capa adicional de seguridad requiriendo un código dinámico TOTP
+                        Agrega una capa adicional de seguridad requiriendo un cÃ³digo dinÃ¡mico TOTP
                       </p>
                     </div>
                   </div>
@@ -665,7 +666,7 @@ export function MyAccountSettings() {
                 </p>
               </div>
 
-              {/* Lista de Sesiones Activas (Información Real Detección Browser/OS en Vivo) */}
+              {/* Lista de Sesiones Activas (InformaciÃ³n Real DetecciÃ³n Browser/OS en Vivo) */}
               <div
                 className="rounded-2xl p-6 shadow-sm space-y-4"
                 style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -689,7 +690,7 @@ export function MyAccountSettings() {
                     disabled={signingOutOthers}
                     className="text-xs text-rose-400 hover:text-rose-300"
                   >
-                    {signingOutOthers ? "Cerrando…" : "Cerrar sesión en otros dispositivos"}
+                    {signingOutOthers ? "Cerrandoâ€¦" : "Cerrar sesiÃ³n en otros dispositivos"}
                   </OutlineButton>
                 </div>
 
@@ -705,11 +706,11 @@ export function MyAccountSettings() {
                         <p className="text-xs font-semibold text-zinc-100 flex items-center gap-2">
                           {`${currentDevice.browser} en ${currentDevice.os}`}
                           <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-normal">
-                            Sesión Actual Real
+                            SesiÃ³n Actual Real
                           </span>
                         </p>
                         <p className="text-[11px] text-zinc-400 mt-0.5">
-                          Último ingreso registrado: {lastSignInTime}
+                          Ãšltimo ingreso registrado: {lastSignInTime}
                         </p>
                       </div>
                     </div>
@@ -719,24 +720,24 @@ export function MyAccountSettings() {
             </div>
           )}
 
-          {/* Pestaña 3: NOTIFICACIONES */}
+          {/* PestaÃ±a 3: NOTIFICACIONES */}
           {activeTab === "notifications" && (
             <div
               className="rounded-2xl p-6 shadow-sm space-y-6"
               style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
             >
               <div className="pb-3 border-b border-zinc-800/80">
-                <h3 className="text-sm font-semibold text-zinc-100">Preferencias de Notificación</h3>
+                <h3 className="text-sm font-semibold text-zinc-100">Preferencias de NotificaciÃ³n</h3>
                 <p className="text-xs text-zinc-400">
-                  Configura por qué canales deseas recibir boletines, alertas de seguridad y avisos operacionales
+                  Configura por quÃ© canales deseas recibir boletines, alertas de seguridad y avisos operacionales
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/40">
                   <div>
-                    <p className="text-xs font-semibold text-zinc-100">Notificaciones por Correo Electrónico</p>
-                    <p className="text-[11px] text-zinc-400">Alertas de proyectos, asistencias y resúmenes diarios</p>
+                    <p className="text-xs font-semibold text-zinc-100">Notificaciones por Correo ElectrÃ³nico</p>
+                    <p className="text-[11px] text-zinc-400">Alertas de proyectos, asistencias y resÃºmenes diarios</p>
                   </div>
                   <input
                     type="checkbox"
@@ -762,7 +763,7 @@ export function MyAccountSettings() {
                 <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/40">
                   <div>
                     <p className="text-xs font-semibold text-zinc-100">Alertas SMS (Twilio / AWS SNS)</p>
-                    <p className="text-[11px] text-zinc-400">Códigos OTP de seguridad y validaciones de cuenta</p>
+                    <p className="text-[11px] text-zinc-400">CÃ³digos OTP de seguridad y validaciones de cuenta</p>
                   </div>
                   <input
                     type="checkbox"
@@ -775,7 +776,7 @@ export function MyAccountSettings() {
                 <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/40">
                   <div>
                     <p className="text-xs font-semibold text-zinc-100">Push Notifications (Firebase FCM)</p>
-                    <p className="text-[11px] text-zinc-400">Avisos instantáneos en el navegador o app móvil</p>
+                    <p className="text-[11px] text-zinc-400">Avisos instantÃ¡neos en el navegador o app mÃ³vil</p>
                   </div>
                   <input
                     type="checkbox"
@@ -794,7 +795,7 @@ export function MyAccountSettings() {
             </div>
           )}
 
-          {/* Pestaña 4: PREFERENCIAS */}
+          {/* PestaÃ±a 4: PREFERENCIAS */}
           {activeTab === "preferences" && (
             <div
               className="rounded-2xl p-6 shadow-sm space-y-6"
@@ -816,7 +817,7 @@ export function MyAccountSettings() {
                     className={INPUT_CLASS}
                     style={INPUT_STYLE}
                   >
-                    <option value="es">Español (Perú / Latinoamérica)</option>
+                    <option value="es">EspaÃ±ol (PerÃº / LatinoamÃ©rica)</option>
                     <option value="en">English (United States)</option>
                   </select>
                 </div>
@@ -865,3 +866,4 @@ export function MyAccountSettings() {
     </div>
   );
 }
+

@@ -566,3 +566,4 @@ export async function fetchProjectCatalogs(): Promise<ProjectCatalogs> {
     permissionWarning: permissionState.permissionWarning,
   };
 }
+

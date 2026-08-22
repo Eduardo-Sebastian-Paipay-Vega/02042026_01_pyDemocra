@@ -13,7 +13,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
 
   const navLinks = [
     { name: "Producto",      href: "#producto" },
-    { name: "Cómo funciona", href: "#como-funciona" },
+    { name: "CÃ³mo funciona", href: "#como-funciona" },
     { name: "Precios",       href: "#precios" },
     { name: "Empresa",       href: "#empresa" },
   ];
@@ -47,7 +47,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
           </span>
         </motion.div>
 
-        {/* Desktop links — centered */}
+        {/* Desktop links â€” centered */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -95,7 +95,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
                   href="/ong/join"
                   className="block px-3 py-2 text-sm font-light text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                 >
-                  Canjear Código ACE
+                  Canjear CÃ³digo ACE
                 </a>
                 <a
                   href="/ong/signup"
@@ -114,10 +114,10 @@ export function Navbar({ onOpenContact }: NavbarProps) {
             onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#ffffff")}
             onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "var(--body-fg)")}
           >
-            Iniciar sesión
+            Iniciar sesiÃ³n
           </Link>
 
-          {/* Contact — sliding underline indicator */}
+          {/* Contact â€” sliding underline indicator */}
           <button
             type="button"
             onClick={onOpenContact}
@@ -136,7 +136,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
             />
           </button>
 
-          {/* Outline CTA — visually lighter than Hero solid */}
+          {/* Outline CTA â€” visually lighter than Hero solid */}
           <a href="/ong/create">
             <button
               className="h-9 px-5 rounded-xl text-sm font-medium border border-white/15 bg-transparent text-white hover:border-white/35 hover:bg-white/[0.05]"
@@ -184,14 +184,14 @@ export function Navbar({ onOpenContact }: NavbarProps) {
             <div className="pb-5 space-y-2 border-t border-white/[0.06] pt-4">
               <div className="px-3 pb-1 text-xs font-medium text-white/40 uppercase tracking-wider">Participa</div>
               <a href="/ong/join" className="block w-full py-2 px-3 text-sm font-light text-white/55 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                Canjear Código ACE
+                Canjear CÃ³digo ACE
               </a>
               <a href="/ong/signup" className="block w-full py-2 px-3 text-sm font-light text-white/55 hover:text-white hover:bg-white/5 rounded-lg transition-colors mb-4">
                 Ser Voluntario
               </a>
               <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-white/60 hover:text-white hover:bg-white/5 rounded-xl">
-                  Iniciar sesión
+                  Iniciar sesiÃ³n
                 </Button>
               </Link>
               <button
@@ -219,3 +219,4 @@ export function Navbar({ onOpenContact }: NavbarProps) {
     </motion.nav>
   );
 }
+

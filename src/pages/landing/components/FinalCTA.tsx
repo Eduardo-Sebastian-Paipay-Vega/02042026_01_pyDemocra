@@ -23,7 +23,7 @@ export function FinalCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.75, ease: [0.25, 0.4, 0.25, 1] }}
         >
-          {/* Brand icon — visual anchor for CTA */}
+          {/* Brand icon â€” visual anchor for CTA */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -49,7 +49,7 @@ export function FinalCTA() {
             className="text-lg font-light mb-12"
             style={{ color: "var(--body-fg)" }}
           >
-            Más de 2,400 organizaciones confían en democra.pro
+            MÃ¡s de 2,400 organizaciones confÃ­an en democra.pro
           </p>
 
           <div className="flex flex-wrap gap-3 justify-center">
@@ -90,10 +90,11 @@ export function FinalCTA() {
             className="text-[11px] mt-9 font-light tracking-wider uppercase"
             style={{ color: "rgba(136,136,136,0.55)" }}
           >
-            Prueba 14 días sin compromiso · Sin tarjeta de crédito
+            Prueba 14 dÃ­as sin compromiso Â· Sin tarjeta de crÃ©dito
           </p>
         </motion.div>
       </div>
     </section>
   );
 }
+

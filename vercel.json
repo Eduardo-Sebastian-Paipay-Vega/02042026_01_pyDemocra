@@ -12,6 +12,8 @@
     { "source": "/api/:path*", "destination": "/api/server" },
     { "source": "/ong", "destination": "/ong/index.html" },
     { "source": "/ong/:path*", "destination": "/ong/index.html" },
+    { "source": "/educ", "destination": "/educ/index.html" },
+    { "source": "/educ/:path*", "destination": "/educ/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

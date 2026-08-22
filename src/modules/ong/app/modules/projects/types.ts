@@ -45,7 +45,7 @@ export type AssignmentKind =
 export interface SelectOption {
   value: string;
   label: string;
-  /** Optional FK metadata — used for cascading selectors (e.g. filter activities by project). */
+  /** Optional FK metadata â€” used for cascading selectors (e.g. filter activities by project). */
   projectId?: string;
 }
 
@@ -172,7 +172,7 @@ export interface ProjectDetailData {
 }
 
 /**
- * Hierarchy: Proyecto → Actividad → Tarea
+ * Hierarchy: Proyecto â†’ Actividad â†’ Tarea
  * Tasks are children of Activities. activityId may be null for tasks created
  * before the hierarchy migration (they must be re-assigned via UI).
  */
@@ -202,7 +202,7 @@ export interface TaskDetailData {
 }
 
 /**
- * Hierarchy: Proyecto → Actividad → Tarea
+ * Hierarchy: Proyecto â†’ Actividad â†’ Tarea
  * Activities are direct children of Projects.
  */
 export interface ActivityRow {
@@ -222,7 +222,8 @@ export interface ActivityRow {
   assignedVolunteers: number;
   registeredHours: number;
   evidenceCount: number;
-  taskCount: number;
+  taskId: string;
+  taskName: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -362,3 +363,4 @@ export interface ProjectResourceAssignmentFormValues {
   quantityRequired: string;
   quantityAssigned: string;
 }
+

@@ -37,7 +37,15 @@ function spaFallback() {
     }
 
     const isOngPath = pathname === "/ong" || pathname.startsWith("/ong/");
-    req.url = isOngPath ? "/ong/index.html" : "/index.html";
+    const isEducPath = pathname === "/educ" || pathname.startsWith("/educ/");
+    
+    if (isOngPath) {
+      req.url = "/ong/index.html";
+    } else if (isEducPath) {
+      req.url = "/educ/index.html";
+    } else {
+      req.url = "/index.html";
+    }
 
     next();
   };
@@ -88,6 +96,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, "index.html"),
         ong: resolve(__dirname, "ong/index.html"),
+        educ: resolve(__dirname, "educ/index.html"),
       },
       output: {
         // Agrupa dependencias pesadas de terceros en chunks propios,

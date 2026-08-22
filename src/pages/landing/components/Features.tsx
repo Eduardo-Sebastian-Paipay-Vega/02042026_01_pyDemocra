@@ -34,7 +34,7 @@ function FeatureCard({
   return (
     <motion.div
       ref={cardRef}
-      /* Responsive span — always col-span-1 on mobile, desktop span via className */
+      /* Responsive span â€” always col-span-1 on mobile, desktop span via className */
       className={`col-span-1 ${feature.desktopSpan} group cursor-default`}
       initial={{ opacity: 0, y: 36, scale: 0.96 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -85,14 +85,14 @@ function FeatureCard({
           />
         )}
 
-        {/* Abstract icon — AI */}
+        {/* Abstract icon â€” AI */}
         {feature.icon && (
           <div className="absolute top-5 right-5 w-20 h-20 group-hover:scale-110 transition-transform duration-700">
             {feature.icon}
           </div>
         )}
 
-        {/* Brand watermark — large AI card only */}
+        {/* Brand watermark â€” large AI card only */}
         {feature.visual === "ai" && (
           <div className="absolute bottom-5 right-5 w-28 h-28 pointer-events-none opacity-[0.055] group-hover:opacity-[0.10] transition-opacity duration-700">
             <img
@@ -165,9 +165,9 @@ export function Features() {
 
   const features: Feature[] = [
     {
-      title: "Automatización IA",
+      title: "AutomatizaciÃ³n IA",
       description:
-        "Modelos de lenguaje para resumir debates, detectar consenso y generar propuestas automáticas.",
+        "Modelos de lenguaje para resumir debates, detectar consenso y generar propuestas automÃ¡ticas.",
       desktopSpan: "md:col-span-2 md:row-span-2",
       visual: "ai",
       icon: (
@@ -195,7 +195,7 @@ export function Features() {
     },
     {
       title: "Seguridad",
-      description: "Cifrado E2E, auditoría inmutable, SSO/SAML.",
+      description: "Cifrado E2E, auditorÃ­a inmutable, SSO/SAML.",
       desktopSpan: "",
       visual: "security",
       icon: (
@@ -208,19 +208,19 @@ export function Features() {
       ),
     },
     {
-      title: "Analítica profunda",
-      description: "Métricas de participación y tendencias históricas en tiempo real.",
+      title: "AnalÃ­tica profunda",
+      description: "MÃ©tricas de participaciÃ³n y tendencias histÃ³ricas en tiempo real.",
       desktopSpan: "md:row-span-2",
       visual: "chart",
     },
     {
       title: "Tiempo real",
-      description: "Resultados instantáneos con WebSockets.",
+      description: "Resultados instantÃ¡neos con WebSockets.",
       desktopSpan: "",
       visual: "realtime",
     },
     {
-      title: "Gestión de roles",
+      title: "GestiÃ³n de roles",
       description: "Sistema granular de permisos configurables.",
       desktopSpan: "",
       visual: "roles",
@@ -243,11 +243,11 @@ export function Features() {
             futuro del trabajo
           </h2>
           <p className="text-lg font-light max-w-xl mx-auto" style={{ color: "var(--body-fg)" }}>
-            De 5 a 50,000 personas. Tecnología de punta, interfaz humana.
+            De 5 a 50,000 personas. TecnologÃ­a de punta, interfaz humana.
           </p>
         </motion.div>
 
-        {/* Bento — 1 col mobile, 2 col tablet, 4 col desktop */}
+        {/* Bento â€” 1 col mobile, 2 col tablet, 4 col desktop */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 max-w-6xl mx-auto auto-rows-fr">
           {features.map((f, i) => (
             <FeatureCard
@@ -264,3 +264,4 @@ export function Features() {
     </section>
   );
 }
+

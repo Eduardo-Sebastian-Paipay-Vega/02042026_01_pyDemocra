@@ -28,7 +28,7 @@ const stagger: Variants = {
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as any } },
 };
 
 const INPUT_STYLE = {
@@ -87,7 +87,7 @@ const cursoColumns: Column<CursoRow>[] = [
     label: "Horas",
     render: (row) => (
       <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.horasCertificacion != null ? `${row.horasCertificacion}h` : "—"}
+        {row.horasCertificacion != null ? `${row.horasCertificacion}h` : "â€”"}
       </span>
     ),
   },
@@ -154,7 +154,7 @@ const inscripcionColumns: Column<InscripcionRow>[] = [
           Ver
         </a>
       ) : (
-        <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>—</span>
+        <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>â€”</span>
       )
     ),
   },
@@ -249,7 +249,7 @@ export function Courses() {
       : null;
 
     if (form.horasCertificacion.trim() && (Number.isNaN(horas!) || horas! < 0)) {
-      setFormError("Las horas deben ser un número positivo.");
+      setFormError("Las horas deben ser un nÃºmero positivo.");
       return;
     }
 
@@ -449,12 +449,12 @@ export function Courses() {
 
             <div>
               <label className="mb-1 block text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                Descripción
+                DescripciÃ³n
               </label>
               <textarea
                 value={form.descripcion}
                 onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
-                placeholder="Descripción breve del curso..."
+                placeholder="DescripciÃ³n breve del curso..."
                 rows={3}
                 className="w-full resize-none rounded-xl px-3 py-2 text-[12px] outline-none"
                 style={INPUT_STYLE}
@@ -463,7 +463,7 @@ export function Courses() {
 
             <div>
               <label className="mb-1 block text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                Horas de certificación
+                Horas de certificaciÃ³n
               </label>
               <input
                 type="number"
@@ -505,7 +505,7 @@ export function Courses() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Inscripciones — {inscripcionesCurso?.nombre}
+                Inscripciones â€” {inscripcionesCurso?.nombre}
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                 academico.inscripciones + academico.certificados
@@ -538,3 +538,4 @@ export function Courses() {
     </motion.div>
   );
 }
+

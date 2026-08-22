@@ -409,3 +409,4 @@ export async function consumeVolunteerRegistrationCode(
 export function getVolunteerRegistrationDocumentsBucket(): string {
   return REGISTRATION_DOCUMENTS_BUCKET;
 }
+

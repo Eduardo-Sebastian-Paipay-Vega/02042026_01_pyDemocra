@@ -13,7 +13,7 @@ import { FinalCTA } from "./components/FinalCTA";
 import { Footer } from "./components/Footer";
 import { ContactModal } from "./ContactModal";
 
-// REQ-001 (dds/MEJORAS/09072026/REQ001.md): secciones con datos mock aún sin
+// REQ-001 (dds/MEJORAS/09072026/REQ001.md): secciones con datos mock aÃºn sin
 // contenido real para este despliegue. Ocultas de forma no destructiva y
 // reversible con este flag hasta que existan datos reales que mostrar.
 const SHOW_MOCK_SECTIONS = false;
@@ -47,3 +47,4 @@ export function LandingPage() {
     </div>
   );
 }
+

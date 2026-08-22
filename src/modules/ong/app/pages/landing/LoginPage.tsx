@@ -19,7 +19,7 @@ export function LoginPage() {
     if (authError) {
       setError(
         authError.message === "Invalid login credentials"
-          ? "Correo o contraseña incorrectos."
+          ? "Correo o contraseÃ±a incorrectos."
           : authError.message
       );
       setLoading(false);
@@ -57,15 +57,15 @@ export function LoginPage() {
           className="rounded-3xl p-8"
           style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <h1 className="text-[22px] font-semibold text-white mb-1">Iniciar sesión</h1>
+          <h1 className="text-[22px] font-semibold text-white mb-1">Iniciar sesiÃ³n</h1>
           <p className="text-[13px] mb-8" style={{ color: "#A7A7A7" }}>
-            Accede a tu organización en Democra
+            Accede a tu organizaciÃ³n en Democra
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-[12px] mb-1.5" style={{ color: "#A7A7A7" }}>
-                Correo electrónico
+                Correo electrÃ³nico
               </label>
               <input
                 type="email"
@@ -81,7 +81,7 @@ export function LoginPage() {
 
             <div>
               <label className="block text-[12px] mb-1.5" style={{ color: "#A7A7A7" }}>
-                Contraseña
+                ContraseÃ±a
               </label>
               <input
                 type="password"
@@ -91,7 +91,7 @@ export function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-xl px-4 py-2.5 text-[14px] text-white outline-none transition-colors focus:border-[#3D6BFF]"
                 style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)" }}
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               />
             </div>
 
@@ -125,10 +125,11 @@ export function LoginPage() {
             className="transition-colors hover:text-white"
             style={{ color: "#A7A7A7" }}
           >
-            ← Volver al inicio
+            â† Volver al inicio
           </Link>
         </p>
       </div>
     </div>
   );
 }
+

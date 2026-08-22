@@ -9,7 +9,7 @@ const stats = [
   { value: "2,400+", label: "Organizaciones activas" },
   { value: "18M",    label: "Votaciones procesadas" },
   { value: "99.9%",  label: "Uptime garantizado" },
-  { value: "4.9",    label: "Satisfacción media" },
+  { value: "4.9",    label: "SatisfacciÃ³n media" },
 ];
 
 export function TrustSection() {
@@ -43,7 +43,7 @@ export function TrustSection() {
           </div>
         </div>
 
-        {/* Stats grid — 4 equal cards */}
+        {/* Stats grid â€” 4 equal cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {stats.map((stat, i) => (
             <motion.div
@@ -82,3 +82,4 @@ export function TrustSection() {
     </section>
   );
 }
+

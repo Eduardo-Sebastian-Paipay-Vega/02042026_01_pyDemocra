@@ -83,3 +83,4 @@ export function useActividadDetail(activityId: string | null) {
     refresh,
   };
 }
+

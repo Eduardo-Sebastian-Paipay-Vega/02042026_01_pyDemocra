@@ -159,3 +159,4 @@ export function useCategoriasFinancieras(filters: FinancialCategoriesFilters) {
     refresh,
   };
 }
+

@@ -151,3 +151,4 @@ export function useUbicaciones(filters: InventoryLocationsFilters) {
     refresh,
   };
 }
+
