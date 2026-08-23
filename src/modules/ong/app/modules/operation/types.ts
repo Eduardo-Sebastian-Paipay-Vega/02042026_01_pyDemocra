@@ -437,6 +437,7 @@ export interface OperationApprovalRow {
   approvedBy: string;
   approvedAt: string;
   comment: string;
+  hasEvidence?: boolean;
 }
 
 export interface ApprovalContextField {

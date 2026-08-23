@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/core/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { TableSkeleton } from "./TableSkeleton";
@@ -26,7 +26,7 @@ interface DataTableProps<T extends { id: string }> {
   columns: Column<T>[];
   data: T[];
   actions?: RowAction<T>[];
-  emptyMessage?: string;
+  emptyMessage?: ReactNode;
   className?: string;
   loading?: boolean;
 }
@@ -49,7 +49,7 @@ export function DataTable<T extends { id: string }>({
         className={cn("rounded-2xl p-12 text-center backdrop-blur-xl", className)}
         style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)", boxShadow: "var(--t-shadow)" }}
       >
-        <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>{emptyMessage}</p>
+        {typeof emptyMessage === "string" ? <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>{emptyMessage}</p> : emptyMessage}
       </div>
     );
   }

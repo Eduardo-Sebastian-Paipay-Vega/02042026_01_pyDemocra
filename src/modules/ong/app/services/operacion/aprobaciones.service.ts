@@ -247,7 +247,8 @@ async function loadHoursContext(): Promise<{
 function mapApprovalRow(
   approval: ApprovalDbRow,
   linkedHours: OperationHoursRow | null,
-  profileLabels: Map<string, string>
+  profileLabels: Map<string, string>,
+  hasEvidence: boolean = false
 ): OperationApprovalRow {
   const statusKind = mapApprovalStatusKind(approval.estado);
   const requestedBy =
@@ -291,6 +292,7 @@ function mapApprovalRow(
         ? toDateTimeLabel(approval.resolved_at ?? approval.updated_at)
         : "-"),
     comment: sanitizeText(approval.comentario, 500),
+    hasEvidence,
   };
 }
 
@@ -361,6 +363,24 @@ export async function listAprobaciones(
     const hoursContext = await loadHoursContext();
     warnings.push(...hoursContext.warnings);
 
+    const linkedActivities = Array.from(hoursContext.byHoursId.values()).map(h => h.activityId).filter(Boolean);
+    const linkedVolunteers = Array.from(hoursContext.byHoursId.values()).map(h => h.volunteerId).filter(Boolean);
+    let evidenceRows: any[] = [];
+    if (linkedActivities.length > 0 && linkedVolunteers.length > 0) {
+      const { data } = await ongSchema()
+        .from("evidencias_actividad")
+        .select("id_actividad, id_voluntario")
+        .eq("tenant_id", tenantId)
+        .in("id_actividad", linkedActivities)
+        .in("id_voluntario", linkedVolunteers);
+      evidenceRows = data || [];
+    }
+    const hasEvidenceFn = (activityId?: string | null, volunteerId?: string | null) => {
+      if (!activityId || !volunteerId) return false;
+      return evidenceRows.some(e => e.id_actividad === activityId && e.id_voluntario === volunteerId);
+    };
+
+
     const profileIds = Array.from(
       new Set(
         approvalRows
@@ -375,7 +395,7 @@ export async function listAprobaciones(
     const searchTerm = normalizeText(filters.searchTerm ?? "");
     const mappedRows = approvalRows
       .map((approval) =>
-        mapApprovalRow(approval, hoursContext.byHoursId.get(approval.entidad_id) ?? null, profileLabels)
+        mapApprovalRow(approval, hoursContext.byHoursId.get(approval.entidad_id) ?? null, profileLabels, hasEvidenceFn((hoursContext.byHoursId.get(approval.entidad_id) ?? null)?.activityId, (hoursContext.byHoursId.get(approval.entidad_id) ?? null)?.volunteerId))
       )
       .filter((row) => {
         if (volunteerFilter && row.subjectId !== volunteerFilter) {

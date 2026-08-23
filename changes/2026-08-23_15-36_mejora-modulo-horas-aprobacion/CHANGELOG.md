@@ -1,0 +1,21 @@
+﻿# Changelog
+
+- **Fecha y hora**: 2026-08-23 15:35
+- **Objetivo del cambio**: Refactorizar y mejorar la UX/UI del módulo de aprobación de horas (`/ong/app/approvals/hours`), alinearlo con el diseño visual sobrio y verificar su conexión funcional con el esquema de base de datos.
+- **Contexto del problema**: El layout de filtros estaba desorganizado ocupando mucho espacio, el botón de "Sincronizar" era demasiado llamativo, había errores ortográficos (Aprobacion), faltaba mostrar el avatar del usuario y evidenciar si existían documentos adjuntos a la actividad. Además el rechazo no exigía motivo.
+- **Motivo de la modificación**: El usuario solicitó múltiples mejoras de diseño (Design Skills) e integridad de datos siguiendo estrictamente el esquema `BD.json`.
+- **Solución implementada**:
+  - Se corrigieron los errores ortográficos y de codificación.
+  - Se implementó un layout de cuadrícula (`grid-cols-4`) para los filtros.
+  - Se cambió el botón de actualizar a un estilo `OutlineButton` con ícono `RefreshCw`.
+  - Se creó un nuevo componente `EmptyState` centrado y sobrio, incorporado a la `DataTable`.
+  - Se modificó la validación en frontend para hacer obligatorio el comentario al rechazar una solicitud.
+  - Se mejoró la columna "Voluntario" para mostrar el componente `Avatar` con las iniciales (con fallback Dicebear).
+  - Se modificó el servicio backend `aprobaciones.service.ts` para cruzar la tabla `evidencias_actividad` e inyectar un flag `hasEvidence`.
+  - Se muestra un icono `Paperclip` si existe evidencia adjunta.
+- **Riesgos identificados**: Modificación de la respuesta en `aprobaciones.service.ts` que puede requerir re-comprobación de tipos en lugares donde `OperationApprovalRow` es dependiente.
+- **Impacto esperado**: Mayor usabilidad, diseño más limpio, reducción de fricciones al revisar horas, y mayor control de auditoría al exigir comentarios de rechazo.
+- **Módulos afectados**: ONG - Aprobaciones (Operaciones).
+- **Dependencias involucradas**: `lucide-react`, componentes UI base de Antigravity (Avatar, EmptyState).
+- **Posibles efectos secundarios**: Ninguno previsible si el servicio de Supabase maneja adecuadamente las evidencias.
+- **Estado del cambio**: Completado.

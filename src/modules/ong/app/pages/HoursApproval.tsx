@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
+import { Paperclip } from "lucide-react";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
@@ -55,14 +57,29 @@ const columns: Column<OperationApprovalRow>[] = [
   {
     key: "volunteer",
     label: "Voluntario",
-    render: (item) => <span style={{ color: "var(--t-text)" }}>{item.subjectName}</span>,
+    render: (item) => (
+      <div className="flex items-center gap-3">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.subjectName}`} alt={item.subjectName} />
+          <AvatarFallback>{item.subjectName.substring(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <span style={{ color: "var(--t-text)" }}>{item.subjectName}</span>
+      </div>
+    ),
   },
   {
     key: "activity",
     label: "Actividad",
     render: (item) => (
       <div>
-        <div style={{ color: "var(--t-text-secondary)" }}>{item.entityTitle}</div>
+        <div className="flex items-center gap-2" style={{ color: "var(--t-text-secondary)" }}>
+          {item.entityTitle}
+          {item.hasEvidence && (
+            <span className="flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[10px] text-blue-500" title="Contiene evidencia adjunta">
+              <Paperclip size={10} />
+            </span>
+          )}
+        </div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
           {item.entitySubtitle}
         </div>
@@ -181,7 +198,7 @@ export function HoursApproval() {
       if (!result) {
         return;
       }
-      toast.success("El registro volviÃ³ a estado pendiente.");
+      toast.success("El registro volvió a estado pendiente.");
     } catch (actionError) {
       toast.error(
         actionError instanceof Error
@@ -197,10 +214,14 @@ export function HoursApproval() {
     }
     const targetStateId = stateByKind.get(resolutionTarget.action);
     if (!targetStateId) {
-      setResolutionError("No existe estado configurado para esta acciÃ³n.");
+      setResolutionError("No existe estado configurado para esta acción.");
       return;
     }
     const comment = resolutionComment.trim();
+    if (resolutionTarget.action === "rejected" && !comment) {
+      setResolutionError("El comentario es obligatorio para rechazar horas.");
+      return;
+    }
     if (comment.length > 500) {
       setResolutionError("El comentario no puede exceder 500 caracteres.");
       return;
@@ -214,26 +235,29 @@ export function HoursApproval() {
       if (!result) {
         return;
       }
-      toast.success("AprobaciÃ³n actualizada.");
+      toast.success("Aprobación actualizada.");
       closeResolutionModal();
       if (isDetailOpen && detailApprovalId === resolutionTarget.approvalId) {
         refreshDetail();
       }
     } catch (actionError) {
       setResolutionError(
-        actionError instanceof Error ? actionError.message : "No se pudo resolver la aprobaciÃ³n."
+        actionError instanceof Error ? actionError.message : "No se pudo resolver la aprobación."
       );
     }
   }
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp} className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <PageHeader
-          title="AprobaciÃ³n de horas"
-          description="GestiÃ³n de aprobaciones para registros de horas de voluntarios. Resuelve, rechaza o devuelve a pendiente desde esta vista."
-          action={{ label: "Actualizar", onClick: refresh }}
+          title="Aprobación de horas"
+          description="Gestión de aprobaciones para registros de horas de voluntarios. Resuelve, rechaza o devuelve a pendiente desde esta vista."
         />
+        <OutlineButton size="sm" onClick={refresh} className="mt-2 flex items-center gap-2 md:mt-0" title="Sincronizar">
+          <RefreshCw size={14} />
+          <span>Sincronizar</span>
+        </OutlineButton>
       </motion.div>
 
       <motion.div variants={fadeUp}>
@@ -247,33 +271,39 @@ export function HoursApproval() {
       </motion.div>
 
       <motion.div variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
-          <select
-            value={volunteerFilter}
-            onChange={(event) => setVolunteerFilter(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={INPUT_STYLE}
-          >
-            {volunteerOptionsWithAll.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={INPUT_STYLE}
-          />
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(event) => setDateTo(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={INPUT_STYLE}
-          />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="md:col-span-2">
+            <select
+              value={volunteerFilter}
+              onChange={(event) => setVolunteerFilter(event.target.value)}
+              className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+              style={INPUT_STYLE}
+            >
+              {volunteerOptionsWithAll.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-1">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(event) => setDateFrom(event.target.value)}
+              className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+              style={INPUT_STYLE}
+            />
+          </div>
+          <div className="md:col-span-1">
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(event) => setDateTo(event.target.value)}
+              className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+              style={INPUT_STYLE}
+            />
+          </div>
         </div>
       </motion.div>
 
@@ -327,7 +357,7 @@ export function HoursApproval() {
               },
             },
             {
-              label: "Solicitar revisiÃ³n",
+              label: "Solicitar revisión",
               onClick: (item) => void requestReview(item),
             },
             {
@@ -340,7 +370,7 @@ export function HoursApproval() {
               variant: "destructive",
             },
           ]}
-          emptyMessage="No hay aprobaciones de horas para el filtro seleccionado"
+          emptyMessage={<EmptyState title="Sin resultados" description="No hay aprobaciones de horas para el filtro seleccionado." />}
         />
       </motion.div>
 
@@ -352,10 +382,10 @@ export function HoursApproval() {
         >
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Detalle de aprobaciÃ³n
+              Detalle de aprobación
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Registro de horas vinculado y estado actual de la aprobaciÃ³n.
+              Registro de horas vinculado y estado actual de la aprobación.
             </p>
           </div>
           <button
@@ -405,7 +435,7 @@ export function HoursApproval() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="ID aprobaciÃ³n" value={detail.approval.id} />
+                <DetailField label="ID aprobación" value={detail.approval.id} />
                 <DetailField label="Voluntario" value={detail.approval.subjectName} />
                 <DetailField label="Actividad" value={detail.approval.entityTitle} />
                 <DetailField label="Proyecto" value={detail.approval.entitySubtitle} />
@@ -448,7 +478,7 @@ export function HoursApproval() {
                   style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
                 >
                   <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                    Comentario de resoluciÃ³n
+                    Comentario de resolución
                   </p>
                   <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
                     {detail.approval.comment}
@@ -465,7 +495,7 @@ export function HoursApproval() {
                   }}
                   disabled={isCreating}
                 >
-                  Solicitar revisiÃ³n
+                  Solicitar revisión
                 </OutlineButton>
                 <OutlineButton
                   size="sm"
@@ -504,7 +534,7 @@ export function HoursApproval() {
               {resolutionTarget?.action === "approved" ? "Aprobar horas" : "Rechazar horas"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              El comentario es opcional y queda registrado en la aprobaciÃ³n y en el registro de horas.
+              {resolutionTarget?.action === "rejected" ? "El comentario es obligatorio para justificar el rechazo." : "El comentario es opcional y queda registrado en la aprobación y en el registro de horas."}
             </p>
           </div>
           <button
