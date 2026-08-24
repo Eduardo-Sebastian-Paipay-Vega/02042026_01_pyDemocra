@@ -1,5 +1,5 @@
 import express from "express";
-import { resolveAuthContext, supabaseAdmin } from "../../../supabase.js";
+import { resolveAuthContext, serviceClient } from "../../../supabase.js";
 import { assertTenantScope } from "../../../utils/tenant-scope.js";
 import { getBearerToken, sendError } from "../../../utils/http.js";
 
@@ -41,9 +41,9 @@ router.get("/director", async (req, res) => {
   try {
     // Real counts from DB
     const [{ count: estudiantesCount }, { count: profesoresCount }, { count: cursosCount }] = await Promise.all([
-      supabaseAdmin.from('estudiantes').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
-      supabaseAdmin.from('profesores').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
-      supabaseAdmin.from('cursos').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
+      serviceClient.from('estudiantes').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
+      serviceClient.from('profesores').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
+      serviceClient.from('cursos').select('*', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
     ]);
 
     const data = {

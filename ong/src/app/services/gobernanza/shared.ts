@@ -1,4 +1,4 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 import type { AppDatabase } from "../../../lib/db/ong/app-database";
 import type { GovernanceCapabilityState } from "../../modules/governance/types";
 
@@ -20,27 +20,27 @@ let tenantCache: { value: string; at: number } | null = null;
 export const governanceDb = supabase;
 
 export function publicSchema() {
-  return governanceDb.schema("public");
+  return governanceDb.schema("public" as any) as any;
 }
 
 export function ongSchema() {
-  return governanceDb.schema("ong");
+  return governanceDb.schema("ong" as any) as any;
 }
 
 export function rrhhSchema() {
-  return governanceDb.schema("rrhh");
+  return governanceDb.schema("rrhh" as any) as any;
 }
 
 export function clinicoSchema() {
-  return governanceDb.schema("clinico");
+  return governanceDb.schema("clinico" as any) as any;
 }
 
 export function comunicacionesSchema() {
-  return governanceDb.schema("comunicaciones");
+  return governanceDb.schema("comunicaciones" as any) as any;
 }
 
 export function auditoriaSchema() {
-  return governanceDb.schema("auditoria");
+  return governanceDb.schema("auditoria" as any) as any;
 }
 
 export function normalizeText(value: string | null | undefined): string {

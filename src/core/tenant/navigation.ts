@@ -1,4 +1,4 @@
-import type { TenantContextValue } from "../../modules/ong/app/tenant/bootstrap";
+import type { TenantContextValue } from "@ong/app/tenant/bootstrap";
 import {
   canAccessRegisteredModule,
   canAccessRegisteredRoute,
@@ -18,7 +18,7 @@ import type {
   TenantRouteRedirectDefinition,
   TenantSidebarCategory,
 } from "./registry-types";
-import { getStoredLastTenantRoute } from "../../modules/ong/app/tenant/bootstrap";
+import { getStoredLastTenantRoute } from "@ong/app/tenant/bootstrap";
 
 export const APP_BASE_PATH = "/app";
 export const APP_SETTINGS_BASE_PATH = `${APP_BASE_PATH}/settings`;

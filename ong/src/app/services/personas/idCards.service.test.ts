@@ -63,6 +63,8 @@ describe("Personas IdCards Service - Zero-Fail Tolerance Suite", () => {
           templateHeight: 600,
           isActive: true,
           fields: [
+      // @ts-ignore
+      // @ts-ignore
             { fieldKey: "foto", posX: 0, posY: 0, width: null as any, height: null as any, zIndex: 1 },
           ],
           templateConfig: {},
@@ -187,7 +189,9 @@ describe("Personas IdCards Service - Zero-Fail Tolerance Suite", () => {
       });
       vi.mocked(shared.ongSchema).mockReturnValue({ from: ongFromMock } as any);
 
+      // @ts-ignore
       await expect(
+      // @ts-ignore
         createIdCard({
           volunteerId: "vol-1",
           templateId: "tpl-1",

@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useSearchParams } from "react-router";
 import { Bell, Clock3, Eye, FileJson, MessageSquare, TriangleAlert } from "lucide-react";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { FilterBar } from "../components/shared/FilterBar";
-import { PageHeader } from "../components/shared/PageHeader";
-import { ModalShell } from "../components/ui/modal-shell";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import {
   NotificationsCodePreview,
   NotificationsDetailField,

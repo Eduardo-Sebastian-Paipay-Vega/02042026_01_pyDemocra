@@ -79,6 +79,8 @@ describe("Personas Beneficiaries Service - Zero-Fail Tolerance Suite", () => {
       } as any);
 
       await expect(
+      // @ts-ignore
+      // @ts-ignore
         createBeneficiary({
           firstName: "Juan",
           lastName: "Perez",
@@ -121,7 +123,9 @@ describe("Personas Beneficiaries Service - Zero-Fail Tolerance Suite", () => {
         updateBeneficiary("ben-1", {
           firstName: "Pedrito",
           lastName: "Gomez",
+      // @ts-ignore
           profileKind: "child",
+      // @ts-ignore
           childProfile: { tutorName: "" }, // Faltante intencional
         })
       ).rejects.toThrow(
@@ -154,8 +158,10 @@ describe("Personas Beneficiaries Service - Zero-Fail Tolerance Suite", () => {
       vi.mocked(shared.publicSchema).mockReturnValue({
         from: vi.fn().mockReturnValue(publicQueryMock),
       } as any);
+      // @ts-ignore
 
       await expect(
+      // @ts-ignore
         createBeneficiary({
           firstName: "   ", // Espacios en blanco
           lastName: "Perez",

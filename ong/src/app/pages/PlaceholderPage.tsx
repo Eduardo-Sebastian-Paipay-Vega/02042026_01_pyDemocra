@@ -1,17 +1,17 @@
 import { motion } from "motion/react";
-import { PageHeader } from "../components/shared/PageHeader";
+import { PageHeader } from '@/core/components/shared/PageHeader';
 import { Construction } from "lucide-react";
 
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } } };
+const stagger: any = { hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } } };
+const fadeUp: any = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } } };
 
 export function PlaceholderPage({ title, description }: { title: string; description: string }) {
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
+    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="space-y-6">
+      <motion.div variants={fadeUp as any}>
         <PageHeader title={title} description={description} />
       </motion.div>
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp as any}>
         <div
           className="rounded-2xl backdrop-blur-xl p-16 text-center"
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}

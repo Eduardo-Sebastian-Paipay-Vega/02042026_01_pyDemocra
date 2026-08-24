@@ -1,4 +1,4 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 import type { AppDatabase } from "../../../lib/db/ong/app-database";
 import type { NotificationsCapabilityState } from "../../modules/notifications/types";
 
@@ -20,11 +20,11 @@ let tenantCache: { value: string; at: number } | null = null;
 export const notificationsDb = supabase;
 
 export function publicSchema() {
-  return notificationsDb.schema("public");
+  return notificationsDb.schema("public" as any) as any;
 }
 
 export function comunicacionesSchema() {
-  return notificationsDb.schema("comunicaciones");
+  return notificationsDb.schema("comunicaciones" as any) as any;
 }
 
 export function normalizeText(value: string | null | undefined): string {

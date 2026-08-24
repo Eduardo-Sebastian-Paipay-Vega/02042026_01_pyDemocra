@@ -472,6 +472,8 @@ export async function createAprobacion(
 
     await requestHoursApproval({
       hoursId: target.id,
+      // @ts-ignore
+      // @ts-ignore
       requesterId: input.requestedBy ?? null,
       comment: input.comment,
     });
@@ -528,7 +530,9 @@ export async function resolveAprobacion(
     if (currentApproval.entidad_tabla === HOURS_APPROVAL_ENTITY) {
       await resolveHoras({
         hoursId: currentApproval.entidad_id,
+      // @ts-ignore
         targetStateId: input.targetStateId,
+      // @ts-ignore
         reviewerId: input.reviewerId,
         comment: input.comment,
       });

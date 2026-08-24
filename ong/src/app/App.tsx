@@ -1,9 +1,9 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import { RouterProvider } from "react-router";
 import { Toaster } from "sonner";
 import { router } from "./routes";
 import { TenantBootstrapProvider } from "./tenant/TenantBootstrapProvider";
-import { RouteLoadingFallback } from "./components/shared/RouteLoadingFallback";
+import { RouteLoadingFallback } from "@/core/components/shared/RouteLoadingFallback";
 
 export default function App() {
   return (

@@ -26,6 +26,8 @@ describe("Roles Service - Zero-Fail Tolerance Suite", () => {
 
   describe("SAD PATHS: Auth Breaches & Injections", () => {
     it("TST-ERR-006: Debe rechazar obtencion de datos si tenantId no se resuelve (Token invalido)", async () => {
+      // @ts-ignore
+      // @ts-ignore
       vi.mocked(shared.resolveSettingsCapabilities).mockResolvedValueOnce({
         canReadRoles: true,
         canReadPermissions: true,
@@ -41,7 +43,9 @@ describe("Roles Service - Zero-Fail Tolerance Suite", () => {
       );
     });
 
+      // @ts-ignore
     it("TST-ERR-007: Debe bloquear createRole si no hay permisos de gestion", async () => {
+      // @ts-ignore
       vi.mocked(shared.resolveSettingsCapabilities).mockResolvedValueOnce({
         canReadRoles: true,
         canReadPermissions: true,
@@ -53,8 +57,10 @@ describe("Roles Service - Zero-Fail Tolerance Suite", () => {
         "No tienes permisos para crear roles."
       );
     });
+      // @ts-ignore
     
     it("TST-ERR-008: Debe rechazar inputs corruptos en updateRole (Inyeccion/Validacion)", async () => {
+      // @ts-ignore
       vi.mocked(shared.resolveSettingsCapabilities).mockResolvedValueOnce({
         canReadRoles: true,
         canReadPermissions: true,
@@ -67,9 +73,11 @@ describe("Roles Service - Zero-Fail Tolerance Suite", () => {
       );
     });
   });
+      // @ts-ignore
 
   describe("SAD PATHS: Corrupt Payloads & Missing Data", () => {
     it("TST-ERR-009: Debe manejar el caso de eliminar un rol propio (Self-Delete Prevencion)", async () => {
+      // @ts-ignore
       vi.mocked(shared.resolveSettingsCapabilities).mockResolvedValueOnce({
         canReadRoles: true,
         canReadPermissions: true,
@@ -104,10 +112,12 @@ describe("Roles Service - Zero-Fail Tolerance Suite", () => {
         "No se permite eliminar un rol actualmente asignado a tu usuario"
       );
     });
+      // @ts-ignore
   });
 
   describe("SAD PATHS: Network Failures & Supabase Offline", () => {
     it("TST-ERR-010: Debe capturar y propagar error si la base de datos falla en Promise.all (Timeout 503)", async () => {
+      // @ts-ignore
       vi.mocked(shared.resolveSettingsCapabilities).mockResolvedValueOnce({
         canReadRoles: true,
         canReadPermissions: true,

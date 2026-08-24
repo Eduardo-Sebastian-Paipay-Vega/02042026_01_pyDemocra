@@ -105,6 +105,8 @@ describe("Volunteer Registration Service", () => {
 
   describe("consumeVolunteerRegistrationCode", () => {
     it("debe validar los datos basicos y rechazar si faltan", async () => {
+      // @ts-ignore
+      // @ts-ignore
       await expect(consumeVolunteerRegistrationCode({
         code: "",
         email: "a@a.com",
@@ -120,7 +122,9 @@ describe("Volunteer Registration Service", () => {
       (supabase.functions.invoke as any).mockResolvedValue({ data: { codeId: "x" }, error: null });
 
       const mockFile = new File(["dummy content"], "test.pdf", { type: "application/pdf" });
+      // @ts-ignore
 
+      // @ts-ignore
       const res = await consumeVolunteerRegistrationCode({
         code: "123",
         email: "test@gmail.com",

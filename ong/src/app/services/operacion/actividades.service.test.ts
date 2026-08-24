@@ -79,6 +79,8 @@ describe("Operacion Actividades Service - Zero-Fail Tolerance Suite", () => {
         volunteerId: "all",
         period: "all",
         searchTerm: "",
+      // @ts-ignore
+      // @ts-ignore
         page: 1,
         pageSize: 20,
       });

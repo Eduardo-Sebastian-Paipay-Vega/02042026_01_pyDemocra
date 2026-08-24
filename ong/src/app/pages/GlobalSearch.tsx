@@ -8,7 +8,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { PageHeader } from "../components/shared/PageHeader";
+import { PageHeader } from '@/core/components/shared/PageHeader';
 import { cn } from "../lib/utils";
 import { useGlobalSearch } from "../modules/home/useGlobalSearch";
 import { useGlobalSearchDetail } from "../modules/home/useGlobalSearchDetail";
@@ -19,12 +19,12 @@ import type {
   GlobalSearchItem,
 } from "../modules/home/types";
 
-const stagger = {
+const stagger: any = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
 };
 
-const fadeUp = {
+const fadeUp: any = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
@@ -142,15 +142,15 @@ export function GlobalSearch() {
   } = useGlobalSearchDetail();
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
+    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="space-y-6">
+      <motion.div variants={fadeUp as any}>
         <PageHeader
           title="Busqueda global"
           description="Busca voluntarios, actividades, proyectos y solicitudes de admision."
         />
       </motion.div>
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp as any}>
         <div
           className="rounded-2xl p-4 backdrop-blur-xl"
           style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -184,7 +184,7 @@ export function GlobalSearch() {
       </motion.div>
 
       {error && (
-        <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp as any}>
           <div
             className="flex items-center justify-between rounded-2xl px-4 py-3"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -205,7 +205,7 @@ export function GlobalSearch() {
       )}
 
       {!hasSearched && !loading && (
-        <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp as any}>
           <div
             className="rounded-2xl p-10 text-center"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -218,7 +218,7 @@ export function GlobalSearch() {
       )}
 
       {hasSearched && !loading && !error && totalResults === 0 && (
-        <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp as any}>
           <div
             className="rounded-2xl p-10 text-center"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
@@ -231,7 +231,7 @@ export function GlobalSearch() {
       )}
 
       {(loading || (hasSearched && totalResults > 0)) && (
-        <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <motion.div variants={fadeUp as any} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {resultGroups.map((group) => (
             <div
               key={group.key}

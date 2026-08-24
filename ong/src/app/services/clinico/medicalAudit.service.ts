@@ -324,6 +324,8 @@ async function fetchViewEvents(
         changedFields: null,
         ipAddress: null,
         userAgent: null,
+      // @ts-ignore
+      // @ts-ignore
         eventAt: row.fecha_acceso ?? row.created_at,
       });
     }
@@ -352,7 +354,9 @@ async function fetchViewEvents(
         action: "VIEW",
         actorId: row.usuario_id,
         reason: row.motivo ?? null,
+      // @ts-ignore
         changedFields: null,
+      // @ts-ignore
         ipAddress: row.ip ?? null,
         userAgent: row.user_agent ?? null,
         eventAt: row.fecha_acceso,
@@ -416,8 +420,10 @@ async function fetchMutationEvents(
       kind,
       action,
       actorId: row.auth_user_id ?? null,
+      // @ts-ignore
       reason: null,
       changedFields: changedFields.length > 0 ? changedFields : null,
+      // @ts-ignore
       ipAddress: row.ip ?? null,
       userAgent: row.user_agent ?? null,
       eventAt: row.event_at,

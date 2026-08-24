@@ -9,7 +9,7 @@ import {
   AlertTriangle,
   Lightbulb,
 } from "lucide-react";
-import { cn } from '../../../lib/utils';
+import { cn } from "@/core/components/ui/utils";
 
 const resources = [
   { icon: Book, label: "Ver documentaciÃƒÂ³n", description: "GuÃƒÂ­as y referencia", href: "#" },

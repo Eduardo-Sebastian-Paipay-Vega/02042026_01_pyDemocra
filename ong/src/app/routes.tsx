@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate, useLocation } from "react-router";
 import type { ReactNode } from "react";
-import { AppShell } from "./components/layout/AppShell";
-import { PublicLayout } from "./components/layout/PublicLayout";
-import { ErrorBoundary } from "./components/shared/ErrorBoundary";
+import { AppShell } from "@/core/shell/AppShell";
+import { PublicLayout } from "@/core/shell/PublicLayout";
+import { ErrorBoundary } from "@/core/components/shared/ErrorBoundary";
+import { RouterErrorBoundary } from "@/core/components/shared/RouterErrorBoundary";
 import { useTenantBootstrap } from "./tenant/TenantBootstrapProvider";
 import {
   canAccessTenantRoute,
@@ -19,10 +20,8 @@ import type { TenantRouteId } from "./tenant/navigation";
 // navegación protegida, cargarlo diferido solo retrasaría el primer render
 // sin ahorrar nada.
 const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
-const MyProfile = lazy(() => import("./pages/MyProfile").then((m) => ({ default: m.MyProfile })));
-const MyAccountSettings = lazy(() =>
-  import("./pages/MyAccountSettings").then((m) => ({ default: m.MyAccountSettings }))
-);
+const ProfilePage = lazy(() => import("@/core/features/profile/ProfilePage"));
+const SettingsPage = lazy(() => import("@/core/features/settings/SettingsPage"));
 const AuditLog = lazy(() => import("./pages/AuditLog").then((m) => ({ default: m.AuditLog })));
 const AdmissionDocuments = lazy(() =>
   import("./pages/AdmissionDocuments").then((m) => ({ default: m.AdmissionDocuments }))
@@ -116,18 +115,6 @@ const CreateTenantPage = lazy(() =>
 const ROUTER_BASENAME = "/ong";
 
 function RootEntry() {
-  const { loading, status, context, resolveInitialPath } = useTenantBootstrap();
-
-  if (loading) {
-    return <TenantBootstrapLoadingScreen />;
-  }
-
-  // Si ya tiene sesión activa, redirige al sistema internamente
-  if (status === "ready" && context) {
-    return <Navigate to={resolveInitialPath() ?? resolveTenantInitialPath(context)} replace />;
-  }
-
-  // Si no está listo (unauthenticated), muestra el Landing Page
   return (
     <Suspense fallback={<TenantBootstrapLoadingScreen />}>
       <LandingPage />
@@ -299,6 +286,7 @@ export const router = createBrowserRouter(
     {
       path: "/",
       element: <RootEntry />,
+      errorElement: <RouterErrorBoundary />,
     },
     {
       path: "/login",
@@ -306,6 +294,7 @@ export const router = createBrowserRouter(
     },
     {
       element: <PublicLayout />,
+      errorElement: <RouterErrorBoundary />,
       children: [
         {
           path: "/landing/register",
@@ -336,6 +325,7 @@ export const router = createBrowserRouter(
     {
       path: "/app",
       element: <ProtectedTenantShell />,
+      errorElement: <RouterErrorBoundary />,
       children: [
         {
           index: true,
@@ -355,11 +345,15 @@ export const router = createBrowserRouter(
           // autenticado con tenant resuelto (ya garantizado por
           // ProtectedTenantShell) puede ver/editar su propia cuenta.
           path: "account/profile",
-          element: <MyProfile />,
+          element: <ProfilePage userName="" role="" onLogout={async () => {
+            const { supabase } = await import('@educ/lib/supabase');
+            await supabase.auth.signOut();
+            window.location.href = '/ong/login';
+          }} />,
         },
         {
           path: "account/settings",
-          element: <MyAccountSettings />,
+          element: <SettingsPage />,
         },
         {
           path: "operation",

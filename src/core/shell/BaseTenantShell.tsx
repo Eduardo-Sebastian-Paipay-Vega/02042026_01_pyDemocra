@@ -13,8 +13,8 @@ import { Topbar } from "../../modules/ong/app/components/layout/Topbar";
 import {
   CommandPalette,
   useCommandPalette,
-} from "../../modules/ong/app/components/ui/command-palette";
-import { HelpAssistant } from "../../modules/ong/app/components/ui/help-assistant";
+} from "../components/ui/command-palette";
+import { HelpAssistant } from "../components/ui/help-assistant";
 import { useGlobalShortcuts } from "../../modules/ong/app/lib/useGlobalShortcuts";
 import { cn } from "../../modules/ong/app/lib/utils";
 import { useTenantBootstrap } from "../tenant";
@@ -205,7 +205,7 @@ export function BaseTenantShell({
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(16, 14, 12, 0.12) 0%, rgba(16, 14, 12, 0) 22%, rgba(16, 14, 12, 0.18) 100%)",
+              "linear-gradient(180deg, var(--t-hover) 0%, transparent 22%, var(--t-hover) 100%)",
           }}
         />
       </div>
@@ -265,7 +265,7 @@ export function BaseTenantShell({
             onSearchClick={() => navigate(searchRoute?.path ?? location.pathname)}
             onSignOut={async () => {
               await supabase.auth.signOut();
-              navigate("/app/login");
+              window.location.href = "/";
             }}
             notifications={notifications}
             notificationsLoading={notificationsLoading}

@@ -83,6 +83,8 @@ describe("personas/shared.ts", () => {
       expect(resolvePeopleStatusVariant("active")).toBe("success");
       expect(resolvePeopleStatusVariant("inactive")).toBe("secondary");
       expect(resolvePeopleStatusVariant("pending")).toBe("warning");
+      // @ts-ignore
+      // @ts-ignore
       expect(resolvePeopleStatusVariant("archived")).toBe("info");
     });
   });

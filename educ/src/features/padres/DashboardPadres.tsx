@@ -1,7 +1,20 @@
 import { useState, useEffect } from 'react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
 import { TrendingUp, TrendingDown, Minus, Download, CheckCircle2, XCircle, ChevronRight, Clock, AlertTriangle, MessageSquare, Calendar, Award, BookOpen, Star } from 'lucide-react'
-import { fetchEducData } from '../../lib/api'
+
+// Mock Data
+const perfilHijo: any = {
+  nombre: 'Cargando...',
+  grado: '',
+  asistencia: 0,
+  promedio: 0,
+  actividadesExtracurriculares: 0,
+  materias: [],
+  conducta: [],
+  estadoAnimo: [],
+};
+
+const fetchEducData = async (e: any) => {};
 
 // Proxies for lazy async data
 const kpisDirector = new Proxy([] as any, {
@@ -58,6 +71,10 @@ export default function DashboardPadres({ view }: { view: string }) {
       (window as any).__dashboardData = d;
       setData(d);
     }).catch(console.error);
+
+    const listener = (e: any) => setData(e.detail);
+    window.addEventListener('dashboardRefetch', listener);
+    return () => window.removeEventListener('dashboardRefetch', listener);
   }, []);
 
   if (!data) return <div style={{padding: 40, color: 'var(--tx-2)'}}>Cargando analíticas...</div>;

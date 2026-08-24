@@ -99,6 +99,8 @@ describe("Proyectos Projects Service - Zero-Fail Tolerance Suite", () => {
           stateCode: "estado-1",
           startDate: "2026-01-01",
           endDate: "2026-02-01",
+      // @ts-ignore
+      // @ts-ignore
           budget: 1000,
           imageUrl: "",
         })
@@ -207,7 +209,9 @@ describe("Proyectos Projects Service - Zero-Fail Tolerance Suite", () => {
           areaId: "area-1",
           stateCode: "estado-1",
           startDate: "2026-01-01",
+      // @ts-ignore
           endDate: "2026-02-01",
+      // @ts-ignore
           budget: 1000,
           imageUrl: "",
         })

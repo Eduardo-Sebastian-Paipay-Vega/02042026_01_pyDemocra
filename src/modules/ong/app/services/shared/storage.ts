@@ -190,3 +190,13 @@ export function getAdmissionOnboardingEvidenceBucket() {
   } as const;
 }
 
+export function getAssetsUploadBucket() {
+  return {
+    bucket: "assets",
+    publicBucket: true,
+    tenantScoped: true,
+    allowedMimeTypes: IMAGE_MIME_TYPES,
+    maxSizeBytes: MAX_IMAGE_BYTES,
+  } as const;
+}
+

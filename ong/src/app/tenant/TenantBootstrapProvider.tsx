@@ -41,7 +41,7 @@ interface TenantBootstrapContextShape {
   reload: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
-  canAccessModule: ReturnType<typeof canAccessModuleWithContext>;
+  canAccessModule: (moduleKey: any) => boolean;
   canAccessRoute: (routeId: TenantRouteId) => boolean;
   resolveInitialPath: () => string | null;
 }
@@ -60,7 +60,7 @@ const UNAUTHENTICATED_RESULT: TenantBootstrapResult = {
 function resolveInitialState(): { result: TenantBootstrapResult; loading: boolean } {
   const cached = readBootstrapCacheSync();
   if (cached?.status === "ready" && cached.context) {
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.MODE === "development") {
       console.debug("[Tenant] Hidratación sincrónica desde localStorage — sin loader.");
     }
     return { result: cached, loading: false };
@@ -132,7 +132,7 @@ export function TenantBootstrapProvider({ children }: { children: ReactNode }) {
         const entry = JSON.parse(event.newValue) as BootstrapCacheEntry;
         if (entry.result.status === "ready" && entry.result.context) {
           // La otra pestaña completó un bootstrap exitoso → adoptar su resultado
-          if (process.env.NODE_ENV === "development") {
+          if (import.meta.env.MODE === "development") {
             console.debug("[Tenant] Contexto sincronizado desde otra pestaña.");
           }
           setResult(entry.result);

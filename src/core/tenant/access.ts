@@ -1,7 +1,7 @@
 import type {
   TenantContextValue,
   TenantModulesState,
-} from "../../modules/ong/app/tenant/bootstrap";
+} from "@ong/app/tenant/bootstrap";
 import type {
   IndustryId,
   RegisteredModuleDefinition,

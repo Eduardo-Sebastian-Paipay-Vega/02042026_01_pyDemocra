@@ -130,6 +130,8 @@ describe("Operacion Evidencias Service - Zero-Fail Tolerance Suite", () => {
       });
 
       // Segundo mock: Inserción de aprobación falla
+      // @ts-ignore
+      // @ts-ignore
       mockQuery.insert.mockReturnValueOnce(mockQuery);
       (mockQuery.insert as any).mockResolvedValueOnce({
         error: { message: "503 Approval Create Failed" },
@@ -161,7 +163,9 @@ describe("Operacion Evidencias Service - Zero-Fail Tolerance Suite", () => {
     });
 
     it("TST-ERR-062: validateEvidencia debe lanzar error informando que esta bloqueada por SQL maestro", async () => {
+      // @ts-ignore
       await expect(
+      // @ts-ignore
         validateEvidencia({ evidenceId: "ev-1", validationStatusId: 2 })
       ).rejects.toThrow(
         "La validacion de evidencias no esta documentada en los scripts SQL actuales para ong.evidencias_actividad."

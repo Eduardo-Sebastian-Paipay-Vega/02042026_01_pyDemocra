@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { supabase } from '@educ/lib/supabase'
+import i18n from '../lib/i18n'
+import { format as dateFnsFormat } from 'date-fns'
+import { es, enUS, ptBR } from 'date-fns/locale'
 
 export type Theme    = 'dark' | 'light' | 'system'
 export type Density  = 'compact' | 'normal' | 'comfy'
@@ -11,11 +14,19 @@ export interface AppSettings {
   fontSize:       FontSize
   animaciones:    boolean
   sidebarPinned:  boolean
+  language:       string
+  timezone:       string
+  date_format:    string
+  initial_view:   string
+  tenant_settings: Record<string, any>
+  integrations:   Record<string, boolean>
 }
 
 interface SettingsCtx extends AppSettings {
-  saveSettings: (s: AppSettings) => Promise<void>
+  saveSettings: (s: Partial<AppSettings>) => Promise<void>
+  previewSettings: (s: Partial<AppSettings>) => void
   refreshSettings: () => Promise<void>
+  formatDate: (date: Date | string | number) => string
 }
 
 const DEFAULT: AppSettings = {
@@ -24,12 +35,20 @@ const DEFAULT: AppSettings = {
   fontSize:      '14',
   animaciones:   true,
   sidebarPinned: true,
+  language:      'es',
+  timezone:      'America/Lima',
+  date_format:   'dmy',
+  initial_view:  'dashboard',
+  tenant_settings: {},
+  integrations: { google: true, slack: false, zoom: true, whatsapp: false, sap: false }
 }
 
 const Ctx = createContext<SettingsCtx>({
   ...DEFAULT,
   saveSettings: async () => {},
-  refreshSettings: async () => {}
+  previewSettings: () => {},
+  refreshSettings: async () => {},
+  formatDate: () => ''
 })
 
 export function useSettings() { return useContext(Ctx) }
@@ -50,12 +69,18 @@ function resolveTheme(theme: Theme): 'dark' | 'light' {
 function applyAll(s: AppSettings) {
   const root = document.documentElement
   const body = document.body
-  root.setAttribute('data-theme', resolveTheme(s.theme))
+  const resolved = resolveTheme(s.theme)
+  root.setAttribute('data-theme', resolved)
+  root.classList.toggle('dark', resolved === 'dark')
   Object.entries(DENSITY_VARS[s.density]).forEach(([k, v]) => root.style.setProperty(k, v))
   root.setAttribute('data-density', s.density)
   body.style.fontSize = `${s.fontSize}px`
   root.classList.toggle('no-animations', !s.animaciones)
   localStorage.setItem('sidebar-pinned', String(s.sidebarPinned))
+  
+  if (i18n.language !== s.language) {
+    i18n.changeLanguage(s.language)
+  }
 }
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -66,14 +91,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/profile/preferences`, {
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        if (data.preferences && data.preferences.theme) {
-          setSettings(prev => ({ ...prev, ...data.preferences }))
-        }
+      const { data, error } = await supabase.from('profiles').select('preferences').eq('id', session.user.id).single()
+      if (!error && data && data.preferences) {
+        const p = data.preferences
+        const g = p.generalSettings || {}
+        setSettings(prev => ({ 
+          ...prev, 
+          theme: p.theme || prev.theme,
+          density: p.density || prev.density,
+          fontSize: p.fontSize || prev.fontSize,
+          animaciones: p.animaciones ?? prev.animaciones,
+          sidebarPinned: p.sidebarPinned ?? prev.sidebarPinned,
+          language: g.language || prev.language,
+          timezone: g.timezone || prev.timezone,
+          date_format: g.date_format || prev.date_format,
+          initial_view: g.initial_view || prev.initial_view,
+          tenant_settings: p.tenant_settings || prev.tenant_settings,
+          integrations: p.integrations || prev.integrations
+        }))
       }
     } catch (err) {
       console.error('Error fetching settings', err)
@@ -89,32 +124,78 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (settings.theme !== 'system') return
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const handler = () => document.documentElement.setAttribute('data-theme', resolveTheme('system'))
+    const handler = () => {
+      const resolved = resolveTheme('system')
+      document.documentElement.setAttribute('data-theme', resolved)
+      document.documentElement.classList.toggle('dark', resolved === 'dark')
+    }
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [settings.theme])
 
-  const saveSettings = async (s: AppSettings) => {
-    setSettings(s)
+  const previewSettings = (s: Partial<AppSettings>) => {
+    setSettings(prev => ({ ...prev, ...s }))
+  }
+
+  const saveSettings = async (s: Partial<AppSettings>) => {
+    const newSettings = { ...settings, ...s }
+    setSettings(newSettings)
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/profile/preferences`, {
-          method: 'POST',
-          headers: { 
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ preferences: s })
-        })
+        const { data: currentProfile } = await supabase.from('profiles').select('preferences').eq('id', session.user.id).single()
+        const currentPrefs = currentProfile?.preferences || {}
+        
+        await supabase.from('profiles').update({
+          preferences: {
+            ...currentPrefs,
+            theme: newSettings.theme,
+            density: newSettings.density,
+            fontSize: newSettings.fontSize,
+            animaciones: newSettings.animaciones,
+            sidebarPinned: newSettings.sidebarPinned,
+            generalSettings: {
+              ...(currentPrefs.generalSettings || {}),
+              language: newSettings.language,
+              timezone: newSettings.timezone,
+              date_format: newSettings.date_format,
+              initial_view: newSettings.initial_view
+            },
+            tenant_settings: {
+              ...(currentPrefs.tenant_settings || {}),
+              ...newSettings.tenant_settings
+            },
+            integrations: newSettings.integrations
+          }
+        }).eq('id', session.user.id)
       }
     } catch (err) {
       console.error('Error saving settings', err)
     }
   }
 
+  const formatDate = (date: Date | string | number) => {
+    try {
+      const d = new Date(date)
+      // Usamos el locale ptBR si el idioma es portugués.
+      // date-fns no tiene quechua nativo, así que para quechua ('qu') usamos el default español ('es')
+      const locale = settings.language === 'en' ? enUS : settings.language === 'pt' ? ptBR : es
+      const fmtStr = settings.date_format === 'ymd' ? 'yyyy-MM-dd' :
+                     settings.date_format === 'mdy' ? 'MM/dd/yyyy' : 'dd/MM/yyyy'
+      return dateFnsFormat(d, fmtStr, { locale })
+    } catch {
+      return ''
+    }
+  }
+
   return (
-    <Ctx.Provider value={{ ...settings, saveSettings, refreshSettings }}>
+    <Ctx.Provider value={{
+      ...settings,
+      saveSettings,
+      previewSettings,
+      refreshSettings,
+      formatDate
+    }}>
       {children}
     </Ctx.Provider>
   )

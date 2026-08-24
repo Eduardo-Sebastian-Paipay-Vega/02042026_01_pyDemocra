@@ -101,7 +101,7 @@ function SelectField({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       disabled={disabled}
-      className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 disabled:cursor-not-allowed disabled:opacity-70 hover:border-zinc-700"
+      className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300 disabled:cursor-not-allowed disabled:opacity-70 hover:border-zinc-700"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -134,9 +134,9 @@ function FieldError({ message }: { message?: string }) {
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl px-3 py-2 bg-zinc-900 border border-zinc-800">
-      <p className="text-[11px] text-zinc-400 font-medium">{label}</p>
-      <p className="mt-1 text-[12px] text-zinc-200">{value || "-"}</p>
+    <div className="rounded-xl px-3 py-2 bg-neutral-100 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800">
+      <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-medium">{label}</p>
+      <p className="mt-1 text-[12px] text-neutral-800 dark:text-zinc-200">{value || "-"}</p>
     </div>
   );
 }
@@ -717,7 +717,7 @@ export function Hours() {
           type="checkbox"
           checked={rows.length > 0 && selectedHoursIds.length === rows.length}
           onChange={toggleSelectAllHours}
-          className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       ),
       render: (item) => (
@@ -725,7 +725,7 @@ export function Hours() {
           type="checkbox"
           checked={selectedHoursIds.includes(item.id)}
           onChange={() => toggleSelectHours(item.id)}
-          className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       ),
     },
@@ -745,8 +745,8 @@ export function Hours() {
               {initials}
             </div>
             <div>
-              <div className="font-semibold text-zinc-100">{item.volunteerName}</div>
-              <div className="mt-0.5 text-[11px] text-zinc-400">{item.requestedBy || "Voluntario General"}</div>
+              <div className="font-semibold text-neutral-900 dark:text-zinc-100">{item.volunteerName}</div>
+              <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-zinc-400">{item.requestedBy || "Voluntario General"}</div>
             </div>
           </div>
         );
@@ -757,8 +757,8 @@ export function Hours() {
       label: "Proyecto / Actividad",
       render: (item) => (
         <div>
-          <div className="font-medium text-zinc-200">{item.activityName}</div>
-          <div className="mt-0.5 text-[11px] text-zinc-400 font-medium">{item.projectName}</div>
+          <div className="font-medium text-neutral-800 dark:text-zinc-200">{item.activityName}</div>
+          <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-zinc-400 font-medium">{item.projectName}</div>
         </div>
       ),
     },
@@ -766,10 +766,10 @@ export function Hours() {
       key: "date",
       label: "Fecha y Horario",
       render: (item) => (
-        <div className="text-[12px] text-zinc-300 font-mono space-y-0.5">
+        <div className="text-[12px] text-neutral-700 dark:text-zinc-300 font-mono space-y-0.5">
           <div className="flex items-center gap-1">ðŸ“… {item.date}</div>
           {(item.startTime || item.endTime) && (
-            <div className="text-[11px] text-zinc-400 flex items-center gap-1">
+            <div className="text-[11px] text-neutral-500 dark:text-zinc-400 flex items-center gap-1">
               ðŸ•’ {item.startTime || "--:--"} - {item.endTime || "--:--"}
             </div>
           )}
@@ -796,7 +796,7 @@ export function Hours() {
             <Paperclip className="h-3 w-3" /> Adjunto
           </span>
         ) : (
-          <span className="text-[11px] text-zinc-500">-</span>
+          <span className="text-[11px] text-neutral-400 dark:text-zinc-500">-</span>
         );
       },
     },
@@ -822,16 +822,16 @@ export function Hours() {
             <OutlineButton
               size="sm"
               onClick={() => setIsRulesModalOpen(true)}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
             >
-              <Settings className="h-4 w-4 text-zinc-400" />
+              <Settings className="h-4 w-4 text-neutral-500 dark:text-zinc-400" />
               Reglas
             </OutlineButton>
 
             <OutlineButton
               size="sm"
               onClick={() => exportHoursToCSV(rows)}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
             >
               <Download className="h-4 w-4 text-emerald-400" />
               Exportar Reporte
@@ -848,60 +848,60 @@ export function Hours() {
       {/* KPIS DE RESUMEN DE 4 COLUMNAS */}
       <motion.div variants={fadeUp}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Pendientes</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Pendientes</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.pending}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.pending}</p>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                 ðŸŸ¡ Por revisar
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Aprobadas</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Aprobadas</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.approved}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.approved}</p>
               <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                 ðŸŸ¢ Validadas
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-red-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-red-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Rechazadas</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Rechazadas</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                 <XCircle className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.rejected}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.rejected}</p>
               <span className="text-[11px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">
                 ðŸ”´ Desestimadas
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-indigo-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-indigo-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Total Horas Aprobadas</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Total Horas Aprobadas</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 <Timer className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{Math.round(totalApprovedMinutes / 60)}h</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{Math.round(totalApprovedMinutes / 60)}h</p>
               <span className="text-[11px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 font-mono">
                 ðŸ”µ {totalApprovedHoursLabel}
               </span>
@@ -943,7 +943,7 @@ export function Hours() {
               <button
                 type="button"
                 onClick={() => setSelectedHoursIds([])}
-                className="px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200"
+                className="px-2 py-1 text-[11px] text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
               >
                 Desmarcar
               </button>
@@ -972,13 +972,13 @@ export function Hours() {
             type="date"
             value={dateFrom}
             onChange={(event) => setDateFrom(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300"
           />
           <input
             type="date"
             value={dateTo}
             onChange={(event) => setDateTo(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300"
           />
 
           {(searchValue || scope !== "all" || status !== "all" || volunteerFilter !== "all" || projectFilter !== "all" || activityFilter !== "all" || dateFrom || dateTo) && (
@@ -1011,12 +1011,12 @@ export function Hours() {
       {/* TABLA PRINCIPAL Y ESTADO VACÃO */}
       <motion.div variants={fadeUp}>
         {rows.length === 0 && !loading ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-400 mb-4 shadow-sm border border-zinc-700/50">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/60 p-12 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-200 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 mb-4 shadow-sm border border-zinc-700/50">
               <Clock3 className="h-7 w-7 text-indigo-400" />
             </div>
-            <h3 className="text-base font-semibold text-zinc-100">Sin registros de horas</h3>
-            <p className="mt-1 text-xs text-zinc-400 max-w-sm">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100">Sin registros de horas</h3>
+            <p className="mt-1 text-xs text-neutral-500 dark:text-zinc-400 max-w-sm">
               No se encontraron registros de horas reportadas con los filtros activos.
             </p>
             <div className="mt-5 flex gap-2">
@@ -1076,60 +1076,60 @@ export function Hours() {
       {/* MODAL DE REGLAS DE APROBACIÃ“N */}
       <ModalShell open={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} width="max-w-[560px]">
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
               <Settings className="h-5 w-5 text-indigo-400" />
               Reglas de AprobaciÃ³n de Horas
             </h3>
-            <button type="button" className="text-zinc-400 hover:text-zinc-200" onClick={() => setIsRulesModalOpen(false)}>
+            <button type="button" className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200" onClick={() => setIsRulesModalOpen(false)}>
               <X className="h-4 w-4" />
             </button>
           </div>
 
           <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Exigir Evidencia Obligatoria</span>
-                <span className="text-[11px] text-zinc-400">Requerir adjuntar foto o documento para enviar registro de horas.</span>
+                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">Exigir Evidencia Obligatoria</span>
+                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Requerir adjuntar foto o documento para enviar registro de horas.</span>
               </div>
               <input
                 type="checkbox"
                 checked={rulesState.requireEvidence}
                 onChange={(e) => setRulesState((s) => ({ ...s, requireEvidence: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
             </div>
 
             <div>
-              <label className="block text-zinc-300 font-medium mb-1">
+              <label className="block text-neutral-700 dark:text-zinc-300 font-medium mb-1">
                 LÃ­mite MÃ¡ximo Semanal de Horas (Alerta)
               </label>
               <input
                 type="number"
                 value={rulesState.maxWeeklyHoursLimit}
                 onChange={(e) => setRulesState((s) => ({ ...s, maxWeeklyHoursLimit: parseInt(e.target.value) || 0 }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
               />
-              <p className="mt-1 text-[11px] text-zinc-500">
+              <p className="mt-1 text-[11px] text-neutral-400 dark:text-zinc-500">
                 Emitir alerta cuando un voluntario exceda este nÃºmero de horas en la semana.
               </p>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Auto-Aprobar a Coordinadores</span>
-                <span className="text-[11px] text-zinc-400">Aprobar automÃ¡ticamente horas registradas por lideres de proyecto.</span>
+                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">Auto-Aprobar a Coordinadores</span>
+                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Aprobar automÃ¡ticamente horas registradas por lideres de proyecto.</span>
               </div>
               <input
                 type="checkbox"
                 checked={rulesState.autoApproveCoordinators}
                 onChange={(e) => setRulesState((s) => ({ ...s, autoApproveCoordinators: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
             <OutlineButton size="sm" onClick={() => setIsRulesModalOpen(false)}>
               Cancelar
             </OutlineButton>
@@ -1149,19 +1149,19 @@ export function Hours() {
       {/* â”€â”€ MODAL REFACTORIZADO DE REGISTRAR HORAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ModalShell open={isFormModalOpen} onClose={closeFormModal} width="max-w-[840px]">
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
             <div>
-              <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
                 <Timer className="h-5 w-5 text-indigo-400" />
                 {editingHoursId ? "Editar Horas Registradas" : "Registrar Horas de Voluntariado"}
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">
                 Ingresa el tiempo dedicado por el voluntario en una actividad especÃ­fica.
               </p>
             </div>
             <button
               type="button"
-              className="text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+              className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
               onClick={closeFormModal}
             >
               <X className="h-5 w-5" />
@@ -1176,14 +1176,14 @@ export function Hours() {
           )}
 
           {/* FILA 1: MODALIDAD DE TIEMPO (TABS) */}
-          <div className="p-1 rounded-xl bg-zinc-950 border border-zinc-800 grid grid-cols-2 gap-1">
+          <div className="p-1 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 grid grid-cols-2 gap-1">
             <button
               type="button"
               onClick={() => setInputMode("range")}
               className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
                 inputMode === "range"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <Clock className="h-4 w-4" />
@@ -1196,7 +1196,7 @@ export function Hours() {
               className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
                 inputMode === "direct"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <Timer className="h-4 w-4" />
@@ -1207,7 +1207,7 @@ export function Hours() {
           {/* FILA 2: PROYECTO Y ACTIVIDAD */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Proyecto <span className="text-red-400">*</span>
               </label>
               <select
@@ -1217,7 +1217,7 @@ export function Hours() {
                   setFormActivityId("all");
                   clearFormError("projectId");
                 }}
-                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
               >
                 <option value="all">Selecciona un proyecto</option>
                 {volunteerProjectOptions.map((option) => (
@@ -1230,7 +1230,7 @@ export function Hours() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Actividad Vinculada <span className="text-red-400">*</span>
               </label>
               <select
@@ -1240,7 +1240,7 @@ export function Hours() {
                   clearFormError("activityId");
                 }}
                 disabled={formProjectId === "all"}
-                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <option value="all">Selecciona una actividad</option>
                 {filteredActivityOptions.map((option) => (
@@ -1255,7 +1255,7 @@ export function Hours() {
 
           {/* FILA 3: VOLUNTARIO CON TARJETA DE VISTA PREVIA */}
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-zinc-300">
+            <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300">
               Voluntario <span className="text-red-400">*</span>
             </label>
             <select
@@ -1264,7 +1264,7 @@ export function Hours() {
                 setFormVolunteerId(event.target.value);
                 clearFormError("volunteerId");
               }}
-              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
             >
               <option value="all">Selecciona un voluntario</option>
               {volunteerOptions.map((option) => (
@@ -1276,13 +1276,13 @@ export function Hours() {
             <FieldError message={formErrors.volunteerId} />
 
             {selectedVolunteerData && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-950 border border-indigo-500/30 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-950 border border-indigo-500/30 text-xs animate-in fade-in">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 font-bold text-indigo-300 border border-indigo-500/30">
                   {selectedVolunteerData.initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-zinc-100 truncate">{selectedVolunteerData.name}</div>
-                  <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-0.5">
+                  <div className="font-semibold text-neutral-900 dark:text-zinc-100 truncate">{selectedVolunteerData.name}</div>
+                  <div className="text-[11px] text-neutral-500 dark:text-zinc-400 flex items-center gap-2 mt-0.5">
                     <span>âœ‰ï¸ {selectedVolunteerData.email}</span>
                     <span>â€¢</span>
                     <span className="text-indigo-400 font-medium">â³ {selectedVolunteerData.monthlyHours}</span>
@@ -1296,7 +1296,7 @@ export function Hours() {
           {inputMode === "range" ? (
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Fecha <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1306,13 +1306,13 @@ export function Hours() {
                     setFormDate(e.target.value);
                     clearFormError("date");
                   }}
-                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
                 <FieldError message={formErrors.date} />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Hora Inicio <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1322,13 +1322,13 @@ export function Hours() {
                     setFormStart(e.target.value);
                     clearFormError("startTime");
                   }}
-                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
                 <FieldError message={formErrors.startTime} />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Hora Fin <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1338,13 +1338,13 @@ export function Hours() {
                     setFormEnd(e.target.value);
                     clearFormError("endTime");
                   }}
-                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
                 <FieldError message={formErrors.endTime} />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Tiempo Calculado
                 </label>
                 <div className="h-10 flex items-center justify-center px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs font-mono">
@@ -1356,7 +1356,7 @@ export function Hours() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Fecha <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1366,13 +1366,13 @@ export function Hours() {
                     setFormDate(e.target.value);
                     clearFormError("date");
                   }}
-                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
                 <FieldError message={formErrors.date} />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                   Cantidad Directa de Horas (ej. 3.5) <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1386,7 +1386,7 @@ export function Hours() {
                     clearFormError("minutes");
                   }}
                   placeholder="3.5"
-                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
                 <FieldError message={formErrors.minutes} />
               </div>
@@ -1396,7 +1396,7 @@ export function Hours() {
           {/* FILA 5: TAREAS REALIZADAS Y EVIDENCIAS */}
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 DescripciÃ³n de Actividades Realizadas (AuditorÃ­a)
               </label>
               <textarea
@@ -1404,12 +1404,12 @@ export function Hours() {
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={2}
                 placeholder="Ej. Se realizÃ³ el armado de kits de apoyo y entrega en la sede central..."
-                className="w-full rounded-xl p-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+                className="w-full rounded-xl p-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Adjuntar Evidencia / Comprobante (Fotos, reportes PDF, listas firmadas - MÃ¡x 5MB)
               </label>
 
@@ -1430,14 +1430,14 @@ export function Hours() {
                   <div className="flex items-center gap-2 text-indigo-300 truncate">
                     <Paperclip className="h-4 w-4 shrink-0 text-indigo-400" />
                     <span className="font-medium truncate">{formEvidenceFile.name}</span>
-                    <span className="text-[10px] text-zinc-400">
+                    <span className="text-[10px] text-neutral-500 dark:text-zinc-400">
                       ({(formEvidenceFile.size / (1024 * 1024)).toFixed(2)} MB)
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setFormEvidenceFile(null)}
-                    className="p-1 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+                    className="p-1 rounded-lg text-neutral-500 dark:text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -1445,48 +1445,48 @@ export function Hours() {
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-zinc-800 bg-zinc-950 hover:bg-zinc-900/60 cursor-pointer transition-colors text-center"
+                  className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-900/60 cursor-pointer transition-colors text-center"
                 >
-                  <UploadCloud className="h-6 w-6 text-zinc-400 mb-1" />
-                  <p className="text-xs text-zinc-300 font-medium">
+                  <UploadCloud className="h-6 w-6 text-neutral-500 dark:text-zinc-400 mb-1" />
+                  <p className="text-xs text-neutral-700 dark:text-zinc-300 font-medium">
                     Haz clic para examinar o arrastra fotos/archivos de evidencia aquÃ­
                   </p>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">Soporta JPG, PNG, PDF de hasta 5MB</p>
+                  <p className="text-[10px] text-neutral-400 dark:text-zinc-500 mt-0.5">Soporta JPG, PNG, PDF de hasta 5MB</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* FILA 6: CONFIGURACIÃ“N Y ESTADO */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 text-xs">
+            <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
               <input
                 type="checkbox"
                 checked={formNotifyVolunteer}
                 onChange={(e) => setFormNotifyVolunteer(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
               <Mail className="h-3.5 w-3.5 text-indigo-400" />
               Notificar por correo al voluntario
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+            <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
               <input
                 type="checkbox"
                 checked={formAutoApprove}
                 onChange={(e) => setFormAutoApprove(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-emerald-600 focus:ring-emerald-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-emerald-600 focus:ring-emerald-500"
               />
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
               Registrar directamente como 'Aprobado'
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+            <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
               <input
                 type="checkbox"
                 checked={formKeepModalOpen}
                 onChange={(e) => setFormKeepModalOpen(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
               <RefreshCw className="h-3.5 w-3.5 text-amber-400" />
               Mantener abierto al guardar (Modo Lote)
@@ -1494,7 +1494,7 @@ export function Hours() {
           </div>
 
           {/* FOOTER DEL MODAL */}
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
             <OutlineButton size="sm" onClick={closeFormModal}>
               Cancelar
             </OutlineButton>
@@ -1509,14 +1509,14 @@ export function Hours() {
       {/* MODAL DETALLE */}
       <ModalShell open={isDetailModalOpen} onClose={closeDetailModal} width="max-w-[840px]">
         <div className="space-y-3 p-4">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <h3 className="text-[14px] font-semibold text-zinc-100">Detalle del Registro de Horas</h3>
-            <button type="button" className="text-zinc-400 hover:text-zinc-200 text-[12px]" onClick={closeDetailModal}>
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
+            <h3 className="text-[14px] font-semibold text-neutral-900 dark:text-zinc-100">Detalle del Registro de Horas</h3>
+            <button type="button" className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 text-[12px]" onClick={closeDetailModal}>
               âœ•
             </button>
           </div>
 
-          {detailLoading && <p className="text-[12px] text-zinc-400">Cargando detalle...</p>}
+          {detailLoading && <p className="text-[12px] text-neutral-500 dark:text-zinc-400">Cargando detalle...</p>}
           {!detailLoading && detailError && (
             <ErrorBlock message={detailError} onRetry={refreshDetail} />
           )}
@@ -1544,10 +1544,10 @@ export function Hours() {
       {/* MODAL RESOLUCIÃ“N / APROBACIÃ“N */}
       <ModalShell open={isResolutionModalOpen} onClose={closeResolutionModal} width="max-w-[560px]">
         <div className="space-y-3 p-4">
-          <h3 className="text-[14px] font-semibold text-zinc-100">
+          <h3 className="text-[14px] font-semibold text-neutral-900 dark:text-zinc-100">
             {resolutionTarget?.kind === "approved" ? "Aprobar horas" : "Rechazar horas"}
           </h3>
-          <p className="text-[12px] text-zinc-400">
+          <p className="text-[12px] text-neutral-500 dark:text-zinc-400">
             Indica un comentario opcional para resolver la solicitud de horas.
           </p>
 
@@ -1559,7 +1559,7 @@ export function Hours() {
             }}
             rows={4}
             placeholder="Comentario de revisiÃ³n (opcional)"
-            className="w-full rounded-xl p-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+            className="w-full rounded-xl p-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
           />
 
           {resolutionError && <FieldError message={resolutionError} />}
@@ -1578,8 +1578,8 @@ export function Hours() {
       {/* MODAL SOLICITAR APROBACIÃ“N */}
       <ModalShell open={isRequestModalOpen} onClose={closeRequestApprovalModal} width="max-w-[560px]">
         <div className="space-y-3 p-4">
-          <h3 className="text-[14px] font-semibold text-zinc-100">Solicitar aprobaciÃ³n de horas</h3>
-          <p className="text-[12px] text-zinc-400">
+          <h3 className="text-[14px] font-semibold text-neutral-900 dark:text-zinc-100">Solicitar aprobaciÃ³n de horas</h3>
+          <p className="text-[12px] text-neutral-500 dark:text-zinc-400">
             EnvÃ­a la solicitud al coordinador responsable del proyecto.
           </p>
 
@@ -1591,7 +1591,7 @@ export function Hours() {
             }}
             rows={4}
             placeholder="Comentario para el aprobador (opcional)"
-            className="w-full rounded-xl p-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+            className="w-full rounded-xl p-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
           />
 
           {requestError && <FieldError message={requestError} />}

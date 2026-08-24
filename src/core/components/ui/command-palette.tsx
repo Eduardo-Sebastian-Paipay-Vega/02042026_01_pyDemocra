@@ -10,9 +10,9 @@ import {
 } from "react";
 import { ModalShell } from "./modal-shell";
 import { ArrowRight, Search } from "lucide-react";
-import { cn } from '../../../lib/utils';
-import { useTenantBootstrap } from "../../../../../core/tenant";
-import { buildTenantCommandRoutes } from "../../tenant/navigation";
+import { cn } from "@/core/components/ui/utils";
+import { useTenantBootstrap } from "@/core/tenant";
+import { buildTenantCommandRoutes } from "@/core/tenant/navigation";
 
 interface CommandItem {
   id: string;

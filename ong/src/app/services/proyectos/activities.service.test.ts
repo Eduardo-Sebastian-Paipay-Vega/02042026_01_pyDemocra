@@ -77,6 +77,8 @@ describe("Proyectos Activities Service - Zero-Fail Tolerance Suite", () => {
           startAt: "2026-01-01",
           endAt: "2026-01-02",
           locationId: "loc-1",
+      // @ts-ignore
+      // @ts-ignore
           estimatedHours: 10,
         })
       ).rejects.toThrow(

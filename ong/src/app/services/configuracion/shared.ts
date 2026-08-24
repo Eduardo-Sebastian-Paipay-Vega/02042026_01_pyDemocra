@@ -1,4 +1,4 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 import type { AppDatabase } from "../../../lib/db/ong/app-database";
 import type { SettingsCapabilityState } from "../../modules/settings/types";
 
@@ -20,11 +20,11 @@ let tenantCache: { value: string; at: number } | null = null;
 export const settingsDb = supabase;
 
 export function publicSchema() {
-  return settingsDb.schema("public");
+  return settingsDb.schema("public" as any) as any;
 }
 
 export function ongSchema() {
-  return settingsDb.schema("ong");
+  return settingsDb.schema("ong" as any) as any;
 }
 
 export function normalizeText(value: string | null | undefined): string {

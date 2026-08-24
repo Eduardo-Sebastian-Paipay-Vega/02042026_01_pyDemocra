@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Server, Download, RefreshCw, CheckCircle2, FileSpreadsheet, FileText, Database } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -9,12 +9,17 @@ export const SincronizacionERP = () => {
   const [syncing, setSyncing] = useState(false);
   const [synced, setSynced] = useState(false);
 
-  const handleSync = () => {
+  const handleSync = async () => {
     setSyncing(true);
-    setTimeout(() => {
-      setSyncing(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
       setSynced(true);
-    }, 2500);
+    } catch (e: any) {
+      console.error(e);
+      alert('Error en sincronización: ' + e.message);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (

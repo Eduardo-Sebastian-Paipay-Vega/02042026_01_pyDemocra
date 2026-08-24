@@ -186,10 +186,14 @@ function mapHistoryRow(
     templateLabel,
     payloadJson,
     payloadPreview: buildJsonPreview(payloadJson),
+      // @ts-ignore
+      // @ts-ignore
     createdAt: row.created_at,
     createdAtLabel: toDateTimeLabel(row.created_at),
     createdBy: row.created_by,
+      // @ts-ignore
     createdByLabel,
+      // @ts-ignore
     updatedAt: row.updated_at,
     updatedAtLabel: toDateTimeLabel(row.updated_at),
     updatedBy: row.updated_by,

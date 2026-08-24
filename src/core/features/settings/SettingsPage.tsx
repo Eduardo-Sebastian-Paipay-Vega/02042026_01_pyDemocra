@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import '@/core/styles/core-ui.css'
 import {
   Settings, Bell, Palette, Shield, Plug2, ChevronRight,
   Globe, Clock, Mail, MessageSquare, Smartphone, Monitor,
@@ -9,9 +10,11 @@ import {
 } from 'lucide-react'
 import { useSettings, type Density, type Theme, type FontSize, type AppSettings } from '@/core/context/SettingsContext'
 import { type RGBColor, rgbToHex, hexToRgb, getContrastText, rgbToCss, applyColorVars } from '@educ/utils/color'
+import { useTranslation } from 'react-i18next'
+import { MfaSetupCard } from '@/core/auth/components/MfaSetupCard'
 
 // ── Toggle Switch ──────────────────────────────────────────────
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div
       onClick={() => onChange(!checked)}
@@ -36,7 +39,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 // ── Radio Option ───────────────────────────────────────────────
-function Radio({ label, sub, selected, onClick }: { label: string; sub?: string; selected: boolean; onClick: () => void }) {
+export function Radio({ label, sub, selected, onClick }: { label: string; sub?: string; selected: boolean; onClick: () => void }) {
   return (
     <div onClick={onClick} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 14px', borderRadius: 'var(--radius)', border: `1px solid ${selected ? 'var(--blue)' : 'var(--border)'}`, background: selected ? 'var(--blue-dim)' : 'var(--s3)', cursor: 'pointer', transition: 'all var(--transition)' }}>
       <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${selected ? 'var(--blue)' : 'var(--border-md)'}`, background: selected ? 'var(--blue)' : 'transparent', flexShrink: 0, marginTop: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -51,7 +54,7 @@ function Radio({ label, sub, selected, onClick }: { label: string; sub?: string;
 }
 
 // ── Section header ─────────────────────────────────────────────
-function SectionTitle({ title, sub }: { title: string; sub?: string }) {
+export function SectionTitle({ title, sub }: { title: string; sub?: string }) {
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: sub ? 3 : 0 }}>{title}</div>
@@ -61,7 +64,7 @@ function SectionTitle({ title, sub }: { title: string; sub?: string }) {
 }
 
 // ── Divider ────────────────────────────────────────────────────
-function Divider() {
+export function Divider() {
   return <div style={{ borderTop: '1px solid var(--border)', margin: '24px 0' }} />
 }
 
@@ -132,59 +135,282 @@ function loadColors(): Record<ColorKey, RGBColor> {
 }
 
 import { supabase } from '@educ/lib/supabase'
+import { useTenantBootstrap } from '@/core/tenant'
+
+function SecurityTab() {
+  const [pwd, setPwd] = useState({ actual: '', nueva: '', confirmar: '' })
+  const [showPwd, setShowPwd] = useState(false)
+  const [pwdLoading, setPwdLoading] = useState(false)
+  const [pwdError, setPwdError] = useState('')
+  const [pwdSuccess, setPwdSuccess] = useState('')
+
+  const handleUpdatePassword = async () => {
+    setPwdError('')
+    setPwdSuccess('')
+    if (!pwd.nueva || pwd.nueva !== pwd.confirmar) {
+      setPwdError('Las contraseñas no coinciden o están vacías')
+      return
+    }
+    setPwdLoading(true)
+    const { error } = await supabase.auth.updateUser({ password: pwd.nueva })
+    setPwdLoading(false)
+    if (error) setPwdError('Error al actualizar: ' + error.message)
+    else {
+      setPwdSuccess('Contraseña actualizada correctamente')
+      setPwd({ actual: '', nueva: '', confirmar: '' })
+    }
+  }
+
+  /* MFA logic moved to MfaSetupCard */
+  const [sessions, setSessions] = useState<any[]>([])
+  
+  const loadSessions = async () => {
+    const { data, error } = await supabase.rpc('get_my_sessions')
+    if (data) setSessions(data)
+  }
+  
+  useEffect(() => {
+    loadSessions()
+  }, [])
+
+  const revokeSession = async (id: string) => {
+    await supabase.rpc('delete_my_session', { p_session_id: id })
+    loadSessions()
+  }
+
+
+  const [tokens, setTokens] = useState<any[]>([])
+  const [newTokenName, setNewTokenName] = useState('')
+  const [showNewToken, setShowNewToken] = useState(false)
+  const [createdToken, setCreatedToken] = useState<string | null>(null)
+  
+  // NOTE: In SettingsPage we use useTenantBootstrap. Here we can use the same context or mock tenant_id for now if it's not in scope.
+  // Actually, we can get tenant_id from the wrapper or hook. Let's just use useTenantBootstrap.
+  const tenant_id = useTenantBootstrap().context?.tenant?.id
+
+  const loadTokens = async () => {
+    const { data } = await supabase.from('api_tokens').select('*').order('created_at', { ascending: false })
+    if (data) setTokens(data)
+  }
+
+  useEffect(() => {
+    loadTokens()
+  }, [])
+
+  const handleCreateToken = async () => {
+    if (!newTokenName) return
+    const { data, error } = await supabase.rpc('create_api_token', { p_name: newTokenName, p_tenant_id: tenant_id })
+    if (data) {
+      setCreatedToken(data)
+      setShowNewToken(false)
+      setNewTokenName('')
+      loadTokens()
+    } else {
+      alert('Error: ' + (error?.message || 'Error creating token'))
+    }
+  }
+
+  const revokeToken = async (id: string) => {
+    await supabase.rpc('delete_api_token', { p_token_id: id })
+    loadTokens()
+  }
+
+  const [copiedToken, setCopiedToken] = useState<string | null>(null)
+  const copyToken = (name: string) => {
+    setCopiedToken(name)
+    setTimeout(() => setCopiedToken(null), 2000)
+  }
+  return (
+    <div>
+      <SectionTitle title="Seguridad de la cuenta" sub="Autenticación, contraseña y sesiones activas" />
+      
+      <MfaSetupCard supabase={supabase} />
+
+      <Divider />
+
+      <SectionTitle title="Cambiar contraseña" />
+      <div style={{ display: 'grid', gap: 14, maxWidth: 400, marginBottom: 24 }}>
+        {[
+          { key: 'nueva',     label: 'Nueva contraseña' },
+          { key: 'confirmar', label: 'Confirmar contraseña' },
+        ].map(({ key, label }) => (
+          <div key={key}>
+            <label>{label}</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={pwd[key]}
+                onChange={e => setPwd(p => ({ ...p, [key]: e.target.value }))}
+                placeholder="••••••••"
+                style={{ paddingRight: 38 }}
+              />
+              <button onClick={() => setShowPwd(s => !s)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', display: 'flex', padding: 0 }}>
+                {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+        ))}
+        {pwdError && <div style={{color: 'var(--red)', fontSize: 12}}>{pwdError}</div>}
+        {pwdSuccess && <div style={{color: 'var(--green)', fontSize: 12}}>{pwdSuccess}</div>}
+        <button className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }} onClick={handleUpdatePassword} disabled={pwdLoading}>
+          <Lock size={12} /> {pwdLoading ? 'Actualizando...' : 'Actualizar contraseña'}
+        </button>
+      </div>
+
+      <Divider />
+
+      <SectionTitle title="Sesiones activas" sub="Dispositivos donde tu cuenta está abierta" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+        {sessions.map(s => (
+          <div key={s.id} className="card-inner" style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Monitor size={14} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{s.user_agent ? s.user_agent.substring(0,40) : 'Dispositivo Desconocido'}...</div>
+              <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>IP: {s.ip || 'Local'} · {new Date(s.created_at).toLocaleString()}</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, height: 24 }} onClick={() => revokeSession(s.id)}>Revocar</button>
+          </div>
+        ))}
+
+      <Divider />
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <SectionTitle title="Tokens de API" sub="Acceso programático a la plataforma" />
+        <button className="btn btn-secondary btn-sm" onClick={() => setShowNewToken(true)}><RefreshCw size={12} /> Nuevo token</button>
+      </div>
+      
+      {showNewToken && (
+        <div className="card-inner" style={{ padding: '16px', marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Crear nuevo Token</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input type="text" placeholder="Nombre (ej. Integracion Zapier)" value={newTokenName} onChange={e => setNewTokenName(e.target.value)} style={{ flex: 1 }} />
+            <button className="btn btn-sm btn-primary" onClick={handleCreateToken}>Generar</button>
+            <button className="btn btn-sm btn-ghost" onClick={() => setShowNewToken(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {createdToken && (
+        <div className="card-inner" style={{ padding: '16px', marginBottom: 16, border: '1px solid var(--green)' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)', marginBottom: 8 }}>Token generado exitosamente</div>
+          <div style={{ fontSize: 12, marginBottom: 8 }}>Guarda este token ahora, no podrás verlo de nuevo:</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input type="text" value={createdToken} readOnly style={{ flex: 1, fontFamily: 'monospace' }} />
+            <button className="btn btn-sm btn-secondary" onClick={() => { navigator.clipboard.writeText(createdToken); alert('Copiado'); }}>Copiar</button>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <button className="btn btn-sm btn-ghost" onClick={() => setCreatedToken(null)}>Ocultar</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {tokens.map(t => (
+          <div key={t.id} className="card-inner" style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <KeyRound size={13} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{t.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--tx-3)', fontFamily: 'monospace' }}>{t.prefix}************************ · Creado {new Date(t.created_at).toLocaleDateString()}</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" style={{ fontSize: 11 }} onClick={() => revokeToken(t.id)}>
+              <Trash2 size={11} style={{ color: 'var(--red)' }} /> Revocar
+            </button>
+          </div>
+        ))}
+        {tokens.length === 0 && <div style={{fontSize: 12, color: 'var(--tx-3)'}}>No hay tokens generados</div>}
+      </div>
+        {sessions.length === 0 && <div style={{fontSize: 12, color: 'var(--tx-3)'}}>No se encontraron sesiones extra...</div>}
+      </div>
+    </div>
+  )
+}
 export default function SettingsPage() {
+  const { t } = useTranslation()
   const [tab, setTab] = useState('general')
+  const ctx = useSettings()
 
   // General
-  const [idioma,    setIdioma]    = useState('es')
-  const [zona,      setZona]      = useState('America/Lima')
-  const [fechaFmt,  setFechaFmt]  = useState('dmy')
-  const [vistaIni,  setVistaIni]  = useState('dashboard')
+  const [idioma,    setIdioma]    = useState(ctx.language)
+  const [zona,      setZona]      = useState(ctx.timezone)
+  const [fechaFmt,  setFechaFmt]  = useState(ctx.date_format)
+  const [vistaIni,  setVistaIni]  = useState(ctx.initial_view)
 
-  // Notificaciones
+  // Sincronizar estado local si el contexto se carga después
+  useEffect(() => {
+    setIdioma(ctx.language)
+    setZona(ctx.timezone)
+    setFechaFmt(ctx.date_format)
+    setVistaIni(ctx.initial_view)
+  }, [ctx.language, ctx.timezone, ctx.date_format, ctx.initial_view])
+
+  // Obtener tenantId actual para ajustes por tenant
+  let currentTenantId = 'default'
+  try {
+    const tenantCtxRaw = typeof window !== 'undefined' ? localStorage.getItem("democra.tenant.ctx.v2") : null
+    if (tenantCtxRaw) currentTenantId = JSON.parse(tenantCtxRaw)?.data?.tenant?.id || 'default'
+  } catch(e) {}
+
+  // Notificaciones (Guardadas por Tenant)
+  const tenantNotif = ctx.tenant_settings?.[currentTenantId]?.notificaciones || {}
   const [notif, setNotif] = useState({
-    email_pagos:       true,
-    email_ews:         true,
-    email_comunicados: false,
-    email_reportes:    true,
-    push_pagos:        false,
-    push_ews:          true,
-    push_comunicados:  true,
-    push_reportes:     false,
-    sms_pagos:         false,
-    sms_ews:           false,
-    digest_semanal:    true,
-    digest_mensual:    true,
+    email_pagos:       tenantNotif.email_pagos ?? true,
+    email_ews:         tenantNotif.email_ews ?? true,
+    email_comunicados: tenantNotif.email_comunicados ?? false,
+    email_reportes:    tenantNotif.email_reportes ?? true,
+    push_pagos:        tenantNotif.push_pagos ?? false,
+    push_ews:          tenantNotif.push_ews ?? true,
+    push_comunicados:  tenantNotif.push_comunicados ?? true,
+    push_reportes:     tenantNotif.push_reportes ?? false,
+    sms_pagos:         tenantNotif.sms_pagos ?? false,
+    sms_ews:           tenantNotif.sms_ews ?? false,
+    digest_semanal:    tenantNotif.digest_semanal ?? true,
+    digest_mensual:    tenantNotif.digest_mensual ?? true,
   })
+
+  // Sincronizar notif si el contexto se carga después
+  useEffect(() => {
+    if (ctx.tenant_settings && ctx.tenant_settings[currentTenantId]?.notificaciones) {
+      setNotif(prev => ({ ...prev, ...ctx.tenant_settings[currentTenantId].notificaciones }))
+    }
+  }, [ctx.tenant_settings, currentTenantId])
+
   const setN = (k: keyof typeof notif) => (v: boolean) => setNotif(n => ({ ...n, [k]: v }))
 
   // Apariencia — draft state, se aplica al guardar
-  const ctx = useSettings()
-  const [draft, setDraft] = useState<AppSettings>({
+  // Store the original settings when entering the page or after saving
+  const [original, setOriginal] = useState<AppSettings>({
     theme:        ctx.theme,
     density:      ctx.density,
     fontSize:     ctx.fontSize,
     animaciones:  ctx.animaciones,
     sidebarPinned: ctx.sidebarPinned,
+    language:     ctx.language,
+    timezone:     ctx.timezone,
+    date_format:  ctx.date_format,
+    initial_view: ctx.initial_view,
+    tenant_settings: ctx.tenant_settings,
+    integrations: ctx.integrations
   })
+
+  const [draft, setDraft] = useState<AppSettings>({ ...original })
   const [aparienciaSaved, setAparienciaSaved] = useState(false)
+  
   const hasDraftChanges =
-    draft.theme !== ctx.theme ||
-    draft.density !== ctx.density ||
-    draft.fontSize !== ctx.fontSize ||
-    draft.animaciones !== ctx.animaciones ||
-    draft.sidebarPinned !== ctx.sidebarPinned
-  const setD = <K extends keyof AppSettings>(k: K, v: AppSettings[K]) =>
+    draft.theme !== original.theme ||
+    draft.density !== original.density ||
+    draft.fontSize !== original.fontSize ||
+    draft.animaciones !== original.animaciones ||
+    draft.sidebarPinned !== original.sidebarPinned
+
+  const setD = <K extends keyof AppSettings>(k: K, v: AppSettings[K]) => {
     setDraft(d => ({ ...d, [k]: v }))
-  const saveApariencia = () => {
-    ctx.saveSettings(draft)
-    setAparienciaSaved(true)
-    setTimeout(() => setAparienciaSaved(false), 2500)
+    ctx.previewSettings({ [k]: v })
   }
-  const resetDraft = () => setDraft({
-    theme: ctx.theme, density: ctx.density, fontSize: ctx.fontSize,
-    animaciones: ctx.animaciones, sidebarPinned: ctx.sidebarPinned,
-  })
+
+  const resetDraft = () => {
+    setDraft({ ...original })
+    ctx.previewSettings({ ...original })
+  }
 
   // Seguridad
   const [mfa,         setMfa]         = useState(false)
@@ -198,46 +424,52 @@ export default function SettingsPage() {
   }
 
   // Integraciones
-  const [integrations, setIntegrations] = useState({
-    google: true, slack: false, zoom: true, whatsapp: false, sap: false,
-  })
-  const toggleInt = (k: keyof typeof integrations) => setIntegrations(p => ({ ...p, [k]: !p[k] }))
+  const [integrations, setIntegrations] = useState(ctx.integrations)
+  
+  useEffect(() => {
+    setIntegrations(ctx.integrations)
+  }, [ctx.integrations])
+
+  const toggleInt = async (k: keyof typeof integrations) => {
+    const newInts = { ...integrations, [k]: !integrations[k] }
+    setIntegrations(newInts)
+    await ctx.saveSettings({ integrations: newInts })
+  }
 
   const [saved, setSaved] = useState(false)
   const save = async () => { 
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/tenant/settings`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ language: idioma, timezone: zona, date_format: fechaFmt, initial_view: vistaIni })
-        })
+    
+    // Preparar el payload de tenant_settings conservando el resto de los tenants
+    const updatedTenantSettings = {
+      ...ctx.tenant_settings,
+      [currentTenantId]: {
+        ...(ctx.tenant_settings?.[currentTenantId] || {}),
+        notificaciones: notif
       }
-    } catch(e) { console.error(e) }
-  }
+    }
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/tenant/settings`, {
-          headers: { Authorization: `Bearer ${session.access_token}` }
-        })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data) {
-            if (data.language) setIdioma(data.language)
-            if (data.timezone) setZona(data.timezone)
-            if (data.date_format) setFechaFmt(data.date_format)
-            if (data.initial_view) setVistaIni(data.initial_view)
-          }
-        })
-        .catch(console.error)
-      }
+    await ctx.saveSettings({ 
+      language: idioma, 
+      timezone: zona, 
+      date_format: fechaFmt, 
+      initial_view: vistaIni,
+      tenant_settings: updatedTenantSettings,
+      integrations: integrations,
+      theme: draft.theme,
+      density: draft.density,
+      fontSize: draft.fontSize,
+      animaciones: draft.animaciones,
+      sidebarPinned: draft.sidebarPinned
     })
-  }, [])
+    
+    setOriginal({ ...draft })
+    
+    // Also reset draft changes state if any
+    setAparienciaSaved(true)
+    setTimeout(() => setAparienciaSaved(false), 2500)
+  }
 
   const [activeColorKey, setActiveColorKey] = useState<ColorKey>('sidebar-badge')
   const [colorDraft, setColorDraft] = useState<Record<ColorKey, RGBColor>>(loadColors)
@@ -307,12 +539,12 @@ export default function SettingsPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h1 style={{ marginBottom: 4 }}>Ajustes</h1>
-          <p style={{ fontSize: 13, color: 'var(--tx-2)' }}>Personaliza tu experiencia en EduOS</p>
+          <h1 style={{ marginBottom: 4 }}>{t('Ajustes')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--tx-2)' }}>{t('Personaliza tu experiencia en EduOS')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {saved && <span className="badge badge-green"><CheckCircle2 size={10} /> Guardado</span>}
-          <button className="btn btn-primary btn-sm" onClick={save}>Guardar cambios</button>
+          {saved && <span className="badge badge-green"><CheckCircle2 size={10} /> {t('Guardado')}</span>}
+          <button className="btn btn-primary btn-sm" onClick={save}>{t('Guardar cambios')}</button>
         </div>
       </div>
 
@@ -344,11 +576,11 @@ export default function SettingsPage() {
           {/* ══ GENERAL ══════════════════════════════════ */}
           {tab === 'general' && (
             <div>
-              <SectionTitle title="Configuración general" sub="Preferencias de idioma, zona horaria y formato de datos" />
+              <SectionTitle title={t('Configuración general')} sub="Preferencias de idioma, zona horaria y formato de datos" />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
                 <div>
-                  <label><Globe size={11} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />Idioma del sistema</label>
+                  <label><Globe size={11} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />{t('Idioma del sistema')}</label>
                   <select value={idioma} onChange={e => setIdioma(e.target.value)}>
                     <option value="es">Español (ES)</option>
                     <option value="en">English (EN)</option>
@@ -357,7 +589,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
                 <div>
-                  <label><Clock size={11} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />Zona horaria</label>
+                  <label><Clock size={11} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />{t('Zona horaria')}</label>
                   <select value={zona} onChange={e => setZona(e.target.value)}>
                     <option value="America/Lima">America/Lima (GMT-5)</option>
                     <option value="America/Bogota">America/Bogotá (GMT-5)</option>
@@ -369,15 +601,15 @@ export default function SettingsPage() {
               </div>
 
               <Divider />
-              <SectionTitle title="Formato de fecha" />
+              <SectionTitle title={t('Formato de fecha')} />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 24 }}>
-                <Radio label="DD/MM/AAAA" sub="Ej: 08/08/2026" selected={fechaFmt === 'dmy'} onClick={() => setFechaFmt('dmy')} />
-                <Radio label="MM/DD/AAAA" sub="Ej: 08/08/2026" selected={fechaFmt === 'mdy'} onClick={() => setFechaFmt('mdy')} />
-                <Radio label="AAAA-MM-DD" sub="Ej: 2026-08-08" selected={fechaFmt === 'ymd'} onClick={() => setFechaFmt('ymd')} />
+                <Radio label="DD/MM/AAAA" sub={`Ej: ${ctx.formatDate(new Date())}`} selected={fechaFmt === 'dmy'} onClick={() => setFechaFmt('dmy')} />
+                <Radio label="MM/DD/AAAA" sub={`Ej: ${ctx.formatDate(new Date())}`} selected={fechaFmt === 'mdy'} onClick={() => setFechaFmt('mdy')} />
+                <Radio label="AAAA-MM-DD" sub={`Ej: ${ctx.formatDate(new Date())}`} selected={fechaFmt === 'ymd'} onClick={() => setFechaFmt('ymd')} />
               </div>
 
               <Divider />
-              <SectionTitle title="Vista inicial" sub="Pantalla que aparece al iniciar sesión" />
+              <SectionTitle title={t('Vista inicial')} sub="Pantalla que aparece al iniciar sesión" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {[
                   { id: 'dashboard',  label: 'Dashboard principal' },
@@ -458,14 +690,6 @@ export default function SettingsPage() {
                       <RotateCcw size={12} />
                     </button>
                   )}
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={saveApariencia}
-                    disabled={!hasDraftChanges}
-                    style={{ opacity: hasDraftChanges ? 1 : 0.45 }}
-                  >
-                    Guardar cambios
-                  </button>
                 </div>
               </div>
 
@@ -839,137 +1063,11 @@ export default function SettingsPage() {
                 />
               </div>
 
-              {/* Guardar al fondo también */}
-              <div style={{ paddingTop: 8, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                {hasDraftChanges && (
-                  <button className="btn btn-ghost btn-sm" onClick={resetDraft}>
-                    <RotateCcw size={12} /> Descartar
-                  </button>
-                )}
-                <button
-                  className="btn btn-primary"
-                  onClick={saveApariencia}
-                  disabled={!hasDraftChanges}
-                  style={{ opacity: hasDraftChanges ? 1 : 0.45 }}
-                >
-                  <CheckCircle2 size={13} /> Guardar cambios
-                </button>
-              </div>
             </div>
           )}
 
           {/* ══ SEGURIDAD ════════════════════════════════ */}
-          {tab === 'seguridad' && (
-            <div>
-              <SectionTitle title="Seguridad de la cuenta" sub="Autenticación, contraseña y sesiones activas" />
-
-              {/* 2FA */}
-              <div className="card-inner" style={{ padding: '16px 18px', marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                      <KeyRound size={14} style={{ color: mfa ? 'var(--green)' : 'var(--tx-3)' }} />
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>Autenticación de dos factores (2FA)</span>
-                      {mfa
-                        ? <span className="badge badge-green" style={{ fontSize: 10 }}>Activo</span>
-                        : <span className="badge badge-amber" style={{ fontSize: 10 }}>Inactivo</span>
-                      }
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--tx-3)', paddingLeft: 22 }}>
-                      {mfa ? 'Tu cuenta está protegida con app autenticadora (TOTP).' : 'Activa 2FA para mayor seguridad al iniciar sesión.'}
-                    </div>
-                  </div>
-                  <Toggle checked={mfa} onChange={setMfa} />
-                </div>
-                {!mfa && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
-                    <button className="btn btn-sm btn-secondary"><Smartphone size={12} /> Configurar app</button>
-                    <button className="btn btn-sm btn-ghost" style={{ color: 'var(--tx-3)' }}>Usar SMS</button>
-                  </div>
-                )}
-              </div>
-
-              <Divider />
-
-              {/* Change password */}
-              <SectionTitle title="Cambiar contraseña" />
-              <div style={{ display: 'grid', gap: 14, maxWidth: 400, marginBottom: 24 }}>
-                {[
-                  { key: 'actual',    label: 'Contraseña actual' },
-                  { key: 'nueva',     label: 'Nueva contraseña' },
-                  { key: 'confirmar', label: 'Confirmar contraseña' },
-                ].map(({ key, label }) => (
-                  <div key={key}>
-                    <label>{label}</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showPwd ? 'text' : 'password'}
-                        value={pwd[key as keyof typeof pwd]}
-                        onChange={e => setPwd(p => ({ ...p, [key]: e.target.value }))}
-                        placeholder="••••••••"
-                        style={{ paddingRight: 38 }}
-                      />
-                      <button onClick={() => setShowPwd(s => !s)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tx-3)', display: 'flex', padding: 0 }}>
-                        {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <button className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }}>
-                  <Lock size={12} /> Actualizar contraseña
-                </button>
-              </div>
-
-              <Divider />
-
-              {/* Sessions */}
-              <SectionTitle title="Sesiones activas" sub="Dispositivos donde tu cuenta está abierta" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-                {SESSIONS_ACTIVAS.map(s => (
-                  <div key={s.ip} className="card-inner" style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Monitor size={14} style={{ color: s.current ? 'var(--green)' : 'var(--tx-3)', flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{s.device}</div>
-                      <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>{s.ip} · {s.lugar} · {s.time}</div>
-                    </div>
-                    {s.current
-                      ? <span className="badge badge-green" style={{ fontSize: 10 }}>Esta sesión</span>
-                      : <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, height: 24 }}>Revocar</button>
-                    }
-                  </div>
-                ))}
-                <button className="btn btn-danger btn-sm" style={{ alignSelf: 'flex-start', marginTop: 4 }}>
-                  <Trash2 size={12} /> Cerrar otras sesiones
-                </button>
-              </div>
-
-              <Divider />
-
-              {/* API Tokens */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <SectionTitle title="Tokens de API" sub="Acceso programático a la plataforma" />
-                <button className="btn btn-secondary btn-sm"><RefreshCw size={12} /> Nuevo token</button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {API_TOKENS.map(t => (
-                  <div key={t.name} className="card-inner" style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <KeyRound size={13} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{t.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--tx-3)', fontFamily: 'monospace' }}>{t.prefix} · Creado {t.created} · Último uso: {t.last}</div>
-                    </div>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, gap: 5 }} onClick={() => copyToken(t.name)}>
-                      {copiedToken === t.name ? <CheckCircle2 size={11} style={{ color: 'var(--green)' }} /> : <Copy size={11} />}
-                      {copiedToken === t.name ? 'Copiado' : 'Copiar'}
-                    </button>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>
-                      <Trash2 size={11} style={{ color: 'var(--red)' }} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {tab === 'seguridad' && <SecurityTab />}
 
           {/* ══ INTEGRACIONES ════════════════════════════ */}
           {tab === 'integraciones' && (

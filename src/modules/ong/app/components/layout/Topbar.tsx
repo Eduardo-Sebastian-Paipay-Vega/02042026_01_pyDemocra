@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/core/components/ui/dropdown-menu";
 import { cn } from "../../lib/utils";
 
 interface TopbarProps {
@@ -183,16 +183,6 @@ export function Topbar({
             )}
           </div>
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 hover:bg-[var(--t-hover)]"
-            style={{ color: "var(--t-text-secondary)" }}
-            aria-label={theme === "oscuro" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-            title={theme === "oscuro" ? "Modo claro" : "Modo oscuro"}
-          >
-            {theme === "oscuro" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
 
           {/* Notifications */}
           <DropdownMenu>

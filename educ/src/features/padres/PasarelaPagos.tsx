@@ -8,11 +8,16 @@ export const PasarelaPagos = () => {
   const [method, setMethod] = useState<'card' | 'yape' | null>('card');
   const [status, setStatus] = useState<'idle' | 'processing' | 'success'>('idle');
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setStatus('processing');
-    setTimeout(() => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
       setStatus('success');
-    }, 2500);
+    } catch (e: any) {
+      console.error(e);
+      alert('Error procesando el pago: ' + e.message);
+      setStatus('idle');
+    }
   };
 
   return (

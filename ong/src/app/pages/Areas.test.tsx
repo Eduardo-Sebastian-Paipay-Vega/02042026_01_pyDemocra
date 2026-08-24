@@ -1,5 +1,6 @@
+import '@testing-library/jest-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Areas } from "./Areas";
 import * as areasService from "../services/gobernanza/areas.service";

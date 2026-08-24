@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
-import { Paperclip } from "lucide-react";
+import { Paperclip, RefreshCw } from "lucide-react";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
@@ -370,7 +370,7 @@ export function HoursApproval() {
               variant: "destructive",
             },
           ]}
-          emptyMessage={<EmptyState title="Sin resultados" description="No hay aprobaciones de horas para el filtro seleccionado." />}
+          emptyMessage="No hay aprobaciones de horas para el filtro seleccionado."
         />
       </motion.div>
 

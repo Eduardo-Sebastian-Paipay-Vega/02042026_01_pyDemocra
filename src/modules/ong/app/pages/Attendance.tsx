@@ -675,8 +675,8 @@ export function Attendance() {
               {initials}
             </div>
             <div>
-              <div className="font-medium text-zinc-100">{item.volunteerName}</div>
-              <div className="mt-0.5 text-[11px] text-zinc-400">{item.dateLabel}</div>
+              <div className="font-medium text-neutral-900 dark:text-zinc-100">{item.volunteerName}</div>
+              <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-zinc-400">{item.dateLabel}</div>
             </div>
           </div>
         );
@@ -687,8 +687,8 @@ export function Attendance() {
       label: "Actividad y Proyecto",
       render: (item) => (
         <div>
-          <div className="font-medium text-zinc-200">{item.activityName}</div>
-          <div className="mt-0.5 text-[11px] text-zinc-400">{item.projectName}</div>
+          <div className="font-medium text-neutral-800 dark:text-zinc-200">{item.activityName}</div>
+          <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-zinc-400">{item.projectName}</div>
         </div>
       ),
     },
@@ -696,13 +696,13 @@ export function Attendance() {
       key: "entry",
       label: "Entrada / Salida",
       render: (item) => (
-        <div className="text-[12px] font-mono text-zinc-300 space-y-0.5">
+        <div className="text-[12px] font-mono text-neutral-700 dark:text-zinc-300 space-y-0.5">
           <div className="flex items-center gap-1.5 text-emerald-400">
-            <span className="text-[10px] text-zinc-500">IN:</span>
+            <span className="text-[10px] text-neutral-400 dark:text-zinc-500">IN:</span>
             {item.entryLabel}
           </div>
           <div className="flex items-center gap-1.5 text-amber-400">
-            <span className="text-[10px] text-zinc-500">OUT:</span>
+            <span className="text-[10px] text-neutral-400 dark:text-zinc-500">OUT:</span>
             {item.exitLabel}
           </div>
         </div>
@@ -750,9 +750,9 @@ export function Attendance() {
             <OutlineButton
               size="sm"
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
             >
-              <Settings className="h-4 w-4 text-zinc-400" />
+              <Settings className="h-4 w-4 text-neutral-500 dark:text-zinc-400" />
               Opciones
             </OutlineButton>
 
@@ -781,7 +781,7 @@ export function Attendance() {
             <OutlineButton
               size="sm"
               onClick={() => exportAttendanceToCSV(rows)}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
             >
               <Download className="h-4 w-4 text-emerald-400" />
               Exportar
@@ -800,60 +800,60 @@ export function Attendance() {
       {/* KPIS DE RESUMEN DE 4 COLUMNAS */}
       <motion.div variants={fadeUp}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Presentes / Totales</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Presentes / Totales</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Users className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.open + stats.closed}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.open + stats.closed}</p>
               <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                 ðŸŸ¢ 85% A tiempo
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">En Curso (Abiertas)</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">En Curso (Abiertas)</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.open}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.open}</p>
               <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                 ðŸŸ¡ Turno activo
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-indigo-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-indigo-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Cerradas Hoy</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Cerradas Hoy</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 <CheckCircle2 className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.closed}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.closed}</p>
               <span className="text-[11px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 font-mono">
                 ðŸ”µ {totalHoursLabel}
               </span>
             </div>
           </div>
 
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-zinc-800/80 hover:border-red-500/30 transition-all shadow-sm">
+          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-red-500/30 transition-all shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Incidencias</span>
+              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Incidencias</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
                 <AlertTriangle className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{stats.incidence}</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{stats.incidence}</p>
               <span className="text-[11px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">
                 ðŸ”´ Requiere revisiÃ³n
               </span>
@@ -873,14 +873,14 @@ export function Attendance() {
             onFilterClick={(value) => setStatusFilter(value as AttendanceFilters["status"])}
           />
 
-          <div className="flex items-center gap-1 rounded-xl p-1 bg-zinc-950 border border-zinc-800 shrink-0">
+          <div className="flex items-center gap-1 rounded-xl p-1 bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode("table")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 viewMode === "table"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <LayoutList className="h-3.5 w-3.5" />
@@ -892,7 +892,7 @@ export function Attendance() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 viewMode === "grid"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <Grid className="h-3.5 w-3.5" />
@@ -905,7 +905,7 @@ export function Attendance() {
           <select
             value={volunteerFilter}
             onChange={(event) => setVolunteerFilter(event.target.value as AttendanceFilters["volunteerId"])}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300 hover:border-zinc-700"
           >
             {volunteerOptionsWithAll.map((option) => (
               <option key={option.value} value={option.value}>
@@ -917,7 +917,7 @@ export function Attendance() {
           <select
             value={activityFilter}
             onChange={(event) => setActivityFilter(event.target.value as AttendanceFilters["activityId"])}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300 hover:border-zinc-700"
           >
             {activityOptionsWithAll.map((option) => (
               <option key={option.value} value={option.value}>
@@ -930,13 +930,13 @@ export function Attendance() {
             type="date"
             value={dateFrom}
             onChange={(event) => setDateFrom(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300"
           />
           <input
             type="date"
             value={dateTo}
             onChange={(event) => setDateTo(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-zinc-800 bg-zinc-900 text-zinc-300"
+            className="h-9 rounded-xl px-3 text-[12px] outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300"
           />
 
           {(searchValue || statusFilter !== "all" || volunteerFilter !== "all" || activityFilter !== "all" || dateFrom || dateTo) && (
@@ -1023,12 +1023,12 @@ export function Attendance() {
         ) : (
           <div>
             {rows.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-400 mb-4 shadow-sm border border-zinc-700/50">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/60 p-12 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-200 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 mb-4 shadow-sm border border-zinc-700/50">
                   <CalendarX className="h-7 w-7 text-indigo-400" />
                 </div>
-                <h3 className="text-base font-semibold text-zinc-100">Sin asistencias registradas</h3>
-                <p className="mt-1 text-xs text-zinc-400 max-w-sm">
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100">Sin asistencias registradas</h3>
+                <p className="mt-1 text-xs text-neutral-500 dark:text-zinc-400 max-w-sm">
                   No se encontraron asistencias que coincidan con los filtros o el rango de fecha seleccionado.
                 </p>
                 <div className="mt-5 flex gap-2">
@@ -1067,7 +1067,7 @@ export function Attendance() {
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 shadow-sm"
+                      className="rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/80 p-4 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 shadow-sm"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-3">
@@ -1076,26 +1076,26 @@ export function Attendance() {
                               {initials}
                             </div>
                             <div>
-                              <h4 className="font-semibold text-zinc-100 text-sm truncate max-w-[170px]">
+                              <h4 className="font-semibold text-neutral-900 dark:text-zinc-100 text-sm truncate max-w-[170px]">
                                 {item.volunteerName}
                               </h4>
-                              <p className="text-[11px] text-zinc-400 font-mono">{item.dateLabel}</p>
+                              <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-mono">{item.dateLabel}</p>
                             </div>
                           </div>
                           <StatusDot variant={item.statusVariant}>{item.stateLabel}</StatusDot>
                         </div>
 
-                        <div className="mt-3 space-y-1.5 rounded-xl bg-zinc-950/60 p-3 border border-zinc-800/80 text-xs">
-                          <div className="font-medium text-zinc-200 truncate">{item.activityName}</div>
-                          <div className="text-[11px] text-zinc-400 truncate">{item.projectName}</div>
-                          <div className="pt-2 flex items-center justify-between text-zinc-300 font-mono border-t border-zinc-800/60 text-[11px]">
+                        <div className="mt-3 space-y-1.5 rounded-xl bg-white/60 dark:bg-zinc-950/60 p-3 border border-neutral-200/80 dark:border-zinc-800/80 text-xs">
+                          <div className="font-medium text-neutral-800 dark:text-zinc-200 truncate">{item.activityName}</div>
+                          <div className="text-[11px] text-neutral-500 dark:text-zinc-400 truncate">{item.projectName}</div>
+                          <div className="pt-2 flex items-center justify-between text-neutral-700 dark:text-zinc-300 font-mono border-t border-neutral-200/60 dark:border-zinc-800/60 text-[11px]">
                             <span>IN: {item.entryLabel}</span>
                             <span>OUT: {item.exitLabel}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="pt-2 flex items-center justify-between border-t border-zinc-800/60">
+                      <div className="pt-2 flex items-center justify-between border-t border-neutral-200/60 dark:border-zinc-800/60">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold font-mono border ${
                             isOpen
@@ -1129,7 +1129,7 @@ export function Attendance() {
                               setDetailAttendanceId(item.id);
                               setIsDetailOpen(true);
                             }}
-                            className="px-2.5 py-1 rounded-lg text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium"
+                            className="px-2.5 py-1 rounded-lg text-xs bg-neutral-200 dark:bg-zinc-800 hover:bg-zinc-700 text-neutral-700 dark:text-zinc-300 font-medium"
                           >
                             Detalle
                           </button>
@@ -1147,62 +1147,62 @@ export function Attendance() {
       {/* MODAL CONFIGURACIÃ“N / SETTINGS */}
       <ModalShell open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} width="max-w-[560px]">
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
               <Settings className="h-5 w-5 text-indigo-400" />
               Opciones de Asistencia
             </h3>
-            <button type="button" className="text-zinc-400 hover:text-zinc-200" onClick={() => setIsSettingsOpen(false)}>
+            <button type="button" className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200" onClick={() => setIsSettingsOpen(false)}>
               <X className="h-4 w-4" />
             </button>
           </div>
 
           <div className="space-y-4 text-xs">
             <div>
-              <label className="block text-zinc-300 font-medium mb-1">
+              <label className="block text-neutral-700 dark:text-zinc-300 font-medium mb-1">
                 Tolerancia de Tardanza (minutos)
               </label>
               <input
                 type="number"
                 value={settingsState.tardinessToleranceMins}
                 onChange={(e) => setSettingsState((s) => ({ ...s, tardinessToleranceMins: parseInt(e.target.value) || 0 }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
               />
-              <p className="mt-1 text-[11px] text-zinc-500">
+              <p className="mt-1 text-[11px] text-neutral-400 dark:text-zinc-500">
                 Minutos transcurridos tras la hora fijada antes de considerar tardanza.
               </p>
             </div>
 
             <div>
-              <label className="block text-zinc-300 font-medium mb-1">
+              <label className="block text-neutral-700 dark:text-zinc-300 font-medium mb-1">
                 Cierre AutomÃ¡tico de Turno Inconcluso
               </label>
               <input
                 type="time"
                 value={settingsState.autoCloseTime}
                 onChange={(e) => setSettingsState((s) => ({ ...s, autoCloseTime: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
               />
-              <p className="mt-1 text-[11px] text-zinc-500">
+              <p className="mt-1 text-[11px] text-neutral-400 dark:text-zinc-500">
                 Hora del dÃ­a en que se marcarÃ¡ salida automÃ¡tica si el voluntario no cerrÃ³ turno.
               </p>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">ValidaciÃ³n GPS por QR</span>
-                <span className="text-[11px] text-zinc-400">Exigir geolocalizaciÃ³n al escanear la credencial.</span>
+                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">ValidaciÃ³n GPS por QR</span>
+                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Exigir geolocalizaciÃ³n al escanear la credencial.</span>
               </div>
               <input
                 type="checkbox"
                 checked={settingsState.requireGps}
                 onChange={(e) => setSettingsState((s) => ({ ...s, requireGps: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
             <OutlineButton size="sm" onClick={() => setIsSettingsOpen(false)}>
               Cancelar
             </OutlineButton>
@@ -1222,19 +1222,19 @@ export function Attendance() {
       {/* â”€â”€ MODAL REFACTORIZADO DE REGISTRAR ASISTENCIA MANUAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <ModalShell open={isFormOpen} onClose={() => setIsFormOpen(false)} width="max-w-[840px]">
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
             <div>
-              <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
                 <UserCheck className="h-5 w-5 text-indigo-400" />
                 {formMode === "edit" ? "Editar Asistencia" : "Registrar Asistencia Manual"}
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">
                 Selecciona el voluntario, la actividad y el horario de marcaciÃ³n.
               </p>
             </div>
             <button
               type="button"
-              className="text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+              className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
               onClick={() => setIsFormOpen(false)}
             >
               <X className="h-5 w-5" />
@@ -1248,14 +1248,14 @@ export function Attendance() {
             </div>
           )}
 
-          <div className="p-1 rounded-xl bg-zinc-950 border border-zinc-800 grid grid-cols-3 gap-1">
+          <div className="p-1 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 grid grid-cols-3 gap-1">
             <button
               type="button"
               onClick={() => setFormState((s) => ({ ...s, recordType: "check_in", entryTime: getCurrentTimeFormatted() }))}
               className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
                 formState.recordType === "check_in"
                   ? "bg-emerald-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <LogIn className="h-4 w-4" />
@@ -1268,7 +1268,7 @@ export function Attendance() {
               className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
                 formState.recordType === "check_out"
                   ? "bg-amber-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <LogOut className="h-4 w-4" />
@@ -1281,7 +1281,7 @@ export function Attendance() {
               className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${
                 formState.recordType === "full"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               }`}
             >
               <Clock className="h-4 w-4" />
@@ -1291,7 +1291,7 @@ export function Attendance() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Proyecto <span className="text-red-400">*</span>
               </label>
               <select
@@ -1300,7 +1300,7 @@ export function Attendance() {
                   setFormState((s) => ({ ...s, projectId: event.target.value, activityId: "all" }));
                   setFormError(null);
                 }}
-                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
               >
                 <option value="all">Selecciona un proyecto</option>
                 {volunteerProjectOptions.map((option) => (
@@ -1312,7 +1312,7 @@ export function Attendance() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Actividad Vinculada <span className="text-red-400">*</span>
               </label>
               <select
@@ -1322,7 +1322,7 @@ export function Attendance() {
                   setFormError(null);
                 }}
                 disabled={formState.projectId === "all"}
-                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <option value="all">Selecciona una actividad</option>
                 {filteredActivityOptions.map((option) => (
@@ -1335,7 +1335,7 @@ export function Attendance() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-zinc-300">
+            <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300">
               Voluntario <span className="text-red-400">*</span>
             </label>
             <select
@@ -1344,7 +1344,7 @@ export function Attendance() {
                 setFormState((s) => ({ ...s, volunteerId: event.target.value }));
                 setFormError(null);
               }}
-              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
             >
               <option value="all">Selecciona un voluntario</option>
               {volunteerOptions.map((option) => (
@@ -1355,13 +1355,13 @@ export function Attendance() {
             </select>
 
             {selectedVolunteerData && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-950 border border-indigo-500/30 text-xs animate-in fade-in">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-zinc-950 border border-indigo-500/30 text-xs animate-in fade-in">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 font-bold text-indigo-300 border border-indigo-500/30">
                   {selectedVolunteerData.initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-zinc-100 truncate">{selectedVolunteerData.name}</div>
-                  <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-0.5">
+                  <div className="font-semibold text-neutral-900 dark:text-zinc-100 truncate">{selectedVolunteerData.name}</div>
+                  <div className="text-[11px] text-neutral-500 dark:text-zinc-400 flex items-center gap-2 mt-0.5">
                     <span>ðŸ‘¤ {selectedVolunteerData.role}</span>
                     <span>â€¢</span>
                     <span className="text-indigo-400 font-medium">â³ {selectedVolunteerData.monthlyHours}</span>
@@ -1373,7 +1373,7 @@ export function Attendance() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-zinc-300">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300">
                 Fecha y MarcaciÃ³n <span className="text-red-400">*</span>
               </label>
 
@@ -1382,7 +1382,7 @@ export function Attendance() {
                   type="date"
                   value={formState.date}
                   onChange={(e) => setFormState((s) => ({ ...s, date: e.target.value }))}
-                  className="h-10 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                  className="h-10 rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                 />
 
                 {formState.recordType === "check_in" && (
@@ -1390,7 +1390,7 @@ export function Attendance() {
                     type="time"
                     value={formState.entryTime}
                     onChange={(e) => setFormState((s) => ({ ...s, entryTime: e.target.value }))}
-                    className="h-10 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                    className="h-10 rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                   />
                 )}
 
@@ -1399,7 +1399,7 @@ export function Attendance() {
                     type="time"
                     value={formState.exitTime}
                     onChange={(e) => setFormState((s) => ({ ...s, exitTime: e.target.value }))}
-                    className="h-10 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                    className="h-10 rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                   />
                 )}
 
@@ -1409,15 +1409,15 @@ export function Attendance() {
                       type="time"
                       value={formState.entryTime}
                       onChange={(e) => setFormState((s) => ({ ...s, entryTime: e.target.value }))}
-                      className="h-10 w-full rounded-xl px-2 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                      className="h-10 w-full rounded-xl px-2 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                       placeholder="Entrada"
                     />
-                    <span className="text-zinc-500 text-xs">-</span>
+                    <span className="text-neutral-400 dark:text-zinc-500 text-xs">-</span>
                     <input
                       type="time"
                       value={formState.exitTime}
                       onChange={(e) => setFormState((s) => ({ ...s, exitTime: e.target.value }))}
-                      className="h-10 w-full rounded-xl px-2 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                      className="h-10 w-full rounded-xl px-2 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
                       placeholder="Salida"
                     />
                   </div>
@@ -1441,7 +1441,7 @@ export function Attendance() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 ClasificaciÃ³n / Puntualidad
               </label>
               <select
@@ -1449,7 +1449,7 @@ export function Attendance() {
                 onChange={(e) =>
                   setFormState((s) => ({ ...s, punctuality: e.target.value as AttendancePunctuality }))
                 }
-                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
               >
                 <option value="on_time">ðŸŸ¢ Normal (A tiempo)</option>
                 <option value="tardiness">ðŸŸ¡ Tardanza</option>
@@ -1460,7 +1460,7 @@ export function Attendance() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
+            <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
               ObservaciÃ³n / JustificaciÃ³n (Opcional)
             </label>
             <textarea
@@ -1468,13 +1468,13 @@ export function Attendance() {
               onChange={(e) => setFormState((s) => ({ ...s, observation: e.target.value }))}
               rows={2}
               placeholder="Escribe alguna incidencia o detalle sobre el marcado..."
-              className="w-full rounded-xl p-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500 transition-colors"
+              className="w-full rounded-xl p-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500 transition-colors"
             />
           </div>
 
           {formMode === "edit" && (
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
                 Motivo de CorrecciÃ³n
               </label>
               <textarea
@@ -1482,30 +1482,30 @@ export function Attendance() {
                 onChange={(e) => setFormState((s) => ({ ...s, correctionReason: e.target.value }))}
                 rows={2}
                 placeholder="Indica la razÃ³n de la correcciÃ³n manual..."
-                className="w-full rounded-xl p-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
+                className="w-full rounded-xl p-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
               />
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 text-xs">
+            <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
               <input
                 type="checkbox"
                 checked={formState.notifyVolunteer}
                 onChange={(e) => setFormState((s) => ({ ...s, notifyVolunteer: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
               />
               <Mail className="h-3.5 w-3.5 text-indigo-400" />
               Notificar por correo al voluntario
             </label>
 
             {formMode === "create" && (
-              <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+              <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
                 <input
                   type="checkbox"
                   checked={formState.keepModalOpen}
                   onChange={(e) => setFormState((s) => ({ ...s, keepModalOpen: e.target.checked }))}
-                  className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
                 />
                 <RefreshCw className="h-3.5 w-3.5 text-amber-400" />
                 Mantener modal abierto al guardar (Modo Lote)
@@ -1513,7 +1513,7 @@ export function Attendance() {
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
             <OutlineButton
               size="sm"
               onClick={() => setIsFormOpen(false)}
@@ -1826,19 +1826,19 @@ function QrScanModal({
   return (
     <ModalShell open={open} onClose={() => { stopCamera(); onClose(); }} width="max-w-[780px]">
       <div className="space-y-4 p-5">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
           <div>
-            <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
               <Camera className="h-5 w-5 text-emerald-400" />
               EscÃ¡ner de Asistencia QR
             </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">
               Escanea credenciales para registrar ingresos y salidas en tiempo real.
             </p>
           </div>
           <button
             type="button"
-            className="text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+            className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800 transition-colors"
             onClick={() => { stopCamera(); onClose(); }}
           >
             <X className="h-5 w-5" />
@@ -1847,13 +1847,13 @@ function QrScanModal({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
+            <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
               Actividad Vinculada <span className="text-red-400">*</span>
             </label>
             <select
               value={scanForm.activityId}
               onChange={(event) => { setScanForm((s) => ({ ...s, activityId: event.target.value })); setScanError(null); }}
-              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500"
+              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500"
             >
               <option value="">Selecciona una actividad</option>
               {activityOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -1861,17 +1861,17 @@ function QrScanModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
+            <label className="block text-xs font-medium text-neutral-700 dark:text-zinc-300 mb-1">
               Modo de MarcaciÃ³n
             </label>
-            <div className="p-1 rounded-xl bg-zinc-950 border border-zinc-800 grid grid-cols-3 gap-1 h-10">
+            <div className="p-1 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 grid grid-cols-3 gap-1 h-10">
               <button
                 type="button"
                 onClick={() => setScanForm((s) => ({ ...s, mode: "auto" }))}
                 className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[11px] font-medium transition-all ${
                   scanForm.mode === "auto"
                     ? "bg-indigo-600 text-white shadow-sm font-semibold"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 ðŸ¤– Auto
@@ -1882,7 +1882,7 @@ function QrScanModal({
                 className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[11px] font-medium transition-all ${
                   scanForm.mode === "check_in"
                     ? "bg-emerald-600 text-white shadow-sm font-semibold"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 ðŸ“¥ Entrada
@@ -1893,7 +1893,7 @@ function QrScanModal({
                 className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[11px] font-medium transition-all ${
                   scanForm.mode === "check_out"
                     ? "bg-amber-600 text-white shadow-sm font-semibold"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
                 }`}
               >
                 ðŸ“¤ Salida
@@ -1903,7 +1903,7 @@ function QrScanModal({
         </div>
 
         {cameraMode ? (
-          <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-black" style={{ aspectRatio: "16/9" }}>
+          <div className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-black" style={{ aspectRatio: "16/9" }}>
             <video ref={videoRef} muted playsInline className="h-full w-full object-cover" />
             <canvas ref={canvasRef} className="hidden" />
 
@@ -1926,7 +1926,7 @@ function QrScanModal({
                     setSelectedDeviceId(e.target.value);
                     void startCamera(e.target.value);
                   }}
-                  className="h-8 px-2 rounded-lg text-xs bg-black/70 backdrop-blur-md text-zinc-200 border border-zinc-700/60 outline-none"
+                  className="h-8 px-2 rounded-lg text-xs bg-black/70 backdrop-blur-md text-neutral-800 dark:text-zinc-200 border border-zinc-700/60 outline-none"
                 >
                   {devices.map((d, idx) => (
                     <option key={d.deviceId} value={d.deviceId}>
@@ -1935,7 +1935,7 @@ function QrScanModal({
                   ))}
                 </select>
               ) : (
-                <span className="text-[11px] text-zinc-300 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-md">
+                <span className="text-[11px] text-neutral-700 dark:text-zinc-300 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-md">
                   ðŸ“¹ CÃ¡mara Activa
                 </span>
               )}
@@ -1948,7 +1948,7 @@ function QrScanModal({
                     className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${
                       torchOn
                         ? "bg-amber-500 text-black shadow-md shadow-amber-500/30"
-                        : "bg-black/70 text-zinc-300 border border-zinc-700/60"
+                        : "bg-black/70 text-neutral-700 dark:text-zinc-300 border border-zinc-700/60"
                     }`}
                     title="Alternar Linterna"
                   >
@@ -1973,7 +1973,7 @@ function QrScanModal({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl py-8 bg-zinc-950 border border-dashed border-zinc-800">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl py-8 bg-white dark:bg-zinc-950 border border-dashed border-neutral-200 dark:border-zinc-800">
             {cameraError && (
               <p className="text-xs text-red-400 font-medium px-4 text-center">{cameraError}</p>
             )}
@@ -1986,7 +1986,7 @@ function QrScanModal({
               <Camera className="h-4 w-4 text-emerald-400" />
               Activar CÃ¡mara del Dispositivo
             </OutlineButton>
-            <p className="text-[11px] text-zinc-400">
+            <p className="text-[11px] text-neutral-500 dark:text-zinc-400">
               {savedPref === "true" ? "CÃ¡mara autorizada" : "Se solicitarÃ¡ permiso de cÃ¡mara una sola vez"}
             </p>
           </div>
@@ -1999,7 +1999,7 @@ function QrScanModal({
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 {scanResult.outcomeLabel} CONFIRMADO ({scanResult.scannedAtLabel})
               </span>
-              <span className="font-mono text-[11px] text-zinc-400">{scanResult.cardCode}</span>
+              <span className="font-mono text-[11px] text-neutral-500 dark:text-zinc-400">{scanResult.cardCode}</span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -2012,8 +2012,8 @@ function QrScanModal({
                   .toUpperCase()}
               </div>
               <div>
-                <h4 className="font-bold text-zinc-100 text-sm">{scanResult.attendance.volunteerName}</h4>
-                <p className="text-zinc-300 text-[11px]">
+                <h4 className="font-bold text-neutral-900 dark:text-zinc-100 text-sm">{scanResult.attendance.volunteerName}</h4>
+                <p className="text-neutral-700 dark:text-zinc-300 text-[11px]">
                   Voluntario General â€¢ {scanResult.confirmationMessage}
                 </p>
               </div>
@@ -2027,12 +2027,12 @@ function QrScanModal({
               <XCircle className="h-4 w-4 text-red-400" />
               <span className="font-semibold text-red-300">Lectura Rechazada / Error</span>
             </div>
-            <p className="text-zinc-300 text-[12px]">{scanError}</p>
+            <p className="text-neutral-700 dark:text-zinc-300 text-[12px]">{scanError}</p>
           </div>
         )}
 
-        <div className="space-y-2 pt-2 border-t border-zinc-800">
-          <label className="block text-xs font-medium text-zinc-400">
+        <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-zinc-800">
+          <label className="block text-xs font-medium text-neutral-500 dark:text-zinc-400">
             Ingreso Manual (Pistolas Lectoras USB o CÃ³digo Teclado):
           </label>
           <div className="flex gap-2">
@@ -2044,7 +2044,7 @@ function QrScanModal({
                 if (event.key === "Enter") { event.preventDefault(); void onSubmitScan(); }
               }}
               placeholder="Pega o escanea el payload QR..."
-              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200 focus:border-indigo-500"
+              className="h-10 w-full rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200 focus:border-indigo-500"
             />
             <GradientButton size="sm" onClick={() => void onSubmitScan()} disabled={isScanning}>
               Validar
@@ -2052,35 +2052,35 @@ function QrScanModal({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
-          <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 text-xs">
+          <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
             <input
               type="checkbox"
               checked={scanForm.burstMode}
               onChange={(e) => setScanForm((s) => ({ ...s, burstMode: e.target.checked }))}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
             />
             <Zap className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
             Modo RÃ¡faga (Auto-procesar al detectar)
           </label>
 
-          <label className="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-zinc-100">
+          <label className="flex items-center gap-2 cursor-pointer text-neutral-700 dark:text-zinc-300 hover:text-zinc-100">
             <input
               type="checkbox"
               checked={scanForm.enableAudio}
               onChange={(e) => setScanForm((s) => ({ ...s, enableAudio: e.target.checked }))}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
             />
             {scanForm.enableAudio ? (
               <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
             ) : (
-              <VolumeX className="h-3.5 w-3.5 text-zinc-500" />
+              <VolumeX className="h-3.5 w-3.5 text-neutral-400 dark:text-zinc-500" />
             )}
             Sonido de confirmaciÃ³n (Beep)
           </label>
         </div>
 
-        <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+        <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
           <OutlineButton
             size="sm"
             onClick={() => {

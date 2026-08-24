@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StatusDot } from "../../../components/ui/status-dot";
+import { StatusDot } from '@/core/components/ui/status-dot';
 
 export function SettingsTechnicalDetails({
   details,

@@ -3,11 +3,11 @@ import { motion } from "motion/react";
 import { useSearchParams } from "react-router";
 import { Mail, Phone, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "../components/shared/PageHeader";
-import { FilterBar } from "../components/shared/FilterBar";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { GradientButton } from "../components/ui/gradient-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useVolunteers } from "../modules/people/hooks/useVolunteers";
 import { useVolunteerDetail } from "../modules/people/hooks/useVolunteerDetail";
 import { useVolunteerMutations } from "../modules/people/hooks/useVolunteerMutations";
@@ -20,12 +20,12 @@ import { PeopleErrorBlock, formatPeopleDate, formatPeopleText } from "../modules
 import type { PeopleRecordStatusKind, VolunteerListRow } from "../modules/people/types";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
 
-const stagger = {
+const stagger: any = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
 };
 
-const fadeUp = {
+const fadeUp: any = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 };
@@ -249,8 +249,8 @@ export function Volunteers() {
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
+    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="space-y-6">
+      <motion.div variants={fadeUp as any}>
         <PageHeader
           title="Voluntarios"
           description="Administra los perfiles de voluntarios con sus habilidades, roles y documentación."
@@ -258,7 +258,7 @@ export function Volunteers() {
         />
       </motion.div>
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp as any}>
         {canManageVolunteers && (
           <GradientButton size="sm" onClick={openCreateModal}>
             Nuevo voluntario
@@ -267,12 +267,12 @@ export function Volunteers() {
       </motion.div>
 
       {volunteers.error && (
-        <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp as any}>
           <PeopleErrorBlock message={volunteers.error} onRetry={volunteers.refresh} />
         </motion.div>
       )}
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp as any}>
         <FilterBar
           searchPlaceholder="Buscar por nombre, documento, correo, telefono o estado..."
           searchValue={searchValue}
@@ -282,7 +282,7 @@ export function Volunteers() {
         />
       </motion.div>
 
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp as any}>
         {volunteers.error ? null : (
           <DataTable
             columns={columns}

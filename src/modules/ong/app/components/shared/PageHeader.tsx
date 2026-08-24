@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { cn } from "../../lib/utils";
-import { GradientButton } from "../ui/gradient-button";
+import { GradientButton } from "@/core/components/ui/gradient-button";
 
 interface PageHeaderProps {
   title: string;

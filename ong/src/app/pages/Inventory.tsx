@@ -1,18 +1,18 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { ImageUploadField } from "../components/ui/image-upload-field";
+import { ImageUploadField } from '@/core/components/ui/image-upload-field';
 import {
   getAssetsUploadBucket,
   uploadFileToStorage,
 } from "../services/shared/storage";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { FilterBar } from "../components/shared/FilterBar";
-import { PageHeader } from "../components/shared/PageHeader";
-import { GradientButton } from "../components/ui/gradient-button";
-import { ModalShell } from "../components/ui/modal-shell";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useInventarioMovimientos } from "../modules/resources/hooks/useInventarioMovimientos";
 import { useItemDetail } from "../modules/resources/hooks/useItemDetail";
 import { useItems } from "../modules/resources/hooks/useItems";

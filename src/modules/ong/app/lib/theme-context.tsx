@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSettings } from "@/core/context/SettingsContext";
 
 /* â”€â”€â”€ Types â”€â”€â”€ */
 export type Theme = "claro" | "oscuro";
@@ -250,28 +251,41 @@ function getTokens(theme: Theme, intensity: Intensity) {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const { theme: ctxTheme } = useSettings();
+  
   const [theme, setThemeState] = useState<Theme>(() => {
-    try { return (localStorage.getItem("app-theme") as Theme) || "oscuro"; }
-    catch { return "oscuro"; }
+    if (ctxTheme === 'light' || ctxTheme === 'claro' as any) return 'claro';
+    if (ctxTheme === 'dark' || ctxTheme === 'oscuro' as any) return 'oscuro';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
   });
+
+  useEffect(() => {
+    if (ctxTheme === 'light' || ctxTheme === 'claro' as any) {
+      setThemeState('claro');
+    } else if (ctxTheme === 'dark' || ctxTheme === 'oscuro' as any) {
+      setThemeState('oscuro');
+    } else {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      setThemeState(mq.matches ? 'oscuro' : 'claro');
+      const listener = (e: MediaQueryListEvent) => {
+        setThemeState(e.matches ? 'oscuro' : 'claro');
+      };
+      mq.addEventListener('change', listener);
+      return () => mq.removeEventListener('change', listener);
+    }
+  }, [ctxTheme]);
+
   const [intensity, setIntensityState] = useState<Intensity>(() => {
     try { return (localStorage.getItem("app-intensity") as Intensity) || "normal"; }
     catch { return "normal"; }
   });
 
-  const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
-    try { localStorage.setItem("app-theme", t); } catch {}
-  }, []);
-
+  const setTheme = useCallback(() => {}, []);
   const setIntensity = useCallback((i: Intensity) => {
     setIntensityState(i);
     try { localStorage.setItem("app-intensity", i); } catch {}
   }, []);
-
-  const toggleTheme = useCallback(() => {
-    setTheme(theme === "oscuro" ? "claro" : "oscuro");
-  }, [theme, setTheme]);
+  const toggleTheme = useCallback(() => {}, []);
 
   const vars = getTokens(theme, intensity);
 

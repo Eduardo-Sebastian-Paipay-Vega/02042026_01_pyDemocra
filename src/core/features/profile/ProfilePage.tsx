@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import '@/core/styles/core-ui.css'
 import {
   Camera, Mail, Phone, Building2, MapPin, Calendar,
   Shield, Clock, Activity, ChevronRight, Save, X,
@@ -33,40 +34,53 @@ interface Props {
 
 const SESSIONS = [
   { device: 'Chrome · macOS', ip: '190.236.14.12', lugar: 'Lima, PE',    hora: 'Activo ahora',    current: true },
-  { device: 'Safari · iPhone', ip: '190.236.14.88', lugar: 'Lima, PE',   hora: 'Hace 2 horas',   current: false },
-  { device: 'Firefox · Windows', ip: '200.48.92.5', lugar: 'Miraflores', hora: 'Hace 1 día',     current: false },
-]
+] // Se mantendrá un placeholder para la UI, pero modificado debajo para usar la sesión real.
 
 export default function ProfilePage({ userName, role, onLogout }: Props) {
-  const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   const roleLabel = ROLE_LABELS[role] || role
   const roleColor = ROLE_COLOR[role] || 'var(--blue)'
 
   const [editing, setEditing]       = useState(false)
   const [saved, setSaved]           = useState(false)
+  const [sessionData, setSessionData] = useState<any>(null)
   const [form, setForm]             = useState({
-    nombre:    userName,
-    email:     `${userName.toLowerCase().replace(/\s/g, '.')}@eduos.edu.pe`,
-    telefono:  '+51 987 654 321',
-    cargo:     roleLabel,
-    bio:       'Apasionado por la transformación digital educativa. Comprometido con la excelencia académica y el desarrollo integral del estudiante.',
-    ciudad:    'Lima, Perú',
-    sitio:     'www.eduos.edu.pe',
+    nombre:    userName || '',
+    email:     '',
+    telefono:  '',
+    cargo:     roleLabel || '',
+    bio:       '',
+    ciudad:    '',
+    sitio:     '',
   })
+
+  const currentName = form.nombre || 'Usuario'
+  const initials = currentName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/profile/preferences`, {
-          headers: { Authorization: `Bearer ${session.access_token}` }
-        })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.preferences && data.preferences.profileData) {
-            setForm(prev => ({ ...prev, ...data.preferences.profileData }))
-          }
-        })
-        .catch(console.error)
+        setSessionData(session)
+        setForm(f => ({ ...f, email: session.user.email || '' }))
+        
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (!error && data) {
+              const prefs = data.preferences?.profileData || {}
+              setForm(prev => ({
+                ...prev,
+                nombre: data.full_name || prev.nombre,
+                telefono: prefs.telefono || '',
+                cargo: prefs.cargo || prev.cargo,
+                bio: prefs.bio || '',
+                ciudad: prefs.ciudad || '',
+                sitio: prefs.sitio || ''
+              }))
+            }
+          })
       }
     })
   }, [])
@@ -78,11 +92,17 @@ export default function ProfilePage({ userName, role, onLogout }: Props) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787'}/api/core/profile/preferences`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ preferences: { profileData: form } })
-        })
+        const { data: currentProfile } = await supabase.from('profiles').select('preferences').eq('id', session.user.id).single()
+        const currentPrefs = currentProfile?.preferences || {}
+        
+        await supabase
+          .from('profiles')
+          .update({
+            full_name: form.nombre,
+            preferences: { ...currentPrefs, profileData: { telefono: form.telefono, bio: form.bio, ciudad: form.ciudad, sitio: form.sitio, cargo: form.cargo } }
+          })
+          .eq('id', session.user.id)
+          
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
       }
@@ -128,9 +148,9 @@ export default function ProfilePage({ userName, role, onLogout }: Props) {
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12, color: roleColor, fontWeight: 500 }}>{roleLabel}</span>
+              <span style={{ fontSize: 12, color: roleColor, fontWeight: 500 }}>{form.cargo}</span>
               <span style={{ color: 'var(--tx-3)', fontSize: 12 }}>·</span>
-              <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>EduOS · Lima, PE</span>
+              <span style={{ fontSize: 12, color: 'var(--tx-3)' }}>{form.ciudad || 'Ubicación no definida'}</span>
             </div>
           </div>
 
@@ -162,12 +182,11 @@ export default function ProfilePage({ userName, role, onLogout }: Props) {
           <div className="card" style={{ padding: '16px 18px' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>Información</div>
             {[
-              { icon: Mail,      label: form.email },
-              { icon: Phone,     label: form.telefono },
-              { icon: Building2, label: 'EduOS S.A.C.' },
-              { icon: MapPin,    label: form.ciudad },
-              { icon: Globe,     label: form.sitio },
-              { icon: Calendar,  label: 'Desde enero 2024' },
+              { icon: Mail,      label: form.email || 'No especificado' },
+              { icon: Phone,     label: form.telefono || 'No especificado' },
+              { icon: Building2, label: 'Organización' },
+              { icon: MapPin,    label: form.ciudad || 'No especificado' },
+              { icon: Globe,     label: form.sitio || 'No especificado' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 11 }}>
                 <Icon size={13} style={{ color: 'var(--tx-3)', flexShrink: 0 }} />
@@ -251,19 +270,16 @@ export default function ProfilePage({ userName, role, onLogout }: Props) {
               <button className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>Revocar todas</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {SESSIONS.map(s => (
-                <div key={s.ip} className="card-inner" style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Activity size={14} style={{ color: s.current ? 'var(--green)' : 'var(--tx-3)', flexShrink: 0 }} />
+              {sessionData && (
+                <div className="card-inner" style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Activity size={14} style={{ color: 'var(--green)', flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{s.device}</div>
-                    <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>{s.ip} · {s.lugar} · {s.hora}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>Navegador Actual</div>
+                    <div style={{ fontSize: 11, color: 'var(--tx-3)' }}>Iniciada: {new Date(sessionData.created_at).toLocaleString()}</div>
                   </div>
-                  {s.current
-                    ? <span className="badge badge-green" style={{ fontSize: 10 }}>Esta sesión</span>
-                    : <button className="btn btn-ghost btn-sm" style={{ fontSize: 11, height: 24, color: 'var(--tx-3)' }}>Revocar</button>
-                  }
+                  <span className="badge badge-green" style={{ fontSize: 10 }}>Esta sesión</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

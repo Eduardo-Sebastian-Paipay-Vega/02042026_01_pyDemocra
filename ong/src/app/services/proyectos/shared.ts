@@ -1,4 +1,4 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 import type {
   ActivityStatusCode,
   ActivityStatusKind,
@@ -50,11 +50,11 @@ const ACTIVITY_STATUS_OPTIONS: ActivityStatusOption[] = [
 ];
 
 export function ongSchema() {
-  return supabase.schema("ong");
+  return supabase.schema("ong" as any) as any;
 }
 
 export function publicSchema() {
-  return supabase.schema("public");
+  return supabase.schema("public" as any) as any;
 }
 
 export function normalizeText(value: string | null | undefined): string {

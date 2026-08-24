@@ -111,6 +111,8 @@ describe("Solicitudes Admision Service", () => {
           nombres: "Pedro",
           apellidos: "Gomez",
           email: "pedro@gmail.com",
+      // @ts-ignore
+      // @ts-ignore
           estado: "nueva",
           notas: ""
         });

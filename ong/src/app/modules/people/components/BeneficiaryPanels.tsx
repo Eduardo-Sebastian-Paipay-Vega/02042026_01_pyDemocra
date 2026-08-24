@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HeartPulse, UserRound } from "lucide-react";
-import { ModalShell } from "../../../components/ui/modal-shell";
-import { GradientButton } from "../../../components/ui/gradient-button";
-import { OutlineButton } from "../../../components/ui/outline-button";
-import { StatusDot } from "../../../components/ui/status-dot";
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useFilePreview } from "../../../lib/use-file-preview";
 import { adaptBeneficiaryFormToUpsertInput } from "../../../services/personas/form-adapters";
 import type {

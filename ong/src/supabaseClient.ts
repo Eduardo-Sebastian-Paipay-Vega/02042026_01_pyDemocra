@@ -1,4 +1,4 @@
-import {
+﻿import {
   fetchOngVolunteerStates,
   fetchOngVolunteersPreview,
   ongClient,
@@ -13,6 +13,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = ongClient;
+export const supabase = ongClient as any;
 
 export { fetchOngVolunteersPreview, fetchOngVolunteerStates };

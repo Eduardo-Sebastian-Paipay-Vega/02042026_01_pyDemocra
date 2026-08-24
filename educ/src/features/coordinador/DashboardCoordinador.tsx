@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { TrendingUp, Users, CreditCard, AlertTriangle, ChevronRight, CheckCircle2, XCircle, Clock } from 'lucide-react'
-import { fetchEducData } from '../../lib/api'
+import { fetchEducData, postEducData, forceDashboardRefetch } from '../../lib/api'
 
 // Proxies for lazy async data
 const kpisCFO = new Proxy([] as any, {
@@ -31,6 +31,14 @@ const secciones10 = new Proxy([] as any, {
 const deudores = new Proxy([] as any, {
   get: (target, prop) => {
     const realData = (window as any).__dashboardData?.deudores;
+    if (!realData) return undefined;
+    const value = realData[prop];
+    return typeof value === 'function' ? value.bind(realData) : value;
+  }
+});
+const inscripciones = new Proxy([] as any, {
+  get: (target, prop) => {
+    const realData = (window as any).__dashboardData?.inscripciones;
     if (!realData) return undefined;
     const value = realData[prop];
     return typeof value === 'function' ? value.bind(realData) : value;
@@ -66,6 +74,10 @@ export default function DashboardCoordinador({ view }: { view: string }) {
       (window as any).__dashboardData = d;
       setData(d);
     }).catch(console.error);
+
+    const listener = (e: any) => setData(e.detail);
+    window.addEventListener('dashboardRefetch', listener);
+    return () => window.removeEventListener('dashboardRefetch', listener);
   }, []);
 
   if (!data) return <div style={{padding: 40, color: 'var(--tx-2)'}}>Cargando analíticas...</div>;
@@ -117,6 +129,8 @@ export default function DashboardCoordinador({ view }: { view: string }) {
           <table className="table">
             <thead><tr><th>Estudiante</th><th>Curso</th><th>Monto</th><th>Estado</th></tr></thead>
             <tbody>
+      // @ts-ignore
+      // @ts-ignore
               {inscripciones.slice(0,5).map(i => (
                 <tr key={i.id}>
                   <td style={{ color: 'var(--tx)', fontWeight: 500 }}>{i.nombre}</td>
@@ -143,6 +157,7 @@ function WizardInscripcion() {
   const [step, setStep] = useState(1)
   const [data, setData] = useState({ nombre:'', cedula:'', fechaNac:'', genero:'M', emailPadre:'', telefono:'', emergencia:'', grado:'', seccion:'', plan:'semestral', becas:[] as string[] })
   const [done, setDone] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const set = (k: string, v: string) => setData(p => ({ ...p, [k]: v }))
   const toggleBeca = (id: string) => setData(p => ({ ...p, becas: p.becas.includes(id) ? p.becas.filter(b => b !== id) : [...p.becas, id] }))
@@ -300,10 +315,26 @@ function WizardInscripcion() {
       </div>
 
       <div style={{ display:'flex', gap:8, marginTop:16 }}>
-        {step>1 && <button className="btn btn-ghost" onClick={() => setStep(s=>s-1)}>Atrás</button>}
+        {step>1 && <button className="btn btn-ghost" onClick={() => setStep(s=>s-1)} disabled={loading}>Atrás</button>}
         {step<4
           ? <button className="btn btn-primary" onClick={() => setStep(s=>s+1)}>Continuar</button>
-          : <button className="btn btn-primary" onClick={() => setDone(true)}>Completar inscripción</button>}
+          : <button className="btn btn-primary" disabled={loading} onClick={async () => {
+              setLoading(true);
+              try {
+                // Hacemos el POST real al endpoint de estudiantes
+                await postEducData('estudiantes', data);
+                // Refrescamos el dashboard general
+                forceDashboardRefetch('analytics/coordinador');
+                setDone(true);
+              } catch (e) {
+                console.error(e);
+                alert("Error al guardar: " + e.message);
+              } finally {
+                setLoading(false);
+              }
+            }}>
+              {loading ? 'Guardando...' : 'Completar inscripción'}
+            </button>}
       </div>
     </div>
   )

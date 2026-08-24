@@ -195,7 +195,7 @@ export function MyProfile() {
             }}
           >
             {/* Banner decorativo en modo oscuro */}
-            <div className="relative h-36 w-full bg-gradient-to-r from-zinc-900 via-indigo-950/60 to-slate-900 p-6 border-b border-zinc-800/80">
+            <div className="relative h-36 w-full bg-gradient-to-r from-zinc-900 via-indigo-950/60 to-slate-900 p-6 border-b border-neutral-200/80 dark:border-zinc-800/80">
               <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]" />
               <div className="absolute right-6 top-4 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
@@ -218,7 +218,7 @@ export function MyProfile() {
                       <img
                         src={profile.avatar_url}
                         alt={profile.full_name ?? "Avatar"}
-                        className="h-28 w-28 rounded-full border-4 border-zinc-900 object-cover shadow-2xl bg-zinc-800"
+                        className="h-28 w-28 rounded-full border-4 border-zinc-900 object-cover shadow-2xl bg-neutral-200 dark:bg-zinc-800"
                       />
                     ) : (
                       <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-zinc-900 bg-gradient-to-br from-indigo-600 via-indigo-800 to-slate-900 text-2xl font-bold text-white shadow-2xl">
@@ -237,7 +237,7 @@ export function MyProfile() {
                       {profile?.full_name ?? "Sin nombre registrado"}
                     </h2>
                     <p className="text-xs flex items-center gap-1.5 mt-0.5" style={{ color: "var(--t-text-dim)" }}>
-                      <Mail className="h-3.5 w-3.5 text-zinc-400" />
+                      <Mail className="h-3.5 w-3.5 text-neutral-500 dark:text-zinc-400" />
                       {email ?? "â€”"}
                     </p>
                   </div>
@@ -274,7 +274,7 @@ export function MyProfile() {
                 border: "1px solid var(--t-border)",
               }}
             >
-              <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-neutral-200/80 dark:border-zinc-800/80">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                   <User className="h-5 w-5" />
                 </div>
@@ -335,7 +335,7 @@ export function MyProfile() {
                 border: "1px solid var(--t-border)",
               }}
             >
-              <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-neutral-200/80 dark:border-zinc-800/80">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                   <Building2 className="h-5 w-5" />
                 </div>
@@ -381,7 +381,7 @@ export function MyProfile() {
                 border: "1px solid var(--t-border)",
               }}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-200/80 dark:border-zinc-800/80">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
                     <Shield className="h-5 w-5" />
@@ -424,13 +424,13 @@ export function MyProfile() {
 
       {/* Modal Shell de EdiciÃ³n de Perfil (CRUD Supabase DB) */}
       <ModalShell open={editModalOpen} onClose={() => setEditModalOpen(false)} width="max-w-[640px]">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 px-5 py-4">
           <h3 className="text-base font-semibold" style={{ color: "var(--t-text)" }}>
             Editar Perfil de Usuario (BD)
           </h3>
           <button
             type="button"
-            className="rounded-lg p-1 text-xs text-zinc-400 hover:text-white"
+            className="rounded-lg p-1 text-xs text-neutral-500 dark:text-zinc-400 hover:text-white"
             onClick={() => setEditModalOpen(false)}
           >
             âœ•

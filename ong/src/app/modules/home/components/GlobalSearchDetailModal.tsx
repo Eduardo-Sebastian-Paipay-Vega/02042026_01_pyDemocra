@@ -1,6 +1,6 @@
-import { GradientButton } from "../../../components/ui/gradient-button";
-import { ModalShell } from "../../../components/ui/modal-shell";
-import { OutlineButton } from "../../../components/ui/outline-button";
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { OutlineButton } from '@/core/components/ui/outline-button';
 import type { GlobalSearchDetailData } from "../types";
 
 interface GlobalSearchDetailModalProps {

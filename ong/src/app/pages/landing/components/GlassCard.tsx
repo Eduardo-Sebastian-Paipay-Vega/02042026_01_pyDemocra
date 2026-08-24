@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-interface GlassCardProps {
+interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   className?: string;
   hover?: boolean;
@@ -10,9 +10,11 @@ export function GlassCard({
   children,
   className = "",
   hover = false,
+  ...props
 }: GlassCardProps) {
   return (
     <div
+      {...props}
       className={[
         "rounded-3xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-[24px]",
         "shadow-[0_20px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.05)]",

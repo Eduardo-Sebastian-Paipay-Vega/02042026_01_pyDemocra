@@ -4,7 +4,12 @@ import {
   BookOpen, ClipboardList, CheckSquare, AlertTriangle, ChevronRight, Download,
   Send, ChevronDown, Plus, FileText, Layers, List, Eye,
 } from 'lucide-react'
-import { misClasesDocente, estudiantesRiesgo, calificaciones10A, asistencia10A, comunicaciones, cursosDocente } from '../../lib/mock-data'
+const misClasesDocente: any[] = [];
+const estudiantesRiesgo: any[] = [];
+const calificaciones10A: any[] = [];
+const asistencia10A: any[] = [];
+const comunicaciones: any[] = [];
+const cursosDocente: any[] = [];
 import { CurriculumBuilder } from './CurriculumBuilder'
 import { EWSDetailView } from '../ews/EWSDetailView'
 

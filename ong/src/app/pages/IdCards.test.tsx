@@ -1,5 +1,6 @@
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { IdCards } from "./IdCards";
 
@@ -28,7 +29,7 @@ vi.mock("../context/SupabaseContext", () => ({
 }));
 
 vi.mock("react-router", async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return {
     ...actual,
     useNavigate: () => vi.fn(),

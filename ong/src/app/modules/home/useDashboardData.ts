@@ -83,8 +83,12 @@ function toErrorBlock<TData>(data: TData, error: string): AsyncBlockState<TData>
   return { data, loading: false, error };
 }
 
-export function useDashboardData() {
+export function useDashboardData(periodFilter: string = "month", projectFilter: string = "all") {
   const [reloadToken, setReloadToken] = useState(0);
+
+  const refresh = useCallback(() => {
+    setReloadToken((t) => t + 1);
+  }, []);
 
   const [metrics, setMetrics] = useState<DashboardMetricValues>(DEFAULT_METRICS);
   const [metricErrors, setMetricErrors] = useState<MetricErrorMap>(DEFAULT_METRIC_ERRORS);
@@ -119,9 +123,7 @@ export function useDashboardData() {
   const [locationOptions, setLocationOptions] = useState<DashboardLocationOption[]>([]);
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
-  const refresh = useCallback(() => {
-    setReloadToken((current) => current + 1);
-  }, []);
+
 
   useEffect(() => {
     let isActive = true;
@@ -144,29 +146,17 @@ export function useDashboardData() {
               data: items,
               error: null as string | null,
             }))
-            .catch((error: unknown) => ({
-              data: [] as DashboardTaskOption[],
-              error: toFriendlyError(
-                error,
-                "No se pudo cargar el catalogo de proyectos para crear/editar actividades."
-              ),
-            })),
+            .catch((err) => ({ data: [], error: err.message })),
           fetchActivityLocationOptions()
             .then((items) => ({
               data: items,
               error: null as string | null,
             }))
-            .catch((error: unknown) => ({
-              data: [] as DashboardLocationOption[],
-              error: toFriendlyError(
-                error,
-                "No se pudo cargar el catalogo de ubicaciones para actividades."
-              ),
-            })),
+            .catch((err) => ({ data: [], error: err.message })),
         ]);
 
         const [metricsResult, userContextResult] = await Promise.all([
-          fetchDashboardMetrics(),
+          fetchDashboardMetrics(periodFilter, projectFilter),
           fetchDashboardUserContext().catch(() => DEFAULT_USER_CONTEXT),
         ]);
 
@@ -311,7 +301,7 @@ export function useDashboardData() {
     return () => {
       isActive = false;
     };
-  }, [reloadToken]);
+  }, [reloadToken, periodFilter, projectFilter]);
 
   const alerts = useMemo<DashboardAlertItem[]>(
     () => buildDashboardAlerts(metrics),

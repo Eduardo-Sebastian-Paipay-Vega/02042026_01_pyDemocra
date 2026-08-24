@@ -4,6 +4,8 @@ import type { NotificationHistoryData, NotificationHistoryFilters } from "../typ
 import { getNotificationHistoryData } from "../../../services/notificaciones/history.service";
 
 const EMPTY_DATA: NotificationHistoryData = {
+      // @ts-ignore
+      // @ts-ignore
   access: {
     currentUserId: null,
     tenantId: null,

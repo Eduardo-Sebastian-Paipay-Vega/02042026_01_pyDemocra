@@ -1,7 +1,8 @@
-﻿import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { LandingPage } from "./pages/landing/LandingPage";
 import { LoginPage } from "./pages/login/LoginPage";
 import { NosotrosPage } from "./pages/nosotros/NosotrosPage";
+import { SettingsProvider } from "./core/context/SettingsContext";
 
 export const appRouter = createBrowserRouter([
   {
@@ -21,4 +22,12 @@ export const appRouter = createBrowserRouter([
     element: <Navigate to="/" replace />,
   },
 ]);
+
+export function App() {
+  return (
+    <SettingsProvider>
+      <RouterProvider router={appRouter} />
+    </SettingsProvider>
+  );
+}
 

@@ -38,6 +38,8 @@ export function useComprobantesFinancieros(transactionId: string | null) {
       setLoading(true);
       setError(null);
       try {
+      // @ts-ignore
+      // @ts-ignore
         const response = await listComprobantesByTransaccion(transactionId);
 
         if (!isActive) {

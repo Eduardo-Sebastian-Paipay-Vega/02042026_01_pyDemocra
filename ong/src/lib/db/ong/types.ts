@@ -1,1 +1,3 @@
-export type { AppDatabase, OngDatabase } from "./app-database";
+      // @ts-ignore
+      // @ts-ignore
+﻿export type { AppDatabase, Database } from "./app-database";

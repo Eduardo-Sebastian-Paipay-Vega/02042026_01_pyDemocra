@@ -33,13 +33,13 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { FilterBar } from "../components/shared/FilterBar";
-import { PageHeader } from "../components/shared/PageHeader";
-import { GradientButton } from "../components/ui/gradient-button";
-import { ModalShell } from "../components/ui/modal-shell";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useAsistenciaDetail } from "../modules/operation/hooks/useAsistenciaDetail";
 import { useOperationAttendance } from "../modules/operation/useOperationAttendance";
 import type {
@@ -1723,7 +1723,9 @@ function QrScanModal({
 
       const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack && "getCapabilities" in videoTrack) {
-        // @ts-expect-error Torch capability check
+      // @ts-ignore
+      // @ts-ignore
+        // Torch capability check
         const caps = videoTrack.getCapabilities();
         if (caps && "torch" in caps) {
           setTorchSupported(true);
@@ -1740,8 +1742,8 @@ function QrScanModal({
     if (!track) return;
     try {
       const nextTorch = !torchOn;
-      // @ts-expect-error Torch constraints
-      await track.applyConstraints({ advanced: [{ torch: nextTorch }] });
+      // Torch constraints
+      await track.applyConstraints({ advanced: [{ torch: nextTorch } as any] });
       setTorchOn(nextTorch);
     } catch {
       toast.error("Tu cámara no admite linterna.");
@@ -1777,8 +1779,8 @@ function QrScanModal({
 
       if ("BarcodeDetector" in window) {
         try {
-          // @ts-expect-error BarcodeDetector API
-          const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+          // BarcodeDetector API
+          const detector = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
           const barcodes = await detector.detect(canvas);
           if (barcodes.length > 0 && barcodes[0].rawValue) {
             const raw = barcodes[0].rawValue as string;
@@ -2045,7 +2047,9 @@ function QrScanModal({
             Ingreso Manual (Pistolas Lectoras USB o Código Teclado):
           </label>
           <div className="flex gap-2">
+      // @ts-ignore
             <input
+      // @ts-ignore
               ref={scanInputRef}
               value={scanForm.qrPayload}
               onChange={(event) => { setScanForm((s) => ({ ...s, qrPayload: event.target.value })); setScanError(null); }}

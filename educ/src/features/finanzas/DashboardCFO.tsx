@@ -98,6 +98,10 @@ export default function DashboardCFO({ view }: { view: string }) {
       (window as any).__dashboardData = d;
       setData(d);
     }).catch(console.error);
+
+    const listener = (e: any) => setData(e.detail);
+    window.addEventListener('dashboardRefetch', listener);
+    return () => window.removeEventListener('dashboardRefetch', listener);
   }, []);
 
   if (!data) return <div style={{padding: 40, color: 'var(--tx-2)'}}>Cargando analíticas...</div>;

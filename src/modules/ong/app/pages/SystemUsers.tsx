@@ -925,14 +925,14 @@ export function SystemUsers() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 py-2 border-t border-b border-zinc-800/80 my-1">
+          <div className="flex items-center gap-2 py-2 border-t border-b border-neutral-200/80 dark:border-zinc-800/80 my-1">
             <input
               type="checkbox"
               id="sendVerificationEmail"
               defaultChecked={true}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
             />
-            <label htmlFor="sendVerificationEmail" className="text-[12px] font-medium text-zinc-300 cursor-pointer select-none">
+            <label htmlFor="sendVerificationEmail" className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300 cursor-pointer select-none">
               âœ‰ï¸ Enviar correo automÃ¡tico de bienvenida y verificaciÃ³n de cuenta (vÃ­a Resend API)
             </label>
           </div>

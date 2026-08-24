@@ -333,7 +333,7 @@ export function CreateTenantPage() {
   };
 
   const inputClass =
-    "w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-2.5 text-[13px] text-[#F5F5F5] placeholder:text-zinc-500 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all";
+    "w-full rounded-xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/90 px-4 py-2.5 text-[13px] text-[#F5F5F5] placeholder:text-zinc-500 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 transition-all";
 
   return (
     <div className="w-full flex-grow flex items-center justify-center px-4 py-6 relative z-10 font-sans">
@@ -341,7 +341,7 @@ export function CreateTenantPage() {
           CONTENEDOR PRINCIPAL DEL WIZARD (DARK MODE GLASS)
       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <GlassCard
-        className="w-full max-w-xl p-8 relative border border-zinc-800/80 bg-zinc-900/90 backdrop-blur-2xl shadow-2xl rounded-2xl"
+        className="w-full max-w-xl p-8 relative border border-neutral-200/80 dark:border-zinc-800/80 bg-zinc-900/90 backdrop-blur-2xl shadow-2xl rounded-2xl"
       >
         {/* STEPPER HEADER CON TIMING ESTIMADO Y PASOS CLICKEABLES */}
         <div className="mb-8">
@@ -350,7 +350,7 @@ export function CreateTenantPage() {
               <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
                 Paso {currentStep} de 5
               </span>
-              <span className="text-[12px] text-zinc-400 flex items-center gap-1 font-medium">
+              <span className="text-[12px] text-neutral-500 dark:text-zinc-400 flex items-center gap-1 font-medium">
                 â€¢ <Clock className="h-3.5 w-3.5 text-indigo-400 inline" /> ~{6 - currentStep} min restantes
               </span>
             </div>
@@ -368,7 +368,7 @@ export function CreateTenantPage() {
                       ? "w-6 bg-indigo-500 shadow-sm shadow-indigo-500/50"
                       : s < currentStep
                       ? "w-2.5 bg-emerald-400 cursor-pointer hover:opacity-80"
-                      : "w-2.5 bg-zinc-800 cursor-not-allowed"
+                      : "w-2.5 bg-neutral-200 dark:bg-zinc-800 cursor-not-allowed"
                   }`}
                   title={`Paso ${s}`}
                 />
@@ -393,13 +393,13 @@ export function CreateTenantPage() {
             <div className="text-center mb-6">
               <Building2 className="h-10 w-10 text-indigo-400 mx-auto mb-2" />
               <h2 className="text-[22px] font-bold text-[#F5F5F5]">Valida tu RUC Institucional</h2>
-              <p className="text-[13px] text-zinc-400">
+              <p className="text-[13px] text-neutral-500 dark:text-zinc-400">
                 Consulta en tiempo real con SUNAT para autocompletar la RazÃ³n Social.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-zinc-300">NÃºmero de RUC (11 dÃ­gitos) *</label>
+              <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">NÃºmero de RUC (11 dÃ­gitos) *</label>
               <input
                 type="text"
                 value={taxId}
@@ -412,7 +412,7 @@ export function CreateTenantPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-zinc-300">RazÃ³n Social Oficial *</label>
+              <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">RazÃ³n Social Oficial *</label>
               <input
                 type="text"
                 value={tenantName}
@@ -424,7 +424,7 @@ export function CreateTenantPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">Nombre Comercial (Opcional)</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">Nombre Comercial (Opcional)</label>
                 <input
                   type="text"
                   value={tradeName}
@@ -434,7 +434,7 @@ export function CreateTenantPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">DirecciÃ³n Fiscal / Sede Matriz</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">DirecciÃ³n Fiscal / Sede Matriz</label>
                 <input
                   type="text"
                   value={address}
@@ -473,14 +473,14 @@ export function CreateTenantPage() {
                 <User className="h-6 w-6 text-indigo-400" />
               </div>
               <h2 className="text-[22px] font-bold text-[#F5F5F5]">Datos del Representante Legal</h2>
-              <p className="text-[13px] text-zinc-400">
+              <p className="text-[13px] text-neutral-500 dark:text-zinc-400">
                 La persona titular de la cuenta administradora (Owner).
               </p>
             </div>
 
             {/* Nombres y Apellidos */}
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-zinc-300">Nombres y Apellidos Completos *</label>
+              <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">Nombres y Apellidos Completos *</label>
               <input
                 type="text"
                 value={fullName}
@@ -494,7 +494,7 @@ export function CreateTenantPage() {
             {/* Tipo y NÃºmero de Documento + BotÃ³n Consultar RENIEC */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
               <div className="md:col-span-4 space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">Tipo de Doc. *</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">Tipo de Doc. *</label>
                 <select
                   value={docType}
                   onChange={(e: any) => setDocType(e.target.value)}
@@ -507,7 +507,7 @@ export function CreateTenantPage() {
               </div>
 
               <div className="md:col-span-8 space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">NÃºmero de Documento *</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">NÃºmero de Documento *</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -521,7 +521,7 @@ export function CreateTenantPage() {
                     type="button"
                     onClick={handleValidateDni}
                     disabled={validatingDni}
-                    className="px-3 py-2.5 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold bg-neutral-200 dark:bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
                     title="Auto-completar desde RENIEC"
                   >
                     {validatingDni ? (
@@ -552,7 +552,7 @@ export function CreateTenantPage() {
             {/* TelÃ©fono & Correo ElectrÃ³nico */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">TelÃ©fono / WhatsApp *</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">TelÃ©fono / WhatsApp *</label>
                 <div className="relative">
                   <input
                     type="tel"
@@ -566,7 +566,7 @@ export function CreateTenantPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">Correo ElectrÃ³nico (Login Owner) *</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">Correo ElectrÃ³nico (Login Owner) *</label>
                 <input
                   type="email"
                   value={email}
@@ -580,7 +580,7 @@ export function CreateTenantPage() {
 
             {/* ContraseÃ±a Segura con Toggle de Visibilidad */}
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-zinc-300">ContraseÃ±a Segura *</label>
+              <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">ContraseÃ±a Segura *</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -594,7 +594,7 @@ export function CreateTenantPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -604,7 +604,7 @@ export function CreateTenantPage() {
               {password.length > 0 && (
                 <div className="mt-2 space-y-1.5">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-zinc-400">Fortaleza de contraseÃ±a:</span>
+                    <span className="text-neutral-500 dark:text-zinc-400">Fortaleza de contraseÃ±a:</span>
                     <span
                       className={`font-semibold ${
                         passwordScore <= 1
@@ -618,7 +618,7 @@ export function CreateTenantPage() {
                     </span>
                   </div>
 
-                  <div className="flex h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+                  <div className="flex h-1.5 w-full rounded-full bg-neutral-200 dark:bg-zinc-800 overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
                         passwordScore <= 1
@@ -630,7 +630,7 @@ export function CreateTenantPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1 pt-1 text-[10px] text-zinc-400">
+                  <div className="grid grid-cols-3 gap-1 pt-1 text-[10px] text-neutral-500 dark:text-zinc-400">
                     <div className={`flex items-center gap-1 ${hasMinLength ? "text-emerald-400" : ""}`}>
                       <Check className="h-3 w-3" /> 8+ caracteres
                     </div>
@@ -646,23 +646,23 @@ export function CreateTenantPage() {
             </div>
 
             {/* Checkboxes de ConfiguraciÃ³n de Experiencia */}
-            <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-              <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+            <div className="space-y-2 pt-2 border-t border-neutral-200/80 dark:border-zinc-800/80">
+              <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-zinc-300 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={useWhatsapp}
                   onChange={(e) => setUseWhatsapp(e.target.checked)}
-                  className="rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500"
+                  className="rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-500 focus:ring-indigo-500"
                 />
                 <span>Recibir soporte y notificaciones rÃ¡pidas por WhatsApp</span>
               </label>
 
-              <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-zinc-300 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={sendEmailCopy}
                   onChange={(e) => setSendEmailCopy(e.target.checked)}
-                  className="rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500"
+                  className="rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-500 focus:ring-indigo-500"
                 />
                 <span>Recibir resumen del registro y credenciales en mi correo</span>
               </label>
@@ -700,7 +700,7 @@ export function CreateTenantPage() {
           <form onSubmit={handleVerifyOtp} className="space-y-4 text-center">
             <Mail className="h-10 w-10 text-indigo-400 mx-auto mb-2 animate-bounce" />
             <h2 className="text-[22px] font-bold text-[#F5F5F5]">VerificaciÃ³n OTP por Correo</h2>
-            <p className="text-[13px] text-zinc-400">
+            <p className="text-[13px] text-neutral-500 dark:text-zinc-400">
               Hemos enviado un cÃ³digo de 6 dÃ­gitos vÃ­a Resend API a <strong className="text-white">{email}</strong>.
             </p>
 
@@ -718,7 +718,7 @@ export function CreateTenantPage() {
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="784920"
                 maxLength={6}
-                className="w-48 text-center tracking-[0.4em] text-2xl font-mono py-3 rounded-xl border border-indigo-500/30 bg-zinc-950 text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-48 text-center tracking-[0.4em] text-2xl font-mono py-3 rounded-xl border border-indigo-500/30 bg-white dark:bg-zinc-950 text-white outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
@@ -726,7 +726,7 @@ export function CreateTenantPage() {
               <p className="text-[12px] text-red-400">{otpError}</p>
             )}
 
-            <div className="flex justify-between items-center text-[12px] text-zinc-400 px-4">
+            <div className="flex justify-between items-center text-[12px] text-neutral-500 dark:text-zinc-400 px-4">
               <span>El cÃ³digo expira en 10 minutos</span>
               {resendCountdown > 0 ? (
                 <span>Reenviar en {resendCountdown}s</span>
@@ -756,14 +756,14 @@ export function CreateTenantPage() {
             <div className="text-center mb-6">
               <Sparkles className="h-10 w-10 text-amber-400 mx-auto mb-2" />
               <h2 className="text-[22px] font-bold text-[#F5F5F5]">ConfiguraciÃ³n del Plan</h2>
-              <p className="text-[13px] text-zinc-400">
+              <p className="text-[13px] text-neutral-500 dark:text-zinc-400">
                 Selecciona la categorÃ­a institucional y el plan de suscripciÃ³n.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">Sector / CategorÃ­a</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">Sector / CategorÃ­a</label>
                 <select
                   value={industryTypeId}
                   onChange={(e) => setIndustryTypeId(e.target.value)}
@@ -776,7 +776,7 @@ export function CreateTenantPage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-zinc-300">DÃ­a Preferido de FacturaciÃ³n</label>
+                <label className="text-[12px] font-medium text-neutral-700 dark:text-zinc-300">DÃ­a Preferido de FacturaciÃ³n</label>
                 <input
                   type="number"
                   min={1}
@@ -800,12 +800,12 @@ export function CreateTenantPage() {
                   className={`p-4 rounded-xl cursor-pointer border transition-all text-center ${
                     planId === p.id
                       ? "border-indigo-500 bg-indigo-500/10 text-white"
-                      : "border-zinc-800 bg-zinc-950/50 text-zinc-400 hover:border-zinc-700"
+                      : "border-neutral-200 dark:border-zinc-800 bg-zinc-950/50 text-neutral-500 dark:text-zinc-400 hover:border-zinc-700"
                   }`}
                 >
                   <div className="font-bold text-sm">{p.name}</div>
                   <div className="text-xs text-indigo-300 my-1">{p.price}</div>
-                  <div className="text-[10px] text-zinc-400">{p.desc}</div>
+                  <div className="text-[10px] text-neutral-500 dark:text-zinc-400">{p.desc}</div>
                 </div>
               ))}
             </div>
@@ -834,7 +834,7 @@ export function CreateTenantPage() {
           <div className="text-center py-8 space-y-4">
             <CheckCircle2 className="h-16 w-16 text-emerald-400 mx-auto animate-bounce" />
             <h2 className="text-[26px] font-bold text-white">Â¡OrganizaciÃ³n Creada Exitosamente!</h2>
-            <p className="text-zinc-300 text-sm max-w-md mx-auto">
+            <p className="text-neutral-700 dark:text-zinc-300 text-sm max-w-md mx-auto">
               Se ha completado el onboarding v2.0 de <strong className="text-white">{tenantName}</strong>. Redirigiendo a tu Dashboard de gestiÃ³n...
             </p>
           </div>
@@ -846,19 +846,19 @@ export function CreateTenantPage() {
       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {showLeaveModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-neutral-100 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-amber-400">
               <AlertTriangle className="h-6 w-6 shrink-0" />
               <h3 className="text-lg font-bold text-white">Â¿Deseas salir del registro?</h3>
             </div>
-            <p className="text-xs text-zinc-300 leading-relaxed">
+            <p className="text-xs text-neutral-700 dark:text-zinc-300 leading-relaxed">
               Tienes informaciÃ³n no guardada en el formulario de creaciÃ³n de tu organizaciÃ³n. Si sales ahora, se perderÃ¡n los datos ingresados en el Paso {currentStep}.
             </p>
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowLeaveModal(false)}
-                className="px-4 py-2 text-xs font-medium text-zinc-300 hover:text-white rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors"
+                className="px-4 py-2 text-xs font-medium text-neutral-700 dark:text-zinc-300 hover:text-white rounded-xl bg-neutral-200 dark:bg-zinc-800 hover:bg-zinc-700 transition-colors"
               >
                 Cancelar
               </button>

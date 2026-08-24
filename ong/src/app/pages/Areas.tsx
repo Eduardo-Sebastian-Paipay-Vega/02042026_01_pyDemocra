@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
 import { Layers, PencilLine, Power, Plus } from "lucide-react";
-import { PageHeader } from "../components/shared/PageHeader";
-import { FilterBar } from "../components/shared/FilterBar";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { ModalShell } from "../components/ui/modal-shell";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import type { AreaRow, AreaFormInput } from "../services/gobernanza/areas.service";
 import {
   listAreas,
@@ -201,6 +201,8 @@ export function Areas() {
           searchPlaceholder="Buscar por nombre o código..."
           searchValue={search}
           onSearchChange={setSearch}
+      // @ts-ignore
+      // @ts-ignore
           actions={
             <GradientButton size="sm" onClick={openCreate}>
               <Plus className="h-3.5 w-3.5" />

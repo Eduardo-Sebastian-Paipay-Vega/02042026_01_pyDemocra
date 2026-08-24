@@ -39,7 +39,8 @@ export interface DashboardActivityRow {
   taskId?: string;
   taskName?: string;
   taskStatus?: string;
-  estimatedHours?: number | null;
+  projectId: string;
+  estimatedHours: number | null;
 }
 
 export interface DashboardAdmissionRow {
@@ -55,6 +56,7 @@ export interface DashboardAdmissionRow {
 export interface WeeklyImpactPoint {
   label: string;
   value: number;
+  total?: number;
 }
 
 export interface MonthlyHoursPoint {
@@ -72,8 +74,10 @@ export interface DashboardTimelineItem {
   id: string;
   title: string;
   subtitle: string;
+  timeLabel?: string;
   time: string;
   dotColor: string;
+  assignedCount?: number;
 }
 
 export interface DashboardAlertItem {
@@ -125,11 +129,13 @@ export interface DashboardActivityFormInput {
 }
 
 export interface DashboardActivityFormErrors {
-  projectId?: string;
   title?: string;
+  projectId?: string;
   statusCode?: string;
-  dateOrder?: string;
-  estimatedHours?: string;
+  startAt?: string;
+  endAt?: string;
+  locationId?: string;
+  _form?: string;
 }
 
 export interface DashboardActivityDetail {
@@ -157,6 +163,8 @@ export interface DashboardActivityDetail {
   }>;
   registeredHours: number;
   evidenceCount: number;
+  assignedVolunteersCount?: number;
+  projectId?: string;
 }
 
 export interface DashboardHoursDetail {
@@ -171,6 +179,9 @@ export interface DashboardHoursDetail {
   approvedBy: string | null;
   approvalComment: string | null;
   createdAt: string;
+  hours?: number;
+  comment?: string;
+  approvalId?: string;
 }
 
 export interface DashboardAdmissionDetail {

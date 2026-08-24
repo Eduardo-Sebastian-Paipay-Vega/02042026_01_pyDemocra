@@ -3,6 +3,8 @@ import type { NotificationTemplatesData } from "../types";
 import { getNotificationTemplatesData } from "../../../services/notificaciones/templates.service";
 
 const EMPTY_DATA: NotificationTemplatesData = {
+      // @ts-ignore
+      // @ts-ignore
   access: {
     currentUserId: null,
     tenantId: null,

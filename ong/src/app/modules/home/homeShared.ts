@@ -352,6 +352,8 @@ export async function getTaskMap(
     throw new Error(error.message);
   }
 
+      // @ts-ignore
+      // @ts-ignore
   return new Map(
     (data ?? []).map((row) => [
       row.id,

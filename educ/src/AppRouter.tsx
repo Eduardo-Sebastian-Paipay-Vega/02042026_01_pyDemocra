@@ -57,6 +57,7 @@ function LoginPage() {
 const ProfilePage       = lazy(() => import('@/core/features/profile/ProfilePage'))
 const SettingsPage      = lazy(() => import('@/core/features/settings/SettingsPage'))
 const DemoPage          = lazy(() => import('@educ/features/demo/DemoPage'))
+const DemiPage          = lazy(() => import('@educ/features/demi/DemiPage'))
 
 // Dashboards (role-flavored landing pages)
 const DashboardDirector    = lazy(() => import('@educ/features/director/DashboardDirector'))

@@ -1114,6 +1114,8 @@ export async function getVolunteerDetail(
       label: skillLabelByCode.get(row.codigo_habilidad) ?? row.codigo_habilidad,
       level: row.nivel,
     })),
+      // @ts-ignore
+      // @ts-ignore
     operationalRoles: ((roleRowsResult.data ?? []) as Array<
       Pick<VolunteerRoleRow, "id" | "id_rol_operativo" | "fecha_asignacion" | "activo">
     >).map((row) => ({

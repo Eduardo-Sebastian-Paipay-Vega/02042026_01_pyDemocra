@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CreditCard, Download } from "lucide-react";
-import { ModalShell } from "../../../components/ui/modal-shell";
-import { OutlineButton } from "../../../components/ui/outline-button";
-import { StatusDot } from "../../../components/ui/status-dot";
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useIdCardTemplateDetail } from "../hooks/useIdCardTemplateDetail";
 import { buildIdCardQrPayload, buildIdCardRenderSubject } from "../idCardShared";
 import type {

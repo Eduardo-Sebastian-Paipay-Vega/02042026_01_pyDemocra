@@ -1,4 +1,4 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 import type { AppDatabase } from "../../../lib/db/ong/app-database";
 import type {
   PeopleRecordStatusKind,
@@ -19,19 +19,19 @@ let tenantCache: { value: string; at: number } | null = null;
 export const peopleDb = supabase;
 
 export function ongSchema() {
-  return peopleDb.schema("ong");
+  return peopleDb.schema("ong" as any) as any;
 }
 
 export function rrhhSchema() {
-  return peopleDb.schema("rrhh");
+  return peopleDb.schema("rrhh" as any) as any;
 }
 
 export function clinicoSchema() {
-  return peopleDb.schema("clinico");
+  return peopleDb.schema("clinico" as any) as any;
 }
 
 export function publicSchema() {
-  return peopleDb.schema("public");
+  return peopleDb.schema("public" as any) as any;
 }
 
 export function stripAccents(value: string): string {

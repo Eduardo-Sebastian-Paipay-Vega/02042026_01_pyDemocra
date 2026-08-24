@@ -1,7 +1,7 @@
 export {
   TenantBootstrapProvider,
   useTenantBootstrap,
-} from "../../modules/ong/app/tenant/TenantBootstrapProvider";
+} from "@ong/app/tenant/TenantBootstrapProvider";
 
 export type {
   TenantBootstrapResult,
@@ -10,5 +10,5 @@ export type {
   TenantFinancialPolicy,
   TenantModulesState,
   TenantRoleAssignment,
-} from "../../modules/ong/app/tenant/bootstrap";
+} from "@ong/app/tenant/bootstrap";
 

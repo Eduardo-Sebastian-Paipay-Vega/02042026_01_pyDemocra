@@ -3,7 +3,7 @@ import type { ComponentType, ReactNode } from "react";
 import type {
   TenantContextValue,
   TenantModulesState,
-} from "../../modules/ong/app/tenant/bootstrap";
+} from "@ong/app/tenant/bootstrap";
 
 export const KNOWN_INDUSTRY_IDS = ["ong", "gym", "health", "retail"] as const;
 export type IndustryId = (typeof KNOWN_INDUSTRY_IDS)[number];

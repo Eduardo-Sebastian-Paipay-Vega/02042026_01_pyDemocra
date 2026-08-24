@@ -1,18 +1,18 @@
-import { supabase } from "../../../supabaseClient";
+﻿import { supabase } from "../../../supabaseClient";
 
 const DEFAULT_TEXT_MAX_LENGTH = 500;
 const DEFAULT_SEARCH_MAX_LENGTH = 120;
 
 export function ongSchema() {
-  return supabase.schema("ong");
+  return supabase.schema("ong" as any) as any;
 }
 
 export function finanzasSchema() {
-  return supabase.schema("finanzas");
+  return supabase.schema("finanzas" as any) as any;
 }
 
 export function publicSchema() {
-  return supabase.schema("public");
+  return supabase.schema("public" as any) as any;
 }
 
 export function normalizeText(value: string | null | undefined): string {

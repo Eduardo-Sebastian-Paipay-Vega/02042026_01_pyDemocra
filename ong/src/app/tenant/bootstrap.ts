@@ -61,7 +61,7 @@ export interface TenantFinancialPolicy {
   isReadOnly: boolean;
   isSuspended: boolean;
   label: string;
-  message: string | null;
+  message: string | any;
 }
 
 export interface TenantRoleAssignment {
@@ -74,13 +74,13 @@ export interface TenantRoleAssignment {
 export interface TenantContextValue {
   user: {
     id: string;
-    email: string | null;
+    email: string | any;
   };
   profile: {
     id: string;
     tenantId: string;
-    fullName: string | null;
-    avatarUrl: string | null;
+    fullName: string | any;
+    avatarUrl: string | any;
   };
   tenant: {
     id: string;
@@ -103,7 +103,7 @@ export interface TenantContextValue {
 export interface TenantBootstrapResult {
   status: TenantBootstrapStatus;
   context: TenantContextValue | null;
-  message: string | null;
+  message: string | any;
   warnings: string[];
 }
 
@@ -340,7 +340,7 @@ function writeBootstrapCache(userId: string, result: TenantBootstrapResult): voi
   memBootstrapCache = entry;
   try {
     localStorage.setItem(BOOTSTRAP_CACHE_KEY, JSON.stringify(entry));
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.MODE === "development") {
       console.debug("[Tenant] Contexto guardado en caché localStorage.");
     }
   } catch {
@@ -353,7 +353,7 @@ function publicSchema() {
   return supabase.schema("public");
 }
 
-function normalizeKey(value: string | null | undefined): string {
+function normalizeKey(value: string | any | undefined): string {
   return String(value ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -361,7 +361,7 @@ function normalizeKey(value: string | null | undefined): string {
     .replace(/[^a-z0-9]+/g, "");
 }
 
-function resolveIndustryTypeId(value: string | null | undefined): string {
+function resolveIndustryTypeId(value: string | any | undefined): string {
   return normalizeKey(value);
 }
 
@@ -373,7 +373,7 @@ export function getStoredLastTenantRoute(
   userId: string,
   tenantId: string,
   industryTypeId: string
-): string | null {
+): string | any {
   if (typeof window === "undefined") {
     return null;
   }
@@ -656,7 +656,7 @@ export async function bootstrapTenantContext(): Promise<TenantBootstrapResult> {
     // Cache hit: retorno inmediato, 0 llamadas a Supabase
     const cachedResult = readBootstrapCacheForUser(user.id);
     if (cachedResult) {
-      if (process.env.NODE_ENV === "development") {
+      if (import.meta.env.MODE === "development") {
         console.debug("[Tenant] Bootstrap resuelto desde caché (0 llamadas).");
       }
       return cachedResult;

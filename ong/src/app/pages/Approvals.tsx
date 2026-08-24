@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
-import { FilterBar } from "../components/shared/FilterBar";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { PageHeader } from "../components/shared/PageHeader";
-import { StatusDot } from "../components/ui/status-dot";
-import { GradientButton } from "../components/ui/gradient-button";
-import { OutlineButton } from "../components/ui/outline-button";
-import { ModalShell } from "../components/ui/modal-shell";
+import { Search, Inbox, FileText } from "lucide-react";
+
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { StatusDot } from '@/core/components/ui/status-dot';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { OutlineButton } from '@/core/components/ui/outline-button';
+import { ModalShell } from '@/core/components/ui/modal-shell';
+import { Tabs, TabsList, TabsTrigger } from "@/core/components/ui/tabs";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/core/components/ui/select";
 import { useDebouncedValue } from "../lib/useDebouncedValue";
 import { useAprobacionDetail } from "../modules/operation/hooks/useAprobacionDetail";
 import { useAprobacionesOperacion } from "../modules/operation/hooks/useAprobacionesOperacion";
@@ -41,38 +44,6 @@ interface CreateFormErrors {
 interface ResolutionTarget {
   approvalId: string;
   action: ResolutionActionKind;
-}
-
-function SelectField({
-  value,
-  onChange,
-  options,
-  disabled = false,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-  disabled?: boolean;
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      disabled={disabled}
-      className="h-9 rounded-xl px-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
-      style={{
-        border: "1px solid var(--t-border)",
-        background: "var(--t-input-bg)",
-        color: "var(--t-text-secondary)",
-      }}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  );
 }
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
@@ -124,21 +95,70 @@ function DetailField({ label, value }: { label: string; value: string }) {
   );
 }
 
+const timeAgo = (dateStr: string) => {
+  if (!dateStr || dateStr === "-") return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " años";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " meses";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " días";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + "h";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + "m";
+  return Math.floor(seconds) + "s";
+};
+
+const parseMeta = (metaStr?: string) => {
+  if (!metaStr || metaStr === "-") return null;
+  try { return JSON.parse(metaStr); } catch (e) { return null; }
+};
+
 const columns: Column<OperationApprovalRow>[] = [
   {
     key: "entity",
     label: "Registro",
-    render: (item) => (
-      <div>
-        <div style={{ color: "var(--t-text)" }}>{item.entityTitle || "-"}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.subjectName && item.subjectName !== "-" ? `${item.subjectName} · ${item.entitySubtitle || "-"}` : (item.entitySubtitle || "-")}
+    render: (item) => {
+      const meta = parseMeta(item.contextMeta);
+      const isEvidencia = item.entityTable === "evidencias_actividad";
+      
+      return (
+        <div className="flex items-start gap-3">
+          {isEvidencia && meta?.url_archivo ? (
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-[var(--t-hover)]">
+              {meta.url_archivo.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
+                <img src={meta.url_archivo} alt="Evidencia" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <FileText className="h-5 w-5 opacity-50" style={{ color: "var(--t-text-dim)" }} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--t-primary-soft)] text-[var(--t-primary)] font-medium text-[12px]">
+              {item.subjectName && item.subjectName !== "-" ? item.subjectName.substring(0,2).toUpperCase() : "NA"}
+            </div>
+          )}
+          
+          <div>
+            <div className="font-medium text-[13px]" style={{ color: "var(--t-text)" }}>
+              {item.subjectName && item.subjectName !== "-" ? item.subjectName : item.entityTitle}
+            </div>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+              <span className="rounded-sm px-1.5 py-0.5" style={{ background: "var(--t-hover)", color: "var(--t-text-secondary)" }}>
+                {item.entityTable === "horas_actividad" ? "Horas" : item.entityTable === "evidencias_actividad" ? "Evidencia" : "Admisión"}
+              </span>
+              <span>•</span>
+              <span className="truncate max-w-[200px]">{item.entitySubtitle || "-"}</span>
+            </div>
+          </div>
         </div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {item.entityId || "-"}
-        </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     key: "status",
@@ -149,18 +169,22 @@ const columns: Column<OperationApprovalRow>[] = [
     key: "requested",
     label: "Solicitado",
     render: (item) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-        {item.requestedBy || "-"} - {item.requestedAt || "-"}
-      </span>
+      <div className="flex flex-col">
+        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.requestedBy || "-"}</span>
+        <span className="text-[11px]" style={{ color: "var(--t-text-tertiary)" }}>Hace {timeAgo(item.requestedAt)}</span>
+      </div>
     ),
   },
   {
     key: "approved",
-    label: "Resuelto",
+    label: "Resolución",
     render: (item) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-        {item.approvedBy || "-"} - {item.approvedAt || "-"}
-      </span>
+      <div className="flex flex-col">
+        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.approvedBy || "-"}</span>
+        <span className="text-[11px]" style={{ color: "var(--t-text-tertiary)" }}>
+          {item.approvedAt && item.approvedAt !== "-" ? `Hace ${timeAgo(item.approvedAt)}` : "-"}
+        </span>
+      </div>
     ),
   },
 ];
@@ -169,8 +193,7 @@ export function Approvals() {
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearchValue = useDebouncedValue(searchValue, 350);
 
-  const [hoursIdFilter, setHoursIdFilter] = useState("");
-  const debouncedHoursIdFilter = useDebouncedValue(hoursIdFilter, 350);
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string | "all">("all");
 
   const [volunteerFilter, setVolunteerFilter] = useState<string | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ApprovalStatusKind>("all");
@@ -205,8 +228,8 @@ export function Approvals() {
     refresh,
   } = useAprobacionesOperacion({
     searchTerm: debouncedSearchValue,
-    entityType: "all",
-    entityId: debouncedHoursIdFilter,
+    entityType: entityTypeFilter,
+    entityId: "",
     status: statusFilter,
     requestedById: volunteerFilter,
     approvedById: "all",
@@ -225,7 +248,7 @@ export function Approvals() {
 
   useEffect(() => {
     setPage(1);
-  }, [searchValue, hoursIdFilter, volunteerFilter, statusFilter, dateFrom, dateTo]);
+  }, [searchValue, entityTypeFilter, volunteerFilter, statusFilter, dateFrom, dateTo]);
 
   useEffect(() => {
     const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -443,56 +466,83 @@ export function Approvals() {
         />
       </motion.div>
 
-      <motion.div variants={fadeUp}>
-        <FilterBar
-          searchPlaceholder="Buscar por solicitante, estado o texto visible..."
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={statusFilters}
-          onFilterClick={(value) => setStatusFilter(value as "all" | ApprovalStatusKind)}
-        />
-      </motion.div>
+      <motion.div variants={fadeUp} className="rounded-2xl border px-4 py-4 backdrop-blur-xl space-y-4" style={{ background: "var(--t-surface)", borderColor: "var(--t-border)" }}>
+        {/* Top bar with Tabs and Search */}
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <Tabs value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)} className="w-full xl:w-auto">
+            <TabsList>
+              {statusFilters.map(f => (
+                <TabsTrigger key={f.value} value={f.value}>{f.label}</TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          
+          <div className="relative max-w-xl w-full xl:w-[400px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--t-text-tertiary)" }} />
+            <input
+              placeholder="Buscar por solicitante, estado o texto visible..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="ong-field-control h-9 w-full rounded-xl pl-9 pr-4 text-[13px] outline-none transition-colors"
+              style={{ border: "1px solid var(--t-border-strong)", background: "var(--t-input-bg)", color: "var(--t-text)" }}
+            />
+          </div>
+        </div>
 
-      <motion.div variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
-          <input
-            value={hoursIdFilter}
-            onChange={(event) => setHoursIdFilter(event.target.value)}
-            placeholder="ID de horas"
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={{
-              border: "1px solid var(--t-border)",
-              background: "var(--t-input-bg)",
-              color: "var(--t-text-secondary)",
-            }}
-          />
-          <SelectField
-            value={volunteerFilter}
-            onChange={(value) => setVolunteerFilter(value as string | "all")}
-            options={volunteerOptionsWithAll}
-          />
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={{
-              border: "1px solid var(--t-border)",
-              background: "var(--t-input-bg)",
-              color: "var(--t-text-secondary)",
-            }}
-          />
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(event) => setDateTo(event.target.value)}
-            className="h-9 rounded-xl px-3 text-[12px] outline-none"
-            style={{
-              border: "1px solid var(--t-border)",
-              background: "var(--t-input-bg)",
-              color: "var(--t-text-secondary)",
-            }}
-          />
+        {/* Filters Group */}
+        <div className="flex flex-wrap items-center gap-3 border-t pt-4" style={{ borderColor: "var(--t-border)" }}>
+           <div className="w-[180px]">
+             <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Tipo de solicitud" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  <SelectItem value="horas_actividad">Horas de Actividad</SelectItem>
+                  <SelectItem value="evidencias_actividad">Evidencias</SelectItem>
+                  <SelectItem value="solicitudes_admision">Admisión</SelectItem>
+                </SelectContent>
+             </Select>
+           </div>
+           
+           <div className="w-[200px]">
+             <Select value={volunteerFilter} onValueChange={setVolunteerFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Voluntario" />
+                </SelectTrigger>
+                <SelectContent>
+                  {volunteerOptionsWithAll.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+             </Select>
+           </div>
+           
+           {/* DateRangePicker styled inputs */}
+           <div className="flex items-center rounded-md border h-9" style={{ borderColor: "var(--t-border)", background: "var(--t-input-bg)" }}>
+             <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="h-full w-[120px] rounded-l-md bg-transparent px-3 text-[12px] outline-none" style={{ color: "var(--t-text)", colorScheme: "dark" }} />
+             <span className="px-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>-</span>
+             <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="h-full w-[120px] rounded-r-md bg-transparent px-3 text-[12px] outline-none" style={{ color: "var(--t-text)", colorScheme: "dark" }} />
+           </div>
+           
+           {/* Clear filters CTA */}
+           {(entityTypeFilter !== 'all' || volunteerFilter !== 'all' || dateFrom || dateTo || searchValue || statusFilter !== 'all') && (
+              <button 
+                type="button"
+                onClick={() => {
+                  setEntityTypeFilter('all');
+                  setVolunteerFilter('all');
+                  setDateFrom('');
+                  setDateTo('');
+                  setSearchValue('');
+                  setStatusFilter('all');
+                }}
+                className="text-[12px] underline transition-colors hover:text-[var(--t-text)]"
+                style={{ color: "var(--t-text-tertiary)" }}
+              >
+                Limpiar filtros
+              </button>
+           )}
         </div>
       </motion.div>
 
@@ -526,7 +576,33 @@ export function Approvals() {
               variant: "destructive",
             },
           ]}
-          emptyMessage="No hay aprobaciones documentadas para el filtro seleccionado"
+          emptyMessage={
+            <div className="flex flex-col items-center justify-center space-y-3 py-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: "var(--t-hover)" }}>
+                <Inbox className="h-6 w-6" style={{ color: "var(--t-text-tertiary)" }} />
+              </div>
+              <div className="text-center">
+                <p className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>Bandeja vacía</p>
+                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>No hay aprobaciones que coincidan con los filtros actuales.</p>
+              </div>
+              {(entityTypeFilter !== 'all' || volunteerFilter !== 'all' || dateFrom || dateTo || searchValue || statusFilter !== 'all') && (
+                <OutlineButton 
+                  size="sm" 
+                  onClick={() => {
+                    setEntityTypeFilter('all');
+                    setVolunteerFilter('all');
+                    setDateFrom('');
+                    setDateTo('');
+                    setSearchValue('');
+                    setStatusFilter('all');
+                  }}
+                  className="mt-2"
+                >
+                  Limpiar filtros
+                </OutlineButton>
+              )}
+            </div>
+          }
         />
       </motion.div>
 

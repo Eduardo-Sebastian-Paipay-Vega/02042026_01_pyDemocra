@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "../components/shared/PageHeader";
-import { FilterBar } from "../components/shared/FilterBar";
-import { DataTable, type Column } from "../components/shared/DataTable";
-import { GradientButton } from "../components/ui/gradient-button";
-import { StatusDot } from "../components/ui/status-dot";
+import { PageHeader } from '@/core/components/shared/PageHeader';
+import { FilterBar } from '@/core/components/shared/FilterBar';
+import { DataTable, type Column } from '@/core/components/shared/DataTable';
+import { GradientButton } from '@/core/components/ui/gradient-button';
+import { StatusDot } from '@/core/components/ui/status-dot';
 import { useBeneficiaries } from "../modules/people/hooks/useBeneficiaries";
 import { useBeneficiaryDetail } from "../modules/people/hooks/useBeneficiaryDetail";
 import { useBeneficiaryMutations } from "../modules/people/hooks/useBeneficiaryMutations";
@@ -17,12 +17,12 @@ import {
 import { PeopleErrorBlock, formatPeopleDate } from "../modules/people/components/people-shared";
 import type { BeneficiaryListRow, BeneficiaryProfileKind } from "../modules/people/types";
 
-const stagger = {
-  hidden: {},
+const stagger: any = {
+  hidden: { opacity: 0 },
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
 };
 
-const fadeUp = {
+const fadeUp: any = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 };
