@@ -24,12 +24,12 @@ const dotColors: Record<StatusVariant, string> = {
 };
 
 const textColors: Record<StatusVariant, string> = {
-  success: "text-emerald-400/80",
-  warning: "text-amber-400/80",
-  destructive: "text-red-400/80",
-  info: "text-[#9B7AEA]/80",
-  secondary: "text-[#A7A7A7]/70",
-  default: "text-[#F5F5F5]/60",
+  success: "text-emerald-400",
+  warning: "text-amber-400",
+  destructive: "text-red-400",
+  info: "text-[#9B7AEA]",
+  secondary: "text-[#A7A7A7]",
+  default: "text-[#F5F5F5]",
 };
 
 export function StatusDot({
@@ -41,7 +41,7 @@ export function StatusDot({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-[12px] capitalize",
+        "inline-flex items-center gap-1.5 text-[12px]",
         textColors[variant],
         className
       )}

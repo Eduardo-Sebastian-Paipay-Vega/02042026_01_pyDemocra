@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { ShieldAlert, RefreshCw, Eye, Search } from "lucide-react";
+import { ShieldAlert, RefreshCw, Eye, Search, BarChart as LucideBarChart, Calendar, Users, Activity, ChevronRight } from "lucide-react";
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
 import { PageHeader } from '@/core/components/shared/PageHeader';
 import { DataTable, type Column } from '@/core/components/shared/DataTable';
@@ -133,7 +134,7 @@ export function MedicalRecords() {
           </div>
           <div>
             <div style={{ color: "var(--t-text)" }}>{row.personName}</div>
-            <div className="mt-0.5 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+            <div className="mt-0.5 text-[12px] font-medium" style={{ color: "var(--t-text)" }}>
               {row.documentLabel}
             </div>
           </div>
@@ -168,7 +169,7 @@ export function MedicalRecords() {
           className="text-[12px]"
           style={{ color: row.updatedAt ? "var(--t-text-secondary)" : "var(--t-muted)" }}
         >
-          {formatPeopleDate(row.updatedAt)}
+          {row.updatedAt ? formatPeopleDate(row.updatedAt) : "—"}
         </span>
       ),
     },
@@ -179,7 +180,7 @@ export function MedicalRecords() {
       render: (row) => (
         <OutlineButton size="sm" onClick={() => setGateTarget(row)} className="h-8 gap-1.5 px-3">
           <Eye className="h-3.5 w-3.5" />
-          <span>Ver Ficha</span>
+          <span>{row.hasRecord ? "Ver Ficha" : "Crear Ficha"}</span>
         </OutlineButton>
       ),
     },
@@ -248,131 +249,253 @@ export function MedicalRecords() {
     toast.success("Ficha sensible actualizada.");
   }
 
-  return (
-    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="fichas-medicas-theme space-y-6">
-      <motion.div variants={fadeUp as any}>
-        <PageHeader
-          title="Ficha médica sensible"
-          description="Acceso controlado a fichas clínicas y sensibles con trazabilidad y ocultamiento de contenido en listados."
-          action={{
-            label: (
-              <div className="flex items-center gap-2">
-                <RefreshCw className={`h-4 w-4 ${records.loading ? 'animate-spin' : ''}`} />
-                <span>Actualizar</span>
-              </div>
-            ) as unknown as string,
-            onClick: records.refresh,
-          }}
-        />
-      </motion.div>
+  const totalPeople = records.rows.length;
+  const withRecordCount = records.rows.filter(r => r.hasRecord).length;
+  const withoutRecordCount = records.rows.filter(r => !r.hasRecord).length;
+  const coveragePercent = totalPeople > 0 ? Math.round((withRecordCount / totalPeople) * 100) : 0;
 
-      <motion.div variants={fadeUp as any}>
+  const evolutionData = useMemo(() => {
+    if (!records.rows.length) return [];
+    const counts: Record<string, number> = {};
+    records.rows.forEach(row => {
+      if (row.hasRecord && row.createdAt) {
+        const date = new Date(row.createdAt);
+        const monthYear = date.toLocaleString('es-ES', { month: 'short', year: '2-digit' }).replace('.', '');
+        counts[monthYear] = (counts[monthYear] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  }, [records.rows]);
+
+  const { agenda } = records;
+
+  return (
+    <motion.div 
+      variants={stagger as any} 
+      initial="hidden" 
+      animate="visible" 
+      className="bg-[#100F0D] text-[#F9F7F3] min-h-screen p-6 font-sans w-full"
+      style={{
+        '--t-surface': '#171512',
+        '--t-border': '#26231F',
+        '--t-text': '#F9F7F3',
+        '--t-text-secondary': '#A4A29F',
+        '--t-text-tertiary': '#686561',
+        '--t-hover': '#1F1D1A',
+        '--t-muted': '#686561',
+        '--t-border-strong': '#26231F',
+        '--t-input-bg': '#100F0D',
+      } as React.CSSProperties}
+    >
+      {/* Header Superior */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Panel Principal</h1>
+          <p className="text-sm text-[#A4A29F] mt-1">Control de acceso y registro clínico sensible</p>
+        </div>
         <div className="flex flex-wrap gap-2">
           {scope === "beneficiaries" ? (
-            <GradientButton size="sm" onClick={() => setScope("beneficiaries")}>
-              Beneficiarios
-            </GradientButton>
+             <button className="bg-[#1F1D1A] border border-[#356C92] px-4 py-2 rounded-lg text-sm text-[#356C92] font-medium" onClick={() => setScope("beneficiaries")}>Beneficiarios</button>
           ) : (
-            <OutlineButton size="sm" onClick={() => setScope("beneficiaries")}>
-              Beneficiarios
-            </OutlineButton>
+             <button className="bg-[#171512] border border-[#26231F] px-4 py-2 rounded-lg text-sm text-[#A4A29F] hover:bg-[#1F1D1A] transition-colors" onClick={() => setScope("beneficiaries")}>Beneficiarios</button>
           )}
           {scope === "volunteers" ? (
-            <GradientButton size="sm" onClick={() => setScope("volunteers")}>
-              Voluntarios
-            </GradientButton>
+             <button className="bg-[#1F1D1A] border border-[#356C92] px-4 py-2 rounded-lg text-sm text-[#356C92] font-medium" onClick={() => setScope("volunteers")}>Voluntarios</button>
           ) : (
-            <OutlineButton size="sm" onClick={() => setScope("volunteers")}>
-              Voluntarios
-            </OutlineButton>
+             <button className="bg-[#171512] border border-[#26231F] px-4 py-2 rounded-lg text-sm text-[#A4A29F] hover:bg-[#1F1D1A] transition-colors" onClick={() => setScope("volunteers")}>Voluntarios</button>
           )}
+          <button className="bg-[#356C92] border border-[#356C92]/50 px-4 py-2 rounded-lg text-sm text-white font-medium flex items-center gap-2 hover:bg-[#2b597a] transition-colors shadow-lg" onClick={records.refresh} disabled={records.loading}>
+             <RefreshCw className={`h-4 w-4 ${records.loading ? 'animate-spin' : ''}`} />
+             <span>Actualizar</span>
+          </button>
         </div>
-      </motion.div>
+      </header>
 
-      <motion.div variants={fadeUp as any}>
-        <div className="flex items-center gap-2 py-2">
-          <ShieldAlert className="h-4 w-4 shrink-0" style={{ color: "var(--t-warning)" }} />
-          <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
-            Los listados solo muestran metadatos operativos. El contenido clínico se abre con motivo de acceso y se edita solo con rol autorizado.
-          </p>
-        </div>
-      </motion.div>
-
-      {records.error && (
-        <motion.div variants={fadeUp as any}>
-          <PeopleErrorBlock message={records.error} onRetry={records.refresh} />
-        </motion.div>
-      )}
-
-      {!records.error && !records.loading && !records.access.canRead && (
-        <motion.div variants={fadeUp as any}>
-          <PeopleErrorBlock
-            message={
-              records.access.reason ??
-              "No tienes permisos para consultar fichas médicas sensibles."
-            }
-            onRetry={records.refresh}
-          />
-        </motion.div>
-      )}
-
-      <motion.div variants={fadeUp as any}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--t-text-tertiary)" }} />
-            <input
-              placeholder="Buscar por persona, documento o contexto..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              className="ong-field-control h-10 w-full rounded-xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[var(--t-primary)]/30"
-              style={{
-                border: "1px solid var(--t-border-strong)",
-                background: "var(--t-input-bg)",
-                color: "var(--t-text)",
-              }}
-            />
+      {/* Grid de Contenido */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Columna Izquierda */}
+        <div className="lg:col-span-2 space-y-4">
+          
+          {/* Fila de 4 KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+             <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+                <p className="text-xs text-[#A4A29F]">Total Personas</p>
+                <p className="text-2xl font-bold text-white mt-1">{totalPeople}</p>
+                <div className="absolute top-3 right-3 bg-[#1F181E] border border-[#8B5CF6]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                   <Users className="w-3 h-3 text-[#8B5CF6]" />
+                   <span className="text-[10px] font-medium text-[#8B5CF6]">Activos</span>
+                </div>
+             </div>
+             <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+                <p className="text-xs text-[#A4A29F]">Con Ficha</p>
+                <p className="text-2xl font-bold text-white mt-1">{withRecordCount}</p>
+                <div className="absolute top-3 right-3 bg-[#161D17] border border-[#08996A]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                   <Activity className="w-3 h-3 text-[#08996A]" />
+                   <span className="text-[10px] font-medium text-[#08996A]">Completas</span>
+                </div>
+             </div>
+             <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+                <p className="text-xs text-[#A4A29F]">Pendientes</p>
+                <p className="text-2xl font-bold text-white mt-1">{withoutRecordCount}</p>
+                <div className="absolute top-3 right-3 bg-[#231C11] border border-[#D97706]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                   <ShieldAlert className="w-3 h-3 text-[#D97706]" />
+                   <span className="text-[10px] font-medium text-[#D97706]">Atención</span>
+                </div>
+             </div>
+             <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+                <p className="text-xs text-[#A4A29F]">Cobertura</p>
+                <p className="text-2xl font-bold text-white mt-1">{coveragePercent}%</p>
+                <div className="absolute top-3 right-3 bg-[#1F181E] border border-[#8B5CF6]/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                   <BarChart className="w-3 h-3 text-[#8B5CF6]" />
+                   <span className="text-[10px] font-medium text-[#8B5CF6]">Global</span>
+                </div>
+             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: "Todas", value: "all" },
-              { label: "Con ficha", value: "withRecord" },
-              { label: "Sin ficha", value: "withoutRecord" },
-            ].map((filter) => {
-              const isActive = recordFilter === filter.value;
-              return (
-                <button
-                  key={filter.value}
-                  className={`inline-flex h-9 items-center rounded-full border px-3.5 text-[12px] font-medium transition-colors ${
-                    isActive
-                      ? "border-[var(--t-primary)]/35 bg-[var(--t-primary-soft)] text-[var(--t-primary)]"
-                      : ""
-                  }`}
-                  style={!isActive ? {
-                    border: "1px solid var(--t-border)",
-                    background: "var(--t-input-bg)",
-                    color: "var(--t-text-secondary)",
-                  } : undefined}
-                  onClick={() => setRecordFilter(filter.value as any)}
+
+          {/* Tarjeta de Gráfico / Evolución */}
+          <div className="h-[280px] bg-[#171512] border border-[#26231F] rounded-[12px] flex flex-col items-center justify-center p-6">
+             <div className="bg-[#23211D] p-3 rounded-xl mb-3">
+                <LucideBarChart className="w-6 h-6 text-[#A4A29F]" />
+             </div>
+             <p className="text-sm font-medium text-[#F9F7F3] mb-4">Evolución de Fichas</p>
+             {evolutionData.length > 0 ? (
+               <div className="w-full h-full min-h-[150px]">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <BarChart data={evolutionData}>
+                     <XAxis dataKey="name" stroke="#A4A29F" fontSize={10} tickLine={false} axisLine={false} />
+                     <Tooltip cursor={{ fill: '#1F1D1A' }} contentStyle={{ backgroundColor: '#171512', borderColor: '#26231F', borderRadius: '8px', fontSize: '12px', color: '#F9F7F3' }} />
+                     <Bar dataKey="count" fill="#356C92" radius={[4, 4, 0, 0]} />
+                   </BarChart>
+                 </ResponsiveContainer>
+               </div>
+             ) : (
+               <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">No hay datos suficientes para generar el gráfico de evolución en este momento.</p>
+             )}
+          </div>
+
+          {/* Tarjeta de Feed en Vivo (Tabla) */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <h2 className="text-sm font-medium text-[#F9F7F3]">Feed en Vivo de Registros</h2>
+                
+                {/* Search */}
+                <div className="relative w-full sm:max-w-xs">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A4A29F]" />
+                  <input
+                    placeholder="Buscar por persona, DNI o contexto..."
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="h-9 w-full rounded-lg pl-9 pr-4 text-xs bg-[#100F0D] border border-[#26231F] text-[#F9F7F3] outline-none focus:border-[#356C92] transition-colors"
+                  />
+                </div>
+             </div>
+
+             {/* Filters */}
+             <div className="flex flex-wrap gap-2 mb-4">
+                {[
+                  { label: "Todas", value: "all" },
+                  { label: "Con ficha", value: "withRecord" },
+                  { label: "Sin ficha", value: "withoutRecord" },
+                ].map((filter) => {
+                  const isActive = recordFilter === filter.value;
+                  return (
+                    <button
+                      key={filter.value}
+                      className={`inline-flex h-7 items-center rounded-full px-3 text-[11px] font-medium transition-colors ${
+                        isActive
+                          ? "bg-[#1F181E] border border-[#8B5CF6]/20 text-[#8B5CF6]"
+                          : "bg-[#100F0D] border border-[#26231F] text-[#A4A29F] hover:bg-[#1F1D1A]"
+                      }`}
+                      onClick={() => setRecordFilter(filter.value as any)}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+             </div>
+
+             {/* Tabla */}
+             <div className="overflow-x-auto rounded-xl border border-[#26231F] bg-[#100F0D]">
+               {records.error && (
+                 <div className="p-4"><PeopleErrorBlock message={records.error} onRetry={records.refresh} /></div>
+               )}
+               {!records.error && !records.loading && !records.access.canRead && (
+                 <div className="p-4"><PeopleErrorBlock message={records.access.reason ?? "No tienes permisos."} onRetry={records.refresh} /></div>
+               )}
+               {(!records.error && records.access.canRead) && (
+                 <DataTable
+                   columns={columns}
+                   data={filteredRows}
+                   loading={records.loading}
+                   emptyMessage={tableEmptyMessage}
+                   className="!bg-transparent !border-0 !shadow-none rounded-none"
+                 />
+               )}
+             </div>
+          </div>
+        </div>
+
+        {/* Columna Derecha */}
+        <div className="lg:col-span-1 space-y-4">
+          
+          {/* Tarjeta Agenda de Hoy */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-6 flex flex-col min-h-[220px]">
+             <div className="flex items-center gap-3 mb-4">
+               <div className="bg-[#23211D] p-2.5 rounded-xl">
+                  <Calendar className="w-5 h-5 text-[#A4A29F]" />
+               </div>
+               <p className="text-sm font-medium text-[#F9F7F3]">Agenda de Hoy</p>
+             </div>
+             
+             {agenda.length > 0 ? (
+               <div className="space-y-3 overflow-y-auto pr-2">
+                 {agenda.map(item => (
+                   <div key={item.id} className="border-l-2 border-[#356C92] pl-3 py-1">
+                     <p className="text-xs text-[#F9F7F3] font-medium truncate">{item.titulo}</p>
+                     <p className="text-[10px] text-[#A4A29F]">
+                       {new Date(item.fecha_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - {new Date(item.fecha_fin).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                     </p>
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <div className="flex-1 flex flex-col items-center justify-center">
+                 <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">Sin actividades ni atenciones programadas para el día de hoy.</p>
+               </div>
+             )}
+          </div>
+
+          {/* Tarjeta Accesos Directos */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+             <h2 className="text-sm font-medium text-[#F9F7F3] mb-3">Accesos Directos</h2>
+             <div className="space-y-2">
+                <button 
+                   className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
+                   onClick={() => setRecordFilter("withoutRecord")}
                 >
-                  {filter.label}
+                   <span className="text-sm text-[#F9F7F3]">Fichas Pendientes</span>
+                   <span className="bg-[#100F0D] text-[10px] px-2 py-0.5 rounded text-[#A4A29F] border border-[#26231F]">{withoutRecordCount}</span>
                 </button>
-              );
-            })}
+                <button 
+                   className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
+                   onClick={() => setRecordFilter("withRecord")}
+                >
+                   <span className="text-sm text-[#F9F7F3]">Fichas Registradas</span>
+                   <span className="bg-[#100F0D] text-[10px] px-2 py-0.5 rounded text-[#A4A29F] border border-[#26231F]">{withRecordCount}</span>
+                </button>
+                <button 
+                   className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
+                >
+                   <span className="text-sm text-[#F9F7F3]">Auditoría de Accesos</span>
+                   <ChevronRight className="w-4 h-4 text-[#A4A29F]" />
+                </button>
+             </div>
           </div>
+          
         </div>
-      </motion.div>
-
-      <motion.div variants={fadeUp as any}>
-        {records.error || !records.access.canRead ? null : (
-          <DataTable
-            columns={columns}
-            data={filteredRows}
-            loading={records.loading}
-            emptyMessage={tableEmptyMessage}
-          />
-        )}
-      </motion.div>
-
+      </div>
+      
+      {/* Modals */}
       <SensitiveAccessGateModal
         open={Boolean(gateTarget)}
         onClose={() => setGateTarget(null)}

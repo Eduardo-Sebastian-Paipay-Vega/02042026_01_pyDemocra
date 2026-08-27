@@ -81,6 +81,7 @@ function buildBeneficiaryMedicalSummary(options: {
     profileLabel: resolveProfileLabel(options.profileKind),
     hasRecord: Boolean(options.record),
     summary: options.record ? "Ficha médica registrada" : "Pendiente de creación",
+    createdAt: options.record?.created_at ?? null,
     updatedAt: options.record?.updated_at ?? null,
     loggable: Boolean(options.record?.id),
   };
@@ -100,6 +101,7 @@ function buildVolunteerSensitiveSummary(options: {
     stateLabel: options.volunteer.codigo_estado,
     hasRecord: Boolean(options.record),
     summary: options.record ? "Ficha médica registrada" : "Pendiente de creación",
+    createdAt: options.record?.created_at ?? null,
     updatedAt: options.record?.updated_at ?? null,
     loggable: false,
   };
@@ -112,7 +114,7 @@ async function fetchLatestBeneficiaryMedicalRecords(
     clinicoSchema()
       .from("fichas_medicas")
       .select(
-        "id, id_beneficiario, updated_at"
+        "id, id_beneficiario, created_at, updated_at"
       ),
     tenantId
   ).order("updated_at", { ascending: false });
@@ -277,7 +279,7 @@ export async function listSensitiveMedicalRecords(
       clinicoSchema()
         .from("ficha_sensible_voluntario")
         .select(
-          "id, id_voluntario, updated_at"
+          "id, id_voluntario, created_at, updated_at"
         ),
       tenantId
     ),
@@ -712,4 +714,33 @@ export async function getMedicalRecordDetailByVolunteerId(
     created_by: detail.createdBy || null,
     updated_by: detail.updatedBy || null,
   };
+}
+
+export interface ClinicalAgendaItem {
+  id: string;
+  titulo: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  codigo_estado: string;
+}
+
+export async function getTodayClinicalAgenda(): Promise<ClinicalAgendaItem[]> {
+  const tenantId = await getRequiredTenantId();
+  // Using the general actividades table for today's agenda in the clinical dashboard.
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  
+  const { data, error } = await ongSchema()
+    .from("actividades")
+    .select("id, titulo, fecha_inicio, fecha_fin, codigo_estado")
+    .eq("tenant_id", tenantId)
+    // Basic prefix matching for today's date in timestamp fields
+    .like("fecha_inicio", `${today}%`)
+    .order("fecha_inicio", { ascending: true })
+    .limit(50);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as ClinicalAgendaItem[];
 }

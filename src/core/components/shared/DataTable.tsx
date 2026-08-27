@@ -66,7 +66,7 @@ export function DataTable<T extends { id: string }>({
               <th
                 key={column.key}
                 className={cn(
-                  "px-5 py-3 text-[10px] font-medium uppercase tracking-[0.1em] first:pl-6 last:pr-6",
+                  "px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] first:pl-6 last:pr-6",
                   column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
                 )}
                 style={{ color: "var(--t-text-tertiary)" }}

@@ -23,7 +23,7 @@ export function OutlineButton({
     <button
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200",
-        "hover:-translate-y-0.5",
+        "hover:-translate-y-0.5 hover:bg-[var(--t-hover)]",
         "active:translate-y-0",
         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--t-primary)]/50",
         "disabled:opacity-50 disabled:pointer-events-none",

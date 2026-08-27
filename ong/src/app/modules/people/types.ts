@@ -268,6 +268,7 @@ export interface BeneficiaryMedicalRecordRow {
   profileLabel: string;
   hasRecord: boolean;
   summary: string;
+  createdAt: string | null;
   updatedAt: string | null;
   loggable: boolean;
 }
@@ -282,6 +283,7 @@ export interface VolunteerSensitiveRecordRow {
   stateLabel: string;
   hasRecord: boolean;
   summary: string;
+  createdAt: string | null;
   updatedAt: string | null;
   loggable: boolean;
 }

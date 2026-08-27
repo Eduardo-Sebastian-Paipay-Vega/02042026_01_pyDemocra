@@ -7,6 +7,8 @@ import type {
 import {
   getSensitiveAccessContext,
   listSensitiveMedicalRecords,
+  getTodayClinicalAgenda,
+  type ClinicalAgendaItem,
 } from "../../../services/clinico/medicalRecords.service";
 
 const EMPTY_ACCESS: SensitiveAccessState = {
@@ -23,6 +25,7 @@ export function useMedicalRecords(scope: SensitiveRecordScope) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<SensitiveMedicalListRow[]>([]);
+  const [agenda, setAgenda] = useState<ClinicalAgendaItem[]>([]);
   const [access, setAccess] = useState<SensitiveAccessState>(EMPTY_ACCESS);
 
   const refresh = useCallback(() => {
@@ -67,21 +70,28 @@ export function useMedicalRecords(scope: SensitiveRecordScope) {
 
         if (!accessState.canRead) {
           setRows([]);
+          setAgenda([]);
           return;
         }
 
-        const listRows = await listSensitiveMedicalRecords(scope);
+        const [listRows, agendaRows] = await Promise.all([
+          listSensitiveMedicalRecords(scope),
+          getTodayClinicalAgenda()
+        ]);
+        
         if (!isActive) {
           return;
         }
 
         setRows(listRows);
+        setAgenda(agendaRows);
       } catch (loadError) {
         if (!isActive) {
           return;
         }
 
         setRows([]);
+        setAgenda([]);
         setError(
           loadError instanceof Error
             ? loadError.message
@@ -105,6 +115,7 @@ export function useMedicalRecords(scope: SensitiveRecordScope) {
     loading,
     error,
     rows,
+    agenda,
     access,
     refresh,
     upsertRow,
