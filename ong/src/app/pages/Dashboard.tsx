@@ -44,6 +44,13 @@ import { OutlineButton } from '@/core/components/ui/outline-button';
 import { StatusDot } from '@/core/components/ui/status-dot';
 import { ModalShell } from '@/core/components/ui/modal-shell';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/core/components/ui/select";
+import {
   fetchDashboardActivityDetail,
   fetchDashboardAdmissionDetail,
   fetchDashboardHourDetail,
@@ -769,58 +776,69 @@ export function Dashboard() {
     <motion.div variants={stagger as any} initial="hidden" animate="visible" className="space-y-6">
       {/* HEADER EJECUTIVO DEL DASHBOARD CON ACCIONES REALES */}
       <motion.div variants={fadeUp as any}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex-1">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 min-w-0">
             <PageHeader
               title="Panel Principal"
               description="Resumen operativo general, métricas clave en tiempo real y gestión de la ONG."
             />
           </div>
 
+          {/* ── Barra de acciones unificada (una sola fila) ── */}
           <div className="flex flex-wrap items-center gap-2">
             {/* BOTÓN ACTUALIZAR */}
             <OutlineButton
               size="sm"
               onClick={refresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5"
+              style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
             >
-              <RefreshCw className={`h-4 w-4 text-zinc-400 ${isRefreshing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} style={{ color: "var(--t-text-dim)" }} />
               Actualizar
             </OutlineButton>
 
-            {/* SELECTOR DE PERÍODO */}
-            <select
+            {/* SELECTOR DE PERÍODO (Custom) */}
+            <Select
               value={periodFilter}
-              onChange={(e) => setPeriodFilter(e.target.value as PeriodFilter)}
-              className="h-9 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 font-medium"
+              onValueChange={(val) => setPeriodFilter(val as PeriodFilter)}
             >
-              <option value="month">📅 Este Mes</option>
-              <option value="quarter">📅 Último Trimestre</option>
-              <option value="year">📅 Este Año</option>
-            </select>
+              <SelectTrigger className="h-9 w-fit min-w-[110px] rounded-xl text-[13px] font-medium transition-colors" style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)", color: "var(--t-text-secondary)" }}>
+                <SelectValue placeholder="Periodo" />
+              </SelectTrigger>
+              <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+                <SelectItem value="month" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Mes</SelectItem>
+                <SelectItem value="quarter" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Último Trimestre</SelectItem>
+                <SelectItem value="year" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Año</SelectItem>
+              </SelectContent>
+            </Select>
 
-            {/* SELECTOR DE PROYECTO */}
-            <select
+            {/* SELECTOR DE PROYECTO (Custom) */}
+            <Select
               value={selectedProjectFilter}
-              onChange={(e) => setSelectedProjectFilter(e.target.value)}
-              className="h-9 rounded-xl px-3 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 font-medium"
+              onValueChange={setSelectedProjectFilter}
             >
-              <option value="all">📁 Todos los Proyectos</option>
-              {taskOptions.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9 w-fit min-w-[140px] rounded-xl text-[13px] font-medium transition-colors" style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)", color: "var(--t-text-secondary)" }}>
+                <SelectValue placeholder="Proyecto" />
+              </SelectTrigger>
+              <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+                <SelectItem value="all" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Todos los Proyectos</SelectItem>
+                {taskOptions.map((p) => (
+                  <SelectItem key={p.value} value={p.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* BOTÓN PERSONALIZAR */}
             <OutlineButton
               size="sm"
               onClick={() => setIsSettingsModalOpen(true)}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5"
+              style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
             >
-              <Settings className="h-4 w-4 text-zinc-400" />
+              <Settings className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
               Personalizar
             </OutlineButton>
 
@@ -831,9 +849,10 @@ export function Dashboard() {
                 toast.info("Preparando vista para imprimir/guardar PDF...");
                 setTimeout(() => window.print(), 500);
               }}
-              className="flex items-center gap-1.5 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5"
+              style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
             >
-              <Download className="h-4 w-4 text-emerald-400" />
+              <Download className="h-3.5 w-3.5" style={{ color: "var(--t-primary)" }} />
               Reporte PDF
             </OutlineButton>
 
@@ -850,14 +869,18 @@ export function Dashboard() {
               </GradientButton>
 
               {isQuickActionOpen && (
-                <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-zinc-800 bg-zinc-900/95 p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95">
+                <div
+                  className="absolute right-0 mt-2 w-52 rounded-2xl p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95"
+                  style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)" }}
+                >
                   <button
                     type="button"
                     onClick={() => {
                       setIsQuickActionOpen(false);
                       navigate("/app/operation/hours");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium hover:bg-[var(--t-hover)] text-left transition-colors"
+                    style={{ color: "var(--t-text)" }}
                   >
                     <Clock className="h-4 w-4 text-indigo-400" />
                     Registrar Horas
@@ -868,7 +891,8 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       navigate("/app/approvals/hours");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium hover:bg-[var(--t-hover)] text-left transition-colors"
+                    style={{ color: "var(--t-text)" }}
                   >
                     <CheckSquare className="h-4 w-4 text-emerald-400" />
                     Aprobar Horas Pendientes
@@ -879,7 +903,8 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       openActivityCreateModal();
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium hover:bg-[var(--t-hover)] text-left transition-colors"
+                    style={{ color: "var(--t-text)" }}
                   >
                     <Plus className="h-4 w-4 text-purple-400" />
                     Nueva Actividad
@@ -890,7 +915,8 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       navigate("/app/admission/requests");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium hover:bg-[var(--t-hover)] text-left transition-colors"
+                    style={{ color: "var(--t-text)" }}
                   >
                     <UserPlus className="h-4 w-4 text-amber-400" />
                     Revisar Admisiones
@@ -906,66 +932,78 @@ export function Dashboard() {
       <motion.div variants={fadeUp as any}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. VOLUNTARIOS ACTIVOS */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-white/10 shadow-lg shadow-black/20 hover:border-emerald-500/30 transition-all shadow-sm">
+          <div
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Voluntarios Activos</span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Voluntarios Activos</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Users className="h-4 w-4" />
               </div>
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{activeVolunteersCount}</p>
-              <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1">
+            <div className="mt-3 flex items-baseline justify-between">
+              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{activeVolunteersCount}</p>
+              <span className="text-[11px] font-medium text-emerald-400/70 bg-emerald-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
                 <TrendingUp className="h-3 w-3" /> En sistema
               </span>
             </div>
           </div>
 
           {/* 2. PROYECTOS Y ACTIVIDADES */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-white/10 shadow-lg shadow-black/20 hover:border-indigo-500/30 transition-all shadow-sm">
+          <div
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Proyectos y Actividades</span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Proyectos y Actividades</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                 <FolderKanban className="h-4 w-4" />
               </div>
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">
-                {activeProjectsCount} <span className="text-xs font-normal text-zinc-400">proj.</span> • {activeActivitiesCount} <span className="text-xs font-normal text-zinc-400">act.</span>
+            <div className="mt-3 flex items-baseline justify-between">
+              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>
+                {activeProjectsCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>proy.</span> • {activeActivitiesCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>act.</span>
               </p>
-              <span className="text-[11px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1">
+              <span className="text-[11px] font-medium text-indigo-300/70 bg-indigo-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3" /> Activos
               </span>
             </div>
           </div>
 
           {/* 3. HORAS APROBADAS */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-white/10 shadow-lg shadow-black/20 hover:border-purple-500/30 transition-all shadow-sm">
+          <div
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Horas Aprobadas Totales</span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Horas Aprobadas Totales</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{safeHoursToText(approvedHoursTotal)}</p>
-              <span className="text-[11px] font-medium text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-md border border-purple-500/20 flex items-center gap-1">
+            <div className="mt-3 flex items-baseline justify-between">
+              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{safeHoursToText(approvedHoursTotal)}</p>
+              <span className="text-[11px] font-medium text-purple-300/70 bg-purple-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
                 <Award className="h-3 w-3" /> Auditado OK
               </span>
             </div>
           </div>
 
           {/* 4. PENDIENTES DE REVISIÓN */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-white/10 shadow-lg shadow-black/20 hover:border-amber-500/30 transition-all shadow-sm">
+          <div
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
+            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-zinc-400">Pendientes de Revisión</span>
+              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Pendientes de Revisión</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 <AlertCircle className="h-4 w-4" />
               </div>
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-zinc-100 tabular-nums">{pendingApprovalsCount} <span className="text-xs font-normal text-zinc-400">pend.</span></p>
-              <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
+            <div className="mt-3 flex items-baseline justify-between">
+              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{pendingApprovalsCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>pend.</span></p>
+              <span className="text-[11px] font-medium text-amber-400/70 bg-amber-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
                 <Clock className="h-3 w-3" /> Requiere atención
               </span>
             </div>
@@ -978,80 +1016,100 @@ export function Dashboard() {
         <motion.div variants={fadeUp as any} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* GRÁFICO DE EVOLUCIÓN DE HORAS */}
           {widgetSettings.showEvolutionChart && (
-            <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-zinc-900/80 shadow-lg shadow-black/20 p-5 space-y-4 shadow-sm">
+            <div
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm"
+              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+                  <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
                     <TrendingUp className="h-5 w-5 text-indigo-400" />
                     Evolución del Voluntariado (Horas)
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
+                  <p className="text-[13px] mt-0.5" style={{ color: "var(--t-text-dim)" }}>
                     Comparativa de horas solicitadas vs validadas en los últimos meses.
                   </p>
                 </div>
 
-                <span className="text-xs text-indigo-400 font-mono bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 font-medium">
+                <span className="text-[13px] text-indigo-400 font-mono bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 font-medium">
                   {safeHoursToText(approvedHoursTotal)} acumuladas
                 </span>
               </div>
 
               <div className="h-64 w-full pt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorAprobadas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
-                      </linearGradient>
-                      <linearGradient id="colorSolicitadas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#71717a" fontSize={11} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#18181b",
-                        borderColor: "#27272a",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="solicitadas"
-                      name="Solicitadas"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorSolicitadas)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="aprobadas"
-                      name="Aprobadas"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorAprobadas)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {chartData.some(d => d.solicitadas > 0 || d.aprobadas > 0) ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorAprobadas" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                        </linearGradient>
+                        <linearGradient id="colorSolicitadas" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#18181b",
+                          borderColor: "#27272a",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="solicitadas"
+                        name="Solicitadas"
+                        stroke="#10b981"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorSolicitadas)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="aprobadas"
+                        name="Aprobadas"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorAprobadas)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full w-full flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-inner" style={{ background: "var(--t-input-bg)", borderColor: "var(--t-border-strong)" }}>
+                      <TrendingUp className="h-6 w-6 text-indigo-400/50" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold" style={{ color: "var(--t-text)" }}>Aún no hay horas registradas</p>
+                      <p className="text-[12px] max-w-[250px] mx-auto mt-1" style={{ color: "var(--t-text-dim)" }}>
+                        A medida que los voluntarios registren y validen sus horas, verás el progreso aquí.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* AGENDA Y COMPROMISOS DE HOY (REAL DATABASE ITEMS ONLY) */}
           {widgetSettings.showTodayAgenda && (
-            <div className="rounded-2xl border border-white/5 bg-zinc-900/80 shadow-lg shadow-black/20 p-5 space-y-4 shadow-sm flex flex-col justify-between">
+            <div
+              className="rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between"
+              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            >
               <div>
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                  <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+                <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
+                  <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
                     <Calendar className="h-5 w-5 text-indigo-400" />
                     Agenda de Hoy
                   </h3>
-                  <span className="text-[11px] font-mono text-zinc-400 font-medium">
+                  <span className="text-[13px] font-mono font-medium" style={{ color: "var(--t-text-dim)" }}>
                     {new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
                   </span>
                 </div>
@@ -1097,7 +1155,8 @@ export function Dashboard() {
               <OutlineButton
                 size="sm"
                 onClick={() => navigate("/app/projects/activities")}
-                className="w-full text-xs text-zinc-300 border-zinc-800 justify-center"
+                className="text-[13px] self-center px-6 w-fit mx-auto"
+                style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
               >
                 Ver Todas las Actividades
               </OutlineButton>
@@ -1111,13 +1170,16 @@ export function Dashboard() {
         <motion.div variants={fadeUp as any} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* FEED DE ACTIVIDAD EN TIEMPO REAL (100% REAL DE LA BASE DE DATOS) */}
           {widgetSettings.showActivityFeed && (
-            <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-zinc-900/80 shadow-lg shadow-black/20 p-5 space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2">
+            <div
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm"
+              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            >
+              <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
+                <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
                   <Radio className="h-5 w-5 text-indigo-400" />
                   Feed de Actividad en Vivo
                 </h3>
-                <span className="text-[11px] text-zinc-400 font-mono flex items-center gap-1">
+                <span className="text-[12px] font-mono flex items-center gap-1" style={{ color: "var(--t-text-dim)" }}>
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   En directo
                 </span>
@@ -1128,23 +1190,24 @@ export function Dashboard() {
                   realActivityFeed.slice(0, 5).map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-white/10 shadow-lg shadow-black/20 text-xs hover:border-zinc-700 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-xl text-[13px] hover:bg-[var(--t-hover)] transition-colors"
+                      style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white text-xs">
                           {item.avatar}
                         </div>
                         <div>
-                          <p className="text-zinc-200">
-                            <span className="font-semibold text-zinc-100">{item.user}</span>{" "}
-                            <span className="text-zinc-400">{item.action}</span>
+                          <p style={{ color: "var(--t-text)" }}>
+                            <span className="font-semibold">{item.user}</span>{" "}
+                            <span style={{ color: "var(--t-text-dim)" }}>{item.action}</span>
                           </p>
-                          <p className="text-[11px] text-indigo-400 font-medium truncate max-w-sm mt-0.5">
+                          <p className="text-[12px] text-indigo-400 font-medium truncate max-w-sm mt-0.5">
                             {item.target}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[11px] text-zinc-500 font-mono shrink-0">{item.time}</span>
+                      <span className="text-[12px] font-mono shrink-0" style={{ color: "var(--t-text-dim)" }}>{item.time}</span>
                     </div>
                   ))
                 ) : (
@@ -1174,9 +1237,12 @@ export function Dashboard() {
 
           {/* ACCESOS DIRECTOS Y ESTADO OPERATIVO (VALORES REALES DE SUPABASE) */}
           {widgetSettings.showQuickAccess && (
-            <div className="rounded-2xl border border-white/5 bg-zinc-900/80 shadow-lg shadow-black/20 p-5 space-y-3 shadow-sm flex flex-col justify-between">
+            <div
+              className="rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between"
+              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            >
               <div>
-                <h3 className="text-base font-semibold text-zinc-100 flex items-center gap-2 border-b border-white/5 pb-3">
+                <h3 className="text-base font-semibold flex items-center gap-2 pb-3" style={{ color: "var(--t-text)", borderBottom: "1px solid var(--t-border)" }}>
                   <Zap className="h-5 w-5 text-amber-400" />
                   Accesos Directos
                 </h3>
@@ -1185,13 +1251,14 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/admission/requests")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-indigo-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
+                    style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
                       <UserPlus className="h-4 w-4 text-indigo-400" />
                       Revisar Admisiones
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-[11px]">
+                    <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-[12px]">
                       {metrics.admissionPending ?? 0} pend.
                     </span>
                   </button>
@@ -1199,13 +1266,14 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/approvals/hours")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-emerald-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
+                    style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
                       <CheckSquare className="h-4 w-4 text-emerald-400" />
                       Validar Horas Pendientes
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-mono text-[11px]">
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-mono text-[12px]">
                       {metrics.approvalsPending ?? 0} solicit.
                     </span>
                   </button>
@@ -1213,20 +1281,21 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/operation/evidence")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-purple-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
+                    style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
                       <Upload className="h-4 w-4 text-purple-400" />
                       Repositorio de Evidencias
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 font-mono text-[11px]">
+                    <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 font-mono text-[12px]">
                       {metrics.evidencesUploaded ?? 0} arch.
                     </span>
                   </button>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between font-mono">
+              <div className="pt-3 text-[12px] flex items-center justify-between font-mono" style={{ borderTop: "1px solid var(--t-border)", color: "var(--t-text-dim)" }}>
                 <span>Estado Servidor ONG:</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> 100% Operativo
@@ -1239,38 +1308,41 @@ export function Dashboard() {
 
       {/* TABLA PRINCIPAL DE DATOS CON ACCIONES CRUD REALES EN SUPABASE */}
       <motion.div variants={fadeUp as any} className="space-y-3">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+        <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("hours")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all ${
                 activeTab === "hours"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "hover:bg-[var(--t-hover)]"
               }`}
+              style={activeTab !== "hours" ? { color: "var(--t-text-dim)" } : undefined}
             >
               Horas Recientes
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("activities")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all ${
                 activeTab === "activities"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "hover:bg-[var(--t-hover)]"
               }`}
+              style={activeTab !== "activities" ? { color: "var(--t-text-dim)" } : undefined}
             >
               Actividades Recientes
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("requests")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all ${
                 activeTab === "requests"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  : "hover:bg-[var(--t-hover)]"
               }`}
+              style={activeTab !== "requests" ? { color: "var(--t-text-dim)" } : undefined}
             >
               Solicitudes Recientes
             </button>
@@ -1417,18 +1489,21 @@ export function Dashboard() {
               <label className="block font-medium text-zinc-300 mb-1">
                 Proyecto <span className="text-red-400">*</span>
               </label>
-              <select
-                value={activityFormDraft.projectId}
-                onChange={(e) => setActivityFormDraft((d) => ({ ...d, projectId: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
-              >
-                <option value="">Selecciona proyecto</option>
-                {taskOptions.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
+              <Select
+  value={activityFormDraft.projectId}
+  onValueChange={(val) => setActivityFormDraft((d) => ({ ...d, projectId: val }))}
+>
+  <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
+    <SelectValue placeholder="Selecciona proyecto" />
+  </SelectTrigger>
+  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+    {taskOptions.map((t) => (
+      <SelectItem key={t.value} value={t.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
+        {t.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
               <FieldError message={activityFormErrors.projectId} />
             </div>
 
@@ -1470,17 +1545,21 @@ export function Dashboard() {
 
             <div>
               <label className="block font-medium text-zinc-300 mb-1">Estado de la Actividad</label>
-              <select
-                value={activityFormDraft.statusCode}
-                onChange={(e) => setActivityFormDraft((d) => ({ ...d, statusCode: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
-              >
-                {activityStateOptions.map((st) => (
-                  <option key={st.value} value={st.value}>
-                    {st.label}
-                  </option>
-                ))}
-              </select>
+              <Select
+  value={activityFormDraft.statusCode}
+  onValueChange={(val) => setActivityFormDraft((d) => ({ ...d, statusCode: val }))}
+>
+  <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
+    <SelectValue placeholder="Selecciona estado" />
+  </SelectTrigger>
+  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+    {activityStateOptions.map((st) => (
+      <SelectItem key={st.value} value={st.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
+        {st.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
             </div>
 
             <div>
@@ -1491,28 +1570,27 @@ export function Dashboard() {
                 value={activityFormDraft.estimatedHoursText}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, estimatedHoursText: e.target.value }))}
                 placeholder="Ej. 4"
-                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
-      // @ts-ignore
-              />
-      // @ts-ignore
-              <FieldError message={(activityFormErrors as any).estimatedHours} />
+                className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200" /> <FieldError message={(activityFormErrors as any).estimatedHours} />
             </div>
           </div>
 
           <div>
             <label className="block font-medium text-zinc-300 mb-1 text-xs">Ubicación</label>
-            <select
-              value={activityFormDraft.locationId}
-              onChange={(e) => setActivityFormDraft((d) => ({ ...d, locationId: e.target.value }))}
-              className="w-full rounded-xl px-3 py-2 text-xs outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
-            >
-              <option value="">Selecciona ubicación</option>
-              {locationOptions.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
+            <Select
+  value={activityFormDraft.locationId}
+  onValueChange={(val) => setActivityFormDraft((d) => ({ ...d, locationId: val }))}
+>
+  <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
+    <SelectValue placeholder="Selecciona ubicaci�n" />
+  </SelectTrigger>
+  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+    {locationOptions.map((l) => (
+      <SelectItem key={l.value} value={l.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
+        {l.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
           </div>
 
           <div>
@@ -1695,12 +1773,8 @@ export function Dashboard() {
             <BlockError message={admissionDetailError} onRetry={() => admissionDetailTargetId && void openAdmissionDetailModal(admissionDetailTargetId)} />
           ) : admissionDetail ? (
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-      // @ts-ignore
-                <DetailField label="Nombre Completo" value={admissionDetail.fullName} />
-                <DetailField label="Correo Electrónico" value={admissionDetail.email} />
-      // @ts-ignore
-                <DetailField label="Teléfono" value={(admissionDetail as any).phone ?? "-"} />
+              <div className="grid grid-cols-2 gap-3"> <DetailField label="Nombre Completo" value={admissionDetail.fullName} />
+                <DetailField label="Correo Electrónico" value={admissionDetail.email} /> <DetailField label="Teléfono" value={(admissionDetail as any).phone ?? "-"} />
                 <DetailField label="Fecha de Envío" value={formatDate(admissionDetail.submittedAt)} />
                 <DetailField label="Estado" value={admissionDetail.status} />
               </div>
@@ -1918,3 +1992,6 @@ export function Dashboard() {
     </motion.div>
   );
 }
+
+
+

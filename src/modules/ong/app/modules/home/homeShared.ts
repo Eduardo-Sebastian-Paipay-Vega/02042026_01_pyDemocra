@@ -6,6 +6,7 @@ import type {
   DashboardAdmissionRow,
   DashboardHoursRow,
   GlobalSearchGroupedResults,
+  DashboardFilters,
 } from "./types";
 import { normalizeText, sanitizeText } from "./validators";
 
@@ -365,6 +366,7 @@ export async function sumHours(options: {
   fromDate?: string;
   toDate?: string;
   tenantId?: string;
+  filters?: DashboardFilters;
 } = {}): Promise<number> {
   let from = 0;
   let total = 0;
@@ -382,12 +384,34 @@ export async function sumHours(options: {
     if (options.activityId) {
       query = query.eq("id_actividad", options.activityId);
     }
-    if (options.fromDate) {
-      query = query.gte("fecha", options.fromDate);
+    
+    // Fallback manual dates
+    let start = options.fromDate;
+    let end = options.toDate;
+    
+    // Auto-calculate from filters.period if provided
+    if (options.filters?.period && options.filters.period !== "all") {
+      const now = new Date();
+      end = now.toISOString();
+      const fromDate = new Date();
+      if (options.filters.period === "month") {
+        fromDate.setMonth(now.getMonth() - 1);
+      } else if (options.filters.period === "quarter") {
+        fromDate.setMonth(now.getMonth() - 3);
+      } else if (options.filters.period === "year") {
+        fromDate.setFullYear(now.getFullYear() - 1);
+      }
+      start = fromDate.toISOString();
     }
-    if (options.toDate) {
-      query = query.lte("fecha", options.toDate);
+
+    if (start) {
+      query = query.gte("fecha", start);
     }
+    if (end) {
+      query = query.lte("fecha", end);
+    }
+
+
     if (options.tenantId) {
       query = query.eq("tenant_id", options.tenantId);
     }

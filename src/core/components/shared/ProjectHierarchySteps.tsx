@@ -69,7 +69,7 @@ export function ProjectHierarchySteps() {
 
   return (
     <div
-      className="flex items-center overflow-x-auto px-4 py-2.5"
+      className="flex items-center w-fit overflow-x-auto px-4 py-2.5"
       style={{
         background: "var(--t-surface)",
         border: "1px solid var(--t-border)",

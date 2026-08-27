@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import {
   buildDashboardAlerts,
   fetchActivityLocationOptions,
@@ -13,23 +14,11 @@ import {
   toFriendlyError,
 } from "./homeService";
 import type {
-  DashboardActivityRow,
-  DashboardAdmissionRow,
-  DashboardAlertItem,
-  DashboardHoursRow,
-  DashboardLocationOption,
+  DashboardFilters,
   DashboardMetricValues,
-  DashboardTaskOption,
   DashboardUserContext,
-  DashboardTimelineItem,
-  WeeklyImpactPoint,
+  DashboardAlertItem,
 } from "./types";
-
-interface AsyncBlockState<TData> {
-  data: TData;
-  loading: boolean;
-  error: string | null;
-}
 
 type MetricErrorMap = Record<keyof DashboardMetricValues, string | null>;
 
@@ -65,238 +54,142 @@ const DEFAULT_USER_CONTEXT: DashboardUserContext = {
   canResolveAdmissions: false,
 };
 
-function toLoadingBlock<TData>(data: TData): AsyncBlockState<TData> {
-  return { data, loading: true, error: null };
+function toAsyncBlock(queryResult: any, defaultErrorMsg: string) {
+  return {
+    data: queryResult.data ?? [],
+    loading: queryResult.isLoading,
+    error: queryResult.isError ? (queryResult.error?.message || defaultErrorMsg) : null,
+  };
 }
 
-function toReadyBlock<TData>(data: TData): AsyncBlockState<TData> {
-  return { data, loading: false, error: null };
-}
-
-function toErrorBlock<TData>(data: TData, error: string): AsyncBlockState<TData> {
-  return { data, loading: false, error };
-}
-
-export function useDashboardData() {
-  const [reloadToken, setReloadToken] = useState(0);
-
-  const [metrics, setMetrics] = useState<DashboardMetricValues>(DEFAULT_METRICS);
-  const [metricErrors, setMetricErrors] = useState<MetricErrorMap>(DEFAULT_METRIC_ERRORS);
-  const [metricsLoading, setMetricsLoading] = useState(true);
-
-  const [recentHours, setRecentHours] = useState<AsyncBlockState<DashboardHoursRow[]>>(
-    toLoadingBlock([])
-  );
-  const [recentActivities, setRecentActivities] = useState<
-    AsyncBlockState<DashboardActivityRow[]>
-  >(toLoadingBlock([]));
-  const [recentRequests, setRecentRequests] = useState<
-    AsyncBlockState<DashboardAdmissionRow[]>
-  >(toLoadingBlock([]));
-  const [weeklyImpact, setWeeklyImpact] = useState<AsyncBlockState<WeeklyImpactPoint[]>>(
-    toLoadingBlock([])
-  );
-  const [todayTimeline, setTodayTimeline] = useState<
-    AsyncBlockState<DashboardTimelineItem[]>
-  >(toLoadingBlock([]));
-
-  const [isRefreshing, setIsRefreshing] = useState(true);
-  const [userContext, setUserContext] =
-    useState<DashboardUserContext>(DEFAULT_USER_CONTEXT);
-  const [taskOptions, setTaskOptions] = useState<DashboardTaskOption[]>([]);
-  const [locationOptions, setLocationOptions] = useState<DashboardLocationOption[]>([]);
-  const [catalogError, setCatalogError] = useState<string | null>(null);
-
-  const refresh = useCallback(() => {
-    setReloadToken((current) => current + 1);
-  }, []);
-
-  useEffect(() => {
-    let isActive = true;
-
-    async function loadDashboard() {
-      setIsRefreshing(true);
-      setMetricsLoading(true);
-      setRecentHours((current) => toLoadingBlock(current.data));
-      setRecentActivities((current) => toLoadingBlock(current.data));
-      setRecentRequests((current) => toLoadingBlock(current.data));
-      setWeeklyImpact((current) => toLoadingBlock(current.data));
-      setTodayTimeline((current) => toLoadingBlock(current.data));
-      setCatalogError(null);
+export function useDashboardData(filters?: DashboardFilters) {
+  const queryClient = useQueryClient();
+  
+  // 1. Catalogs
+  const { data: taskOptions = [], error: taskError } = useQuery({
+    queryKey: ['dashboard', 'catalogs', 'tasks'],
+    queryFn: async () => {
       try {
-        const [taskOptionsResult, locationOptionsResult] = await Promise.all([
-          fetchActivityTaskOptions()
-            .then((items) => ({
-              data: items,
-              error: null as string | null,
-            }))
-            .catch((error: unknown) => ({
-              data: [] as DashboardTaskOption[],
-              error: toFriendlyError(
-                error,
-                "No se pudo cargar el catalogo de tareas para crear/editar actividades."
-              ),
-            })),
-          fetchActivityLocationOptions()
-            .then((items) => ({
-              data: items,
-              error: null as string | null,
-            }))
-            .catch((error: unknown) => ({
-              data: [] as DashboardLocationOption[],
-              error: toFriendlyError(
-                error,
-                "No se pudo cargar el catalogo de ubicaciones para actividades."
-              ),
-            })),
-        ]);
-
-        const [metricsResult, userContextResult] = await Promise.all([
-          fetchDashboardMetrics(),
-          fetchDashboardUserContext().catch(() => DEFAULT_USER_CONTEXT),
-        ]);
-
-        if (!isActive) {
-          return;
-        }
-
-        setMetrics({
-          volunteersActive: metricsResult.volunteersActive.value,
-          projectsActive: metricsResult.projectsActive.value,
-          activitiesActive: metricsResult.activitiesActive.value,
-          hoursRegistered: metricsResult.hoursRegistered.value,
-          hoursApproved: metricsResult.hoursApproved.value,
-          evidencesUploaded: metricsResult.evidencesUploaded.value,
-          admissionPending: metricsResult.admissionPending.value,
-          approvalsPending: metricsResult.approvalsPending.value,
-        });
-
-        setMetricErrors({
-          volunteersActive: metricsResult.volunteersActive.error,
-          projectsActive: metricsResult.projectsActive.error,
-          activitiesActive: metricsResult.activitiesActive.error,
-          hoursRegistered: metricsResult.hoursRegistered.error,
-          hoursApproved: metricsResult.hoursApproved.error,
-          evidencesUploaded: metricsResult.evidencesUploaded.error,
-          admissionPending: metricsResult.admissionPending.error,
-          approvalsPending: metricsResult.approvalsPending.error,
-        });
-
-        setMetricsLoading(false);
-        setUserContext(userContextResult);
-        setTaskOptions(taskOptionsResult.data);
-        setLocationOptions(locationOptionsResult.data);
-
-        if (taskOptionsResult.error || locationOptionsResult.error) {
-          setCatalogError(taskOptionsResult.error ?? locationOptionsResult.error);
-        }
-
-        const [
-          recentHoursResult,
-          recentActivitiesResult,
-          recentRequestsResult,
-          weeklyImpactResult,
-          timelineResult,
-        ] = await Promise.allSettled([
-          fetchDashboardRecentHours(5),
-          fetchDashboardRecentActivities(5),
-          fetchDashboardRecentAdmissionRequests(5),
-          fetchWeeklyImpact(),
-          fetchTodayTimeline(6),
-        ]);
-
-        if (!isActive) {
-          return;
-        }
-
-        if (recentHoursResult.status === "fulfilled") {
-          setRecentHours(toReadyBlock(recentHoursResult.value));
-        } else {
-          setRecentHours(
-            toErrorBlock([], "No se pudo cargar la tabla de horas recientes.")
-          );
-        }
-
-        if (recentActivitiesResult.status === "fulfilled") {
-          setRecentActivities(toReadyBlock(recentActivitiesResult.value));
-        } else {
-          setRecentActivities(
-            toErrorBlock([], "No se pudo cargar la tabla de actividades recientes.")
-          );
-        }
-
-        if (recentRequestsResult.status === "fulfilled") {
-          setRecentRequests(toReadyBlock(recentRequestsResult.value));
-        } else {
-          setRecentRequests(
-            toErrorBlock([], "No se pudo cargar la tabla de solicitudes recientes.")
-          );
-        }
-
-        if (weeklyImpactResult.status === "fulfilled") {
-          setWeeklyImpact(toReadyBlock(weeklyImpactResult.value));
-        } else {
-          setWeeklyImpact(
-            toErrorBlock([], "No se pudo cargar la grafica de impacto semanal.")
-          );
-        }
-
-        if (timelineResult.status === "fulfilled") {
-          setTodayTimeline(toReadyBlock(timelineResult.value));
-        } else {
-          setTodayTimeline(toErrorBlock([], "No se pudo cargar la agenda de hoy."));
-        }
-      } catch {
-        if (!isActive) {
-          return;
-        }
-
-        setMetrics(DEFAULT_METRICS);
-        setMetricErrors({
-          volunteersActive: "No se pudieron cargar las metricas.",
-          projectsActive: "No se pudieron cargar las metricas.",
-          activitiesActive: "No se pudieron cargar las metricas.",
-          hoursRegistered: "No se pudieron cargar las metricas.",
-          hoursApproved: "No se pudieron cargar las metricas.",
-          evidencesUploaded: "No se pudieron cargar las metricas.",
-          admissionPending: "No se pudieron cargar las metricas.",
-          approvalsPending: "No se pudieron cargar las metricas.",
-        });
-        setMetricsLoading(false);
-        setUserContext(DEFAULT_USER_CONTEXT);
-        setTaskOptions([]);
-        setLocationOptions([]);
-        setCatalogError(
-          "No se pudieron cargar los catalogos operativos del dashboard."
-        );
-      } finally {
-        if (isActive) {
-          setIsRefreshing(false);
-        }
+        return await fetchActivityTaskOptions();
+      } catch (err) {
+        throw new Error(toFriendlyError(err, "No se pudo cargar el catalogo de tareas para crear/editar actividades."));
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-    void loadDashboard();
+  const { data: locationOptions = [], error: locationError } = useQuery({
+    queryKey: ['dashboard', 'catalogs', 'locations'],
+    queryFn: async () => {
+      try {
+        return await fetchActivityLocationOptions();
+      } catch (err) {
+        throw new Error(toFriendlyError(err, "No se pudo cargar el catalogo de ubicaciones para actividades."));
+      }
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-    return () => {
-      isActive = false;
+  const catalogError = taskError?.message || locationError?.message || null;
+
+  // 2. Core Metrics
+  const { data: metricsData, isLoading: metricsLoading, isFetching: metricsFetching } = useQuery({
+    queryKey: ['dashboard', 'metrics', filters],
+    queryFn: () => fetchDashboardMetrics(filters),
+  });
+
+  const metrics = useMemo(() => {
+    if (!metricsData) return DEFAULT_METRICS;
+    return {
+      volunteersActive: metricsData.volunteersActive.value,
+      projectsActive: metricsData.projectsActive.value,
+      activitiesActive: metricsData.activitiesActive.value,
+      hoursRegistered: metricsData.hoursRegistered.value,
+      hoursApproved: metricsData.hoursApproved.value,
+      evidencesUploaded: metricsData.evidencesUploaded.value,
+      admissionPending: metricsData.admissionPending.value,
+      approvalsPending: metricsData.approvalsPending.value,
     };
-  }, [reloadToken]);
+  }, [metricsData]);
+
+  const metricErrors = useMemo(() => {
+    if (!metricsData) return DEFAULT_METRIC_ERRORS;
+    return {
+      volunteersActive: metricsData.volunteersActive.error,
+      projectsActive: metricsData.projectsActive.error,
+      activitiesActive: metricsData.activitiesActive.error,
+      hoursRegistered: metricsData.hoursRegistered.error,
+      hoursApproved: metricsData.hoursApproved.error,
+      evidencesUploaded: metricsData.evidencesUploaded.error,
+      admissionPending: metricsData.admissionPending.error,
+      approvalsPending: metricsData.approvalsPending.error,
+    };
+  }, [metricsData]);
+
+  // 3. User Context
+  const { data: userContext = DEFAULT_USER_CONTEXT } = useQuery({
+    queryKey: ['dashboard', 'userContext'],
+    queryFn: async () => {
+      try {
+        return await fetchDashboardUserContext();
+      } catch {
+        return DEFAULT_USER_CONTEXT;
+      }
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  // 4. Data Blocks
+  const recentHoursQuery = useQuery({
+    queryKey: ['dashboard', 'recentHours', filters],
+    queryFn: () => fetchDashboardRecentHours(5),
+  });
+  
+  const recentActivitiesQuery = useQuery({
+    queryKey: ['dashboard', 'recentActivities', filters],
+    queryFn: () => fetchDashboardRecentActivities(5),
+  });
+  
+  const recentRequestsQuery = useQuery({
+    queryKey: ['dashboard', 'recentRequests', filters],
+    queryFn: () => fetchDashboardRecentAdmissionRequests(5),
+  });
+  
+  const weeklyImpactQuery = useQuery({
+    queryKey: ['dashboard', 'weeklyImpact', filters],
+    queryFn: () => fetchWeeklyImpact(filters),
+  });
+  
+  const todayTimelineQuery = useQuery({
+    queryKey: ['dashboard', 'todayTimeline', filters],
+    queryFn: () => fetchTodayTimeline(6, filters),
+  });
 
   const alerts = useMemo<DashboardAlertItem[]>(
     () => buildDashboardAlerts(metrics),
     [metrics]
   );
 
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+  };
+
+  const isRefreshing = metricsFetching || 
+    recentHoursQuery.isFetching || 
+    recentActivitiesQuery.isFetching || 
+    recentRequestsQuery.isFetching || 
+    weeklyImpactQuery.isFetching || 
+    todayTimelineQuery.isFetching;
+
   return {
     metrics,
     metricErrors,
     metricsLoading,
-    recentHours,
-    recentActivities,
-    recentRequests,
-    weeklyImpact,
-    todayTimeline,
+    recentHours: toAsyncBlock(recentHoursQuery, "No se pudo cargar la tabla de horas recientes."),
+    recentActivities: toAsyncBlock(recentActivitiesQuery, "No se pudo cargar la tabla de actividades recientes."),
+    recentRequests: toAsyncBlock(recentRequestsQuery, "No se pudo cargar la tabla de solicitudes recientes."),
+    weeklyImpact: toAsyncBlock(weeklyImpactQuery, "No se pudo cargar la grafica de impacto semanal."),
+    todayTimeline: toAsyncBlock(todayTimelineQuery, "No se pudo cargar la agenda de hoy."),
     alerts,
     userContext,
     taskOptions,
@@ -306,4 +199,3 @@ export function useDashboardData() {
     refresh,
   };
 }
-

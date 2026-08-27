@@ -91,7 +91,7 @@ export function useGlobalSearch(limitPerGroup = 6) {
         setError(
           toFriendlyError(
             fetchError,
-            "No se pudieron obtener resultados de la busqueda global."
+            "No se pudieron obtener resultados de la búsqueda global."
           )
         );
       })

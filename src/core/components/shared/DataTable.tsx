@@ -12,6 +12,7 @@ export interface Column<T> {
   key: string;
   label: string;
   render: (item: T) => React.ReactNode;
+  align?: "left" | "center" | "right";
 }
 
 export interface RowAction<T> {
@@ -64,7 +65,10 @@ export function DataTable<T extends { id: string }>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className="px-5 py-3 text-left text-[10px] font-medium uppercase tracking-[0.1em] first:pl-6 last:pr-6"
+                className={cn(
+                  "px-5 py-3 text-[10px] font-medium uppercase tracking-[0.1em] first:pl-6 last:pr-6",
+                  column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
+                )}
                 style={{ color: "var(--t-text-tertiary)" }}
               >
                 {column.label}

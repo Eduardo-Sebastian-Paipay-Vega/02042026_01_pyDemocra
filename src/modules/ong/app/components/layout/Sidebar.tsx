@@ -376,7 +376,7 @@ export function Sidebar({
                 }}
                 onKeyDown={(event) => handleCategoryKeyDown(event, category, isOpen)}
                 className={cn(
-                  "group relative flex w-full items-center gap-2.5 rounded-xl px-2.5 py-[8px] text-left transition-all duration-150 ease-out",
+                  "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-150 ease-out",
                   !showExpandedMode && "justify-center"
                 )}
                 style={{
@@ -394,11 +394,11 @@ export function Sidebar({
                   <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
                 )}
 
-                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[#EAF0FF]" />
+                <CategoryIcon className="h-[18px] w-[18px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[#EAF0FF]" />
 
                 {showExpandedMode && (
                   <>
-                    <span className="flex-1 text-[13px] group-hover:text-[#EAF0FF]">{category.label}</span>
+                    <span className="flex-1 text-sm group-hover:text-[#EAF0FF]">{category.label}</span>
                     <motion.div
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={SNAPPY_MOTION}
@@ -449,7 +449,7 @@ export function Sidebar({
                                   itemLinkRefs.current[item.path] = node;
                                 }}
                                 to={item.path}
-                                className="relative z-10 flex items-center gap-2.5 rounded-lg px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[#EAF0FF]"
+                                className="relative z-10 flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 ease-out hover:text-[#EAF0FF]"
                                 style={{
                                   color: isActive ? "#EAF0FF" : "var(--t-text-secondary)",
                                 }}
@@ -475,7 +475,7 @@ export function Sidebar({
                                 {isActive && (
                                   <span className="absolute -left-[11px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[#3D6BFF]" />
                                 )}
-                                <item.icon className="h-[13px] w-[13px] shrink-0 opacity-70" />
+                                <item.icon className="h-4 w-4 shrink-0 opacity-70" />
                                 <span>{item.label}</span>
                               </Link>
                             </div>

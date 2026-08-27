@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { ShieldAlert, UserRound } from "lucide-react";
+import { ShieldAlert, RefreshCw, Eye, Search } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from '@/core/components/shared/PageHeader';
-import { FilterBar } from '@/core/components/shared/FilterBar';
 import { DataTable, type Column } from '@/core/components/shared/DataTable';
 import { GradientButton } from '@/core/components/ui/gradient-button';
 import { OutlineButton } from '@/core/components/ui/outline-button';
@@ -33,64 +32,10 @@ const fadeUp: any = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 };
 
-const columns: Column<SensitiveMedicalListRow>[] = [
-  {
-    key: "person",
-    label: "Persona",
-    render: (row) => (
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-          style={{ background: "var(--t-hover)" }}
-        >
-          <ShieldAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-        </div>
-        <div>
-          <div style={{ color: "var(--t-text)" }}>{row.personName}</div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.documentLabel}
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "context",
-    label: "Contexto",
-    render: (row) => (
-      <StatusDot variant="info">
-        {row.scope === "beneficiaries" ? row.profileLabel : row.stateLabel}
-      </StatusDot>
-    ),
-  },
-  {
-    key: "record",
-    label: "Ficha",
-    render: (row) => (
-      <div className="space-y-1">
-        <StatusDot variant={row.hasRecord ? "warning" : "secondary"}>
-          {row.hasRecord ? "Registrada" : "Pendiente"}
-        </StatusDot>
-        <div className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.summary}
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "updatedAt",
-    label: "Actualizado",
-    render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-        {formatPeopleDate(row.updatedAt)}
-      </span>
-    ),
-  },
-];
-
 function mapSensitiveDetailToListRow(detail: SensitiveMedicalDetail): SensitiveMedicalListRow {
   if (detail.scope === "beneficiaries") {
     return {
+      id: detail.personId,
       scope: "beneficiaries",
       personId: detail.personId,
       recordId: detail.recordId,
@@ -99,13 +44,14 @@ function mapSensitiveDetailToListRow(detail: SensitiveMedicalDetail): SensitiveM
       profileKind: detail.profileKind,
       profileLabel: detail.profileLabel,
       hasRecord: detail.hasRecord,
-      summary: detail.hasRecord ? "Ficha medica registrada" : "Sin ficha medica registrada",
+      summary: detail.hasRecord ? "Ficha médica registrada" : "Pendiente de creación",
       updatedAt: detail.updatedAt,
       loggable: Boolean(detail.recordId),
     };
   }
 
   return {
+    id: detail.personId,
     scope: "volunteers",
     personId: detail.personId,
     recordId: detail.recordId,
@@ -113,7 +59,7 @@ function mapSensitiveDetailToListRow(detail: SensitiveMedicalDetail): SensitiveM
     documentLabel: detail.documentLabel,
     stateLabel: detail.stateLabel,
     hasRecord: detail.hasRecord,
-    summary: detail.hasRecord ? "Ficha sensible registrada" : "Sin ficha sensible registrada",
+    summary: detail.hasRecord ? "Ficha médica registrada" : "Pendiente de creación",
     updatedAt: detail.updatedAt,
     loggable: false,
   };
@@ -166,21 +112,78 @@ export function MedicalRecords() {
   const tableEmptyMessage = useMemo(() => {
     if (records.rows.length === 0) {
       return scope === "beneficiaries"
-        ? "Aun no hay beneficiarios disponibles para ficha medica sensible."
-        : "Aun no hay voluntarios disponibles para ficha sensible.";
+        ? "Aún no hay beneficiarios disponibles para ficha médica sensible."
+        : "Aún no hay voluntarios disponibles para ficha sensible.";
     }
 
     return "No se encontraron fichas sensibles con los filtros actuales.";
   }, [records.rows.length, scope]);
 
-  const filters = useMemo(
-    () => [
-      { label: "Todas", value: "all", active: recordFilter === "all" },
-      { label: "Con ficha", value: "withRecord", active: recordFilter === "withRecord" },
-      { label: "Sin ficha", value: "withoutRecord", active: recordFilter === "withoutRecord" },
-    ],
-    [recordFilter]
-  );
+  const columns = useMemo<Column<SensitiveMedicalListRow>[]>(() => [
+    {
+      key: "person",
+      label: "Persona",
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+            style={{ background: "var(--t-hover)" }}
+          >
+            <ShieldAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
+          </div>
+          <div>
+            <div style={{ color: "var(--t-text)" }}>{row.personName}</div>
+            <div className="mt-0.5 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+              {row.documentLabel}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "context",
+      label: "Contexto",
+      render: (row) => (
+        <StatusDot variant="info">
+          {row.scope === "beneficiaries" ? row.profileLabel : row.stateLabel}
+        </StatusDot>
+      ),
+    },
+    {
+      key: "record",
+      label: "Ficha",
+      render: (row) => (
+        <div className="flex items-center">
+          <StatusDot variant={row.hasRecord ? "warning" : "secondary"}>
+            {row.summary}
+          </StatusDot>
+        </div>
+      ),
+    },
+    {
+      key: "updatedAt",
+      label: "Actualizado",
+      render: (row) => (
+        <span
+          className="text-[12px]"
+          style={{ color: row.updatedAt ? "var(--t-text-secondary)" : "var(--t-muted)" }}
+        >
+          {formatPeopleDate(row.updatedAt)}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Acciones",
+      align: "right",
+      render: (row) => (
+        <OutlineButton size="sm" onClick={() => setGateTarget(row)} className="h-8 gap-1.5 px-3">
+          <Eye className="h-3.5 w-3.5" />
+          <span>Ver Ficha</span>
+        </OutlineButton>
+      ),
+    },
+  ], []);
 
   async function openSensitiveDetail(reason: string) {
     if (!gateTarget) {
@@ -249,9 +252,17 @@ export function MedicalRecords() {
     <motion.div variants={stagger as any} initial="hidden" animate="visible" className="fichas-medicas-theme space-y-6">
       <motion.div variants={fadeUp as any}>
         <PageHeader
-          title="Ficha medica sensible"
-          description="Acceso controlado a fichas clinicas y sensibles con trazabilidad y ocultamiento de contenido en listados."
-          action={{ label: "Actualizar", onClick: records.refresh }}
+          title="Ficha médica sensible"
+          description="Acceso controlado a fichas clínicas y sensibles con trazabilidad y ocultamiento de contenido en listados."
+          action={{
+            label: (
+              <div className="flex items-center gap-2">
+                <RefreshCw className={`h-4 w-4 ${records.loading ? 'animate-spin' : ''}`} />
+                <span>Actualizar</span>
+              </div>
+            ) as unknown as string,
+            onClick: records.refresh,
+          }}
         />
       </motion.div>
 
@@ -279,16 +290,11 @@ export function MedicalRecords() {
       </motion.div>
 
       <motion.div variants={fadeUp as any}>
-        <div
-          className="rounded-2xl px-4 py-3"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-              Los listados solo muestran metadatos operativos. El contenido clinico se abre con motivo de acceso y se edita solo si el rol actual puede escribir datos sensibles.
-            </p>
-          </div>
+        <div className="flex items-center gap-2 py-2">
+          <ShieldAlert className="h-4 w-4 shrink-0" style={{ color: "var(--t-warning)" }} />
+          <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
+            Los listados solo muestran metadatos operativos. El contenido clínico se abre con motivo de acceso y se edita solo con rol autorizado.
+          </p>
         </div>
       </motion.div>
 
@@ -303,7 +309,7 @@ export function MedicalRecords() {
           <PeopleErrorBlock
             message={
               records.access.reason ??
-              "No tienes permisos para consultar fichas medicas sensibles."
+              "No tienes permisos para consultar fichas médicas sensibles."
             }
             onRetry={records.refresh}
           />
@@ -311,26 +317,57 @@ export function MedicalRecords() {
       )}
 
       <motion.div variants={fadeUp as any}>
-        <FilterBar
-          searchPlaceholder="Buscar por persona, documento o contexto..."
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={filters}
-          onFilterClick={(value) => setRecordFilter(value as "all" | "withRecord" | "withoutRecord")}
-        />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--t-text-tertiary)" }} />
+            <input
+              placeholder="Buscar por persona, documento o contexto..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="ong-field-control h-10 w-full rounded-xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[var(--t-primary)]/30"
+              style={{
+                border: "1px solid var(--t-border-strong)",
+                background: "var(--t-input-bg)",
+                color: "var(--t-text)",
+              }}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Todas", value: "all" },
+              { label: "Con ficha", value: "withRecord" },
+              { label: "Sin ficha", value: "withoutRecord" },
+            ].map((filter) => {
+              const isActive = recordFilter === filter.value;
+              return (
+                <button
+                  key={filter.value}
+                  className={`inline-flex h-9 items-center rounded-full border px-3.5 text-[12px] font-medium transition-colors ${
+                    isActive
+                      ? "border-[var(--t-primary)]/35 bg-[var(--t-primary-soft)] text-[var(--t-primary)]"
+                      : ""
+                  }`}
+                  style={!isActive ? {
+                    border: "1px solid var(--t-border)",
+                    background: "var(--t-input-bg)",
+                    color: "var(--t-text-secondary)",
+                  } : undefined}
+                  onClick={() => setRecordFilter(filter.value as any)}
+                >
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </motion.div>
 
       <motion.div variants={fadeUp as any}>
         {records.error || !records.access.canRead ? null : (
           <DataTable
-      // @ts-ignore
-      // @ts-ignore
             columns={columns}
-      // @ts-ignore
             data={filteredRows}
             loading={records.loading}
-      // @ts-ignore
-            actions={[{ label: "Abrir ficha", onClick: (row) => setGateTarget(row) }]}
             emptyMessage={tableEmptyMessage}
           />
         )}

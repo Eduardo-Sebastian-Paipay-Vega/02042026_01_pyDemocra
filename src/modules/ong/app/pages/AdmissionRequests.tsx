@@ -414,7 +414,7 @@ export function AdmissionRequests() {
         columns={columns}
         data={admission.rows}
         loading={admission.loading}
-        emptyMessage="No se encontraron solicitudes de admision."
+        emptyMessage="No se encontraron solicitudes de admisión."
         actions={[
           { label: "Ver detalle", onClick: (row) => setDetailRequestId(row.id) },
           { label: "Editar", onClick: (row) => openEditModal(row) },

@@ -186,7 +186,7 @@ const EMPTY_PROJECT_RESOURCE_ASSIGNMENT_FORM: ProjectResourceAssignmentFormValue
   quantityAssigned: "0",
 };
 
-function formatCurrency(amount: string | number, currency = "USD"): string {
+function formatCurrency(amount: string | number, currency = "PEN"): string {
   const num = typeof amount === "number" ? amount : parseFloat(amount) || 0;
   const symbol = currency === "PEN" ? "S/" : currency === "EUR" ? "€" : "$";
   return `${symbol} ${num.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -280,7 +280,7 @@ function getTemporalStatusBadge(startAt: string | null, endAt: string | null, st
 
 function AvatarStack({ count }: { count: number }) {
   if (count <= 0) {
-    return null;
+    return <span className="text-[11px] text-zinc-500 italic">Sin asignar</span>;
   }
   const maxVisible = 2;
   const visibleCount = Math.min(count, maxVisible);
@@ -1426,7 +1426,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <span className="font-semibold text-zinc-100 group-hover/item:text-indigo-400 group-hover/item:underline transition-colors">
               {row.name}
             </span>
-            <div className="mt-0.5 text-[11px] text-zinc-400 font-mono">
+            <div className="mt-0.5 text-[12px] font-medium text-indigo-300 font-mono">
               {row.code}
             </div>
           </div>
@@ -1468,9 +1468,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     },
     {
       key: "budget",
-      label: "Presupuesto",
-      render: (row) => (
-        <span className="text-xs font-semibold text-emerald-400">
+      label: "Presupuesto", align: "right", render: (row) => ( <span className="text-xs font-semibold text-emerald-400 text-right block w-full">
           {formatCurrency(row.budget)}
         </span>
       ),
@@ -2398,8 +2396,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <span className="text-xs text-zinc-400">
-              Mostrando <strong className="text-zinc-200">{projectRows.length}</strong> de{" "}
+            <span className="text-[13px] font-medium text-zinc-400"> Mostrando <strong className="text-zinc-200">{projectRows.length}</strong> de{" "}
               <strong className="text-zinc-200">{projectRows.length}</strong> proyectos
             </span>
             <div className="flex items-center gap-2">
@@ -2477,8 +2474,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl shadow-sm"
             style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
           >
-            <span className="text-xs text-zinc-400">
-              Mostrando <strong className="text-zinc-200">{activityRows.length}</strong> de{" "}
+            <span className="text-[13px] font-medium text-zinc-400"> Mostrando <strong className="text-zinc-200">{activityRows.length}</strong> de{" "}
               <strong className="text-zinc-200">{activityRows.length}</strong> actividades
             </span>
             <div className="flex items-center gap-2">
@@ -3223,7 +3219,6 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-zinc-100">{taskPercent}%</span>
               <span className="text-xs font-medium text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-      // @ts-ignore
                 Global
               </span>
             </div>
@@ -3588,7 +3583,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
         style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
       >
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="relative w-full md:w-80">
+          <div className="relative w-full max-w-[260px]">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
             <input
               type="text"
@@ -3629,7 +3624,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             {section === "projects" && (
               <>
-                <div className="w-36">
+                <div className="w-32">
                   <SelectField
                     value={projectFilters.stateCode === "all" ? "" : projectFilters.stateCode}
                     onChange={(value) =>
@@ -3642,7 +3637,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     placeholder="Estado"
                   />
                 </div>
-                <div className="w-36">
+                <div className="w-32">
                   <SelectField
                     value={projectFilters.areaId === "all" ? "" : projectFilters.areaId}
                     onChange={(value) =>
@@ -3660,7 +3655,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
             {section === "activities" && (
               <>
-                <div className="w-44">
+                <div className="w-40">
                   <SelectField
                     value={activityFilters.projectId === "all" ? "" : activityFilters.projectId}
                     onChange={(value) =>
@@ -3673,7 +3668,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     placeholder="Todos los proyectos"
                   />
                 </div>
-                <div className="w-36">
+                <div className="w-32">
                   <SelectField
                     value={activityFilters.statusCode === "all" ? "" : activityFilters.statusCode}
                     onChange={(value) =>
@@ -3688,11 +3683,10 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                 </div>
               </>
             )}
-      // @ts-ignore
-
+            {/* @ts-ignore */}
             {section === "tasks" && (
               <>
-                <div className="w-44">
+                <div className="w-40">
                   <SelectField
                     value={taskFilters.activityId === "all" ? "" : taskFilters.activityId}
                     onChange={(value) =>
@@ -3701,12 +3695,11 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                         activityId: value || "all",
                       }))
                     }
-      // @ts-ignore
-                    options={catalogs.activities.map((a) => ({ value: a.id, label: a.title }))}
+                    options={catalogs.activities}
                     placeholder="Todas las actividades"
                   />
                 </div>
-                <div className="w-36">
+                <div className="w-32">
                   <SelectField
                     value={taskFilters.priority === "all" || !taskFilters.priority ? "" : taskFilters.priority}
                     onChange={(value) =>
@@ -3724,7 +3717,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     placeholder="Prioridad"
                   />
                 </div>
-                <div className="w-36">
+                <div className="w-32">
                   <SelectField
                     value={taskFilters.statusCode === "all" ? "" : taskFilters.statusCode}
                     onChange={(value) =>
@@ -3747,7 +3740,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
 
             {section === "assignments" && (
               <>
-                <div className="w-44">
+                <div className="w-40">
                   <SelectField
                     value={assignmentFilters.projectId === "all" ? "" : assignmentFilters.projectId}
                     onChange={(value) =>
@@ -3760,7 +3753,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
                     placeholder="Todos los proyectos"
                   />
                 </div>
-                <div className="w-48">
+                <div className="w-40">
                   <SelectField
                     value={assignmentFilters.kind === "all" ? "" : assignmentFilters.kind}
                     onChange={(value) =>
@@ -4866,3 +4859,8 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
     </div>
   );
 }
+
+
+
+
+

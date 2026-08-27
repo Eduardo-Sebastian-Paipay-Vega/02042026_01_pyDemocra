@@ -198,7 +198,7 @@ export async function searchGlobalEntities(
           projectsResult.error ||
           activitiesResult.error ||
           admissionsResult.error,
-        "No se pudo completar la busqueda global."
+        "No se pudo completar la búsqueda global."
       )
     );
   }

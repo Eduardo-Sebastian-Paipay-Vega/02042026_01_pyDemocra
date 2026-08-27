@@ -258,6 +258,7 @@ export interface SensitiveAccessState {
 }
 
 export interface BeneficiaryMedicalRecordRow {
+  id: string;
   scope: "beneficiaries";
   personId: string;
   recordId: string | null;
@@ -272,6 +273,7 @@ export interface BeneficiaryMedicalRecordRow {
 }
 
 export interface VolunteerSensitiveRecordRow {
+  id: string;
   scope: "volunteers";
   personId: string;
   recordId: string | null;

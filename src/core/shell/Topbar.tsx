@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Search, Bell, Menu, Sun, Moon, Sparkles } from "lucide-react";
 import { useTheme, type Intensity } from "@ong/app/lib/theme-context";
@@ -120,6 +121,8 @@ export function Topbar({
   const { theme: globalTheme, saveSettings } = useSettings();
   const [showIntensity, setShowIntensity] = useState(false);
   const intensityRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const isSearchPage = location.pathname.includes("/ong/app/search");
 
   // Close intensity popover on outside click
   useEffect(() => {
@@ -177,14 +180,14 @@ export function Topbar({
             <div className="min-w-0 max-w-[45vw] sm:max-w-[320px]">
               {tenantName && (
                 <p
-                  className="hidden truncate text-[10px] uppercase tracking-[0.18em] sm:block"
-                  style={{ color: "var(--t-text-tertiary)" }}
+                  className="hidden truncate text-[11px] font-semibold uppercase tracking-wider sm:block"
+                  style={{ color: "var(--t-text-secondary)" }}
                   title={tenantName}
                 >
                   {tenantName}
                 </p>
               )}
-              <h2 className="truncate text-[14px] font-medium" style={{ color: "var(--t-text)" }} title={t(title)}>
+              <h2 className="truncate text-base font-medium" style={{ color: "var(--t-text)" }} title={t(title)}>
                 {t(title)}
               </h2>
             </div>
@@ -192,33 +195,37 @@ export function Topbar({
         </div>
 
         {/* Center: Search trigger */}
-        <div className="mx-8 hidden max-w-sm flex-1 md:block">
-          <button
-            onClick={onSearchClick}
-            className="flex h-9 w-full items-center gap-2.5 rounded-2xl px-3.5 text-left transition-colors duration-200"
-            style={{
-              border: "1px solid var(--t-border-strong)",
-              background: "var(--t-surface)",
-            }}
-          >
-            <Search className="h-3.5 w-3.5" style={{ color: "var(--t-text-tertiary)" }} />
-            <span className="flex-1 text-[12px]" style={{ color: "var(--t-text-tertiary)" }}>
-              {t("Abrir busqueda global")}
-            </span>
-          </button>
-        </div>
+        {!isSearchPage && (
+          <div className="mx-4 hidden w-48 lg:w-56 md:block">
+            <button
+              onClick={onSearchClick}
+              className="flex h-9 w-full items-center gap-2.5 rounded-2xl px-3.5 text-left transition-colors duration-200 hover:bg-[var(--t-hover)]"
+              style={{
+                border: "1px solid var(--t-border-strong)",
+                background: "var(--t-surface)",
+              }}
+            >
+              <Search className="h-3.5 w-3.5" style={{ color: "var(--t-text-tertiary)" }} />
+              <span className="flex-1 text-[13px]" style={{ color: "var(--t-text-tertiary)" }}>
+                Búsqueda global...
+              </span>
+            </button>
+          </div>
+        )}
 
         {/* Right side */}
         <div className="flex items-center gap-1">
           {/* Mobile search */}
-          <button
-            onClick={onSearchClick}
-            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors md:hidden"
-            style={{ color: "var(--t-text-secondary)" }}
-            aria-label={t("Abrir busqueda global")}
-          >
-            <Search className="h-4 w-4" />
-          </button>
+          {!isSearchPage && (
+            <button
+              onClick={onSearchClick}
+              className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-[var(--t-hover)] md:hidden"
+              style={{ color: "var(--t-text-secondary)" }}
+              aria-label="Búsqueda global"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          )}
 
           {/* Intensity control */}
           <div className="relative hidden sm:block" ref={intensityRef}>
@@ -388,7 +395,7 @@ export function Topbar({
             <DropdownMenuTrigger asChild>
               <button className="flex h-8 items-center gap-2 rounded-lg px-2 transition-colors hover:bg-[var(--t-hover)]">
                 <UserAvatar avatarUrl={userAvatarUrl} label={userLabel} className="h-6 w-6" />
-                <span className="hidden max-w-[160px] truncate sm:inline text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+                <span className="hidden max-w-[160px] truncate sm:inline text-[14px] font-semibold" style={{ color: "var(--t-text-secondary)" }}>
                   {userLabel ?? t("Cuenta")}
                 </span>
               </button>
@@ -436,5 +443,7 @@ export function Topbar({
     </div>
   );
 }
+
+
 
 

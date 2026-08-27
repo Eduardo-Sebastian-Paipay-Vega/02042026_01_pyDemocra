@@ -71,6 +71,7 @@ function buildBeneficiaryMedicalSummary(options: {
   profileKind: BeneficiaryProfileKind;
 }): BeneficiaryMedicalRecordRow {
   return {
+    id: options.beneficiary.id,
     scope: "beneficiaries",
     personId: options.beneficiary.id,
     recordId: options.record?.id ?? null,
@@ -79,7 +80,7 @@ function buildBeneficiaryMedicalSummary(options: {
     profileKind: options.profileKind,
     profileLabel: resolveProfileLabel(options.profileKind),
     hasRecord: Boolean(options.record),
-    summary: options.record ? "Ficha medica registrada" : "Sin ficha medica registrada",
+    summary: options.record ? "Ficha médica registrada" : "Pendiente de creación",
     updatedAt: options.record?.updated_at ?? null,
     loggable: Boolean(options.record?.id),
   };
@@ -90,6 +91,7 @@ function buildVolunteerSensitiveSummary(options: {
   record: VolunteerSensitiveRow | null;
 }): VolunteerSensitiveRecordRow {
   return {
+    id: options.volunteer.id,
     scope: "volunteers",
     personId: options.volunteer.id,
     recordId: options.record?.id ?? null,
@@ -97,7 +99,7 @@ function buildVolunteerSensitiveSummary(options: {
     documentLabel: sanitizeText(options.volunteer.numero_documento, 60),
     stateLabel: options.volunteer.codigo_estado,
     hasRecord: Boolean(options.record),
-    summary: options.record ? "Ficha sensible registrada" : "Sin ficha sensible registrada",
+    summary: options.record ? "Ficha médica registrada" : "Pendiente de creación",
     updatedAt: options.record?.updated_at ?? null,
     loggable: false,
   };
@@ -110,7 +112,7 @@ async function fetchLatestBeneficiaryMedicalRecords(
     clinicoSchema()
       .from("fichas_medicas")
       .select(
-        "id, id_beneficiario, tipos_sangre, alergias, condiciones_preexistentes, medicacion_actual, created_at, updated_at, created_by, updated_by"
+        "id, id_beneficiario, updated_at"
       ),
     tenantId
   ).order("updated_at", { ascending: false });
@@ -275,7 +277,7 @@ export async function listSensitiveMedicalRecords(
       clinicoSchema()
         .from("ficha_sensible_voluntario")
         .select(
-          "id, id_voluntario, condiciones_medicas, contacto_emergencia, telefono_emergencia, created_at, updated_at, created_by, updated_by"
+          "id, id_voluntario, updated_at"
         ),
       tenantId
     ),

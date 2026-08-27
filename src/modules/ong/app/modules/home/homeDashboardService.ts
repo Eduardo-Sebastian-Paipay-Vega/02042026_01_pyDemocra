@@ -6,6 +6,7 @@ import type {
   DashboardAdmissionDetail,
   DashboardAdmissionRow,
   DashboardAlertItem,
+  DashboardFilters,
   DashboardHoursDetail,
   DashboardHoursRow,
   DashboardMetricValues,
@@ -342,13 +343,14 @@ async function resolveActiveProjectCodes(): Promise<string[]> {
     .map((row) => row.codigo);
 }
 
-async function countActiveActivities(tenantId: string): Promise<number> {
-  const { count, error } = await db
+async function countActiveActivities(tenantId: string, filters?: DashboardFilters): Promise<number> {
+  let query = db
     .schema("ong")
     .from("actividades")
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tenantId)
     .in("codigo_estado", ["pendiente", "planificada", "en_progreso"]);
+  if (filters?.projectId && filters.projectId !== "all") { query = query.eq("id_proyecto", filters.projectId); }
   if (error) throw new Error(error.message);
   return count ?? 0;
 }
@@ -390,7 +392,7 @@ export async function fetchDashboardUserContext(): Promise<DashboardUserContext>
   };
 }
 
-export async function fetchDashboardMetrics(): Promise<DashboardMetricsByKey> {
+export async function fetchDashboardMetrics(filters?: DashboardFilters): Promise<DashboardMetricsByKey> {
   const tenantId = await getRequiredTenantId();
   const [volunteerCodes, projectCodes] = await Promise.all([resolveActiveVolunteerCodes().catch(() => []), resolveActiveProjectCodes().catch(() => [])]);
 
@@ -409,9 +411,9 @@ export async function fetchDashboardMetrics(): Promise<DashboardMetricsByKey> {
       if (error) throw new Error(error.message);
       return count ?? 0;
     },
-    activitiesActive: () => countActiveActivities(tenantId),
-    hoursRegistered: () => sumHours({ tenantId }),
-    hoursApproved: () => sumHours({ onlyApproved: true, tenantId }),
+    activitiesActive: () => countActiveActivities(tenantId, filters),
+    hoursRegistered: () => sumHours({ tenantId, filters }),
+    hoursApproved: () => sumHours({ onlyApproved: true, tenantId, filters }),
     evidencesUploaded: async () => {
       const { count, error } = await db.schema("ong").from("evidencias_actividad").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId);
       if (error) throw new Error(error.message);
@@ -588,26 +590,39 @@ export async function fetchDashboardRecentAdmissionRequests(limit = 5): Promise<
   }));
 }
 
-export async function fetchWeeklyImpact(): Promise<WeeklyImpactPoint[]> {
+export async function fetchWeeklyImpact(filters?: DashboardFilters): Promise<WeeklyImpactPoint[]> {
   const tenantId = await getRequiredTenantId();
   const endDate = new Date();
   endDate.setHours(23, 59, 59, 999);
   const startDate = new Date(endDate);
   startDate.setDate(endDate.getDate() - 6);
   startDate.setHours(0, 0, 0, 0);
-  const { data, error } = await db
+
+  let query = db
     .schema("ong")
     .from("horas_actividad")
-    .select("id, fecha, horas_registradas")
+    .select("id, fecha, horas_registradas, estado_aprobacion")
     .eq("tenant_id", tenantId)
     .gte("fecha", formatDateISO(startDate))
-    .lte("fecha", formatDateISO(endDate))
-    .eq("estado_aprobacion", "aprobada");
+    .lte("fecha", formatDateISO(endDate));
+
+  if (filters?.projectId && filters.projectId !== "all") {
+    // Necesitariamos join con actividades para filtrar por proyecto, o si horas_actividad no tiene id_proyecto
+    // Si horas_actividad no tiene id_proyecto, asuminos que no se puede filtrar tan facilmente sin RPC o un inner select
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error(toFriendlyError(error, "No se pudo cargar el impacto semanal."));
 
-  const hoursByDate = new Map<string, number>();
+  const solicitadasByDate = new Map<string, number>();
+  const validadasByDate = new Map<string, number>();
+
   for (const row of data ?? []) {
-    hoursByDate.set(row.fecha, (hoursByDate.get(row.fecha) ?? 0) + Number(row.horas_registradas ?? 0));
+    const isValidadas = row.estado_aprobacion === "aprobada";
+    if (isValidadas) {
+      validadasByDate.set(row.fecha, (validadasByDate.get(row.fecha) ?? 0) + Number(row.horas_registradas ?? 0));
+    }
+    solicitadasByDate.set(row.fecha, (solicitadasByDate.get(row.fecha) ?? 0) + Number(row.horas_registradas ?? 0));
   }
 
   const points: WeeklyImpactPoint[] = [];
@@ -615,22 +630,33 @@ export async function fetchWeeklyImpact(): Promise<WeeklyImpactPoint[]> {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + offset);
     const key = formatDateISO(date);
-    points.push({ label: formatWeekDayLabel(date), value: Math.round((hoursByDate.get(key) ?? 0) * 10) / 10 });
+    points.push({ 
+      label: formatWeekDayLabel(date), 
+      solicitadas: Math.round((solicitadasByDate.get(key) ?? 0) * 10) / 10,
+      validadas: Math.round((validadasByDate.get(key) ?? 0) * 10) / 10 
+    });
   }
   return points;
 }
 
-export async function fetchTodayTimeline(limit = 6): Promise<DashboardTimelineItem[]> {
+export async function fetchTodayTimeline(limit = 6, filters?: DashboardFilters): Promise<DashboardTimelineItem[]> {
   const tenantId = await getRequiredTenantId();
   const today = formatDateISO(new Date());
-  const { data: activities, error: activityError } = await db
+  
+  let query = db
     .schema("ong")
     .from("actividades")
-    .select("id, id_tarea, titulo, codigo_estado, fecha_inicio, fecha_fin, created_at")
+    .select("id, id_tarea, titulo, codigo_estado, fecha_inicio, fecha_fin, created_at, id_ubicacion")
     .eq("tenant_id", tenantId)
     .order("fecha_inicio", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
     .limit(240);
+
+  if (filters?.projectId && filters.projectId !== "all") {
+    query = query.eq("id_proyecto", filters.projectId);
+  }
+
+  const { data: activities, error: activityError } = await query;
   if (activityError) throw new Error(toFriendlyError(activityError, "No se pudo cargar la agenda de hoy."));
 
   const dotColorByStatus: Record<DashboardActivityRow["status"], string> = {
@@ -646,20 +672,42 @@ export async function fetchTodayTimeline(limit = 6): Promise<DashboardTimelineIt
   }
 
   const taskMap = await getTaskMap(uniqueNonEmpty(rows.map((activity) => activity.id_tarea)), tenantId);
+  const locationMap = await getLocationNameMap(uniqueNonEmpty(rows.map((a) => a.id_ubicacion)), tenantId);
+  
   const projectMap = await getProjectNameMap(
     uniqueNonEmpty(Array.from(taskMap.values()).map((task) => task.projectId)),
     tenantId
   );
 
   return rows.slice(0, limit).map((activity) => {
-    const task = taskMap.get(activity.id_tarea);
-    const status = mapActivityStatus(activity.codigo_estado);
+    const mappedStatus = mapActivityStatus(activity.codigo_estado);
+    const taskInfo = activity.id_tarea ? taskMap.get(activity.id_tarea) : null;
+    const projectName = taskInfo?.projectId ? projectMap.get(taskInfo.projectId) : null;
+
+    let subtitle = "Sin proyecto asignado";
+    if (taskInfo?.title && projectName) subtitle = `${projectName} - ${taskInfo.title}`;
+    else if (taskInfo?.title) subtitle = taskInfo.title;
+    else if (projectName) subtitle = projectName;
+
+    const locName = activity.id_ubicacion ? locationMap.get(activity.id_ubicacion) : null;
+    let finalLocName = locName;
+    if (locName) {
+      // Split "codigo - nombre" if it matches
+      const parts = locName.split(" - ");
+      if (parts.length > 1) {
+        finalLocName = parts.slice(1).join(" - ");
+      }
+    }
+
     return {
       id: activity.id,
-      title: activity.titulo,
-      subtitle: `${task?.title ?? "Tarea"} - ${task ? projectMap.get(task.projectId) ?? "Proyecto" : "Proyecto"}`,
-      time: activity.fecha_inicio ?? activity.fecha_fin ?? "Hoy",
-      dotColor: dotColorByStatus[status],
+      title: activity.titulo ?? "Actividad sin titulo",
+      subtitle,
+      time: formatDateTime(getActivityPrimaryDate(activity)),
+      dotColor: dotColorByStatus[mappedStatus] ?? "bg-zinc-400",
+      locationId: activity.id_ubicacion,
+      locationName: finalLocName,
+      address: null, // Si location tuviera direccion se pondria aca
     };
   });
 }

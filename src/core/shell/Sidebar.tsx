@@ -389,7 +389,7 @@ export function Sidebar({
                 }}
                 onKeyDown={(event) => handleCategoryKeyDown(event, category, isOpen)}
                 className={cn(
-                  "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-[8px] text-left transition-all duration-150 ease-out",
+                  "group relative flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-all duration-150 ease-out",
                   !showExpandedMode && "justify-center"
                 )}
                 style={{
@@ -407,11 +407,11 @@ export function Sidebar({
                   <span className="absolute left-[5px] top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-[var(--t-primary)]" />
                 )}
 
-                <CategoryIcon className="h-[15px] w-[15px] shrink-0 transition-colors duration-150 ease-out group-hover:text-[var(--t-primary)]" />
+                <CategoryIcon className="h-5 w-5 shrink-0 transition-colors duration-150 ease-out group-hover:text-[var(--t-primary)]" />
 
                 {showExpandedMode && (
                   <>
-                    <span className="flex-1 text-[13px] group-hover:text-[var(--t-primary)]">{t(category.label)}</span>
+                    <span className="flex-1 text-sm group-hover:text-[var(--t-primary)]">{t(category.label)}</span>
                     <motion.div
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={SNAPPY_MOTION}
@@ -444,7 +444,7 @@ export function Sidebar({
                               {isHighlighted && (
                                 <motion.span
                                   layoutId={`submenu-highlight-${category.id}`}
-                                  className="pointer-events-none absolute inset-0 rounded-md"
+                                  className="pointer-events-none absolute inset-0 rounded-lg"
                                   style={{
                                     background: isActive
                                       ? "var(--t-primary-soft)"
@@ -462,7 +462,7 @@ export function Sidebar({
                                   itemLinkRefs.current[item.path] = node;
                                 }}
                                 to={item.path}
-                                className="relative z-10 flex items-center gap-2.5 rounded-md px-2 py-[6px] text-[12px] transition-colors duration-150 ease-out hover:text-[var(--t-primary)]"
+                                className="relative z-10 flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] transition-colors duration-150 ease-out hover:text-[var(--t-primary)]"
                                 style={{
                                   color: isActive ? "var(--t-primary)" : "var(--t-text-secondary)",
                                 }}

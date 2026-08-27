@@ -1,52 +1,48 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import {
   getEmptySearchResults,
   getSearchMinLength,
-  searchGlobalEntities,
-  toFriendlyError,
+  searchVolunteers,
+  searchProjects,
+  searchActivities,
+  searchAdmissions
 } from "./homeService";
-import { useSessionStorageState } from "../../lib/session-state";
-import type { GlobalSearchGroupedResults } from "./types";
+import type { GlobalSearchGroupedResults, GlobalSearchItem } from "./types";
 
-const DEBOUNCE_MS = 350;
-const GLOBAL_SEARCH_QUERY_STORAGE_KEY = "ong.view.global-search.query";
-
-function isAbortError(error: unknown): boolean {
-  if (error instanceof DOMException && error.name === "AbortError") {
-    return true;
-  }
-
-  if (error instanceof Error) {
-    const normalized = error.message.toLowerCase();
-    return normalized.includes("aborted");
-  }
-
-  return false;
-}
-
-function countResults(results: GlobalSearchGroupedResults): number {
-  return (
-    results.volunteers.length +
-    results.projects.length +
-    results.activities.length +
-    results.admissions.length
-  );
-}
+const DEBOUNCE_MS = 300;
+const RECENT_SEARCHES_KEY = "ong.view.global-search.recent";
 
 export function useGlobalSearch(limitPerGroup = 6) {
   const minLength = getSearchMinLength();
-  const [query, setQuery] = useSessionStorageState(
-    GLOBAL_SEARCH_QUERY_STORAGE_KEY,
-    ""
-  );
+  const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [retryToken, setRetryToken] = useState(0);
-  const [results, setResults] = useState<GlobalSearchGroupedResults>(
-    getEmptySearchResults()
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastSearchedTerm, setLastSearchedTerm] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (stored) setRecentSearches(JSON.parse(stored));
+    } catch {
+      // Ignore
+    }
+  }, []);
+
+  const addRecentSearch = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    setRecentSearches(prev => {
+      const updated = [trimmed, ...prev.filter(t => t !== trimmed)].slice(0, 5);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem(RECENT_SEARCHES_KEY);
+  };
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -58,81 +54,86 @@ export function useGlobalSearch(limitPerGroup = 6) {
     };
   }, [query]);
 
-  useEffect(() => {
-    const currentTerm = debouncedQuery.trim();
+  const hasSearched = debouncedQuery.length >= minLength;
 
-    if (currentTerm.length < minLength) {
-      setLoading(false);
-      setError(null);
-      setResults(getEmptySearchResults());
-      setLastSearchedTerm(currentTerm);
-      return;
-    }
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ["globalSearch", "volunteers", debouncedQuery],
+        queryFn: () => searchVolunteers(debouncedQuery, limitPerGroup),
+        enabled: hasSearched,
+        staleTime: 60 * 1000,
+      },
+      {
+        queryKey: ["globalSearch", "projects", debouncedQuery],
+        queryFn: () => searchProjects(debouncedQuery, limitPerGroup),
+        enabled: hasSearched,
+        staleTime: 60 * 1000,
+      },
+      {
+        queryKey: ["globalSearch", "activities", debouncedQuery],
+        queryFn: () => searchActivities(debouncedQuery, limitPerGroup),
+        enabled: hasSearched,
+        staleTime: 60 * 1000,
+      },
+      {
+        queryKey: ["globalSearch", "admissions", debouncedQuery],
+        queryFn: () => searchAdmissions(debouncedQuery, limitPerGroup),
+        enabled: hasSearched,
+        staleTime: 60 * 1000,
+      }
+    ]
+  });
 
-    let isActive = true;
-    const abortController = new AbortController();
-
-    setLoading(true);
-    setError(null);
-    setLastSearchedTerm(currentTerm);
-
-    searchGlobalEntities(currentTerm, {
-      limitPerGroup,
-      signal: abortController.signal,
-    })
-      .then((response) => {
-        if (!isActive) {
-          return;
-        }
-
-        setResults(response);
-      })
-      .catch((fetchError) => {
-        if (!isActive || isAbortError(fetchError)) {
-          return;
-        }
-
-        setResults(getEmptySearchResults());
-        setError(
-          toFriendlyError(
-            fetchError,
-            "No se pudieron obtener resultados de la busqueda global."
-          )
-        );
-      })
-      .finally(() => {
-        if (isActive) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      isActive = false;
-      abortController.abort();
+  const isLoading = results.some(r => r.isLoading) && hasSearched;
+  const isFetching = results.some(r => r.isFetching) && hasSearched;
+  
+  // Aggregate results safely
+  const groupedResults = useMemo<GlobalSearchGroupedResults>(() => {
+    if (!hasSearched) return getEmptySearchResults();
+    
+    return {
+      volunteers: results[0].data ?? [],
+      projects: results[1].data ?? [],
+      activities: results[2].data ?? [],
+      admissions: results[3].data ?? []
     };
-  }, [debouncedQuery, limitPerGroup, minLength, retryToken]);
+  }, [results, hasSearched]);
 
-  const hasSearched = debouncedQuery.trim().length >= minLength;
-  const totalResults = useMemo(() => countResults(results), [results]);
+  const totalResults = 
+    groupedResults.volunteers.length +
+    groupedResults.projects.length +
+    groupedResults.activities.length +
+    groupedResults.admissions.length;
 
-  const retry = useCallback(() => {
-    if (debouncedQuery.trim().length < minLength) {
-      return;
+  useEffect(() => {
+    // Only save recent search if the query was fully fetched and yielded results
+    if (hasSearched && !isFetching && totalResults > 0) {
+      addRecentSearch(debouncedQuery);
     }
-    setRetryToken((current) => current + 1);
-  }, [debouncedQuery, minLength]);
+  }, [hasSearched, isFetching, totalResults, debouncedQuery]);
+
+  const retry = () => {
+    // Invalidate queries to retry
+    queryClient.invalidateQueries({ queryKey: ["globalSearch"] });
+  };
+
+  const error = results.find(r => r.error)?.error?.message || null;
 
   return {
     query,
     setQuery,
-    results,
-    loading,
+    debouncedQuery,
+    results: groupedResults,
+    loading: isLoading,
     error,
     minLength,
     hasSearched,
     totalResults,
-    lastSearchedTerm,
+    lastSearchedTerm: debouncedQuery,
     retry,
+    recentSearches,
+    addRecentSearch,
+    clearRecentSearches
   };
 }
-

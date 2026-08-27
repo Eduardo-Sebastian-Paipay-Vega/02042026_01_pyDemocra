@@ -39,6 +39,9 @@ import {
 } from "lucide-react";
 
 import { PageHeader } from "../components/shared/PageHeader";
+import { DashboardKpiGrid } from "./components/DashboardKpiGrid";
+import { DashboardTimeline } from "./components/DashboardTimeline";
+import { DashboardFilters } from "./components/DashboardFilters";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { GradientButton } from "@/core/components/ui/gradient-button";
 import { OutlineButton } from "@/core/components/ui/outline-button";
@@ -256,6 +259,7 @@ export function Dashboard() {
 
   const {
     metrics,
+    metricsLoading,
     recentHours,
     recentActivities,
     recentRequests,
@@ -266,7 +270,7 @@ export function Dashboard() {
     locationOptions,
     refresh,
     isRefreshing,
-  } = useDashboardData();
+  } = useDashboardData({ period: periodFilter, projectId: selectedProjectFilter });
 
   const {
     isSavingActivity,
@@ -323,11 +327,7 @@ export function Dashboard() {
   const isResolutionSubmitting = isResolvingHours || isResolvingAdmission;
 
   // 100% REAL METRICS FROM SUPABASE (ZERO HARDCODED FAKE FALLBACK NUMBERS)
-  const activeVolunteersCount = metrics.volunteersActive ?? 0;
-  const activeProjectsCount = metrics.projectsActive ?? 0;
-  const activeActivitiesCount = metrics.activitiesActive ?? 0;
   const approvedHoursTotal = metrics.hoursApproved ?? 0;
-  const pendingApprovalsCount = (metrics.approvalsPending ?? 0) + (metrics.admissionPending ?? 0);
 
   // 100% REAL CHART DATA FROM SUPABASE
   const chartData = useMemo(() => {
@@ -764,35 +764,26 @@ export function Dashboard() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <PageHeader
             title="Panel Principal"
-            description="Resumen operativo general, mÃ©tricas clave en tiempo real y gestiÃ³n de la ONG."
-            action={{ label: "Actualizar", onClick: refresh }}
+            description="Resumen operativo general, métricas clave en tiempo real y gestión de la ONG."
           />
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* SELECTOR DE PERÃODO */}
-            <select
-              value={periodFilter}
-              onChange={(e) => setPeriodFilter(e.target.value as PeriodFilter)}
-              className="h-9 rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300 hover:border-zinc-700 font-medium"
+            <OutlineButton
+              size="sm"
+              onClick={refresh}
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
             >
-              <option value="month">ðŸ“… Este Mes</option>
-              <option value="quarter">ðŸ“… Ãšltimo Trimestre</option>
-              <option value="year">ðŸ“… Este AÃ±o</option>
-            </select>
+              <RefreshCw className="h-4 w-4 text-neutral-500 dark:text-zinc-400" />
+              Actualizar
+            </OutlineButton>
 
-            {/* SELECTOR DE PROYECTO */}
-            <select
-              value={selectedProjectFilter}
-              onChange={(e) => setSelectedProjectFilter(e.target.value)}
-              className="h-9 rounded-xl px-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-700 dark:text-zinc-300 hover:border-zinc-700 font-medium"
-            >
-              <option value="all">ðŸ“ Todos los Proyectos</option>
-              {taskOptions.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+            <DashboardFilters
+              periodFilter={periodFilter}
+              setPeriodFilter={setPeriodFilter}
+              selectedProjectFilter={selectedProjectFilter}
+              setSelectedProjectFilter={setSelectedProjectFilter}
+              taskOptions={taskOptions}
+            />
 
             {/* BOTÃ“N PERSONALIZAR */}
             <OutlineButton
@@ -882,76 +873,8 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {/* 4 GRANDES TARJETAS DE MÃ‰TRICAS PRINCIPALES (100% REALES DESDE SUPABASE) */}
-      <motion.div variants={fadeUp}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {/* 1. VOLUNTARIOS ACTIVOS */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-emerald-500/30 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Voluntarios Activos</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <Users className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{activeVolunteersCount}</p>
-              <span className="text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" /> En sistema
-              </span>
-            </div>
-          </div>
-
-          {/* 2. PROYECTOS Y ACTIVIDADES */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-indigo-500/30 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Proyectos y Actividades</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <FolderKanban className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">
-                {activeProjectsCount} <span className="text-xs font-normal text-neutral-500 dark:text-zinc-400">proj.</span> â€¢ {activeActivitiesCount} <span className="text-xs font-normal text-neutral-500 dark:text-zinc-400">act.</span>
-              </p>
-              <span className="text-[11px] font-medium text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" /> Activos
-              </span>
-            </div>
-          </div>
-
-          {/* 3. HORAS APROBADAS */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-purple-500/30 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Horas Aprobadas Totales</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                <Clock className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{safeHoursToText(approvedHoursTotal)}</p>
-              <span className="text-[11px] font-medium text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-md border border-purple-500/20 flex items-center gap-1">
-                <Award className="h-3 w-3" /> Auditado OK
-              </span>
-            </div>
-          </div>
-
-          {/* 4. PENDIENTES DE REVISIÃ“N */}
-          <div className="rounded-2xl p-4 bg-zinc-900/80 border border-neutral-200/80 dark:border-zinc-800/80 hover:border-amber-500/30 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-neutral-500 dark:text-zinc-400">Pendientes de RevisiÃ³n</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <AlertCircle className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <p className="text-2xl font-bold text-neutral-900 dark:text-zinc-100 tabular-nums">{pendingApprovalsCount} <span className="text-xs font-normal text-neutral-500 dark:text-zinc-400">pend.</span></p>
-              <span className="text-[11px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 flex items-center gap-1">
-                <Clock className="h-3 w-3" /> Requiere atenciÃ³n
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      {/* 4 GRANDES TARJETAS DE MÃ‰TRICAS PRINCIPALES */}
+      <DashboardKpiGrid metrics={metrics} loading={isRefreshing || metricsLoading} />
 
       {/* SECCIÃ“N PRINCIPAL: GRÃFICO DE ÃREA Y AGENDA DE HOY */}
       {(widgetSettings.showEvolutionChart || widgetSettings.showTodayAgenda) && (
@@ -975,49 +898,56 @@ export function Dashboard() {
                 </span>
               </div>
 
-              <div className="h-64 w-full pt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorAprobadas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
-                      </linearGradient>
-                      <linearGradient id="colorSolicitadas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#71717a" fontSize={11} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#18181b",
-                        borderColor: "#27272a",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="solicitadas"
-                      name="Solicitadas"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorSolicitadas)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="aprobadas"
-                      name="Aprobadas"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorAprobadas)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className={(chartData.some(d => d.aprobadas > 0 || d.solicitadas > 0)) ? "h-64 w-full pt-2" : "h-32 w-full pt-2 flex flex-col items-center justify-center text-neutral-500 dark:text-zinc-500"}>
+                {(chartData.some(d => d.aprobadas > 0 || d.solicitadas > 0)) ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorAprobadas" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                        </linearGradient>
+                        <linearGradient id="colorSolicitadas" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#18181b",
+                          borderColor: "#27272a",
+                          borderRadius: "12px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="solicitadas"
+                        name="Solicitadas"
+                        stroke="#10b981"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorSolicitadas)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="aprobadas"
+                        name="Aprobadas"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#colorAprobadas)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center opacity-60">
+                    <TrendingUp className="h-8 w-8 mb-2 text-neutral-400 dark:text-zinc-600" />
+                    <p className="text-sm">Sin impacto registrado recientemente</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1036,41 +966,20 @@ export function Dashboard() {
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-2.5">
-                  {realAgendaItems.length > 0 ? (
-                    realAgendaItems.map((item) => (
-                      <div key={item.id} className="p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 flex items-start gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 font-mono text-[11px] font-bold">
-                          {item.timeLabel || "09:00"}
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-neutral-800 dark:text-zinc-200">{item.title}</h4>
-                          <p className="text-[11px] text-neutral-500 dark:text-zinc-400">{item.subtitle}</p>
-                          <span className="text-[10px] text-emerald-400 font-mono mt-1 block">ðŸ‘¥ {item.assignedCount ?? 0} voluntarios asignados</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-8 text-center space-y-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800/80 text-neutral-500 dark:text-zinc-400 mx-auto">
-                        <Calendar className="h-5 w-5 text-indigo-400" />
-                      </div>
-                      <p className="text-xs text-neutral-700 dark:text-zinc-300 font-semibold">Sin actividades programadas hoy</p>
-                      <p className="text-[11px] text-neutral-400 dark:text-zinc-500 max-w-[200px] mx-auto">
-                        Las actividades creadas para la fecha actual aparecerÃ¡n aquÃ­.
-                      </p>
-                    </div>
-                  )}
+                <div className="mt-3 space-y-2.5 max-h-[300px] overflow-y-auto">
+                  <DashboardTimeline timeline={todayTimeline.data} loading={todayTimeline.loading || isRefreshing} />
                 </div>
               </div>
 
-              <OutlineButton
-                size="sm"
-                onClick={() => navigate("/app/ong/projects/activities")}
-                className="w-full text-xs text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 justify-center"
-              >
-                Ver Todas las Actividades
-              </OutlineButton>
+              <div className="mt-4 flex justify-center">
+                <OutlineButton
+                  size="sm"
+                  onClick={() => navigate("/app/ong/projects/activities")}
+                  className="w-auto px-6 text-sm text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 justify-center"
+                >
+                  Ver Todas las Actividades
+                </OutlineButton>
+              </div>
             </div>
           )}
         </motion.div>

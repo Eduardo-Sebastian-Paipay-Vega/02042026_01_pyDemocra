@@ -1,3 +1,10 @@
+export type PeriodFilter = "month" | "quarter" | "year" | "all";
+
+export interface DashboardFilters {
+  period: PeriodFilter;
+  projectId: string;
+}
+
 export interface DashboardMetricValues {
   volunteersActive: number;
   projectsActive: number;
@@ -54,7 +61,8 @@ export interface DashboardAdmissionRow {
 
 export interface WeeklyImpactPoint {
   label: string;
-  value: number;
+  solicitadas: number;
+  validadas: number;
 }
 
 export interface DashboardTimelineItem {
@@ -63,6 +71,9 @@ export interface DashboardTimelineItem {
   subtitle: string;
   time: string;
   dotColor: string;
+  locationId?: string | null;
+  locationName?: string | null;
+  address?: string | null;
 }
 
 export interface DashboardAlertItem {
@@ -188,6 +199,7 @@ export interface GlobalSearchItem {
   title: string;
   subtitle: string;
   targetPath: string;
+  metadata?: Record<string, any>;
 }
 
 export interface GlobalSearchDetailField {

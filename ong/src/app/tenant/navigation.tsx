@@ -128,8 +128,8 @@ const ROUTES: TenantRouteDefinition[] = [
   },
   {
     id: "search",
-    label: "Busqueda global",
-    title: "Busqueda global",
+    label: "Búsqueda global",
+    title: "Búsqueda global",
     breadcrumb: "Home",
     path: `${ONG_SHELL_BASE_PATH}/search`,
     legacyPath: "/admin/search",

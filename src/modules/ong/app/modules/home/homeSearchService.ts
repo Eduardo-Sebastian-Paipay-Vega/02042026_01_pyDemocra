@@ -124,87 +124,80 @@ async function resolveProjectStateLabel(code: string): Promise<string> {
   return data?.[0]?.nombre_estado ?? code;
 }
 
-export async function searchGlobalEntities(
-  rawTerm: string,
-  options: SearchGlobalOptions = {}
-): Promise<GlobalSearchGroupedResults> {
+export async function searchVolunteers(rawTerm: string, limit: number = 6): Promise<GlobalSearchItem[]> {
   const sanitized = sanitizeSearchTerm(rawTerm);
-
-  if (sanitized.length < SEARCH_MIN_LENGTH) {
-    return getEmptySearchResults();
-  }
-
+  if (sanitized.length < SEARCH_MIN_LENGTH) return [];
   const searchPattern = `%${safeOrPatternValue(sanitized)}%`;
-  const limitPerGroup = options.limitPerGroup ?? 6;
-  const signal = options.signal;
   const tenantId = await getRequiredTenantId();
 
-  let volunteersQuery = db
+  const { data, error } = await db
     .schema("ong")
     .from("voluntarios")
-    .select("id, nombre, apellido, email, numero_documento, tipo_documento")
+    .select("id, nombre, apellido, email, numero_documento, tipo_documento, codigo_estado, ruta_foto")
     .eq("tenant_id", tenantId)
-    .or(
-      `nombre.ilike.${searchPattern},apellido.ilike.${searchPattern},email.ilike.${searchPattern},numero_documento.ilike.${searchPattern}`
-    )
-    .limit(limitPerGroup);
+    .or(`nombre.ilike.${searchPattern},apellido.ilike.${searchPattern},email.ilike.${searchPattern},numero_documento.ilike.${searchPattern}`)
+    .limit(limit);
 
-  let projectsQuery = db
+  if (error) throw new Error(toFriendlyError(error, "Error buscando voluntarios."));
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    type: "volunteer",
+    title: `${row.nombre} ${row.apellido}`.trim(),
+    subtitle: row.email ?? `${row.tipo_documento ?? "DOC"} ${row.numero_documento ?? "sin documento"}`,
+    targetPath: buildEntityTargetPath("volunteer", row.id),
+    metadata: {
+      codigo_estado: row.codigo_estado,
+      ruta_foto: row.ruta_foto,
+    }
+  }));
+}
+
+export async function searchProjects(rawTerm: string, limit: number = 6): Promise<GlobalSearchItem[]> {
+  const sanitized = sanitizeSearchTerm(rawTerm);
+  if (sanitized.length < SEARCH_MIN_LENGTH) return [];
+  const searchPattern = `%${safeOrPatternValue(sanitized)}%`;
+  const tenantId = await getRequiredTenantId();
+
+  const { data, error } = await db
     .schema("ong")
     .from("proyectos")
     .select("id, codigo, nombre_proyecto, descripcion")
     .eq("tenant_id", tenantId)
-    .or(
-      `codigo.ilike.${searchPattern},nombre_proyecto.ilike.${searchPattern},descripcion.ilike.${searchPattern}`
-    )
-    .limit(limitPerGroup);
+    .or(`codigo.ilike.${searchPattern},nombre_proyecto.ilike.${searchPattern},descripcion.ilike.${searchPattern}`)
+    .limit(limit);
 
-  let activitiesQuery = db
+  if (error) throw new Error(toFriendlyError(error, "Error buscando proyectos."));
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    type: "project",
+    title: row.nombre_proyecto,
+    subtitle: row.descripcion || `Código ${row.codigo}`,
+    targetPath: buildEntityTargetPath("project", row.id),
+    metadata: {
+      codigo: row.codigo
+    }
+  }));
+}
+
+export async function searchActivities(rawTerm: string, limit: number = 6): Promise<GlobalSearchItem[]> {
+  const sanitized = sanitizeSearchTerm(rawTerm);
+  if (sanitized.length < SEARCH_MIN_LENGTH) return [];
+  const searchPattern = `%${safeOrPatternValue(sanitized)}%`;
+  const tenantId = await getRequiredTenantId();
+
+  const { data, error } = await db
     .schema("ong")
     .from("actividades")
     .select("id, id_tarea, titulo, descripcion, codigo_estado, fecha_inicio, fecha_fin, id_ubicacion")
     .eq("tenant_id", tenantId)
     .or(`titulo.ilike.${searchPattern},descripcion.ilike.${searchPattern}`)
-    .limit(limitPerGroup);
+    .limit(limit);
 
-  let admissionsQuery = db
-    .schema("rrhh")
-    .from("solicitudes_admision")
-    .select("id, nombres, apellidos, email, estado")
-    .eq("tenant_id", tenantId)
-    .or(
-      `nombres.ilike.${searchPattern},apellidos.ilike.${searchPattern},email.ilike.${searchPattern},estado.ilike.${searchPattern}`
-    )
-    .limit(limitPerGroup);
+  if (error) throw new Error(toFriendlyError(error, "Error buscando actividades."));
 
-  if (signal) {
-    volunteersQuery = volunteersQuery.abortSignal(signal);
-    projectsQuery = projectsQuery.abortSignal(signal);
-    activitiesQuery = activitiesQuery.abortSignal(signal);
-    admissionsQuery = admissionsQuery.abortSignal(signal);
-  }
-
-  const [volunteersResult, projectsResult, activitiesResult, admissionsResult] =
-    await Promise.all([volunteersQuery, projectsQuery, activitiesQuery, admissionsQuery]);
-
-  if (
-    volunteersResult.error ||
-    projectsResult.error ||
-    activitiesResult.error ||
-    admissionsResult.error
-  ) {
-    throw new Error(
-      toFriendlyError(
-        volunteersResult.error ||
-          projectsResult.error ||
-          activitiesResult.error ||
-          admissionsResult.error,
-        "No se pudo completar la busqueda global."
-      )
-    );
-  }
-
-  const activityRows = activitiesResult.data ?? [];
+  const activityRows = data ?? [];
   const taskIds = uniqueNonEmpty(activityRows.map((item) => item.id_tarea));
   const taskMap = await getTaskMap(taskIds, tenantId);
   const projectNameMap = await getProjectNameMap(
@@ -212,53 +205,50 @@ export async function searchGlobalEntities(
     tenantId
   );
 
-  const volunteers: GlobalSearchItem[] = (volunteersResult.data ?? []).map((row) => ({
-    id: row.id,
-    type: "volunteer",
-    title: `${row.nombre} ${row.apellido}`.trim(),
-    subtitle:
-      row.email ??
-      `${row.tipo_documento ?? "DOC"} ${row.numero_documento ?? "sin documento"}`,
-    targetPath: buildEntityTargetPath("volunteer", row.id),
-  }));
-
-  const projects: GlobalSearchItem[] = (projectsResult.data ?? []).map((row) => ({
-    id: row.id,
-    type: "project",
-    title: row.nombre_proyecto,
-    subtitle: row.descripcion || `Codigo ${row.codigo}`,
-    targetPath: buildEntityTargetPath("project", row.id),
-  }));
-
-  const activities: GlobalSearchItem[] = activityRows.map((row) => {
+  return activityRows.map((row) => {
     const task = taskMap.get(row.id_tarea);
-    const projectName = task
-      ? projectNameMap.get(task.projectId) ?? "Proyecto"
-      : "Proyecto";
-
+    const projectName = task ? projectNameMap.get(task.projectId) ?? "Proyecto" : "Proyecto";
     return {
       id: row.id,
       type: "activity",
       title: row.titulo,
       subtitle: `${task?.title ?? "Tarea"} - ${projectName} - ${formatActivityStatusLabel(row.codigo_estado)}`,
       targetPath: buildEntityTargetPath("activity", row.id),
+      metadata: {
+        fecha_inicio: row.fecha_inicio,
+        fecha_fin: row.fecha_fin,
+        codigo_estado: row.codigo_estado
+      }
     };
   });
+}
 
-  const admissions: GlobalSearchItem[] = (admissionsResult.data ?? []).map((row) => ({
+export async function searchAdmissions(rawTerm: string, limit: number = 6): Promise<GlobalSearchItem[]> {
+  const sanitized = sanitizeSearchTerm(rawTerm);
+  if (sanitized.length < SEARCH_MIN_LENGTH) return [];
+  const searchPattern = `%${safeOrPatternValue(sanitized)}%`;
+  const tenantId = await getRequiredTenantId();
+
+  const { data, error } = await db
+    .schema("rrhh")
+    .from("solicitudes_admision")
+    .select("id, nombres, apellidos, email, estado")
+    .eq("tenant_id", tenantId)
+    .or(`nombres.ilike.${searchPattern},apellidos.ilike.${searchPattern},email.ilike.${searchPattern},estado.ilike.${searchPattern}`)
+    .limit(limit);
+
+  if (error) throw new Error(toFriendlyError(error, "Error buscando solicitudes de admisión."));
+
+  return (data ?? []).map((row) => ({
     id: row.id,
     type: "admission",
     title: `${row.nombres} ${row.apellidos}`.trim(),
-    subtitle: `${row.email} - ${row.estado}`,
+    subtitle: row.email ?? row.estado,
     targetPath: buildEntityTargetPath("admission", row.id),
+    metadata: {
+      estado: row.estado
+    }
   }));
-
-  return {
-    volunteers,
-    projects,
-    activities,
-    admissions,
-  };
 }
 
 export async function fetchGlobalSearchDetail(
