@@ -726,15 +726,18 @@ export interface ClinicalAgendaItem {
 
 export async function getTodayClinicalAgenda(): Promise<ClinicalAgendaItem[]> {
   const tenantId = await getRequiredTenantId();
-  // Using the general actividades table for today's agenda in the clinical dashboard.
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
   
   const { data, error } = await ongSchema()
     .from("actividades")
     .select("id, titulo, fecha_inicio, fecha_fin, codigo_estado")
     .eq("tenant_id", tenantId)
-    // Basic prefix matching for today's date in timestamp fields
-    .like("fecha_inicio", `${today}%`)
+    .gte("fecha_inicio", todayStart.toISOString())
+    .lte("fecha_inicio", todayEnd.toISOString())
     .order("fecha_inicio", { ascending: true })
     .limit(50);
 
