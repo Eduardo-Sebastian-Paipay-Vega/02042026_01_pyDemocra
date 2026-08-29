@@ -1,12 +1,11 @@
-import { useMemo, useState } from "react";
-import { motion, type Variants } from "motion/react";
-import { Database, Eye } from "lucide-react";
+import { useState } from "react";
+import { motion } from "motion/react";
+import { Database, Eye, Library } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { ModalShell } from "@/core/components/ui/modal-shell";
-import { GradientButton } from "@/core/components/ui/gradient-button";
-import { OutlineButton } from "@/core/components/ui/outline-button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import { StatusDot } from "@/core/components/ui/status-dot";
 import { useGovernanceCatalogs } from "../modules/governance/hooks/useGovernanceCatalogs";
 import type {
@@ -56,11 +55,6 @@ const columns: Column<GovernanceCatalogEntryRow>[] = [
       </span>
     ),
   },
-  {
-    key: "support",
-    label: "Soporte",
-    render: (row) => <StatusDot variant="secondary">{row.supportLabel}</StatusDot>,
-  },
 ];
 
 export function Catalogs() {
@@ -82,43 +76,12 @@ export function Catalogs() {
 
   const selectedCatalogLabel = selectedCatalog?.label ?? "Catalogo";
 
-  const summaryButtons = useMemo(
-    () =>
-      catalogs.map((catalog) => {
-        const active = catalog.key === selectedCatalogKey;
-        const label = `${catalog.label}${catalog.rowCount === null ? "" : ` (${catalog.rowCount})`}`;
-
-        if (active) {
-          return (
-            <GradientButton
-              key={catalog.key}
-              size="sm"
-              onClick={() => setSelectedCatalogKey(catalog.key)}
-            >
-              {label}
-            </GradientButton>
-          );
-        }
-
-        return (
-          <OutlineButton
-            key={catalog.key}
-            size="sm"
-            onClick={() => setSelectedCatalogKey(catalog.key)}
-          >
-            {label}
-          </OutlineButton>
-        );
-      }),
-    [catalogs, selectedCatalogKey]
-  );
-
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeUp}>
         <PageHeader
           title="Catalogos"
-          description="Explora catalogos reales del Core, ONG, RRHH y Comunicaciones. La vista exige `governance.catalogs.read`; solo se habilita escritura donde la BD la documenta y, en este corte, los catalogos expuestos siguen en consulta/detalle."
+          description="Explora catalogos reales y diccionarios de datos del sistema. La vista exige \`governance.catalogs.read\`."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -131,17 +94,11 @@ export function Catalogs() {
           <div className="flex items-start gap-3">
             <Database className="mt-0.5 h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <div className="space-y-1">
-              <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                Los catalogos visibles provienen de tablas reales como
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>public.cat_permissions</span>,
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>ong.estados_voluntario</span> y
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>comunicaciones.canales_notificacion</span>.
+              <p className="text-[13px]" style={{ color: "var(--t-text)" }}>
+                Los catalogos son diccionarios de datos gestionados por el sistema central.
               </p>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                El script actual solo documenta politicas de lectura para estos catalogos y la UI valida `governance.catalogs.read`; por eso la vista es operativa en consulta y detalle, no en alta/edicion/baja.
+                Por politicas de integridad, esta vista es de solo lectura. Su edicion esta deshabilitada para mantener la consistencia de las reglas de negocio en toda la plataforma.
               </p>
             </div>
           </div>
@@ -154,24 +111,41 @@ export function Catalogs() {
         </motion.div>
       )}
 
-      <motion.div variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
+      <motion.div variants={fadeUp} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:max-w-[320px]">
           {catalogsLoading ? (
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
               Cargando catalogos...
             </p>
           ) : (
-            summaryButtons
+            <Select 
+              value={selectedCatalogKey} 
+              onValueChange={(val) => setSelectedCatalogKey(val as GovernanceCatalogKey)}
+            >
+              <SelectTrigger className="w-full">
+                <div className="flex items-center gap-2">
+                  <Library className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
+                  <SelectValue placeholder="Selecciona un catalogo" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {catalogs.map((catalog) => (
+                  <SelectItem key={catalog.key} value={catalog.key}>
+                    {catalog.label} {catalog.rowCount !== null ? `(${catalog.rowCount})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <FilterBar
-          searchPlaceholder={`Buscar en ${selectedCatalogLabel.toLowerCase()}...`}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-        />
+        
+        <div className="w-full sm:max-w-[400px]">
+          <FilterBar
+            searchPlaceholder={`Buscar en ${selectedCatalogLabel.toLowerCase()}...`}
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+          />
+        </div>
       </motion.div>
 
       {selectedCatalog && (
@@ -182,8 +156,8 @@ export function Catalogs() {
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[13px]" style={{ color: "var(--t-text)" }}>
-                  {selectedCatalog.schemaName}.{selectedCatalog.tableName}
+                <p className="text-[13px] font-medium" style={{ color: "var(--t-text)" }}>
+                  {selectedCatalog.label}
                 </p>
                 <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                   {selectedCatalog.description}
@@ -238,20 +212,6 @@ export function Catalogs() {
               />
             ))}
           </div>
-
-          {selectedCatalog && (
-            <div
-              className="rounded-xl px-3 py-2"
-              style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-            >
-              <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                Fuente documental
-              </p>
-              <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                {selectedCatalog.sourceReference}
-              </p>
-            </div>
-          )}
         </div>
       </ModalShell>
     </motion.div>
