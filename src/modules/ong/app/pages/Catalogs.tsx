@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Database, Eye, Library } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { ModalShell } from "@/core/components/ui/modal-shell";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/core/components/ui/select";
 import { StatusDot } from "@/core/components/ui/status-dot";
+import { StatusPill } from "@/core/components/ui/status-pill";
 import { useGovernanceCatalogs } from "../modules/governance/hooks/useGovernanceCatalogs";
 import type {
   GovernanceCatalogEntryRow,
   GovernanceCatalogKey,
+  GovernanceCatalogSummaryRow,
 } from "../modules/governance/types";
 import {
   GovernanceDetailField,
@@ -33,30 +34,6 @@ const fadeUp = {
 
 const DEFAULT_CATALOG: GovernanceCatalogKey = "public.cat_permissions";
 
-const columns: Column<GovernanceCatalogEntryRow>[] = [
-  {
-    key: "primary",
-    label: "Registro",
-    render: (row) => (
-      <div>
-        <div style={{ color: "var(--t-text)" }}>{row.primaryValue}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.secondaryValue}
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "tertiary",
-    label: "Detalle",
-    render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.tertiaryValue}
-      </span>
-    ),
-  },
-];
-
 export function Catalogs() {
   const [selectedCatalogKey, setSelectedCatalogKey] =
     useState<GovernanceCatalogKey>(DEFAULT_CATALOG);
@@ -74,14 +51,77 @@ export function Catalogs() {
     refresh,
   } = useGovernanceCatalogs(selectedCatalogKey, searchValue);
 
-  const selectedCatalogLabel = selectedCatalog?.label ?? "Catalogo";
+  const selectedCatalogLabel = selectedCatalog?.label ?? "Catálogo";
+
+  const groupedCatalogs = useMemo(() => {
+    return catalogs.reduce((acc, catalog) => {
+      const schema = catalog.schemaName || "public";
+      if (!acc[schema]) acc[schema] = [];
+      acc[schema].push(catalog);
+      return acc;
+    }, {} as Record<string, GovernanceCatalogSummaryRow[]>);
+  }, [catalogs]);
+
+  const columns: Column<GovernanceCatalogEntryRow>[] = [
+    {
+      key: "primary",
+      label: "Registro",
+      render: (row) => {
+        // Evaluate if there is an active/inactive boolean field
+        const hasActiveField = 'activo' in row.raw;
+        const isActive = hasActiveField ? Boolean(row.raw['activo']) : null;
+
+        return (
+          <div>
+            <div className="flex items-center gap-2">
+              <span style={{ color: "var(--t-text)" }}>{row.primaryValue}</span>
+              {hasActiveField && (
+                <StatusPill status={isActive ? "active" : "inactive"}>
+                  {isActive ? "Activo" : "Inactivo"}
+                </StatusPill>
+              )}
+            </div>
+            <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+              {row.secondaryValue}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "tertiary",
+      label: "Detalle",
+      render: (row) => (
+        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          {row.tertiaryValue}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "",
+      render: (row) => (
+        <div className="flex justify-end pr-2">
+          <button
+            type="button"
+            onClick={() => setDetailRow(row)}
+            className="flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 opacity-60 hover:opacity-100 hover:bg-[var(--t-active)]"
+            style={{ color: "var(--t-text-dim)" }}
+            title="Ver detalle"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeUp}>
         <PageHeader
-          title="Catalogos"
-          description="Explora catalogos reales y diccionarios de datos del sistema. La vista exige \`governance.catalogs.read\`."
+          title="Catálogos"
+          description="Explora los diccionarios de datos y valores predeterminados del sistema."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -95,10 +135,10 @@ export function Catalogs() {
             <Database className="mt-0.5 h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <div className="space-y-1">
               <p className="text-[13px]" style={{ color: "var(--t-text)" }}>
-                Los catalogos son diccionarios de datos gestionados por el sistema central.
+                Los catálogos son diccionarios de datos gestionados por el sistema central.
               </p>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                Por politicas de integridad, esta vista es de solo lectura. Su edicion esta deshabilitada para mantener la consistencia de las reglas de negocio en toda la plataforma.
+                Por políticas de integridad, esta vista es de solo lectura. Su edición está deshabilitada para mantener la consistencia de las reglas de negocio en toda la plataforma.
               </p>
             </div>
           </div>
@@ -111,78 +151,101 @@ export function Catalogs() {
         </motion.div>
       )}
 
-      <motion.div variants={fadeUp} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full sm:max-w-[320px]">
-          {catalogsLoading ? (
+      <motion.div variants={fadeUp} className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Sidebar Navigation */}
+        <div className="w-full lg:w-64 flex-shrink-0 space-y-4">
+          <div className="space-y-1 px-1">
+            <h3 className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>Dominios</h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Cargando catalogos...
+              Selecciona un dominio de datos.
+            </p>
+          </div>
+
+          {catalogsLoading ? (
+            <p className="text-[12px] px-1" style={{ color: "var(--t-text-dim)" }}>
+              Cargando catálogos...
             </p>
           ) : (
-            <Select 
-              value={selectedCatalogKey} 
-              onValueChange={(val) => setSelectedCatalogKey(val as GovernanceCatalogKey)}
-            >
-              <SelectTrigger className="w-full">
-                <div className="flex items-center gap-2">
-                  <Library className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-                  <SelectValue placeholder="Selecciona un catalogo" />
+            <div className="space-y-6">
+              {Object.entries(groupedCatalogs).map(([schema, schemaCatalogs]) => (
+                <div key={schema} className="space-y-1">
+                  <h4 className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--t-text-dim)" }}>
+                    {schema === "public" ? "Core" : schema}
+                  </h4>
+                  <div className="space-y-0.5">
+                    {schemaCatalogs.map(catalog => (
+                      <button
+                        key={catalog.key}
+                        onClick={() => {
+                          setSelectedCatalogKey(catalog.key);
+                          setSearchValue(""); // Reset search when switching catalogs
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-[13px] transition-colors ${
+                          selectedCatalogKey === catalog.key
+                            ? "font-medium"
+                            : "hover:bg-[var(--t-surface-hover)] text-[var(--t-text-secondary)]"
+                        }`}
+                        style={{
+                          backgroundColor: selectedCatalogKey === catalog.key ? "var(--t-primary)" : undefined,
+                          color: selectedCatalogKey === catalog.key ? "#ffffff" : undefined,
+                        }}
+                      >
+                        <span className="truncate pr-2">{catalog.label}</span>
+                        {catalog.rowCount !== null && (
+                          <span 
+                            className="text-[11px] px-1.5 py-0.5 rounded-md" 
+                            style={{ 
+                              backgroundColor: selectedCatalogKey === catalog.key ? "rgba(255,255,255,0.2)" : "var(--t-hover)",
+                              color: selectedCatalogKey === catalog.key ? "#ffffff" : "var(--t-text-tertiary)"
+                            }}
+                          >
+                            {catalog.rowCount}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </SelectTrigger>
-              <SelectContent>
-                {catalogs.map((catalog) => (
-                  <SelectItem key={catalog.key} value={catalog.key}>
-                    {catalog.label} {catalog.rowCount !== null ? `(${catalog.rowCount})` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              ))}
+            </div>
           )}
         </div>
-        
-        <div className="w-full sm:max-w-[400px]">
-          <FilterBar
-            searchPlaceholder={`Buscar en ${selectedCatalogLabel.toLowerCase()}...`}
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
-          />
-        </div>
-      </motion.div>
 
-      {selectedCatalog && (
-        <motion.div variants={fadeUp}>
-          <div
-            className="rounded-2xl px-4 py-3"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[13px] font-medium" style={{ color: "var(--t-text)" }}>
-                  {selectedCatalog.label}
-                </p>
-                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                  {selectedCatalog.description}
-                </p>
-              </div>
-              <StatusDot variant="secondary">{selectedCatalog.statusLabel}</StatusDot>
+        {/* Main Content */}
+        <div className="flex-1 min-w-0 w-full space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-[16px] font-medium" style={{ color: "var(--t-text)" }}>
+                {selectedCatalog?.label ?? "Catálogo"}
+              </h2>
+              <p className="text-[13px]" style={{ color: "var(--t-text-dim)" }}>
+                {selectedCatalog?.description ?? "Cargando..."}
+              </p>
+            </div>
+            
+            <div className="w-full sm:w-[320px]">
+              <FilterBar
+                searchPlaceholder={`Buscar en ${selectedCatalogLabel.toLowerCase()}...`}
+                searchValue={searchValue}
+                onSearchChange={setSearchValue}
+              />
             </div>
           </div>
-        </motion.div>
-      )}
 
-      {rowsError && !catalogsError && (
-        <motion.div variants={fadeUp}>
-          <GovernanceErrorBlock message={rowsError} onRetry={refresh} />
-        </motion.div>
-      )}
+          {rowsError && !catalogsError && (
+            <GovernanceErrorBlock message={rowsError} onRetry={refresh} />
+          )}
 
-      <motion.div variants={fadeUp}>
-        <DataTable
-          columns={columns}
-          data={rows}
-          loading={rowsLoading}
-          emptyMessage="No se encontraron registros para el catalogo seleccionado."
-          actions={[{ label: "Ver detalle", onClick: (row) => setDetailRow(row) }]}
-        />
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--t-border)", background: "var(--t-surface)" }}>
+            <DataTable
+              columns={columns}
+              data={rows}
+              loading={rowsLoading}
+              emptyMessage="No se encontraron registros para el catálogo seleccionado."
+              className="border-0 shadow-none rounded-none"
+            />
+          </div>
+        </div>
       </motion.div>
 
       <ModalShell
@@ -195,7 +258,7 @@ export function Catalogs() {
             <Eye className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Detalle de catalogo
+                Detalle de registro
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                 {detailRow?.catalogKey ?? selectedCatalogKey}

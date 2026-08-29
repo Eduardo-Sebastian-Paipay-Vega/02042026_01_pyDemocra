@@ -38,6 +38,7 @@ import { Attendance } from "../../modules/ong/app/pages/Attendance";
 import { AuditLog } from "../../modules/ong/app/pages/AuditLog";
 import { Beneficiaries } from "../../modules/ong/app/pages/Beneficiaries";
 import { Catalogs } from "../../modules/ong/app/pages/Catalogs";
+import { Areas } from "../../modules/ong/app/pages/Areas";
 import { Dashboard } from "../../modules/ong/app/pages/Dashboard";
 import { Evidence } from "../../modules/ong/app/pages/Evidence";
 import { Finance } from "../../modules/ong/app/pages/Finance";
@@ -586,6 +587,17 @@ export const ongModuleDefinitions: RegisteredModuleDefinition[] = [
         moduleKeys: ["governance", "auditoria", "ong"],
         anyPermissions: ["governance.catalogs.read"],
         element: <Catalogs />,
+      },
+      {
+        id: "areas",
+        label: "Áreas Organizacionales",
+        title: "Áreas Organizacionales",
+        breadcrumb: "Gobernanza",
+        path: `${ONG_BASE_PATH}/governance/areas`,
+        icon: Database,
+        moduleKeys: ["governance", "ong"],
+        anyPermissions: ["governance.catalogs.read"],
+        element: <Areas />,
       },
       {
         id: "audit-log",
