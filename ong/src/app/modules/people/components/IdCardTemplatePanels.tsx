@@ -63,7 +63,7 @@ export function IdCardTemplateFormModal({
     <ModalShell open={open} onClose={onClose} width={modalWidth}>
       <PeopleModalHeader
         title={mode === "edit" ? "Editar plantilla ID" : "Nueva plantilla ID"}
-        description="Gestiona ong.id_card_templates y ong.id_card_template_fields."
+        description="Personaliza la ubicación de los elementos, la tipografía y el diseño de la credencial."
         onClose={onClose}
       />
       <IdCardTemplateWizard
@@ -127,7 +127,7 @@ export function IdCardTemplateDetailModal({
     <ModalShell open={open} onClose={onClose} width="max-w-[1180px]">
       <PeopleModalHeader
         title="Detalle de plantilla ID"
-        description="Detalle real desde ong.id_card_templates y ong.id_card_template_fields."
+        description="Revisa y gestiona la configuración de diseño de esta credencial."
         onClose={onClose}
         actions={
           detail ? (
@@ -186,7 +186,7 @@ export function IdCardTemplateDetailModal({
 
               <PeopleSection
                 title="Coordenadas"
-                description="Configuracion persistida en ong.id_card_template_fields."
+                description="Configuración de ubicación y estilo de los elementos."
               >
                 <div className="space-y-3">
                   {detail.fields.map((field) => (

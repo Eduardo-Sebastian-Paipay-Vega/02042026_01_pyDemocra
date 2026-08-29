@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 /*
   Global styles for democra.pro landing.
   Imported by src/main.tsx — first stylesheet in the cascade.

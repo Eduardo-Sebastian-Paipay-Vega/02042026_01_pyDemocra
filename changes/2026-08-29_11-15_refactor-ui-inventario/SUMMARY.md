@@ -1,0 +1,4 @@
+- **Qué se hizo**: Se refactorizó la interfaz visual de la vista de Inventario (Items, Ubicaciones, Movimientos, Kardex).
+- **Por qué se hizo**: Para cumplir con los lineamientos de Design Skills: jerarquizar las acciones principales, alertar sobre stock crítico y mejorar la legibilidad de códigos y SKU.
+- **Qué beneficio aporta**: Mejora la experiencia del usuario (UX) reduciendo fricción, centralizando acciones ("Nuevo", "Refrescar") y previniendo decisiones erróneas mediante la visibilización clara del estado de "Agotado".
+- **Qué funcionalidades quedaron afectadas**: Solo la presentación de los datos en tabla y la ubicación de las acciones del módulo `Inventory.tsx`.

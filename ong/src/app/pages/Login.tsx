@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { supabase } from "../../supabaseClient";
 import { useTenantBootstrap } from "../tenant/TenantBootstrapProvider";
@@ -14,6 +14,7 @@ interface PendingStepUp {
 export function Login() {
   const { status, context, loading: bootstrapLoading } = useTenantBootstrap();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,9 +30,10 @@ export function Login() {
   // un desafío OTP pendiente de esta misma sesión de login (dispositivo nuevo).
   useEffect(() => {
     if (!bootstrapLoading && status === "ready" && context && !pendingStepUp) {
-      navigate(resolveTenantInitialPath(context), { replace: true });
+      const from = location.state?.from || resolveTenantInitialPath(context);
+      navigate(from, { replace: true });
     }
-  }, [bootstrapLoading, status, context, navigate, pendingStepUp]);
+  }, [bootstrapLoading, status, context, navigate, pendingStepUp, location]);
 
   async function evaluateLoginRisk() {
     const {

@@ -185,7 +185,7 @@ function formatScheduleLabel(startAt: string | null | undefined, endAt: string |
 
 function BlockError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="mb-3 flex items-center justify-between rounded-2xl px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-300 text-[12px]">
+    <div className="mb-3 flex items-center justify-between rounded-xl px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-300 text-[12px]">
       <span>{message}</span>
       <button
         type="button"
@@ -205,21 +205,21 @@ function FieldError({ message }: { message?: string | null }) {
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl px-3 py-2 bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
-      <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-medium">{label}</p>
-      <p className="mt-0.5 text-xs text-neutral-800 dark:text-zinc-200">{value || "-"}</p>
+    <div className="rounded-xl px-3 py-2 bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
+      <p className="text-[11px] text-neutral-500 dark:text-[#A4A29F] font-medium">{label}</p>
+      <p className="mt-0.5 text-xs text-neutral-800 dark:text-[#F9F7F3]">{value || "-"}</p>
     </div>
   );
 }
 
 function ModalHeader({ title, description, onClose }: { title: string; description: string; onClose: () => void }) {
   return (
-    <div className="flex items-start justify-between border-b border-neutral-200 dark:border-zinc-800 p-4">
+    <div className="flex items-start justify-between border-b border-neutral-200 dark:border-[#26231F] p-4">
       <div>
-        <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100">{title}</h3>
-        <p className="text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">{description}</p>
+        <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3]">{title}</h3>
+        <p className="text-xs text-neutral-500 dark:text-[#A4A29F] mt-0.5">{description}</p>
       </div>
-      <button type="button" onClick={onClose} className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200 p-1">
+      <button type="button" onClick={onClose} className="text-neutral-500 dark:text-[#A4A29F] hover:text-zinc-200 p-1">
         <X className="h-4 w-4" />
       </button>
     </div>
@@ -634,12 +634,12 @@ export function Dashboard() {
     {
       key: "volunteerName",
       label: "Voluntario",
-      render: (item) => <span className="font-medium text-neutral-900 dark:text-zinc-100">{item.volunteerName}</span>,
+      render: (item) => <span className="font-medium text-neutral-900 dark:text-[#F9F7F3]">{item.volunteerName}</span>,
     },
     {
       key: "activityName",
       label: "Actividad",
-      render: (item) => <span className="text-xs text-neutral-500 dark:text-zinc-400">{item.activityName}</span>,
+      render: (item) => <span className="text-xs text-neutral-500 dark:text-[#A4A29F]">{item.activityName}</span>,
     },
     {
       key: "hours",
@@ -653,7 +653,7 @@ export function Dashboard() {
     {
       key: "date",
       label: "Fecha",
-      render: (item) => <span className="font-mono text-xs text-neutral-500 dark:text-zinc-400">{formatDate(item.date)}</span>,
+      render: (item) => <span className="font-mono text-xs text-neutral-500 dark:text-[#A4A29F]">{formatDate(item.date)}</span>,
     },
     {
       key: "status",
@@ -680,8 +680,8 @@ export function Dashboard() {
       label: "Actividad y Proyecto",
       render: (item) => (
         <div>
-          <div className="font-medium text-neutral-900 dark:text-zinc-100">{item.name}</div>
-          <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-zinc-400">
+          <div className="font-medium text-neutral-900 dark:text-[#F9F7F3]">{item.name}</div>
+          <div className="mt-0.5 text-[11px] text-neutral-500 dark:text-[#A4A29F]">
             {item.projectName}
             {item.locationName ? ` â€¢ ${item.locationName}` : ""}
           </div>
@@ -692,7 +692,7 @@ export function Dashboard() {
       key: "date",
       label: "ProgramaciÃ³n",
       render: (item) => (
-        <span className="font-mono text-xs text-neutral-500 dark:text-zinc-400">
+        <span className="font-mono text-xs text-neutral-500 dark:text-[#A4A29F]">
           {formatScheduleLabel(item.startAt, item.endAt)}
         </span>
       ),
@@ -700,7 +700,7 @@ export function Dashboard() {
     {
       key: "assignedVolunteers",
       label: "Voluntarios",
-      render: (item) => <span className="font-mono text-xs text-neutral-700 dark:text-zinc-300">{item.assignedVolunteers} vol.</span>,
+      render: (item) => <span className="font-mono text-xs text-neutral-700 dark:text-[#A4A29F]">{item.assignedVolunteers} vol.</span>,
     },
     {
       key: "status",
@@ -724,17 +724,17 @@ export function Dashboard() {
     {
       key: "name",
       label: "Solicitante",
-      render: (item) => <span className="font-medium text-neutral-900 dark:text-zinc-100">{item.name}</span>,
+      render: (item) => <span className="font-medium text-neutral-900 dark:text-[#F9F7F3]">{item.name}</span>,
     },
     {
       key: "email",
       label: "Correo ElectrÃ³nico",
-      render: (item) => <span className="text-xs text-neutral-500 dark:text-zinc-400 font-mono">{item.email}</span>,
+      render: (item) => <span className="text-xs text-neutral-500 dark:text-[#A4A29F] font-mono">{item.email}</span>,
     },
     {
       key: "submittedAt",
       label: "Fecha EnvÃ­o",
-      render: (item) => <span className="font-mono text-xs text-neutral-500 dark:text-zinc-400">{formatDate(item.submittedAt)}</span>,
+      render: (item) => <span className="font-mono text-xs text-neutral-500 dark:text-[#A4A29F]">{formatDate(item.submittedAt)}</span>,
     },
     {
       key: "status",
@@ -771,9 +771,9 @@ export function Dashboard() {
             <OutlineButton
               size="sm"
               onClick={refresh}
-              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-[#A4A29F] border-neutral-200 dark:border-[#26231F] hover:bg-zinc-800"
             >
-              <RefreshCw className="h-4 w-4 text-neutral-500 dark:text-zinc-400" />
+              <RefreshCw className="h-4 w-4 text-neutral-500 dark:text-[#A4A29F]" />
               Actualizar
             </OutlineButton>
 
@@ -789,9 +789,9 @@ export function Dashboard() {
             <OutlineButton
               size="sm"
               onClick={() => setIsSettingsModalOpen(true)}
-              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-[#A4A29F] border-neutral-200 dark:border-[#26231F] hover:bg-zinc-800"
             >
-              <Settings className="h-4 w-4 text-neutral-500 dark:text-zinc-400" />
+              <Settings className="h-4 w-4 text-neutral-500 dark:text-[#A4A29F]" />
               Personalizar
             </OutlineButton>
 
@@ -802,7 +802,7 @@ export function Dashboard() {
                 toast.info("Generando informe gerencial ejecutivo en PDF desde Supabase...");
                 setTimeout(() => toast.success("Reporte Ejecutivo descargado exitosamente."), 1000);
               }}
-              className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 text-neutral-700 dark:text-[#A4A29F] border-neutral-200 dark:border-[#26231F] hover:bg-zinc-800"
             >
               <Download className="h-4 w-4 text-emerald-400" />
               Reporte PDF
@@ -821,14 +821,14 @@ export function Dashboard() {
               </GradientButton>
 
               {isQuickActionOpen && (
-                <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/95 p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 mt-2 w-52 rounded-xl border border-neutral-200 dark:border-[#26231F] bg-zinc-900/95 p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95">
                   <button
                     type="button"
                     onClick={() => {
                       setIsQuickActionOpen(false);
                       navigate("/app/ong/operation/hours");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-[#F9F7F3] hover:bg-zinc-800 text-left"
                   >
                     <Clock className="h-4 w-4 text-indigo-400" />
                     Registrar Horas
@@ -839,7 +839,7 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       navigate("/app/ong/approvals/hours");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-[#F9F7F3] hover:bg-zinc-800 text-left"
                   >
                     <CheckSquare className="h-4 w-4 text-emerald-400" />
                     Aprobar Horas Pendientes
@@ -850,7 +850,7 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       openActivityCreateModal();
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-[#F9F7F3] hover:bg-zinc-800 text-left"
                   >
                     <Plus className="h-4 w-4 text-purple-400" />
                     Nueva Actividad
@@ -861,7 +861,7 @@ export function Dashboard() {
                       setIsQuickActionOpen(false);
                       navigate("/app/ong/admission/requests");
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-zinc-200 hover:bg-zinc-800 text-left"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-neutral-800 dark:text-[#F9F7F3] hover:bg-zinc-800 text-left"
                   >
                     <UserPlus className="h-4 w-4 text-amber-400" />
                     Revisar Admisiones
@@ -881,14 +881,14 @@ export function Dashboard() {
         <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* GRÃFICO DE EVOLUCIÃ“N DE HORAS */}
           {widgetSettings.showEvolutionChart && (
-            <div className="lg:col-span-2 rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/80 p-5 space-y-4 shadow-sm">
+            <div className="lg:col-span-2 rounded-xl border border-neutral-200 dark:border-[#26231F] bg-zinc-900/80 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3] flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-indigo-400" />
                     EvoluciÃ³n del Voluntariado (Horas)
                   </h3>
-                  <p className="text-xs text-neutral-500 dark:text-zinc-400 mt-0.5">
+                  <p className="text-xs text-neutral-500 dark:text-[#A4A29F] mt-0.5">
                     Comparativa de horas solicitadas vs validadas en los Ãºltimos meses.
                   </p>
                 </div>
@@ -898,7 +898,7 @@ export function Dashboard() {
                 </span>
               </div>
 
-              <div className={(chartData.some(d => d.aprobadas > 0 || d.solicitadas > 0)) ? "h-64 w-full pt-2" : "h-32 w-full pt-2 flex flex-col items-center justify-center text-neutral-500 dark:text-zinc-500"}>
+              <div className={(chartData.some(d => d.aprobadas > 0 || d.solicitadas > 0)) ? "h-64 w-full pt-2" : "h-32 w-full pt-2 flex flex-col items-center justify-center text-neutral-500 dark:text-[#F9F7F3]0"}>
                 {(chartData.some(d => d.aprobadas > 0 || d.solicitadas > 0)) ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -954,14 +954,14 @@ export function Dashboard() {
 
           {/* AGENDA Y COMPROMISOS DE HOY (REAL DATABASE ITEMS ONLY) */}
           {widgetSettings.showTodayAgenda && (
-            <div className="rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/80 p-5 space-y-4 shadow-sm flex flex-col justify-between">
+            <div className="rounded-xl border border-neutral-200 dark:border-[#26231F] bg-zinc-900/80 p-5 space-y-4 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
-                  <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
+                <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#26231F] pb-3">
+                  <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3] flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-indigo-400" />
                     Agenda de Hoy
                   </h3>
-                  <span className="text-[11px] font-mono text-neutral-500 dark:text-zinc-400 font-medium">
+                  <span className="text-[11px] font-mono text-neutral-500 dark:text-[#A4A29F] font-medium">
                     {new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
                   </span>
                 </div>
@@ -975,7 +975,7 @@ export function Dashboard() {
                 <OutlineButton
                   size="sm"
                   onClick={() => navigate("/app/ong/projects/activities")}
-                  className="w-auto px-6 text-sm text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 justify-center"
+                  className="w-auto px-6 text-sm text-neutral-700 dark:text-[#A4A29F] border-neutral-200 dark:border-[#26231F] justify-center"
                 >
                   Ver Todas las Actividades
                 </OutlineButton>
@@ -990,13 +990,13 @@ export function Dashboard() {
         <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* FEED DE ACTIVIDAD EN TIEMPO REAL (100% REAL DE LA BASE DE DATOS) */}
           {widgetSettings.showActivityFeed && (
-            <div className="lg:col-span-2 rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/80 p-5 space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
-                <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
+            <div className="lg:col-span-2 rounded-xl border border-neutral-200 dark:border-[#26231F] bg-zinc-900/80 p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#26231F] pb-3">
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3] flex items-center gap-2">
                   <Radio className="h-5 w-5 text-indigo-400" />
                   Feed de Actividad en Vivo
                 </h3>
-                <span className="text-[11px] text-neutral-500 dark:text-zinc-400 font-mono flex items-center gap-1">
+                <span className="text-[11px] text-neutral-500 dark:text-[#A4A29F] font-mono flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   En directo
                 </span>
@@ -1007,32 +1007,32 @@ export function Dashboard() {
                   realActivityFeed.slice(0, 5).map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200/80 dark:border-zinc-800/80 text-xs hover:border-zinc-700 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200/80 dark:border-[#26231F]/80 text-xs hover:border-zinc-700 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white text-xs">
                           {item.avatar}
                         </div>
                         <div>
-                          <p className="text-neutral-800 dark:text-zinc-200">
-                            <span className="font-semibold text-neutral-900 dark:text-zinc-100">{item.user}</span>{" "}
-                            <span className="text-neutral-500 dark:text-zinc-400">{item.action}</span>
+                          <p className="text-neutral-800 dark:text-[#F9F7F3]">
+                            <span className="font-semibold text-neutral-900 dark:text-[#F9F7F3]">{item.user}</span>{" "}
+                            <span className="text-neutral-500 dark:text-[#A4A29F]">{item.action}</span>
                           </p>
                           <p className="text-[11px] text-indigo-400 font-medium truncate max-w-sm mt-0.5">
                             {item.target}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[11px] text-neutral-400 dark:text-zinc-500 font-mono shrink-0">{item.time}</span>
+                      <span className="text-[11px] text-neutral-400 dark:text-[#F9F7F3]0 font-mono shrink-0">{item.time}</span>
                     </div>
                   ))
                 ) : (
                   <div className="py-8 text-center space-y-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800/80 text-neutral-500 dark:text-zinc-400 mx-auto">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800/80 text-neutral-500 dark:text-[#A4A29F] mx-auto">
                       <Radio className="h-5 w-5 text-indigo-400" />
                     </div>
-                    <p className="text-xs text-neutral-700 dark:text-zinc-300 font-semibold">Sin actividad reciente en el sistema</p>
-                    <p className="text-[11px] text-neutral-400 dark:text-zinc-500 max-w-sm mx-auto">
+                    <p className="text-xs text-neutral-700 dark:text-[#A4A29F] font-semibold">Sin actividad reciente en el sistema</p>
+                    <p className="text-[11px] text-neutral-400 dark:text-[#F9F7F3]0 max-w-sm mx-auto">
                       Las acciones en tiempo real (horas registradas, admisiones y evidencias) se sincronizan de la BD.
                     </p>
                   </div>
@@ -1043,9 +1043,9 @@ export function Dashboard() {
 
           {/* ACCESOS DIRECTOS Y ESTADO OPERATIVO (VALORES REALES DE SUPABASE) */}
           {widgetSettings.showQuickAccess && (
-            <div className="rounded-2xl border border-neutral-200 dark:border-zinc-800 bg-zinc-900/80 p-5 space-y-3 shadow-sm flex flex-col justify-between">
+            <div className="rounded-xl border border-neutral-200 dark:border-[#26231F] bg-zinc-900/80 p-5 space-y-3 shadow-sm flex flex-col justify-between">
               <div>
-                <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2 border-b border-neutral-200 dark:border-zinc-800 pb-3">
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3] flex items-center gap-2 border-b border-neutral-200 dark:border-[#26231F] pb-3">
                   <Zap className="h-5 w-5 text-amber-400" />
                   Accesos Directos
                 </h3>
@@ -1054,9 +1054,9 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/ong/admission/requests")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 hover:border-indigo-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F] hover:border-indigo-500/40 text-xs transition-colors"
                   >
-                    <span className="flex items-center gap-2 text-neutral-800 dark:text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 text-neutral-800 dark:text-[#F9F7F3] font-medium">
                       <UserPlus className="h-4 w-4 text-indigo-400" />
                       Revisar Admisiones
                     </span>
@@ -1068,9 +1068,9 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/ong/approvals/hours")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 hover:border-emerald-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F] hover:border-emerald-500/40 text-xs transition-colors"
                   >
-                    <span className="flex items-center gap-2 text-neutral-800 dark:text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 text-neutral-800 dark:text-[#F9F7F3] font-medium">
                       <CheckSquare className="h-4 w-4 text-emerald-400" />
                       Validar Horas Pendientes
                     </span>
@@ -1082,9 +1082,9 @@ export function Dashboard() {
                   <button
                     type="button"
                     onClick={() => navigate("/app/ong/operation/evidence")}
-                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800 hover:border-purple-500/40 text-xs transition-colors"
+                    className="flex w-full items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F] hover:border-purple-500/40 text-xs transition-colors"
                   >
-                    <span className="flex items-center gap-2 text-neutral-800 dark:text-zinc-200 font-medium">
+                    <span className="flex items-center gap-2 text-neutral-800 dark:text-[#F9F7F3] font-medium">
                       <Upload className="h-4 w-4 text-purple-400" />
                       Repositorio de Evidencias
                     </span>
@@ -1095,7 +1095,7 @@ export function Dashboard() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-neutral-200 dark:border-zinc-800 text-[11px] text-neutral-400 dark:text-zinc-500 flex items-center justify-between font-mono">
+              <div className="pt-3 border-t border-neutral-200 dark:border-[#26231F] text-[11px] text-neutral-400 dark:text-[#F9F7F3]0 flex items-center justify-between font-mono">
                 <span>Estado Servidor ONG:</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> 100% Operativo
@@ -1108,7 +1108,7 @@ export function Dashboard() {
 
       {/* TABLA PRINCIPAL DE DATOS CON ACCIONES CRUD REALES EN SUPABASE */}
       <motion.div variants={fadeUp} className="space-y-3">
-        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
+        <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#26231F] pb-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -1116,7 +1116,7 @@ export function Dashboard() {
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "hours"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
+                  : "text-neutral-500 dark:text-[#A4A29F] hover:text-zinc-200"
               }`}
             >
               Horas Recientes
@@ -1127,7 +1127,7 @@ export function Dashboard() {
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "activities"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
+                  : "text-neutral-500 dark:text-[#A4A29F] hover:text-zinc-200"
               }`}
             >
               Actividades Recientes
@@ -1138,7 +1138,7 @@ export function Dashboard() {
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === "requests"
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-neutral-500 dark:text-zinc-400 hover:text-zinc-200"
+                  : "text-neutral-500 dark:text-[#A4A29F] hover:text-zinc-200"
               }`}
             >
               Solicitudes Recientes
@@ -1283,13 +1283,13 @@ export function Dashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">
                 Proyecto <span className="text-red-400">*</span>
               </label>
               <select
                 value={activityFormDraft.projectId}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, projectId: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               >
                 <option value="">Selecciona proyecto</option>
                 {taskOptions.map((t) => (
@@ -1302,7 +1302,7 @@ export function Dashboard() {
             </div>
 
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">
                 TÃ­tulo de la Actividad <span className="text-red-400">*</span>
               </label>
               <input
@@ -1310,39 +1310,39 @@ export function Dashboard() {
                 value={activityFormDraft.title}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, title: e.target.value }))}
                 placeholder="Ej. Taller de CapacitaciÃ³n Comunitario"
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               />
               <FieldError message={activityFormErrors.title} />
             </div>
 
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">Fecha / Hora Inicio</label>
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">Fecha / Hora Inicio</label>
               <input
                 type="datetime-local"
                 value={activityFormDraft.startAt}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, startAt: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               />
               <FieldError message={activityFormErrors.startAt} />
             </div>
 
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">Fecha / Hora Fin</label>
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">Fecha / Hora Fin</label>
               <input
                 type="datetime-local"
                 value={activityFormDraft.endAt}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, endAt: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               />
               <FieldError message={activityFormErrors.endAt} />
             </div>
 
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">Estado de la Actividad</label>
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">Estado de la Actividad</label>
               <select
                 value={activityFormDraft.statusCode}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, statusCode: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               >
                 {activityStateOptions.map((st) => (
                   <option key={st.value} value={st.value}>
@@ -1353,25 +1353,25 @@ export function Dashboard() {
             </div>
 
             <div>
-              <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1">Horas Estimadas</label>
+              <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1">Horas Estimadas</label>
               <input
                 type="number"
                 step="0.5"
                 value={activityFormDraft.estimatedHoursText}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, estimatedHoursText: e.target.value }))}
                 placeholder="Ej. 4"
-                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+                className="w-full rounded-xl px-3 py-2 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
               />
               <FieldError message={activityFormErrors.estimatedHours} />
             </div>
           </div>
 
           <div>
-            <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1 text-xs">UbicaciÃ³n</label>
+            <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1 text-xs">UbicaciÃ³n</label>
             <select
               value={activityFormDraft.locationId}
               onChange={(e) => setActivityFormDraft((d) => ({ ...d, locationId: e.target.value }))}
-              className="w-full rounded-xl px-3 py-2 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+              className="w-full rounded-xl px-3 py-2 text-xs outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
             >
               <option value="">Selecciona ubicaciÃ³n</option>
               {locationOptions.map((l) => (
@@ -1383,17 +1383,17 @@ export function Dashboard() {
           </div>
 
           <div>
-            <label className="block font-medium text-neutral-700 dark:text-zinc-300 mb-1 text-xs">DescripciÃ³n / Objetivos</label>
+            <label className="block font-medium text-neutral-700 dark:text-[#A4A29F] mb-1 text-xs">DescripciÃ³n / Objetivos</label>
             <textarea
               rows={3}
               value={activityFormDraft.description}
               onChange={(e) => setActivityFormDraft((d) => ({ ...d, description: e.target.value }))}
               placeholder="Detalla los objetivos de la actividad..."
-              className="w-full rounded-xl p-3 text-xs outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+              className="w-full rounded-xl p-3 text-xs outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
             <OutlineButton size="sm" onClick={closeActivityFormModal} disabled={isSavingActivity}>
               Cancelar
             </OutlineButton>
@@ -1414,7 +1414,7 @@ export function Dashboard() {
           />
 
           {activityDetailLoading ? (
-            <p className="text-xs text-neutral-500 dark:text-zinc-400 py-4 text-center">Cargando informaciÃ³n desde la base de datos...</p>
+            <p className="text-xs text-neutral-500 dark:text-[#A4A29F] py-4 text-center">Cargando informaciÃ³n desde la base de datos...</p>
           ) : activityDetailError ? (
             <BlockError message={activityDetailError} onRetry={() => activityDetailTargetId && void openActivityDetailModal(activityDetailTargetId)} />
           ) : activityDetail ? (
@@ -1431,14 +1431,14 @@ export function Dashboard() {
               </div>
 
               {activityDetail.description && (
-                <div className="p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
-                  <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-medium mb-1">DescripciÃ³n</p>
-                  <p className="text-neutral-800 dark:text-zinc-200">{activityDetail.description}</p>
+                <div className="p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
+                  <p className="text-[11px] text-neutral-500 dark:text-[#A4A29F] font-medium mb-1">DescripciÃ³n</p>
+                  <p className="text-neutral-800 dark:text-[#F9F7F3]">{activityDetail.description}</p>
                 </div>
               )}
 
               {canManageActivities && (
-                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
                   <OutlineButton
                     size="sm"
                     onClick={() => {
@@ -1475,7 +1475,7 @@ export function Dashboard() {
           />
 
           {hourDetailLoading ? (
-            <p className="text-xs text-neutral-500 dark:text-zinc-400 py-4 text-center">Cargando datos de horas desde Supabase...</p>
+            <p className="text-xs text-neutral-500 dark:text-[#A4A29F] py-4 text-center">Cargando datos de horas desde Supabase...</p>
           ) : hourDetailError ? (
             <BlockError message={hourDetailError} onRetry={() => hourDetailTargetId && void openHourDetailModal(hourDetailTargetId)} />
           ) : hourDetail ? (
@@ -1490,14 +1490,14 @@ export function Dashboard() {
               </div>
 
               {hourDetail.comment && (
-                <div className="p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
-                  <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-medium mb-1">Notas del Voluntario</p>
-                  <p className="text-neutral-800 dark:text-zinc-200">{hourDetail.comment}</p>
+                <div className="p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
+                  <p className="text-[11px] text-neutral-500 dark:text-[#A4A29F] font-medium mb-1">Notas del Voluntario</p>
+                  <p className="text-neutral-800 dark:text-[#F9F7F3]">{hourDetail.comment}</p>
                 </div>
               )}
 
               {canResolveHours && hourDetail.status === "pending" && (
-                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
                   <OutlineButton
                     size="sm"
                     onClick={() => {
@@ -1557,7 +1557,7 @@ export function Dashboard() {
           />
 
           {admissionDetailLoading ? (
-            <p className="text-xs text-neutral-500 dark:text-zinc-400 py-4 text-center">Cargando solicitud de admisiÃ³n desde Supabase...</p>
+            <p className="text-xs text-neutral-500 dark:text-[#A4A29F] py-4 text-center">Cargando solicitud de admisiÃ³n desde Supabase...</p>
           ) : admissionDetailError ? (
             <BlockError message={admissionDetailError} onRetry={() => admissionDetailTargetId && void openAdmissionDetailModal(admissionDetailTargetId)} />
           ) : admissionDetail ? (
@@ -1571,14 +1571,14 @@ export function Dashboard() {
               </div>
 
               {admissionDetail.notes && (
-                <div className="p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
-                  <p className="text-[11px] text-neutral-500 dark:text-zinc-400 font-medium mb-1">Motivo / Notas de PostulaciÃ³n</p>
-                  <p className="text-neutral-800 dark:text-zinc-200">{admissionDetail.notes}</p>
+                <div className="p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
+                  <p className="text-[11px] text-neutral-500 dark:text-[#A4A29F] font-medium mb-1">Motivo / Notas de PostulaciÃ³n</p>
+                  <p className="text-neutral-800 dark:text-[#F9F7F3]">{admissionDetail.notes}</p>
                 </div>
               )}
 
               {canResolveAdmissions && (admissionDetail.status === "pending" || admissionDetail.status === "interviewing") && (
-                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+                <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
                   <OutlineButton
                     size="sm"
                     onClick={() =>
@@ -1654,12 +1654,12 @@ export function Dashboard() {
                   ? "Escribe el motivo del rechazo..."
                   : "Comentario o notas adicionales para el registro (Opcional)..."
               }
-              className="w-full rounded-xl p-3 outline-none border border-neutral-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 text-neutral-800 dark:text-zinc-200"
+              className="w-full rounded-xl p-3 outline-none border border-neutral-200 dark:border-[#26231F] bg-neutral-100 dark:bg-[#171512] text-neutral-800 dark:text-[#F9F7F3]"
             />
 
             <FieldError message={resolutionError} />
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+            <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
               <OutlineButton size="sm" onClick={closeResolutionModal} disabled={isResolutionSubmitting}>
                 Cancelar
               </OutlineButton>
@@ -1681,11 +1681,11 @@ export function Dashboard() {
           />
 
           <div className="space-y-3 text-xs">
-            <p className="text-neutral-700 dark:text-zinc-300">
+            <p className="text-neutral-700 dark:text-[#A4A29F]">
               {cancelTarget ? `Â¿Confirmas la cancelaciÃ³n de "${cancelTarget.name}"?` : "Selecciona una actividad."}
             </p>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+            <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
               <OutlineButton size="sm" onClick={() => setCancelTarget(null)} disabled={isCancellingActivity}>
                 Volver
               </OutlineButton>
@@ -1700,71 +1700,71 @@ export function Dashboard() {
       {/* MODAL PERSONALIZAR DASHBOARD */}
       <ModalShell open={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} width="max-w-[500px]">
         <div className="space-y-4 p-5">
-          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-zinc-800 pb-3">
-            <h3 className="text-base font-semibold text-neutral-900 dark:text-zinc-100 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-neutral-200 dark:border-[#26231F] pb-3">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-[#F9F7F3] flex items-center gap-2">
               <Settings className="h-5 w-5 text-indigo-400" />
               Personalizar Dashboard
             </h3>
-            <button type="button" className="text-neutral-500 dark:text-zinc-400 hover:text-zinc-200" onClick={() => setIsSettingsModalOpen(false)}>
+            <button type="button" className="text-neutral-500 dark:text-[#A4A29F] hover:text-zinc-200" onClick={() => setIsSettingsModalOpen(false)}>
               <X className="h-4 w-4" />
             </button>
           </div>
 
           <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
               <div>
-                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">GrÃ¡fico de EvoluciÃ³n de Horas</span>
-                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Mostrar grÃ¡fico comparativo de tendencias.</span>
+                <span className="font-medium text-neutral-800 dark:text-[#F9F7F3] block">GrÃ¡fico de EvoluciÃ³n de Horas</span>
+                <span className="text-[11px] text-neutral-500 dark:text-[#A4A29F]">Mostrar grÃ¡fico comparativo de tendencias.</span>
               </div>
               <input
                 type="checkbox"
                 checked={widgetSettings.showEvolutionChart}
                 onChange={(e) => setWidgetSettings((s) => ({ ...s, showEvolutionChart: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-[#171512] text-indigo-600 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
               <div>
-                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">Agenda y Compromisos de Hoy</span>
-                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Mostrar lista de eventos programados para hoy.</span>
+                <span className="font-medium text-neutral-800 dark:text-[#F9F7F3] block">Agenda y Compromisos de Hoy</span>
+                <span className="text-[11px] text-neutral-500 dark:text-[#A4A29F]">Mostrar lista de eventos programados para hoy.</span>
               </div>
               <input
                 type="checkbox"
                 checked={widgetSettings.showTodayAgenda}
                 onChange={(e) => setWidgetSettings((s) => ({ ...s, showTodayAgenda: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-[#171512] text-indigo-600 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
               <div>
-                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">Feed de Actividad en Vivo</span>
-                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Mostrar historial dinÃ¡mico en tiempo real.</span>
+                <span className="font-medium text-neutral-800 dark:text-[#F9F7F3] block">Feed de Actividad en Vivo</span>
+                <span className="text-[11px] text-neutral-500 dark:text-[#A4A29F]">Mostrar historial dinÃ¡mico en tiempo real.</span>
               </div>
               <input
                 type="checkbox"
                 checked={widgetSettings.showActivityFeed}
                 onChange={(e) => setWidgetSettings((s) => ({ ...s, showActivityFeed: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-[#171512] text-indigo-600 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#100F0D] border border-neutral-200 dark:border-[#26231F]">
               <div>
-                <span className="font-medium text-neutral-800 dark:text-zinc-200 block">Accesos Directos Operativos</span>
-                <span className="text-[11px] text-neutral-500 dark:text-zinc-400">Mostrar botones de acceso rÃ¡pido.</span>
+                <span className="font-medium text-neutral-800 dark:text-[#F9F7F3] block">Accesos Directos Operativos</span>
+                <span className="text-[11px] text-neutral-500 dark:text-[#A4A29F]">Mostrar botones de acceso rÃ¡pido.</span>
               </div>
               <input
                 type="checkbox"
                 checked={widgetSettings.showQuickAccess}
                 onChange={(e) => setWidgetSettings((s) => ({ ...s, showQuickAccess: e.target.checked }))}
-                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-zinc-700 bg-neutral-100 dark:bg-[#171512] text-indigo-600 focus:ring-indigo-500"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-zinc-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-neutral-200 dark:border-[#26231F]">
             <OutlineButton size="sm" onClick={() => setIsSettingsModalOpen(false)}>
               Cancelar
             </OutlineButton>

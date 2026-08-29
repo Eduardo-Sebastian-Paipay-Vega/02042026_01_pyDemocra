@@ -42,7 +42,8 @@ export async function adaptAdmissionDocumentFormToCreateInput(options: {
     requestId: options.requestId,
     type: options.values.type.trim(),
     fileUrl: await resolveAdmissionDocumentUrl(options.requestId, options.values),
-    verified: options.values.verified,
+    estadoValidacion: options.values.estadoValidacion,
+    comentariosRechazo: options.values.comentariosRechazo,
   };
 }
 
@@ -55,7 +56,8 @@ export async function adaptAdmissionDocumentFormToUpdateInput(options: {
     documentId: options.documentId,
     type: options.values.type.trim(),
     fileUrl: await resolveAdmissionDocumentUrl(options.requestId, options.values),
-    verified: options.values.verified,
+    estadoValidacion: options.values.estadoValidacion,
+    comentariosRechazo: options.values.comentariosRechazo,
   };
 }
 

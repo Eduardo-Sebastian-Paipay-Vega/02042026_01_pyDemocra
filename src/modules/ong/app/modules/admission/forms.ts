@@ -7,12 +7,15 @@ export interface AdmissionDocumentFormValues {
   type: string;
   existingFileUrl: string;
   file: File | null;
-  verified: boolean;
+  estadoValidacion: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo: string;
 }
 
 export interface AdmissionDocumentFormErrors {
   type?: string;
   file?: string;
+  estadoValidacion?: string;
+  comentariosRechazo?: string;
   general?: string;
 }
 
@@ -33,7 +36,8 @@ export function buildEmptyAdmissionDocumentForm(): AdmissionDocumentFormValues {
     type: "",
     existingFileUrl: "",
     file: null,
-    verified: false,
+    estadoValidacion: "PENDIENTE",
+    comentariosRechazo: "",
   };
 }
 
@@ -48,7 +52,8 @@ export function mapAdmissionDocumentToForm(
       row.typeCode,
     existingFileUrl: row.fileUrl,
     file: null,
-    verified: row.verified,
+    estadoValidacion: row.estadoValidacion,
+    comentariosRechazo: row.comentariosRechazo ?? "",
   };
 }
 
@@ -62,6 +67,9 @@ export function validateAdmissionDocumentForm(
   }
   if (!values.file && !values.existingFileUrl.trim()) {
     errors.file = "Debes seleccionar un archivo o conservar uno existente.";
+  }
+  if (values.estadoValidacion === "RECHAZADO" && !values.comentariosRechazo.trim()) {
+    errors.comentariosRechazo = "Debes ingresar un motivo de rechazo.";
   }
 
   return errors;

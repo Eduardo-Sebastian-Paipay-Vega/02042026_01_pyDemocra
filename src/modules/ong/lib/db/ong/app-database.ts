@@ -599,10 +599,13 @@ interface RrhhSolicitudAdmisionRow {
   nombres: string;
   apellidos: string;
   email: string;
-  estado: "nueva" | "en_entrevista" | "aprobada" | "rechazada" | null;
+  estado: "PENDIENTE" | "EN_REVISION" | "ENTREVISTA" | "APROBADA" | "RECHAZADA" | "CONVERTIDA" | null;
   fecha_solicitud: IsoDateTime | null;
   notas: string | null;
   id_voluntario_vinculado: Uuid | null;
+  is_deleted: boolean;
+  deleted_at: IsoDateTime | null;
+  deleted_by: Uuid | null;
   created_at: IsoDateTime;
   updated_at: IsoDateTime;
   created_by: Uuid | null;
@@ -615,7 +618,8 @@ interface RrhhDocumentoAdmisionRow {
   id_solicitud: Uuid;
   tipo_documento: string;
   archivo_url: string;
-  verificado: boolean | null;
+  estado_validacion: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentarios_rechazo: string | null;
   verified_by: Uuid | null;
   verified_at: IsoDateTime | null;
   created_at: IsoDateTime;

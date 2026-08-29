@@ -7,11 +7,14 @@ export interface AdmissionDocumentFormValues {
   type: string;
   existingFileUrl: string;
   file: File | null;
-  verified: boolean;
+  estadoValidacion: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo: string | null;
 }
 
 export interface AdmissionDocumentFormErrors {
   type?: string;
+  estadoValidacion?: string;
+  comentariosRechazo?: string;
   file?: string;
   general?: string;
 }
@@ -33,7 +36,8 @@ export function buildEmptyAdmissionDocumentForm(): AdmissionDocumentFormValues {
     type: "",
     existingFileUrl: "",
     file: null,
-    verified: false,
+    estadoValidacion: "PENDIENTE",
+    comentariosRechazo: null,
   };
 }
 
@@ -46,7 +50,8 @@ export function mapAdmissionDocumentToForm(
       documentTypeOptions.find((option) => option.label === row.type)?.value ?? row.type,
     existingFileUrl: row.fileUrl,
     file: null,
-    verified: row.verified,
+    estadoValidacion: row.estadoValidacion,
+    comentariosRechazo: row.comentariosRechazo,
   };
 }
 

@@ -25,7 +25,8 @@ function buildDocumentValues(
     type: "  DNI  ",
     existingFileUrl: "",
     file: null,
-    verified: false,
+    estadoValidacion: "PENDIENTE",
+    comentariosRechazo: null,
     ...overrides,
   };
 }
@@ -57,7 +58,8 @@ describe("adaptAdmissionDocumentFormToCreateInput", () => {
       requestId: "req-1",
       type: "DNI",
       fileUrl: "https://cdn.example.com/a.pdf",
-      verified: false,
+      estadoValidacion: "PENDIENTE",
+      comentariosRechazo: null,
     });
     expect(storage.uploadFileToStorage).not.toHaveBeenCalled();
   });
@@ -83,7 +85,7 @@ describe("adaptAdmissionDocumentFormToCreateInput", () => {
 
     const result = await adaptAdmissionDocumentFormToCreateInput({
       requestId: "req-1",
-      values: buildDocumentValues({ file, verified: true }),
+      values: buildDocumentValues({ file, estadoValidacion: "APROBADO" }),
     });
 
     expect(storage.uploadFileToStorage).toHaveBeenCalledTimes(1);
@@ -91,7 +93,8 @@ describe("adaptAdmissionDocumentFormToCreateInput", () => {
       requestId: "req-1",
       type: "DNI",
       fileUrl: "https://cdn.example.com/nuevo.pdf",
-      verified: true,
+      estadoValidacion: "APROBADO",
+      comentariosRechazo: null,
     });
   });
 });
@@ -112,7 +115,8 @@ describe("adaptAdmissionDocumentFormToUpdateInput", () => {
       documentId: "doc-1",
       type: "DNI",
       fileUrl: "https://cdn.example.com/a.pdf",
-      verified: false,
+      estadoValidacion: "PENDIENTE",
+      comentariosRechazo: null,
     });
   });
 });

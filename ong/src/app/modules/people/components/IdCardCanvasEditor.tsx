@@ -134,7 +134,7 @@ function FieldContent({
     <div style={{
       width: "100%", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis",
       fontSize: scaledFont, fontFamily: fontFamily ?? "sans-serif",
-      fontWeight: fontWeight ?? "600", color, lineHeight: "1.15",
+      fontWeight: fontWeight ?? "600", color, lineHeight: "1.25",
       userSelect: "none", pointerEvents: "none",
     }}>
       {text}
@@ -177,12 +177,12 @@ function CoordinatesHud({
 function HudChip({ label, value }: { label: string; value: string }) {
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 2,
+      display: "inline-flex", alignItems: "center", gap: 4,
       background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.25)",
-      borderRadius: 4, padding: "1px 6px", fontSize: 10, fontFamily: "monospace",
+      borderRadius: 6, padding: "3px 8px", fontSize: 12, fontFamily: "monospace",
       color: "var(--t-text)",
     }}>
-      <span style={{ color: "var(--t-text-dim)", fontSize: 9 }}>{label}</span>
+      <span style={{ color: "var(--t-text-dim)", fontSize: 11, fontWeight: 700 }}>{label}</span>
       {value}
     </span>
   );
@@ -575,7 +575,7 @@ export function IdCardCanvasEditor({
             <Rnd
               key={field.fieldKey}
               position={{ x, y }}
-              size={{ width: w, height: h }}
+              size={{ width: w, height: blockField ? h : "auto" }}
               bounds="parent"
               enableResizing={enableResize}
               dragGrid={rndGrid}
@@ -601,10 +601,10 @@ export function IdCardCanvasEditor({
                 {/* Field label badge */}
                 {active && (
                   <div style={{
-                    position: "absolute", top: -18, left: 0,
+                    position: "absolute", top: -22, left: -2,
                     background: "rgba(99,102,241,1)", color: "#fff",
-                    fontSize: 9, fontFamily: "sans-serif", fontWeight: 700,
-                    padding: "1px 5px", borderRadius: "3px 3px 0 0",
+                    fontSize: 11, fontFamily: "sans-serif", fontWeight: 700,
+                    padding: "2px 8px", borderRadius: "4px 4px 0 0",
                     whiteSpace: "nowrap", zIndex: 999, userSelect: "none",
                   }}>
                     {ID_CARD_FIELD_LABELS[field.fieldKey]}
@@ -637,10 +637,10 @@ export function IdCardCanvasEditor({
 
         {/* Canvas size label */}
         <div style={{
-          position: "absolute", bottom: 4, right: 6, fontSize: 9,
-          fontFamily: "monospace", color: "rgba(255,255,255,0.6)",
-          background: "rgba(0,0,0,0.35)", padding: "1px 4px", borderRadius: 3,
-          pointerEvents: "none", userSelect: "none",
+          position: "absolute", bottom: 8, right: 8, fontSize: 11,
+          fontFamily: "monospace", color: "#ffffff", fontWeight: 600,
+          background: "rgba(0,0,0,0.65)", padding: "4px 8px", borderRadius: 4,
+          pointerEvents: "none", userSelect: "none", border: "1px solid rgba(255,255,255,0.15)"
         }}>
           {unit === "mm"
             ? `${pxToMm(templateWidth).toFixed(1)} × ${pxToMm(templateHeight).toFixed(1)} mm`

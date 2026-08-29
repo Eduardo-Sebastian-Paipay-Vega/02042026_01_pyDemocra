@@ -25,7 +25,7 @@ export function LoginGateway() {
       // Same-origin MPA: la sesión ya quedó en localStorage bajo AUTH_STORAGE_KEY
       // (compartido con el cliente Supabase de ONG). Una navegación normal basta
       // para que /ong la recoja al montar — sin tokens en la URL.
-      window.location.assign("/ong/");
+      window.location.assign("/ong/app");
       return;
     }
 

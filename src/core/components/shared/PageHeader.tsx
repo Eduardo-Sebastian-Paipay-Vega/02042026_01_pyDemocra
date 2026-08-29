@@ -10,9 +10,10 @@ interface PageHeaderProps {
     disabled?: boolean;
   };
   className?: string;
+  children?: React.ReactNode;
 }
 
-export function PageHeader({ title, description, action, className }: PageHeaderProps) {
+export function PageHeader({ title, description, action, className, children }: PageHeaderProps) {
   return (
     <div className={cn("flex flex-col gap-4 md:flex-row md:items-start md:justify-between", className)}>
       <div className="max-w-3xl">
@@ -21,11 +22,14 @@ export function PageHeader({ title, description, action, className }: PageHeader
           <p className="mt-1.5 text-[15px]" style={{ color: "var(--t-text-secondary)" }}>{description}</p>
         )}
       </div>
-      {action && (
-        <GradientButton size="sm" onClick={action.onClick} disabled={action.disabled}>
-          {action.label}
-        </GradientButton>
-      )}
+      <div className="flex items-center gap-3">
+        {children}
+        {action && (
+          <GradientButton size="sm" onClick={action.onClick} disabled={action.disabled}>
+            {action.label}
+          </GradientButton>
+        )}
+      </div>
     </div>
   );
 }

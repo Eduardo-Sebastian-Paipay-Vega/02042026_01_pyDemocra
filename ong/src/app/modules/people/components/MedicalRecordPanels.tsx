@@ -49,7 +49,8 @@ export function SensitiveAccessGateModal({
   loggable: boolean;
   onConfirm: (reason: string) => Promise<void>;
 }) {
-  const { register, handleSubmit, reset } = useForm<SensitiveAccessGateState>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { isSubmitting, isValid, errors } } = useForm<SensitiveAccessGateState>({
+    mode: "onChange",
     defaultValues: {
       accessReason: "",
     },
@@ -65,43 +66,102 @@ export function SensitiveAccessGateModal({
     await onConfirm(values.accessReason);
   });
 
+  const quickReasons = ["Emergencia", "Seguimiento clínico", "Auditoría"];
+
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[560px]" className="fichas-medicas-theme">
-      <PeopleModalHeader
-        title="Motivo de acceso sensible"
-        description={`Debes justificar el acceso a la ficha ${scope === "beneficiaries" ? "medica" : "sensible"} de ${personName}.`}
-        onClose={onClose}
-      />
-
-      <form className="space-y-4 p-4" onSubmit={(event) => void submit(event)}>
-        <PeopleField label="Motivo de acceso">
-          <PeopleTextArea
-            rows={3}
-            placeholder="Ej: atencion de emergencia, seguimiento clinico, actualizacion autorizada"
-            {...register("accessReason", {
-              required: true,
-            })}
-          />
-        </PeopleField>
-
-        {!loggable && (
-          <div
-            className="rounded-2xl px-4 py-3 text-[12px]"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-          >
-            El acceso a esta ficha quedará registrado en la bitácora de accesos sensibles.
+    <ModalShell open={open} onClose={onClose} width="max-w-[560px]">
+      <div className="bg-[#171512] text-[#F9F7F3] font-sans w-full h-full relative">
+        {/* Header Superior */}
+        <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-[#26231F]">
+          <div>
+            <h3 className="text-xl font-bold text-[#F9F7F3]">
+              Motivo de acceso sensible
+            </h3>
+            <p className="text-sm text-[#A4A29F] mt-1">
+              Debes justificar el acceso a la ficha {scope === "beneficiaries" ? "médica" : "sensible"} de <span className="font-bold text-white uppercase">{personName}</span>.
+            </p>
           </div>
-        )}
-
-        <div className="flex flex-wrap gap-2">
-          <GradientButton size="sm" type="submit">
-            Abrir ficha
-          </GradientButton>
-          <OutlineButton size="sm" type="button" onClick={onClose}>
-            Cancelar
-          </OutlineButton>
+          <button
+            type="button"
+            aria-label="Cerrar modal"
+            className="rounded-md p-1.5 text-[#A4A29F] transition-colors hover:bg-[#1F1D1A]"
+            onClick={onClose}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
-      </form>
+
+        <form className="p-6 space-y-5" onSubmit={(event) => void submit(event)}>
+          <label className="block space-y-3">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-[#F9F7F3]">
+                Motivo de acceso
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {quickReasons.map(reason => (
+                  <button
+                    key={reason}
+                    type="button"
+                    className="text-xs bg-[#1F1D1A] text-[#A4A29F] px-2.5 py-1 rounded-md border border-[#26231F] hover:border-[#356C92] hover:text-[#F9F7F3] transition-colors"
+                    onClick={() => {
+                      const current = watch("accessReason");
+                      const newValue = current ? `${current.trim()}, ${reason}` : reason;
+                      setValue("accessReason", newValue, { shouldValidate: true, shouldDirty: true });
+                    }}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <textarea
+              rows={3}
+              placeholder="Escribe o selecciona un motivo válido (mín. 10 caracteres)"
+              className={`w-full rounded-xl px-4 py-3 text-sm outline-none bg-[#1F1D1A] border transition-all resize-none ${errors.accessReason ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-[#374151] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] focus:ring-2 focus:ring-[#356C92]/30'}`}
+              {...register("accessReason", { required: true, minLength: 10 })}
+            />
+            {errors.accessReason && (
+              <p className="text-xs text-red-400 mt-1">El motivo debe tener al menos 10 caracteres.</p>
+            )}
+          </label>
+
+          {!loggable && (
+            <div className="bg-[#231C11] border border-[#FCD34D]/20 p-4 rounded-xl flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-[#FCD34D] shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div>
+                <p className="text-sm font-medium text-[#FCD34D]">Trazabilidad activa</p>
+                <p className="text-xs text-[#FDE68A] mt-1 leading-relaxed">
+                  El acceso a esta ficha quedará registrado permanentemente en la bitácora de accesos sensibles del sistema.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={!isValid || isSubmitting}
+              className="bg-[#356C92] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#356C92]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
+            >
+              {isSubmitting ? (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : "Abrir ficha"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-[#A4A29F] hover:bg-[#1F1D1A] transition-colors border border-transparent hover:border-[#26231F] disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </ModalShell>
   );
 }
@@ -157,75 +217,138 @@ export function SensitiveMedicalFormModal({
   });
 
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[820px]" className="fichas-medicas-theme">
-      <PeopleModalHeader
-        title={detail?.hasRecord ? "Editar ficha sensible" : "Registrar ficha sensible"}
-        description="Actualiza los datos clínicos sensibles del voluntario o beneficiario."
-        onClose={onClose}
-      />
+    <ModalShell open={open} onClose={onClose} width="max-w-[820px]">
+      <div className="bg-[#171512] text-[#F9F7F3] font-sans w-full h-full relative flex flex-col">
+        {/* Header Superior */}
+        <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-[#26231F] shrink-0">
+          <div>
+            <h3 className="text-xl font-bold text-[#F9F7F3]">
+              {detail?.hasRecord ? "Editar ficha sensible" : "Registrar ficha sensible"}
+            </h3>
+            <p className="text-sm text-[#A4A29F] mt-1">
+              Actualiza los datos clínicos sensibles del voluntario o beneficiario.
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Cerrar modal"
+            className="rounded-md p-1.5 text-[#A4A29F] transition-colors hover:bg-[#1F1D1A]"
+            onClick={onClose}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
 
-      <form className="max-h-[78vh] space-y-4 overflow-y-auto p-4" onSubmit={(event) => void submit(event)}>
-        {submitError && <PeopleErrorBlock message={submitError} />}
-        {!detail ? (
-          <PeopleErrorBlock message="No se encontro la ficha a editar." />
-        ) : detail.scope === "beneficiaries" ? (
-          <>
-            <PeopleSection title="Ficha medica" description="Datos médicos generales del beneficiario.">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <PeopleField label="Tipo de sangre">
-                  <PeopleTextInput placeholder="Ej: O+" {...register("bloodType")} />
-                </PeopleField>
-                <PeopleField label="Alergias">
-                  <PeopleTextInput placeholder="Alergias" {...register("allergies")} />
-                </PeopleField>
+        <form className="p-6 space-y-6 overflow-y-auto max-h-[78vh]" onSubmit={(event) => void submit(event)}>
+          {submitError && (
+            <div className="bg-[#231C11] border border-[#D97706]/20 rounded-xl p-4 flex items-center justify-between">
+               <span className="text-sm font-medium text-[#D97706]">{submitError}</span>
+            </div>
+          )}
+          {!detail ? (
+            <div className="bg-[#1F181E] border border-[#8B5CF6]/20 rounded-xl p-4">
+              <span className="text-sm font-medium text-[#8B5CF6]">No se encontro la ficha a editar.</span>
+            </div>
+          ) : detail.scope === "beneficiaries" ? (
+            <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-[#F9F7F3]">Ficha medica</h4>
+                <p className="text-xs text-[#A4A29F] mt-1">Datos médicos generales del beneficiario.</p>
               </div>
-              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                <PeopleField label="Condiciones preexistentes">
-                  <PeopleTextArea rows={3} placeholder="Condiciones" {...register("preexistingConditions")} />
-                </PeopleField>
-                <PeopleField label="Medicacion actual">
-                  <PeopleTextArea rows={3} placeholder="Medicacion" {...register("currentMedication")} />
-                </PeopleField>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[#A4A29F]">Tipo de sangre</span>
+                  <select 
+                    className="w-full rounded-xl px-4 py-2.5 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] focus:border-[#356C92] transition-colors" 
+                    {...register("bloodType")}
+                  >
+                    <option value="">Selecciona un tipo</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                  </select>
+                </label>
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[#A4A29F]">Alergias</span>
+                  <input type="text" placeholder="Alergias" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors" {...register("allergies")} />
+                </label>
               </div>
-            </PeopleSection>
-          </>
-        ) : (
-          <PeopleSection title="Ficha sensible de voluntario" description="clinico.ficha_sensible_voluntario">
-            <div className="space-y-3">
-              <PeopleField label="Condiciones medicas">
-                <PeopleTextArea rows={4} placeholder="Condiciones medicas" {...register("medicalConditions")} />
-              </PeopleField>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <PeopleField label="Contacto emergencia">
-                  <PeopleTextInput placeholder="Contacto" {...register("emergencyContact")} />
-                </PeopleField>
-                <PeopleField label="Telefono emergencia">
-                  <PeopleTextInput placeholder="Telefono" {...register("emergencyPhone")} />
-                </PeopleField>
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[#A4A29F]">Condiciones preexistentes</span>
+                  <textarea rows={3} placeholder="Condiciones" className="w-full rounded-xl px-4 py-3 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors resize-none" {...register("preexistingConditions")} />
+                </label>
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[#A4A29F]">Medicacion actual</span>
+                  <textarea rows={3} placeholder="Medicacion" className="w-full rounded-xl px-4 py-3 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors resize-none" {...register("currentMedication")} />
+                </label>
               </div>
             </div>
-          </PeopleSection>
-        )}
+          ) : (
+            <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-[#F9F7F3]">Ficha sensible de voluntario</h4>
+                <p className="text-xs text-[#A4A29F] mt-1">clinico.ficha_sensible_voluntario</p>
+              </div>
+              <div className="space-y-4">
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-medium text-[#A4A29F]">Condiciones medicas</span>
+                  <textarea rows={4} placeholder="Condiciones medicas" className="w-full rounded-xl px-4 py-3 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors resize-none" {...register("medicalConditions")} />
+                </label>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium text-[#A4A29F]">Contacto emergencia</span>
+                    <input type="text" placeholder="Contacto" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors" {...register("emergencyContact")} />
+                  </label>
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium text-[#A4A29F]">Telefono emergencia</span>
+                    <input type="text" placeholder="Telefono" className="w-full rounded-xl px-4 py-2.5 text-sm outline-none bg-[#171512] border border-[#26231F] text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors" {...register("emergencyPhone")} />
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
 
-        <PeopleSection title="Trazabilidad de acceso" description="El motivo se usa para registrar o justificar el acceso sensible.">
-          <PeopleField label="Motivo de acceso" error={submitError ?? undefined}>
-            <PeopleTextArea
-              rows={3}
-              placeholder="Motivo obligatorio para lectura o actualizacion sensible"
-              {...register("accessReason", { required: true })}
-            />
-          </PeopleField>
-        </PeopleSection>
+          <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-[#F9F7F3]">Trazabilidad de acceso</h4>
+              <p className="text-xs text-[#A4A29F] mt-1">El motivo se usa para registrar o justificar el acceso sensible.</p>
+            </div>
+            <label className="block space-y-1.5">
+              <span className="text-xs font-medium text-[#A4A29F]">Motivo de acceso</span>
+              <textarea
+                rows={3}
+                placeholder="Motivo obligatorio para lectura o actualizacion sensible"
+                className={`w-full rounded-xl px-4 py-3 text-sm outline-none bg-[#171512] border text-[#F9F7F3] placeholder:text-[#686561] focus:border-[#356C92] transition-colors resize-none ${submitError ? 'border-[#D97706]' : 'border-[#26231F]'}`}
+                {...register("accessReason", { required: true })}
+              />
+            </label>
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          <GradientButton size="sm" type="submit" disabled={isSaving}>
-            {isSaving ? "Guardando..." : "Guardar ficha"}
-          </GradientButton>
-          <OutlineButton size="sm" type="button" onClick={onClose} disabled={isSaving}>
-            Cancelar
-          </OutlineButton>
-        </div>
-      </form>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="bg-[#356C92] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#356C92]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? "Guardando..." : "Guardar ficha"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSaving}
+              className="px-5 py-2.5 rounded-lg text-sm font-medium text-[#A4A29F] hover:bg-[#1F1D1A] transition-colors border border-transparent hover:border-[#26231F] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </ModalShell>
   );
 }
@@ -250,132 +373,225 @@ export function SensitiveMedicalDetailModal({
   canWrite: boolean;
 }) {
   return (
-    <ModalShell open={open} onClose={onClose} width="max-w-[980px]" className="fichas-medicas-theme">
-      <PeopleModalHeader
-        title="Detalle de ficha sensible"
-        description="El contenido clinico solo se expone despues de pasar por la validacion de acceso."
-        onClose={onClose}
-        actions={
-          detail && canWrite ? (
-            <OutlineButton size="sm" onClick={onEdit}>
-              {detail.hasRecord ? "Editar" : "Registrar"}
-            </OutlineButton>
-          ) : null
-        }
-      />
-
-      <div className="max-h-[78vh] space-y-4 overflow-y-auto p-4">
-        {loading && <PeopleErrorBlock message="Cargando ficha sensible..." />}
-        {!loading && error && <PeopleErrorBlock message={error} onRetry={onRetry} />}
-        {!loading && !error && detail && (
-          <>
-            <div
-              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl px-4 py-4"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+    <ModalShell open={open} onClose={onClose} width="max-w-[800px]">
+      <div className="bg-[#171512] text-[#F9F7F3] font-sans w-full h-full relative flex flex-col">
+        {/* Header Superior */}
+        <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-[#26231F] shrink-0">
+          <div>
+            <h3 className="text-xl font-bold text-[#F9F7F3]">
+              Detalle de ficha sensible
+            </h3>
+            <p className="text-sm text-[#A4A29F] mt-1">
+              Información clínica confidencial de acceso controlado.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {detail && canWrite && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#356C92] hover:bg-[#356C92]/90 transition-colors shadow-sm"
+              >
+                {detail.hasRecord ? "Editar ficha" : "Registrar ficha"}
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Cerrar modal"
+              className="rounded-md p-1.5 text-[#A4A29F] transition-colors hover:bg-[#1F1D1A]"
+              onClick={onClose}
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-                  <h4 className="text-[16px]" style={{ color: "var(--t-text)" }}>
-                    {detail.personName}
-                  </h4>
-                </div>
-                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                  {detail.documentLabel}
-                </p>
-              </div>
-              <StatusDot variant={detail.hasRecord ? "warning" : "secondary"}>
-                {detail.hasRecord ? "Con ficha" : "Sin ficha"}
-              </StatusDot>
-            </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
 
-            <PeopleSection title="Control sensible" description="Estado del acceso y trazabilidad.">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                <PeopleDetailField label="Actualizado" value={formatPeopleDate(detail.updatedAt)} />
-                <PeopleDetailField label="Creado por" value={formatPeopleText(detail.createdBy)} />
-                <PeopleDetailField label="Actualizado por" value={formatPeopleText(detail.updatedBy)} />
-                <PeopleDetailField
-                  label="Bitacora acceso"
-                  value={detail.accessLogged ? "Registrada" : "No persistida"}
-                />
+        <div className="p-6 space-y-6 overflow-y-auto max-h-[78vh]">
+          {loading && (
+            <div className="bg-[#100F0D] border border-[#26231F] rounded-xl p-5 flex items-center justify-center">
+               <span className="text-sm text-[#A4A29F]">Cargando ficha sensible...</span>
+            </div>
+          )}
+          {!loading && error && (
+            <div className="bg-[#231C11] border border-[#D97706]/20 rounded-xl p-5 flex items-center justify-between">
+               <span className="text-sm text-[#D97706]">{error}</span>
+               <button onClick={onRetry} className="text-xs font-medium bg-[#1F1D1A] px-3 py-1.5 rounded-lg border border-[#26231F] hover:bg-[#26231F] transition-colors text-[#F9F7F3]">Reintentar</button>
+            </div>
+          )}
+          {!loading && !error && detail && (
+            <>
+              {/* Top Bar Identity */}
+              <div className="bg-transparent p-2 flex flex-wrap items-center justify-between gap-4 mb-2">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#1F1D1A] border border-[#26231F] flex items-center justify-center">
+                    <ShieldAlert className="h-6 w-6 text-[#356C92]" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-2xl font-bold text-[#F9F7F3] uppercase">
+                      {detail.personName}
+                    </h4>
+                    <p className="text-sm text-[#A4A29F] mt-0.5 font-medium">
+                      {detail.documentLabel}
+                    </p>
+                  </div>
+                </div>
+                {detail.hasRecord ? (
+                  <span className="text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-[#08996A]/10 text-[#08996A] border border-[#08996A]/20 font-semibold uppercase tracking-wider">
+                    Con ficha médica
+                  </span>
+                ) : (
+                  <span className="text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 bg-[#D97706]/10 text-[#FCD34D] border border-[#D97706]/30 font-semibold uppercase tracking-wider shadow-sm">
+                    Ficha pendiente
+                  </span>
+                )}
               </div>
-              {detail.accessWarning && (
-                <div className="mt-3">
-                  <PeopleErrorBlock message={detail.accessWarning} />
+
+              {/* Control sensible */}
+              <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-[#F9F7F3]">Control de acceso</h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                    <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Actualizado</p>
+                    <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleDate(detail.updatedAt)}</p>
+                  </div>
+                  <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                    <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Creado por</p>
+                    <p className="text-sm font-semibold text-[#F9F7F3] mt-1 truncate" title={formatPeopleText(detail.createdBy)}>{formatPeopleText(detail.createdBy)}</p>
+                  </div>
+                  <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                    <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Actualizado por</p>
+                    <p className="text-sm font-semibold text-[#F9F7F3] mt-1 truncate" title={formatPeopleText(detail.updatedBy)}>{formatPeopleText(detail.updatedBy)}</p>
+                  </div>
+                  <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                    <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Trazabilidad</p>
+                    <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{detail.accessLogged ? "Registrada" : "No persistida"}</p>
+                  </div>
+                </div>
+                {detail.accessWarning && (
+                  <div className="mt-4 bg-[#231C11] border border-[#FCD34D]/20 rounded-xl p-4 flex items-start gap-3">
+                    <ShieldAlert className="w-5 h-5 text-[#FCD34D] shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-sm text-[#FDE68A] leading-relaxed font-medium">{detail.accessWarning}</p>
+                  </div>
+                )}
+              </div>
+
+              {!detail.hasRecord ? (
+                <div className="bg-[#100F0D] border-2 border-[#26231F] border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center">
+                   <ShieldAlert className="w-12 h-12 text-[#686561] mb-4" strokeWidth={1} />
+                   <h4 className="text-lg text-[#F9F7F3] font-bold mb-2">Sin información clínica</h4>
+                   <p className="text-sm text-[#A4A29F] mb-6 max-w-md leading-relaxed">
+                     Esta persona no cuenta con una ficha sensible registrada en el sistema. Es crucial registrar estos datos para garantizar una atención segura ante emergencias.
+                   </p>
+                   {canWrite && (
+                     <button
+                       type="button"
+                       onClick={onEdit}
+                       className="px-6 py-3 rounded-xl text-sm font-medium text-white bg-[#356C92] hover:bg-[#356C92]/90 transition-colors shadow-lg"
+                     >
+                       Crear Ficha Médica
+                     </button>
+                   )}
+                </div>
+              ) : detail.scope === "beneficiaries" ? (
+                <>
+                  <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-[#F9F7F3]">Ficha médica</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                        <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Tipo de sangre</p>
+                        <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.bloodType)}</p>
+                      </div>
+                      <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                        <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Alergias</p>
+                        <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.allergies)}</p>
+                      </div>
+                      <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-3 md:col-span-2">
+                        <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Condiciones preexistentes</p>
+                        <p className="text-sm font-semibold text-[#F9F7F3] mt-1 leading-relaxed">{formatPeopleText(detail.preexistingConditions)}</p>
+                      </div>
+                      <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-3 md:col-span-2">
+                        <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Medicación actual</p>
+                        <p className="text-sm font-semibold text-[#F9F7F3] mt-1 leading-relaxed">{formatPeopleText(detail.currentMedication)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-[#F9F7F3]">Perfil asociado</h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                        <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Perfil</p>
+                        <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{detail.profileLabel}</p>
+                      </div>
+                      {detail.childProfile && (
+                        <>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Tutor</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1 truncate" title={formatPeopleText(detail.childProfile.tutorName)}>{formatPeopleText(detail.childProfile.tutorName)}</p>
+                          </div>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Teléfono tutor</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.childProfile.tutorPhone)}</p>
+                          </div>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Colegio</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1 truncate" title={formatPeopleText(detail.childProfile.school)}>{formatPeopleText(detail.childProfile.school)}</p>
+                          </div>
+                        </>
+                      )}
+                      {detail.seniorProfile && (
+                        <>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Movilidad reducida</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{detail.seniorProfile.limitedMobility ? "Sí" : "No"}</p>
+                          </div>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Vive solo</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{detail.seniorProfile.livesAlone ? "Sí" : "No"}</p>
+                          </div>
+                          <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5 md:col-span-2">
+                            <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Contacto emergencia</p>
+                            <p className="text-sm font-semibold text-[#F9F7F3] mt-1 truncate" title={formatPeopleText(detail.seniorProfile.emergencyContact)}>{formatPeopleText(detail.seniorProfile.emergencyContact)}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-[#100F0D] border border-[#26231F] rounded-2xl p-6">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-[#F9F7F3]">Ficha sensible de voluntario</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                      <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Estado voluntario</p>
+                      <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.stateLabel)}</p>
+                    </div>
+                    <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                      <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Contacto emergencia</p>
+                      <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.emergencyContact)}</p>
+                    </div>
+                    <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-2.5">
+                      <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Teléfono emergencia</p>
+                      <p className="text-sm font-semibold text-[#F9F7F3] mt-1">{formatPeopleText(detail.emergencyPhone)}</p>
+                    </div>
+                    <div className="bg-[#171512] border border-[#26231F] rounded-xl px-4 py-3 md:col-span-2">
+                      <p className="text-[10px] font-bold text-[#A4A29F] uppercase tracking-wider">Condiciones médicas</p>
+                      <p className="text-sm font-semibold text-[#F9F7F3] mt-1 leading-relaxed">{formatPeopleText(detail.medicalConditions)}</p>
+                    </div>
+                  </div>
                 </div>
               )}
-            </PeopleSection>
-
-            {detail.scope === "beneficiaries" ? (
-              <>
-                <PeopleSection title="Ficha medica" description="Datos médicos generales del beneficiario.">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <PeopleDetailField label="Tipo de sangre" value={formatPeopleText(detail.bloodType)} />
-                    <PeopleDetailField label="Alergias" value={formatPeopleText(detail.allergies)} />
-                    <PeopleDetailField
-                      label="Condiciones preexistentes"
-                      value={formatPeopleText(detail.preexistingConditions)}
-                    />
-                    <PeopleDetailField
-                      label="Medicacion actual"
-                      value={formatPeopleText(detail.currentMedication)}
-                    />
-                  </div>
-                </PeopleSection>
-
-                <PeopleSection title="Perfil asociado" description="Contexto clinico relacionado al beneficiario.">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                    <PeopleDetailField label="Perfil" value={detail.profileLabel} />
-                    {detail.childProfile && (
-                      <>
-                        <PeopleDetailField label="Tutor" value={formatPeopleText(detail.childProfile.tutorName)} />
-                        <PeopleDetailField
-                          label="Telefono tutor"
-                          value={formatPeopleText(detail.childProfile.tutorPhone)}
-                        />
-                        <PeopleDetailField label="Colegio" value={formatPeopleText(detail.childProfile.school)} />
-                      </>
-                    )}
-                    {detail.seniorProfile && (
-                      <>
-                        <PeopleDetailField
-                          label="Movilidad reducida"
-                          value={detail.seniorProfile.limitedMobility ? "Si" : "No"}
-                        />
-                        <PeopleDetailField
-                          label="Vive solo"
-                          value={detail.seniorProfile.livesAlone ? "Si" : "No"}
-                        />
-                        <PeopleDetailField
-                          label="Contacto emergencia"
-                          value={formatPeopleText(detail.seniorProfile.emergencyContact)}
-                        />
-                      </>
-                    )}
-                  </div>
-                </PeopleSection>
-              </>
-            ) : (
-              <PeopleSection title="Ficha sensible de voluntario" description="Información clínica sensible del voluntario.">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <PeopleDetailField label="Estado voluntario" value={formatPeopleText(detail.stateLabel)} />
-                  <PeopleDetailField
-                    label="Contacto emergencia"
-                    value={formatPeopleText(detail.emergencyContact)}
-                  />
-                  <PeopleDetailField
-                    label="Telefono emergencia"
-                    value={formatPeopleText(detail.emergencyPhone)}
-                  />
-                  <PeopleDetailField
-                    label="Condiciones medicas"
-                    value={formatPeopleText(detail.medicalConditions)}
-                  />
-                </div>
-              </PeopleSection>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </ModalShell>
   );

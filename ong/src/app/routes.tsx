@@ -123,6 +123,7 @@ function RootEntry() {
 }
 
 function ShellIndexRedirect() {
+  const location = useLocation();
   const { loading, status, message, context, resolveInitialPath } = useTenantBootstrap();
 
   if (loading) {
@@ -130,7 +131,7 @@ function ShellIndexRedirect() {
   }
 
   if (status === "unauthenticated") {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
   if (!context || status !== "ready") {
@@ -151,6 +152,7 @@ function ShellIndexRedirect() {
 }
 
 function ProtectedTenantShell() {
+  const location = useLocation();
   const { loading, status, message, context } = useTenantBootstrap();
 
   if (loading) {
@@ -158,7 +160,7 @@ function ProtectedTenantShell() {
   }
 
   if (status === "unauthenticated") {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
   if (!context || status !== "ready") {
@@ -204,6 +206,7 @@ function ProtectedTenantRoute({
 }
 
 function LegacyAdminRedirect() {
+  const location = useLocation();
   const { loading, status, message, context, resolveInitialPath } = useTenantBootstrap();
 
   if (loading) {
@@ -211,7 +214,7 @@ function LegacyAdminRedirect() {
   }
 
   if (status === "unauthenticated") {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
   if (!context || status !== "ready") {

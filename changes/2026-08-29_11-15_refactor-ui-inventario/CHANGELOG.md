@@ -1,0 +1,16 @@
+- **Fecha y hora**: 2026-08-29 11:15
+- **Objetivo del cambio**: Refactorizar la UI/UX del módulo de inventario (`/ong/app/resources/inventory`) para alinearla con los estándares de diseño y jerarquía visual.
+- **Contexto del problema**: El botón "Nuevo Item" carecía de jerarquía y estaba al final de la página. El botón "Refrescar" estaba desconectado de la paginación. La tipografía de SKU y códigos era plana, y el stock crítico (0) no alertaba visualmente al usuario.
+- **Motivo de la modificación**: Requerimiento directo de auditoría UI/UX (Design Skills).
+- **Solución implementada**: 
+  - Centralización del botón de acción principal en el `PageHeader`.
+  - Agrupación del botón "Refrescar" junto a la paginación de la tabla.
+  - Implementación de un badge semántico tipo monospace para los códigos y SKU.
+  - Alerta visual en color rojo y badge de "Agotado" cuando el stock derivado es nulo o 0.
+  - Corrección de la ruta de importación de `cn` desde `../lib/utils`.
+- **Riesgos identificados**: Modificación en el componente principal de inventario podía afectar las demás pestañas, pero se adaptó un control dinámico por tab (`view`).
+- **Impacto esperado**: Mejor usabilidad, jerarquía más clara, prevención de errores por falta de stock.
+- **Módulos afectados**: `/ong/app/pages/Inventory.tsx`
+- **Dependencias involucradas**: `lucide-react`, utilidades locales (`cn`).
+- **Posibles efectos secundarios**: Ninguno detectado. Build pasa exitosamente.
+- **Estado del cambio**: Completado

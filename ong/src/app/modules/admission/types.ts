@@ -90,7 +90,8 @@ export interface AdmissionDocumentRow {
   requestName: string;
   type: string;
   fileUrl: string;
-  verified: boolean;
+  estadoValidacion: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo: string | null;
   verifiedById: string | null;
   verifiedByLabel: string | null;
   verifiedAt: string | null;
@@ -314,7 +315,8 @@ export interface AdmissionDocumentCreateInput {
   requestId: string;
   type: string;
   fileUrl: string;
-  verified?: boolean;
+  estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo?: string | null;
   actorId?: string | null;
 }
 
@@ -322,7 +324,8 @@ export interface AdmissionDocumentUpdateInput {
   documentId: string;
   type?: string;
   fileUrl?: string;
-  verified?: boolean;
+  estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo?: string | null;
   actorId?: string | null;
 }
 

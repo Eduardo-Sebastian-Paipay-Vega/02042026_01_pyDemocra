@@ -8,6 +8,7 @@ interface PageHeaderProps {
   action?: {
     label: string;
     onClick: () => void;
+    disabled?: boolean;
   };
   className?: string;
 }
@@ -22,11 +23,10 @@ export function PageHeader({ title, description, action, className }: PageHeader
         )}
       </div>
       {action && (
-        <GradientButton size="sm" onClick={action.onClick}>
+        <GradientButton size="sm" onClick={action.onClick} disabled={action.disabled}>
           {action.label}
         </GradientButton>
       )}
     </div>
   );
 }
-

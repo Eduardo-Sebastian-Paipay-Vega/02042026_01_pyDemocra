@@ -103,9 +103,9 @@ function SelectField({
 
 function SummaryField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-      <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{label}</p>
-      <p className="mt-1 text-[20px]" style={{ color: "var(--t-text)" }}>{value}</p>
+    <div className="rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+      <p className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>{label}</p>
+      <p className="mt-2 text-2xl font-bold" style={{ color: "var(--t-text)" }}>{value}</p>
     </div>
   );
 }
@@ -127,8 +127,21 @@ const columns: Column<AdmissionRequestRow>[] = [
     label: "Solicitante",
     render: (item) => (
       <div>
-        <div style={{ color: "var(--t-text)" }}>{item.fullName}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.email}</div>
+        <div style={{ color: "var(--t-text)" }} className="font-medium">{item.fullName}</div>
+        <div
+          className="mt-0.5 text-[11px] cursor-pointer hover:underline inline-flex items-center gap-1"
+          style={{ color: "var(--t-text-dim)" }}
+          title="Copiar correo"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (item.email) {
+              navigator.clipboard.writeText(item.email);
+              toast.success("Correo copiado al portapapeles");
+            }
+          }}
+        >
+          {item.email}
+        </div>
       </div>
     ),
   },
@@ -172,6 +185,7 @@ export function AdmissionRequests() {
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [generatedRegistrationCode, setGeneratedRegistrationCode] =
     useState<AdmissionRegistrationCodeRow | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const requestIdParam = searchParams.get("requestId");
 
   const admission = useSolicitudesAdmision({ searchTerm, status, dateFrom: null, dateTo: null, page, pageSize: PAGE_SIZE });
@@ -195,6 +209,42 @@ export function AdmissionRequests() {
     const next = new URLSearchParams(searchParams);
     next.delete("requestId");
     setSearchParams(next, { replace: true });
+  }
+
+  function exportToCSV() {
+    const dataToExport = selectedIds.length > 0
+      ? admission.rows.filter(r => selectedIds.includes(r.id))
+      : admission.rows;
+
+    if (dataToExport.length === 0) {
+      toast.error("No hay datos para exportar.");
+      return;
+    }
+
+    const headers = ["ID", "Nombres", "Apellidos", "Email", "Estado", "Fecha Solicitud", "Voluntario Vinculado", "Notas"];
+    const csvContent = dataToExport.map(r =>
+      [
+        r.id,
+        r.nombres,
+        r.apellidos,
+        r.email,
+        r.stateName,
+        r.submittedAt,
+        r.linkedVolunteerName || r.resolvedVolunteerName || "",
+        (r.notes || "").replace(/"/g, '""')
+      ].map(field => `"${field}"`).join(",")
+    );
+    const csv = [headers.join(","), ...csvContent].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "solicitudes_admision.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Archivo CSV generado exitosamente.");
   }
 
   const filterOptions = useMemo(() => [{ label: "Todas", value: "all", active: status === "all" }, ...admission.stateOptions.map((item) => ({ label: item.label, value: item.kind, active: status === item.kind }))], [admission.stateOptions, status]);
@@ -352,19 +402,38 @@ export function AdmissionRequests() {
     }
   }
 
+  const enProceso = admission.kpis.pending + admission.kpis.review + admission.kpis.interview + admission.kpis.onboarding;
+  const aprobadas = admission.kpis.approved + admission.kpis.converted;
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <PageHeader title="Solicitudes de admision" description="Bandeja real sobre rrhh.solicitudes_admision con edicion, cambio de estado y conversion a ong.voluntarios." action={{ label: "Nueva solicitud", onClick: openCreateModal }} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader 
+          title="Solicitudes de admisión" 
+          description="Gestiona y da seguimiento a los postulantes a través del proceso de selección." 
+        />
+        <GradientButton onClick={openCreateModal} className="shrink-0 px-6 py-2.5 text-sm font-medium shadow-sm">
+          Nueva solicitud
+        </GradientButton>
+      </div>
 
-      <div className="grid gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <SummaryField label="Total" value={String(admission.kpis.total)} />
-        <SummaryField label="Pendientes" value={String(admission.kpis.pending)} />
-        <SummaryField label="Revision" value={String(admission.kpis.review)} />
-        <SummaryField label="Entrevista" value={String(admission.kpis.interview)} />
-        <SummaryField label="Onboarding" value={String(admission.kpis.onboarding)} />
-        <SummaryField label="Aprobadas" value={String(admission.kpis.approved)} />
-        <SummaryField label="Rechazadas" value={String(admission.kpis.rejected)} />
-        <SummaryField label="Convertidas" value={String(admission.kpis.converted)} />
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--t-text-secondary)" }}>Total</p>
+          <p className="mt-2 text-3xl font-bold" style={{ color: "var(--t-text)" }}>{admission.kpis.total}</p>
+        </div>
+        <div className="rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--t-text-secondary)" }}>En Proceso</p>
+          <p className="mt-2 text-3xl font-bold" style={{ color: "var(--t-primary)" }}>{enProceso}</p>
+        </div>
+        <div className="rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--t-text-secondary)" }}>Aprobadas</p>
+          <p className="mt-2 text-3xl font-bold text-emerald-500">{aprobadas}</p>
+        </div>
+        <div className="rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--t-text-secondary)" }}>Rechazadas</p>
+          <p className="mt-2 text-3xl font-bold text-red-400">{admission.kpis.rejected}</p>
+        </div>
       </div>
 
       {(admission.error || catalogs.error) && <ErrorBlock message={admission.error || catalogs.error || "No se pudo cargar admision."} onRetry={() => { admission.refresh(); catalogs.refresh(); }} />}
@@ -385,13 +454,34 @@ export function AdmissionRequests() {
         onSearchChange={(value) => { setSearchTerm(value); setPage(1); }}
         filters={filterOptions}
         onFilterClick={(value) => { setStatus(value as "all" | AdmissionStateKind); setPage(1); }}
+        actions={
+          <OutlineButton size="sm" onClick={exportToCSV}>
+             Exportar CSV
+          </OutlineButton>
+        }
       />
 
+      {selectedIds.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl px-5 py-3 mb-2" style={{ background: "var(--t-primary)", color: "white" }}>
+          <div className="text-[13px] font-medium">
+            {selectedIds.length} {selectedIds.length === 1 ? 'solicitud seleccionada' : 'solicitudes seleccionadas'}
+          </div>
+          <div className="flex gap-2">
+             <button className="text-[12px] bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition-colors" onClick={() => setSelectedIds([])}>
+               Cancelar
+             </button>
+          </div>
+        </div>
+      )}
+
       <DataTable
+        selectable
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
         columns={columns}
         data={admission.rows}
         loading={admission.loading}
-        emptyMessage="No se encontraron solicitudes de admision."
+        emptyMessage="No se encontraron solicitudes de admisión."
         actions={[
           { label: "Ver detalle", onClick: (row) => setDetailRequestId(row.id) },
           { label: "Editar", onClick: (row) => openEditModal(row) },
@@ -401,8 +491,8 @@ export function AdmissionRequests() {
         ]}
       />
 
-      <div className="flex items-center justify-between rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-        <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{fromRow}-{toRow} de {admission.total}</p>
+      <div className="flex items-center justify-between rounded-2xl px-5 py-4" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+        <p className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>{fromRow} - {toRow} de {admission.total}</p>
         <div className="flex gap-2">
           <OutlineButton size="sm" onClick={() => setPage((current) => current - 1)} disabled={page <= 1}>Anterior</OutlineButton>
           <OutlineButton size="sm" onClick={() => setPage((current) => current + 1)} disabled={page * PAGE_SIZE >= admission.total}>Siguiente</OutlineButton>
@@ -413,7 +503,7 @@ export function AdmissionRequests() {
         <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>{editingRequest ? "Editar solicitud" : "Nueva solicitud"}</h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{editingRequest ? "Actualiza el expediente." : "Registro real en rrhh.solicitudes_admision."}</p>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{editingRequest ? "Actualiza el expediente." : "Complete los datos de la solicitud."}</p>
           </div>
           <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setIsRequestFormOpen(false)}>X</button>
         </div>
@@ -444,7 +534,7 @@ export function AdmissionRequests() {
       <ModalShell open={Boolean(detailRequestId)} onClose={closeDetailModal} width="max-w-[920px]">
         <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <div>
-            <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Expediente de admision</h3>
+            <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Expediente de admisión</h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>Vista consolidada del expediente real.</p>
           </div>
           <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={closeDetailModal}>X</button>
@@ -476,7 +566,7 @@ export function AdmissionRequests() {
                 <DetailField label="Solicitud" value={detail.detail.request.submittedAt} />
                 <DetailField label="Actualizado" value={detail.detail.request.updatedAt} />
                 <DetailField
-                  label="Vinculo directo"
+                  label="Vínculo directo"
                   value={detail.detail.request.linkedVolunteerName ?? "-"}
                 />
                 <DetailField label="Notas" value={detail.detail.request.notes || "-"} />
@@ -509,7 +599,7 @@ export function AdmissionRequests() {
         <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Cambiar estado</h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{stateTarget ? `${stateTarget.fullName} (${stateTarget.stateName})` : "Actualiza el flujo de admision."}</p>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{stateTarget ? `${stateTarget.fullName} (${stateTarget.stateName})` : "Actualiza el flujo de admisión."}</p>
           </div>
           <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setStateTarget(null)}>X</button>
         </div>
@@ -527,7 +617,7 @@ export function AdmissionRequests() {
         <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>Convertir a voluntario</h3>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{convertTarget ? `Creacion o vinculacion real en ong.voluntarios para ${convertTarget.fullName}.` : "Conversor de admision."}</p>
+            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{convertTarget ? `Creación o vinculación de perfil para ${convertTarget.fullName}.` : "Conversor de admisión."}</p>
           </div>
           <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setConvertTarget(null)}>X</button>
         </div>

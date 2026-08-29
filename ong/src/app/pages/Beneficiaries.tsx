@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useDeferredValue } from "react";
 import { motion } from "motion/react";
-import { UserRound } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from '@/core/components/shared/PageHeader';
 import { FilterBar } from '@/core/components/shared/FilterBar';
-import { DataTable, type Column } from '@/core/components/shared/DataTable';
 import { GradientButton } from '@/core/components/ui/gradient-button';
-import { StatusDot } from '@/core/components/ui/status-dot';
 import { useBeneficiaries } from "../modules/people/hooks/useBeneficiaries";
 import { useBeneficiaryDetail } from "../modules/people/hooks/useBeneficiaryDetail";
 import { useBeneficiaryMutations } from "../modules/people/hooks/useBeneficiaryMutations";
@@ -14,11 +12,19 @@ import {
   BeneficiaryDetailModal,
   BeneficiaryFormModal,
 } from "../modules/people/components/BeneficiaryPanels";
-import { PeopleErrorBlock, formatPeopleDate } from "../modules/people/components/people-shared";
+import { PeopleErrorBlock } from "../modules/people/components/people-shared";
 import type { BeneficiaryListRow, BeneficiaryProfileKind } from "../modules/people/types";
 
+// Nuevos componentes de la refactorización
+import { useBeneficiaryFilters } from "../modules/people/hooks/useBeneficiaryFilters";
+import { useBulkSelection } from "../modules/people/hooks/useBulkSelection";
+import { BeneficiariesTable } from "../modules/people/components/beneficiaries/BeneficiariesTable";
+import { BulkActionsBar } from "../modules/people/components/beneficiaries/BulkActionsBar";
+import { BeneficiaryDrawerPreview } from "../modules/people/components/beneficiaries/BeneficiaryDrawerPreview";
+import { AdvancedFiltersModal } from "../modules/people/components/beneficiaries/AdvancedFiltersModal";
+
 const stagger: any = {
-  hidden: { opacity: 0 },
+  hidden: {},
   visible: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } },
 };
 
@@ -27,71 +33,22 @@ const fadeUp: any = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 };
 
-const columns: Column<BeneficiaryListRow>[] = [
-  {
-    key: "fullName",
-    label: "Beneficiario",
-    render: (row) => (
-      <div className="flex items-center gap-3">
-        {row.photoUrl ? (
-          <img
-            src={row.photoUrl}
-            alt={row.fullName}
-            className="h-10 w-10 shrink-0 rounded-full object-cover"
-            style={{ border: "1px solid var(--t-border)" }}
-          />
-        ) : (
-          <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            style={{ background: "var(--t-hover)" }}
-          >
-            <UserRound className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-          </div>
-        )}
-        <div>
-          <div style={{ color: "var(--t-text)" }}>{row.fullName}</div>
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            {row.documentLabel}
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "profile",
-    label: "Perfil",
-    render: (row) => <StatusDot variant="info">{row.profileLabel}</StatusDot>,
-  },
-  {
-    key: "tracking",
-    label: "Relacion",
-    render: (row) => (
-      <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        <div>{row.projectCount} proyectos</div>
-        <div>{row.hasMedicalRecord ? `${row.medicalRecordCount} fichas` : "Sin ficha medica"}</div>
-      </div>
-    ),
-  },
-  {
-    key: "updatedAt",
-    label: "Actualizado",
-    render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-        {formatPeopleDate(row.updatedAt)}
-      </span>
-    ),
-  },
-];
-
 export function Beneficiaries() {
-  const [searchValue, setSearchValue] = useState("");
-  const [profileFilter, setProfileFilter] = useState<"all" | BeneficiaryProfileKind>("all");
+  const beneficiaries = useBeneficiaries();
+  
+  // Custom Hooks de Filtrado y Selección
+  const { filters, updateFilter, filteredRows } = useBeneficiaryFilters(beneficiaries.rows);
+  const bulkSelection = useBulkSelection<string>();
+
+  // Estados de Modales y Preview
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [selectedPreviewRow, setSelectedPreviewRow] = useState<BeneficiaryListRow | null>(null);
+  
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string | null>(null);
 
-  const beneficiaries = useBeneficiaries();
   const activeBeneficiaryId =
     selectedBeneficiaryId && (isDetailOpen || (isFormOpen && formMode === "edit"))
       ? selectedBeneficiaryId
@@ -102,37 +59,21 @@ export function Beneficiaries() {
     detail.refresh();
   });
 
-  const filteredRows = useMemo(() => {
-    const term = searchValue.trim().toLowerCase();
-
-    return beneficiaries.rows.filter((row) => {
-      const matchesSearch =
-        !term ||
-        row.fullName.toLowerCase().includes(term) ||
-        row.documentLabel.toLowerCase().includes(term) ||
-        row.profileLabel.toLowerCase().includes(term) ||
-        row.genderLabel.toLowerCase().includes(term);
-      const matchesProfile = profileFilter === "all" || row.profileKind === profileFilter;
-      return matchesSearch && matchesProfile;
-    });
-  }, [beneficiaries.rows, profileFilter, searchValue]);
-
   const tableEmptyMessage = useMemo(() => {
     if (beneficiaries.rows.length === 0) {
       return "Aun no hay beneficiarios registrados en este tenant.";
     }
-
     return "No se encontraron beneficiarios con los filtros actuales.";
   }, [beneficiaries.rows.length]);
 
-  const filters = useMemo(
+  const profileFilters = useMemo(
     () => [
-      { label: "Todos", value: "all", active: profileFilter === "all" },
-      { label: "General", value: "general", active: profileFilter === "general" },
-      { label: "Nino", value: "child", active: profileFilter === "child" },
-      { label: "Adulto mayor", value: "senior", active: profileFilter === "senior" },
+      { label: "Todos", value: "all", active: filters.profileKind === "all" },
+      { label: "General", value: "general", active: filters.profileKind === "general" },
+      { label: "Niño", value: "child", active: filters.profileKind === "child" },
+      { label: "Adulto mayor", value: "senior", active: filters.profileKind === "senior" },
     ],
-    [profileFilter]
+    [filters.profileKind]
   );
 
   function openCreateModal() {
@@ -140,8 +81,13 @@ export function Beneficiaries() {
     setIsFormOpen(true);
   }
 
-  function openDetailModal(row: BeneficiaryListRow) {
-    setSelectedBeneficiaryId(row.id);
+  function handleRowClick(row: BeneficiaryListRow) {
+    setSelectedPreviewRow(row);
+    setIsPreviewOpen(true);
+  }
+  
+  function openFullDetail(id: string) {
+    setSelectedBeneficiaryId(id);
     setIsDetailOpen(true);
   }
 
@@ -166,8 +112,8 @@ export function Beneficiaries() {
 
     beneficiaries.upsertRow(response.beneficiary);
     detail.replace(response);
-    setSearchValue("");
-    setProfileFilter("all");
+    updateFilter("search", "");
+    updateFilter("profileKind", "all");
     toast.success(formMode === "edit" ? "Beneficiario actualizado." : "Beneficiario creado.");
     setSelectedBeneficiaryId(response.beneficiary.id);
     setIsFormOpen(false);
@@ -175,19 +121,31 @@ export function Beneficiaries() {
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
+    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6 relative">
+      <BulkActionsBar 
+        selectedCount={bulkSelection.count} 
+        onExport={() => bulkSelection.clearSelection()}
+        onAssignProject={() => {}}
+        onStatusChange={() => {}}
+      />
+      
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <PageHeader
           title="Beneficiarios"
           description="Gestiona los perfiles de beneficiarios y sus datos clínicos asociados."
-          action={{ label: "Actualizar", onClick: beneficiaries.refresh }}
         />
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <GradientButton size="sm" onClick={openCreateModal}>
-          Nuevo beneficiario
-        </GradientButton>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={beneficiaries.refresh}
+            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            title="Actualizar"
+          >
+            <RefreshCw className="h-5 w-5" style={{ color: "var(--t-text-secondary)" }} />
+          </button>
+          <GradientButton size="sm" onClick={openCreateModal}>
+            Nuevo beneficiario
+          </GradientButton>
+        </div>
       </motion.div>
 
       {beneficiaries.error && (
@@ -196,28 +154,47 @@ export function Beneficiaries() {
         </motion.div>
       )}
 
-      <motion.div variants={fadeUp}>
-        <FilterBar
-          searchPlaceholder="Buscar por nombre, documento, perfil o genero..."
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={filters}
-          onFilterClick={(value) => setProfileFilter(value as "all" | BeneficiaryProfileKind)}
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1">
+          <FilterBar
+            searchPlaceholder="Buscar por nombre, documento, perfil o género..."
+            searchValue={filters.search}
+            onSearchChange={(val) => updateFilter('search', val)}
+            filters={profileFilters}
+            onFilterClick={(value) => updateFilter('profileKind', value)}
+          />
+        </div>
+        <AdvancedFiltersModal 
+          filters={filters} 
+          onUpdateFilter={updateFilter} 
         />
       </motion.div>
 
       <motion.div variants={fadeUp}>
         {beneficiaries.error ? null : (
-          <DataTable
-            columns={columns}
+          <BeneficiariesTable
             data={filteredRows}
             loading={beneficiaries.loading}
-            actions={[{ label: "Ver detalle", onClick: openDetailModal }]}
+            actions={[
+              { label: "Ver detalle completo", onClick: (row: BeneficiaryListRow) => openFullDetail(row.id) }
+            ]}
+            onRowClick={handleRowClick}
+            selectedIds={bulkSelection.selectedIds}
+            onSelectionChange={bulkSelection.selectAll}
             emptyMessage={tableEmptyMessage}
           />
         )}
       </motion.div>
 
+      {/* Sidebar Quick Preview */}
+      <BeneficiaryDrawerPreview
+        open={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        beneficiary={selectedPreviewRow}
+        onOpenFullDetail={openFullDetail}
+      />
+
+      {/* Full Modals */}
       <BeneficiaryDetailModal
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}

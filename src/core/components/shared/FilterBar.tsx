@@ -14,6 +14,7 @@ interface FilterBarProps {
   filters?: FilterOption[];
   onFilterClick?: (value: string) => void;
   className?: string;
+  actions?: React.ReactNode;
 }
 
 export function FilterBar({
@@ -23,6 +24,7 @@ export function FilterBar({
   filters = [],
   onFilterClick,
   className,
+  actions,
 }: FilterBarProps) {
   return (
     <div
@@ -65,6 +67,11 @@ export function FilterBar({
                 {filter.label}
               </button>
             ))}
+          </div>
+        )}
+        {actions && (
+          <div className="flex items-center gap-2">
+            {actions}
           </div>
         )}
       </div>

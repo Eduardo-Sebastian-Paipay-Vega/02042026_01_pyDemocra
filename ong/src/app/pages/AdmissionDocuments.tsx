@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import {
+  CheckCircle2,
+  Clock,
+  FileText,
+  AlertTriangle,
+  BarChart3,
+  X,
+} from "lucide-react";
 import { DataTable, type Column } from '@/core/components/shared/DataTable';
 import { FilterBar } from '@/core/components/shared/FilterBar';
 import { PageHeader } from '@/core/components/shared/PageHeader';
@@ -45,19 +53,6 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
-function InfoBlock({ message }: { message: string }) {
-  return (
-    <div
-      className="rounded-2xl px-4 py-3"
-      style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-    >
-      <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-        {message}
-      </p>
-    </div>
-  );
-}
-
 function FieldError({ message }: { message?: string | null }) {
   if (!message) {
     return null;
@@ -67,22 +62,6 @@ function FieldError({ message }: { message?: string | null }) {
     <p className="text-[11px]" style={{ color: "var(--t-danger, #ef4444)" }}>
       {message}
     </p>
-  );
-}
-
-function DetailField({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      className="rounded-xl px-3 py-2"
-      style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-    >
-      <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-        {label}
-      </p>
-      <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {value || "-"}
-      </p>
-    </div>
   );
 }
 
@@ -118,6 +97,22 @@ function SelectField({
   );
 }
 
+function DetailField({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      className="rounded-xl px-3 py-2"
+      style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+    >
+      <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        {label}
+      </p>
+      <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+        {value || "-"}
+      </p>
+    </div>
+  );
+}
+
 const columns: Column<AdmissionDocumentRow>[] = [
   {
     key: "type",
@@ -125,26 +120,17 @@ const columns: Column<AdmissionDocumentRow>[] = [
     render: (item) => <span style={{ color: "var(--t-text)" }}>{item.type}</span>,
   },
   {
-    key: "verified",
-    label: "Verificacion",
+    key: "estadoValidacion",
+    label: "Estado",
     render: (item) => (
       <div className="space-y-1">
-        <StatusDot variant={item.verified ? "success" : "warning"}>
-          {item.verified ? "Verificado" : "Pendiente"}
+        <StatusDot variant={item.estadoValidacion === "APROBADO" ? "success" : item.estadoValidacion === "RECHAZADO" ? "destructive" : "warning"}>
+          {item.estadoValidacion === "APROBADO" ? "Aprobado" : item.estadoValidacion === "RECHAZADO" ? "Rechazado" : "Pendiente"}
         </StatusDot>
         <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
           {item.verifiedByLabel ?? "Sin verificador"}
         </p>
       </div>
-    ),
-  },
-  {
-    key: "request",
-    label: "Solicitud",
-    render: (item) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {item.requestName}
-      </span>
     ),
   },
   {
@@ -182,33 +168,15 @@ export function AdmissionDocuments() {
   const catalogs = useAdmissionReferenceCatalogs();
   const documents = useDocumentosAdmision(selectedRequestId);
 
-  const requestOptions = useMemo(
-    () =>
-      requests.rows.map((row) => ({
-        value: row.id,
-        label: `${row.fullName} - ${row.stateName}`,
-      })),
-    [requests.rows]
-  );
-
   const selectedRequest = useMemo<AdmissionRequestRow | null>(
     () => requests.rows.find((row) => row.id === selectedRequestId) ?? null,
     [requests.rows, selectedRequestId]
   );
   const hasBlockingError = Boolean(requests.error || catalogs.error || documents.error);
+
   const tableEmptyMessage = useMemo(() => {
-    if (requests.rows.length === 0) {
-      return searchTerm.trim()
-        ? "No hay solicitudes que coincidan con la busqueda actual."
-        : "Aun no hay solicitudes disponibles para gestionar documentos.";
-    }
-
-    if (!selectedRequestId || !selectedRequest) {
-      return "Selecciona una solicitud para revisar sus documentos.";
-    }
-
-    return "La solicitud seleccionada no tiene documentos registrados.";
-  }, [requests.rows.length, searchTerm, selectedRequest, selectedRequestId]);
+    return "El postulante seleccionado no tiene documentos registrados.";
+  }, []);
 
   useEffect(() => {
     if (!selectedRequestId && requests.rows.length > 0) {
@@ -220,6 +188,15 @@ export function AdmissionDocuments() {
       setSelectedRequestId(requests.rows[0]?.id ?? null);
     }
   }, [requests.rows, selectedRequestId]);
+
+  useEffect(() => {
+    setIsFormOpen(false);
+    setEditingDocument(null);
+    setDetailDocument(null);
+    setRemoveDocument(null);
+    setFormState(buildEmptyAdmissionDocumentForm());
+    setFormErrors({});
+  }, [selectedRequestId]);
 
   function resetForm() {
     setFormState(buildEmptyAdmissionDocumentForm());
@@ -248,53 +225,64 @@ export function AdmissionDocuments() {
     resetForm();
   }
 
-  function validateForm() {
-    const nextErrors = validateAdmissionDocumentForm(formState);
+  function validateForm(values = formState) {
+    const nextErrors = validateAdmissionDocumentForm(values);
     setFormErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
 
-  async function submitForm() {
-    if (!selectedRequestId || !validateForm()) {
+  async function submitForm(overrideState?: "PENDIENTE" | "APROBADO" | "RECHAZADO") {
+    const valuesToSubmit = { ...formState };
+    if (overrideState) {
+      valuesToSubmit.estadoValidacion = overrideState;
+      setFormState(valuesToSubmit);
+    }
+    
+    if (!selectedRequestId || !validateForm(valuesToSubmit)) {
       return;
     }
 
+    let result: AdmissionDocumentRow | null = null;
     try {
       setIsUploadingFile(true);
       if (editingDocument) {
-        const result = await documents.update(
+        result = await documents.update(
           await adaptAdmissionDocumentFormToUpdateInput({
             documentId: editingDocument.id,
             requestId: editingDocument.requestId,
-            values: formState,
+            values: valuesToSubmit,
           })
         );
-        if (!result) {
-          return;
-        }
-        toast.success("Documento actualizado.");
       } else {
-        const result = await documents.create(
+        result = await documents.create(
           await adaptAdmissionDocumentFormToCreateInput({
             requestId: selectedRequestId,
-            values: formState,
+            values: valuesToSubmit,
           })
         );
-        if (!result) {
-          return;
-        }
-        toast.success("Documento registrado.");
       }
-
-      closeFormModal();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "No se pudo guardar el documento.";
+        error instanceof Error ? error.message : "No se pudo preparar el documento.";
       setFormErrors((current) => ({ ...current, general: message }));
       toast.error(message);
+      return;
     } finally {
       setIsUploadingFile(false);
     }
+
+    if (!result) {
+      return;
+    }
+
+    if (editingDocument) {
+      setDetailDocument((current) => (current?.id === result.id ? result : current));
+      toast.success("Documento actualizado.");
+    } else {
+      toast.success("Documento registrado.");
+    }
+
+    closeFormModal();
   }
 
   async function confirmRemove() {
@@ -308,6 +296,7 @@ export function AdmissionDocuments() {
         return;
       }
 
+      setDetailDocument((current) => (current?.id === result.id ? null : current));
       toast.success(result.message);
       setRemoveDocument(null);
     } catch (error) {
@@ -317,24 +306,160 @@ export function AdmissionDocuments() {
     }
   }
 
+  const showGlobalEmptyState = !requests.loading && requests.rows.length === 0 && !searchTerm.trim();
+
+  // ── KPI metrics derived from real data ──
+  const kpiTotalRequests = requests.rows.length;
+  const kpiApprovedDocs = documents.rows.filter(
+    (d) => d.estadoValidacion === "APROBADO"
+  ).length;
+  const kpiPendingDocs = documents.rows.filter(
+    (d) => d.estadoValidacion === "PENDIENTE"
+  ).length;
+  const kpiRejectedDocs = documents.rows.filter(
+    (d) => d.estadoValidacion === "RECHAZADO"
+  ).length;
+  const kpiApprovalRate =
+    documents.rows.length > 0
+      ? Math.round((kpiApprovedDocs / documents.rows.length) * 100)
+      : 0;
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="admision-docs-theme space-y-6"
+      style={{ background: "var(--t-bg)", color: "var(--t-text)" }}
+    >
       <PageHeader
-        title="Documentos de admision"
-        description="Gestión y verificación de documentos del proceso de admisión de voluntarios."
-        action={{ label: "Nuevo documento", onClick: openCreateModal }}
+        title="Documentos de admisión"
+        description="Gestión de verificación documental de postulantes."
       />
 
-      <FilterBar
-        searchPlaceholder="Buscar solicitud por nombre o correo..."
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        filters={[]}
-      />
+      {/* ── KPI Summary Cards (Bento Grid Row) ── */}
+      {!showGlobalEmptyState && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Total Solicitudes */}
+          <div
+            className="rounded-xl p-4"
+            style={{
+              background: "var(--t-surface)",
+              border: "1px solid var(--t-border)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs" style={{ color: "var(--t-text-secondary)" }}>
+                Solicitudes
+              </span>
+              <div
+                className="text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1"
+                style={{
+                  background: "var(--t-info-soft, rgba(53,108,146,0.16))",
+                  color: "var(--t-primary)",
+                  border: "1px solid rgba(53,108,146,0.20)",
+                }}
+              >
+                <FileText size={12} strokeWidth={1.5} />
+                Total
+              </div>
+            </div>
+            <div className="text-2xl font-bold" style={{ color: "var(--t-text)" }}>
+              {requests.loading ? "…" : kpiTotalRequests}
+            </div>
+          </div>
+
+          {/* Documentos Pendientes */}
+          <div
+            className="rounded-xl p-4"
+            style={{
+              background: "var(--t-surface)",
+              border: "1px solid var(--t-border)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs" style={{ color: "var(--t-text-secondary)" }}>
+                Pendientes
+              </span>
+              <div
+                className="text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1"
+                style={{
+                  background: "var(--t-warning-soft, #231C11)",
+                  color: "var(--t-warning, #D97706)",
+                  border: "1px solid rgba(217,119,6,0.20)",
+                }}
+              >
+                <Clock size={12} strokeWidth={1.5} />
+                {kpiPendingDocs} pend.
+              </div>
+            </div>
+            <div className="text-2xl font-bold" style={{ color: "var(--t-text)" }}>
+              {documents.loading ? "…" : kpiPendingDocs}
+            </div>
+          </div>
+
+          {/* Tasa de Aprobación */}
+          <div
+            className="rounded-xl p-4"
+            style={{
+              background: "var(--t-surface)",
+              border: "1px solid var(--t-border)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs" style={{ color: "var(--t-text-secondary)" }}>
+                Tasa Aprobación
+              </span>
+              <div
+                className="text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1"
+                style={{
+                  background: "var(--t-success-soft, #161D17)",
+                  color: "var(--t-success, #08996A)",
+                  border: "1px solid rgba(8,153,106,0.20)",
+                }}
+              >
+                <CheckCircle2 size={12} strokeWidth={1.5} />
+                {kpiApprovalRate}%
+              </div>
+            </div>
+            <div className="text-2xl font-bold" style={{ color: "var(--t-text)" }}>
+              {documents.loading ? "…" : `${kpiApprovalRate}%`}
+            </div>
+          </div>
+
+          {/* Rechazados */}
+          <div
+            className="rounded-xl p-4"
+            style={{
+              background: "var(--t-surface)",
+              border: "1px solid var(--t-border)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs" style={{ color: "var(--t-text-secondary)" }}>
+                Rechazados
+              </span>
+              <div
+                className="text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1"
+                style={{
+                  background: "var(--t-danger-bg, rgba(239,68,68,0.08))",
+                  color: "var(--t-danger, #ef4444)",
+                  border: "1px solid rgba(239,68,68,0.20)",
+                }}
+              >
+                <AlertTriangle size={12} strokeWidth={1.5} />
+                {kpiRejectedDocs}
+              </div>
+            </div>
+            <div className="text-2xl font-bold" style={{ color: "var(--t-text)" }}>
+              {documents.loading ? "…" : kpiRejectedDocs}
+            </div>
+          </div>
+        </div>
+      )}
 
       {(requests.error || catalogs.error || documents.error) && (
         <ErrorBlock
-          message={requests.error || catalogs.error || documents.error || "No se pudo cargar admision."}
+          message={requests.error || catalogs.error || documents.error || "No se pudo cargar la información."}
           onRetry={() => {
             requests.refresh();
             catalogs.refresh();
@@ -343,56 +468,187 @@ export function AdmissionDocuments() {
         />
       )}
 
-      <div
-        className="space-y-3 rounded-2xl px-4 py-4"
-        style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-      >
-        <div className="grid gap-3 md:grid-cols-[minmax(0,320px)_1fr]">
-          <SelectField
-            value={selectedRequestId ?? ""}
-            onChange={setSelectedRequestId}
-            options={
-              requestOptions.length > 0
-                ? requestOptions
-                : [{ value: "", label: "Sin solicitudes disponibles" }]
-            }
-            disabled={requests.loading || requestOptions.length === 0}
-          />
-
-          {selectedRequest ? (
-            <div className="grid gap-3 md:grid-cols-3">
-              <DetailField label="Solicitante" value={selectedRequest.fullName} />
-              <DetailField label="Correo" value={selectedRequest.email} />
-              <DetailField label="Estado" value={selectedRequest.stateName} />
-            </div>
-          ) : (
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Selecciona una solicitud para gestionar sus documentos.
-            </p>
-          )}
+      {showGlobalEmptyState ? (
+        <div
+          className="flex flex-col items-center justify-center py-20 rounded-xl"
+          style={{
+            background: "var(--t-surface)",
+            border: "1px solid var(--t-border)",
+          }}
+        >
+          <div
+            className="p-3 rounded-xl mb-3"
+            style={{ background: "var(--t-hover, #1F1D1A)" }}
+          >
+            <BarChart3 size={24} strokeWidth={1.5} style={{ color: "var(--t-text-dim)" }} />
+          </div>
+          <h3 className="text-sm font-medium mb-1" style={{ color: "var(--t-text)" }}>
+            Aún no hay solicitudes pendientes
+          </h3>
+          <p
+            className="text-xs text-center max-w-xs"
+            style={{ color: "var(--t-text-secondary)" }}
+          >
+            Actualmente no hay postulantes pendientes de revisión documental.
+          </p>
         </div>
-      </div>
-
-      {hasBlockingError ? null : !selectedRequest ? (
-        <InfoBlock message={tableEmptyMessage} />
       ) : (
-        <DataTable
-          columns={columns}
-          data={documents.rows}
-          loading={requests.loading || catalogs.loading || documents.loading}
-          emptyMessage={tableEmptyMessage}
-          actions={[
-            { label: "Ver detalle", onClick: (row) => setDetailDocument(row) },
-            { label: "Editar", onClick: (row) => openEditModal(row) },
-            {
-              label: "Eliminar",
-              onClick: (row) => setRemoveDocument(row),
-              variant: "destructive",
-            },
-          ]}
-        />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
+          <div className="space-y-4">
+            <FilterBar
+              searchPlaceholder="Buscar por postulante o correo..."
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              filters={[]}
+            />
+            
+            <div
+              className="flex h-[600px] flex-col overflow-y-auto rounded-xl"
+              style={{
+                border: "1px solid var(--t-border)",
+                background: "var(--t-surface)",
+              }}
+            >
+              {requests.loading ? (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-[13px]" style={{ color: "var(--t-text-dim)" }}>
+                    Cargando postulantes...
+                  </p>
+                </div>
+              ) : requests.rows.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center p-4">
+                  <div
+                    className="p-3 rounded-xl mb-3"
+                    style={{ background: "var(--t-hover, #1F1D1A)" }}
+                  >
+                    <FileText size={24} strokeWidth={1.5} style={{ color: "var(--t-text-dim)" }} />
+                  </div>
+                  <h3 className="text-sm font-medium mb-1" style={{ color: "var(--t-text)" }}>
+                    Sin coincidencias
+                  </h3>
+                  <p
+                    className="text-xs text-center max-w-xs"
+                    style={{ color: "var(--t-text-secondary)" }}
+                  >
+                    No se encontraron postulantes con los criterios de búsqueda.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col divide-y" style={{ borderColor: "var(--t-border)" }}>
+                  {requests.rows.map(row => (
+                    <button
+                      key={row.id}
+                      onClick={() => setSelectedRequestId(row.id)}
+                      className="flex flex-col items-start gap-1 p-4 text-left transition-colors"
+                      style={{
+                        background: selectedRequestId === row.id
+                          ? "var(--t-hover)"
+                          : "transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedRequestId !== row.id)
+                          e.currentTarget.style.background = "var(--t-hover)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedRequestId !== row.id)
+                          e.currentTarget.style.background = "transparent";
+                      }}
+                    >
+                      <p className="text-[13px] font-medium" style={{ color: "var(--t-text)" }}>
+                        {row.fullName}
+                      </p>
+                      <p className="text-[11px]" style={{ color: "var(--t-text-secondary)" }}>
+                        {row.email}
+                      </p>
+                      <div className="mt-1">
+                        <StatusDot
+                          variant={
+                            row.stateCode === "aprobada"
+                              ? "success"
+                              : row.stateCode === "rechazada"
+                              ? "destructive"
+                              : "warning"
+                          }
+                        >
+                          {row.stateName}
+                        </StatusDot>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {hasBlockingError ? null : !selectedRequest ? (
+              <div
+                className="flex h-[600px] flex-col items-center justify-center rounded-xl"
+                style={{
+                  border: "1px solid var(--t-border)",
+                  background: "var(--t-surface)",
+                }}
+              >
+                <div
+                  className="p-3 rounded-xl mb-3"
+                  style={{ background: "var(--t-hover, #1F1D1A)" }}
+                >
+                  <FileText size={24} strokeWidth={1.5} style={{ color: "var(--t-text-dim)" }} />
+                </div>
+                <h3 className="text-sm font-medium mb-1" style={{ color: "var(--t-text)" }}>
+                  Selecciona un postulante
+                </h3>
+                <p
+                  className="text-xs text-center max-w-xs"
+                  style={{ color: "var(--t-text-secondary)" }}
+                >
+                  Haz clic en un postulante de la lista para gestionar sus documentos.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="flex flex-col gap-4 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between"
+                  style={{
+                    background: "var(--t-surface)",
+                    border: "1px solid var(--t-border)",
+                  }}
+                >
+                  <div>
+                    <h3 className="text-[16px] font-medium" style={{ color: "var(--t-text)" }}>
+                      {selectedRequest.fullName}
+                    </h3>
+                    <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+                      {selectedRequest.email} • {selectedRequest.stateName}
+                    </p>
+                  </div>
+                  <GradientButton size="sm" onClick={openCreateModal}>
+                    Solicitar documento
+                  </GradientButton>
+                </div>
+                
+                <DataTable
+                  columns={columns}
+                  data={documents.rows}
+                  loading={requests.loading || catalogs.loading || documents.loading}
+                  emptyMessage={tableEmptyMessage}
+                  actions={[
+                    { label: "Ver detalle", onClick: (row) => setDetailDocument(row) },
+                    { label: "Editar", onClick: (row) => openEditModal(row) },
+                    {
+                      label: "Eliminar",
+                      onClick: (row) => setRemoveDocument(row),
+                      variant: "destructive",
+                    },
+                  ]}
+                />
+              </>
+            )}
+          </div>
+        </div>
       )}
 
+      {/* ── Create/Edit Modal ── */}
       <ModalShell open={isFormOpen} onClose={closeFormModal} width="max-w-[760px]">
         <div
           className="flex items-start justify-between px-4 py-3"
@@ -400,18 +656,21 @@ export function AdmissionDocuments() {
         >
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              {editingDocument ? "Editar documento" : "Nuevo documento"}
+              {editingDocument ? "Editar documento" : "Solicitar documento"}
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Solicitud: {selectedRequest?.fullName ?? "-"}
+              Postulante: {selectedRequest?.fullName ?? "-"}
             </p>
           </div>
           <button
             type="button"
-            className="rounded-md px-2 py-1 text-[12px]"
+            className="rounded-md p-1.5 transition-colors"
+            style={{ color: "var(--t-text-secondary)" }}
             onClick={closeFormModal}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-hover)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
-            X
+            <X size={16} strokeWidth={1.5} />
           </button>
         </div>
 
@@ -426,11 +685,18 @@ export function AdmissionDocuments() {
           <div className="space-y-1">
             <SelectField
               value={formState.type}
-              onChange={(value) => setFormState((current) => ({ ...current, type: value }))}
+              onChange={(value) => {
+                setFormState((current) => ({ ...current, type: value }));
+                setFormErrors((current) => ({
+                  ...current,
+                  type: undefined,
+                  general: undefined,
+                }));
+              }}
               options={
                 catalogs.catalogs.documentTypes.length > 0
                   ? catalogs.catalogs.documentTypes
-                  : [{ value: "", label: "Sin catalogo disponible" }]
+                  : [{ value: "", label: "Sin catálogo disponible" }]
               }
               disabled={documents.isCreating || documents.isUpdating}
             />
@@ -447,10 +713,17 @@ export function AdmissionDocuments() {
                 color: "var(--t-text-secondary)",
               }}
               onChange={(event) =>
-                setFormState((current) => ({
-                  ...current,
-                  file: event.target.files?.[0] ?? null,
-                }))
+                {
+                  setFormState((current) => ({
+                    ...current,
+                    file: event.target.files?.[0] ?? null,
+                  }));
+                  setFormErrors((current) => ({
+                    ...current,
+                    file: undefined,
+                    general: undefined,
+                  }));
+                }
               }
             />
             {formState.file && (
@@ -466,36 +739,48 @@ export function AdmissionDocuments() {
             <FieldError message={formErrors.file} />
           </div>
 
-          <label
-            className="flex items-center gap-2 text-[12px]"
-            style={{ color: "var(--t-text-secondary)" }}
-          >
-            <input
-              type="checkbox"
-              checked={formState.verified}
-              onChange={(event) =>
-                setFormState((current) => ({ ...current, verified: event.target.checked }))
-              }
-            />
-            Documento verificado
-          </label>
-
-          <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-            Al marcarlo como verificado, el sistema persiste `verified_by` y `verified_at`.
-          </p>
+          {formState.estadoValidacion === "RECHAZADO" && (
+            <div className="space-y-1">
+              <textarea
+                placeholder="Motivo de rechazo..."
+                value={formState.comentariosRechazo ?? ""}
+                onChange={(event) => {
+                  setFormState((current) => ({ ...current, comentariosRechazo: event.target.value }));
+                  setFormErrors((current) => ({ ...current, comentariosRechazo: undefined, general: undefined }));
+                }}
+                className="h-20 w-full rounded-xl px-3 py-2 text-[12px] outline-none"
+                style={{
+                  border: "1px solid var(--t-border)",
+                  background: "var(--t-input-bg)",
+                  color: "var(--t-text-secondary)",
+                }}
+              />
+              <FieldError message={formErrors.comentariosRechazo} />
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-2">
             <GradientButton
               size="sm"
-              onClick={() => void submitForm()}
+              onClick={() => void submitForm("APROBADO")}
               disabled={documents.isCreating || documents.isUpdating || isUploadingFile}
             >
-              {isUploadingFile
-                ? "Subiendo archivo..."
-                : documents.isCreating || documents.isUpdating
-                  ? "Guardando..."
-                  : "Guardar"}
+              Aprobar
             </GradientButton>
+            <OutlineButton
+              size="sm"
+              onClick={() => void submitForm("RECHAZADO")}
+              disabled={documents.isCreating || documents.isUpdating || isUploadingFile}
+            >
+              Rechazar
+            </OutlineButton>
+            <OutlineButton
+              size="sm"
+              onClick={() => void submitForm("PENDIENTE")}
+              disabled={documents.isCreating || documents.isUpdating || isUploadingFile}
+            >
+              Solo Guardar
+            </OutlineButton>
             <OutlineButton
               size="sm"
               onClick={closeFormModal}
@@ -507,6 +792,7 @@ export function AdmissionDocuments() {
         </div>
       </ModalShell>
 
+      {/* ── Detail Modal ── */}
       <ModalShell
         open={Boolean(detailDocument)}
         onClose={() => setDetailDocument(null)}
@@ -516,17 +802,27 @@ export function AdmissionDocuments() {
           {detailDocument && (
             <>
               <div className="flex items-center gap-2">
-                <StatusDot variant={detailDocument.verified ? "success" : "warning"}>
-                  {detailDocument.verified ? "Verificado" : "Pendiente"}
+                <StatusDot variant={detailDocument.estadoValidacion === "APROBADO" ? "success" : detailDocument.estadoValidacion === "RECHAZADO" ? "destructive" : "warning"}>
+                  {detailDocument.estadoValidacion === "APROBADO" ? "Aprobado" : detailDocument.estadoValidacion === "RECHAZADO" ? "Rechazado" : "Pendiente"}
                 </StatusDot>
               </div>
+              {detailDocument.estadoValidacion === "RECHAZADO" && detailDocument.comentariosRechazo && (
+                <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-danger-bg, rgba(239,68,68,0.08))", border: "1px solid var(--t-danger, #ef4444)" }}>
+                  <p className="text-[11px] font-medium" style={{ color: "var(--t-danger, #ef4444)" }}>
+                    Motivo de rechazo:
+                  </p>
+                  <p className="mt-1 text-[12px]" style={{ color: "var(--t-danger, #ef4444)" }}>
+                    {detailDocument.comentariosRechazo}
+                  </p>
+                </div>
+              )}
               <div className="grid gap-3 md:grid-cols-2">
                 <DetailField label="Solicitud" value={detailDocument.requestName} />
                 <DetailField label="Tipo" value={detailDocument.type} />
                 <DetailField label="Archivo" value={detailDocument.fileUrl} />
                 <DetailField label="Verificado por" value={detailDocument.verifiedByLabel ?? "-"} />
                 <DetailField
-                  label="Fecha de verificacion"
+                  label="Fecha de verificación"
                   value={detailDocument.verifiedAtLabel}
                 />
                 <DetailField label="Actualizado" value={detailDocument.updatedAt} />
@@ -536,6 +832,7 @@ export function AdmissionDocuments() {
         </div>
       </ModalShell>
 
+      {/* ── Delete Confirmation Modal ── */}
       <ModalShell
         open={Boolean(removeDocument)}
         onClose={() => setRemoveDocument(null)}
@@ -544,8 +841,8 @@ export function AdmissionDocuments() {
         <div className="space-y-3 p-4">
           <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
             {removeDocument
-              ? `Eliminar el documento ${removeDocument.type} de ${removeDocument.requestName}?`
-              : "Confirma la eliminacion."}
+              ? `¿Eliminar el documento ${removeDocument.type} de ${removeDocument.requestName}?`
+              : "Confirma la eliminación."}
           </p>
           <div className="flex gap-2">
             <GradientButton
@@ -568,3 +865,4 @@ export function AdmissionDocuments() {
     </motion.div>
   );
 }
+

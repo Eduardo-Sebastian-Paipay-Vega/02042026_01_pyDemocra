@@ -393,31 +393,73 @@ function PxInspector({
               </p>
               <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <span style={{ fontSize: 9, color: "var(--t-text-dim)", fontFamily: "monospace" }}>
-                  Link Google Fonts
-                  {fontStatus === "ok" && <span style={{ color: "#10b981", marginLeft: 4 }}>✓ inyectada</span>}
+                  Familia tipográfica
+                  {fontStatus === "ok" && <span style={{ color: "#10b981", marginLeft: 4 }}>✓ cargada</span>}
                   {fontStatus === "error" && <span style={{ color: "#ef4444", marginLeft: 4 }}>! inválida</span>}
                 </span>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <input
-                    type="url"
-                    placeholder="https://fonts.googleapis.com/..."
-                    value={googleFontUrl}
-                    onChange={(e) => setGoogleFontUrl(e.target.value)}
-                    onBlur={(e) => { if (e.target.value.includes("fonts.google")) injectGoogleFont(e.target.value); }}
-                    style={{
-                      fontSize: 10, flex: 1, padding: "3px 6px", borderRadius: 4,
-                      border: `1px solid ${fontStatus === "ok" ? "#10b981" : fontStatus === "error" ? "#ef4444" : "var(--t-border)"}`,
-                      background: "var(--t-surface)", color: "var(--t-text)",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => { if (googleFontUrl) injectGoogleFont(googleFontUrl); }}
-                    style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, cursor: "pointer", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", color: "var(--t-text)" }}
-                  >
-                    Aplicar
-                  </button>
-                </div>
+                
+                <select
+                  value={
+                    !field.fontFamily
+                      ? ""
+                      : ["Inter", "Roboto", "Open Sans", "Montserrat", "Lato", "Poppins", "Oswald"].includes(field.fontFamily)
+                      ? field.fontFamily
+                      : "custom"
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "custom") {
+                      // Se mantiene la opción personalizada abierta
+                    } else if (val) {
+                      const url = `https://fonts.googleapis.com/css2?family=${val.replace(/\s+/g, "+")}&display=swap`;
+                      setGoogleFontUrl(url);
+                      injectGoogleFont(url);
+                      onUpdate(fieldIndex, { fontFamily: val });
+                      setFontStatus("ok");
+                    } else {
+                      onUpdate(fieldIndex, { fontFamily: null });
+                      setFontStatus("idle");
+                    }
+                  }}
+                  style={{
+                    fontSize: 11, padding: "4px 6px", borderRadius: 4,
+                    border: "1px solid var(--t-border)", background: "var(--t-surface)", color: "var(--t-text)",
+                  }}
+                >
+                  <option value="">(Por defecto)</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Open Sans">Open Sans</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Lato">Lato</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Oswald">Oswald</option>
+                  <option value="custom">Personalizada...</option>
+                </select>
+
+                {(!["", "Inter", "Roboto", "Open Sans", "Montserrat", "Lato", "Poppins", "Oswald"].includes(field.fontFamily || "") || field.fontFamily === "custom") && (
+                  <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+                    <input
+                      type="url"
+                      placeholder="URL de Google Fonts"
+                      value={googleFontUrl}
+                      onChange={(e) => setGoogleFontUrl(e.target.value)}
+                      onBlur={(e) => { if (e.target.value.includes("fonts.google")) injectGoogleFont(e.target.value); }}
+                      style={{
+                        fontSize: 10, flex: 1, padding: "3px 6px", borderRadius: 4,
+                        border: `1px solid ${fontStatus === "ok" ? "#10b981" : fontStatus === "error" ? "#ef4444" : "var(--t-border)"}`,
+                        background: "var(--t-surface)", color: "var(--t-text)",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { if (googleFontUrl) injectGoogleFont(googleFontUrl); }}
+                      style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, cursor: "pointer", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", color: "var(--t-text)" }}
+                    >
+                      Importar
+                    </button>
+                  </div>
+                )}
               </label>
             </div>
           </div>
@@ -916,7 +958,7 @@ export function IdCardTemplateWizard({
           <div style={{ maxHeight: "calc(100vh - 250px)", display: "flex", overflow: "hidden" }}>
 
             {/* Canvas — 75% */}
-            <div style={{ flex: "1 1 0%", overflow: "auto", padding: 16 }}>
+            <div style={{ flex: "1 1 0%", overflow: "auto", padding: 16, display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
               <IdCardCanvasEditor
                 baseImageUrl={phase1.bgPreviewUrl || null}
                 templateWidth={widthPx}

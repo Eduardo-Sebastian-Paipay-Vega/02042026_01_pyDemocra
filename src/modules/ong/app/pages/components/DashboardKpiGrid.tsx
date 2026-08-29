@@ -29,33 +29,33 @@ export function DashboardKpiGrid({ metrics, loading }: DashboardKpiGridProps) {
       title: "Voluntarios Activos",
       value: metrics.volunteersActive,
       icon: Users,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10",
+      color: "text-emerald-600 dark:text-[#08996A]",
+      bgColor: "bg-emerald-50 dark:bg-[#08996A]/10",
       badge: "En sistema",
       badgeIcon: CheckCircle2,
-      badgeColor: "text-emerald-500 bg-transparent border-emerald-500/20",
+      badgeColor: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-[#161D17] dark:text-[#08996A] dark:border-[#08996A]/20",
     },
     {
       id: "projects",
       title: "Proyectos en Curso",
       value: metrics.projectsActive,
       icon: Briefcase,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "text-blue-600 dark:text-[#356C92]",
+      bgColor: "bg-blue-50 dark:bg-[#356C92]/10",
       badge: "Activos",
       badgeIcon: Activity,
-      badgeColor: "text-blue-500 bg-transparent border-blue-500/20",
+      badgeColor: "text-blue-600 bg-blue-50 border-blue-200 dark:bg-[#10141A] dark:text-[#356C92] dark:border-[#356C92]/20",
     },
     {
       id: "hours",
       title: "Horas Aprobadas",
       value: metrics.hoursApproved,
       icon: Clock,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
+      color: "text-purple-600 dark:text-[#8B5CF6]",
+      bgColor: "bg-purple-50 dark:bg-[#8B5CF6]/10",
       badge: "Auditado OK",
       badgeIcon: CheckCircle2,
-      badgeColor: "text-purple-500 bg-transparent border-purple-500/20",
+      badgeColor: "text-purple-600 bg-purple-50 border-purple-200 dark:bg-[#1F181E] dark:text-[#8B5CF6] dark:border-[#8B5CF6]/20",
       isTime: true,
     },
     {
@@ -63,11 +63,11 @@ export function DashboardKpiGrid({ metrics, loading }: DashboardKpiGridProps) {
       title: "Horas por Revisar",
       value: metrics.approvalsPending,
       icon: FileCheck2,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
+      color: "text-amber-600 dark:text-[#D97706]",
+      bgColor: "bg-amber-50 dark:bg-[#D97706]/10",
       badge: "Requiere atención",
       badgeIcon: AlertTriangle,
-      badgeColor: "text-amber-500 bg-transparent border-amber-500/20",
+      badgeColor: "text-amber-600 bg-amber-50 border-amber-200 dark:bg-[#231C11] dark:text-[#D97706] dark:border-[#D97706]/20",
     },
   ];
 
@@ -77,7 +77,7 @@ export function DashboardKpiGrid({ metrics, loading }: DashboardKpiGridProps) {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 p-6 animate-pulse"
+            className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#171512] border border-neutral-200 dark:border-[#26231F] p-6 animate-pulse"
           >
             <div className="flex items-center justify-between">
               <div className="h-4 w-24 bg-neutral-200 dark:bg-zinc-800 rounded"></div>
@@ -102,10 +102,10 @@ export function DashboardKpiGrid({ metrics, loading }: DashboardKpiGridProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20"
+            className="group relative overflow-hidden rounded-2xl bg-white dark:bg-[#171512] border border-neutral-200 dark:border-[#26231F] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20"
           >
             <div className="flex items-center justify-between relative z-10">
-              <h3 className="text-sm font-medium text-neutral-500 dark:text-zinc-400">
+              <h3 className="text-sm font-medium text-neutral-500 dark:text-[#A4A29F]">
                 {kpi.title}
               </h3>
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${kpi.bgColor}`}>
@@ -113,13 +113,13 @@ export function DashboardKpiGrid({ metrics, loading }: DashboardKpiGridProps) {
               </div>
             </div>
             <div className="mt-4 flex items-baseline gap-2 relative z-10">
-              <p className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-zinc-50">
+              <p className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-[#F9F7F3]">
                 <AnimatedCounter value={kpi.value} isTime={kpi.isTime} />
                 {kpi.isTime && "h"}
               </p>
             </div>
             <div className="mt-4 flex items-center relative z-10">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium border ${kpi.badgeColor}`}>
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs border ${kpi.badgeColor}`}>
                 <BadgeIcon className="h-3.5 w-3.5" />
                 {kpi.badge}
               </span>

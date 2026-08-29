@@ -1,0 +1,1 @@
+- `src/modules/ong/app/pages/Inventory.tsx`: Modificado. Reubicación del botón principal (creación) en `PageHeader`, integración del botón "Refrescar" a nivel de paginación, estilizado en forma de badge para los campos de SKU/código y lógica semántica de alerta ("Agotado") para stocks críticos (menor o igual a cero). Corrección de importación para la función utilitaria `cn`.

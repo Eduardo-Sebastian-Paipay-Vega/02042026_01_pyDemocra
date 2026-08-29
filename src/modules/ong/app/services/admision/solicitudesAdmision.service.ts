@@ -40,16 +40,18 @@ const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
 
 const ADMISSION_STATE_OPTIONS: AdmissionStateOption[] = [
-  { value: "nueva", label: "Nueva", kind: "received", variant: "secondary" },
-  { value: "en_entrevista", label: "En entrevista", kind: "interview", variant: "warning" },
-  { value: "aprobada", label: "Aprobada", kind: "approved", variant: "success" },
-  { value: "rechazada", label: "Rechazada", kind: "rejected", variant: "destructive" },
+  { value: "PENDIENTE", label: "Pendiente", kind: "received", variant: "secondary" },
+  { value: "EN_REVISION", label: "En revision", kind: "review", variant: "secondary" },
+  { value: "ENTREVISTA", label: "En entrevista", kind: "interview", variant: "warning" },
+  { value: "APROBADA", label: "Aprobada", kind: "approved", variant: "success" },
+  { value: "RECHAZADA", label: "Rechazada", kind: "rejected", variant: "destructive" },
+  { value: "CONVERTIDA", label: "Convertida", kind: "other", variant: "success" },
 ];
 
 const REQUEST_SELECT =
   "id, tenant_id, nombres, apellidos, email, estado, fecha_solicitud, notas, id_voluntario_vinculado, created_at, updated_at, created_by, updated_by";
 const DOCUMENT_SELECT =
-  "id, tenant_id, id_solicitud, tipo_documento, archivo_url, verificado, verified_by, verified_at, created_at, updated_at, created_by, updated_by";
+  "id, tenant_id, id_solicitud, tipo_documento, archivo_url, estado_validacion, comentarios_rechazo, verified_by, verified_at, created_at, updated_at, created_by, updated_by";
 const INTERVIEW_SELECT =
   "id, tenant_id, id_solicitud, entrevistador_id, fecha_entrevista, comentarios, resultado, puntaje, created_at, updated_at, created_by, updated_by";
 const ONBOARDING_SELECT =
@@ -86,7 +88,8 @@ interface DocumentoRow extends TenantRow {
   id_solicitud: string;
   tipo_documento: string;
   archivo_url: string;
-  verificado: boolean | null;
+  estado_validacion: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentarios_rechazo: string | null;
   verified_by: string | null;
   verified_at: string | null;
   created_at: string | null;
@@ -631,7 +634,8 @@ function buildDocumentoAdmisionInsertPayload(options: {
   requestId: string;
   type: string;
   fileUrl: string;
-  verified: boolean;
+  estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo?: string | null;
   actorId: string | null;
 }): DocumentoInsertPayload {
   return {
@@ -639,9 +643,10 @@ function buildDocumentoAdmisionInsertPayload(options: {
     id_solicitud: options.requestId,
     tipo_documento: options.type,
     archivo_url: options.fileUrl,
-    verificado: options.verified,
-    verified_by: options.verified ? options.actorId : null,
-    verified_at: options.verified ? new Date().toISOString() : null,
+    estado_validacion: options.estadoValidacion ?? "PENDIENTE",
+      comentarios_rechazo: options.comentariosRechazo ?? null,
+    verified_by: options.estadoValidacion === "APROBADO" ? options.actorId : null,
+    verified_at: options.estadoValidacion === "APROBADO" ? new Date().toISOString() : null,
     created_by: options.actorId,
     updated_by: options.actorId,
   };
@@ -652,7 +657,8 @@ function buildDocumentoAdmisionUpdatePayload(options: {
   existingRow: DocumentoRow;
   type?: string;
   fileUrl?: string;
-  verified?: boolean;
+  estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo?: string | null;
 }): DocumentoUpdatePayload {
   const payload: DocumentoUpdatePayload = {
     updated_by: options.actorId,
@@ -664,15 +670,18 @@ function buildDocumentoAdmisionUpdatePayload(options: {
   if (typeof options.fileUrl === "string") {
     payload.archivo_url = sanitizeText(options.fileUrl, 2000);
   }
-  if (typeof options.verified === "boolean") {
-    payload.verificado = options.verified;
-    if (options.verified && !options.existingRow.verificado) {
+  if (options.estadoValidacion !== undefined) {
+    payload.estado_validacion = options.estadoValidacion;
+    if (options.estadoValidacion === "APROBADO" && options.existingRow.estado_validacion !== "APROBADO") {
       payload.verified_by = options.actorId;
       payload.verified_at = new Date().toISOString();
-    } else if (!options.verified) {
+    } else if (options.estadoValidacion !== "APROBADO") {
       payload.verified_by = null;
       payload.verified_at = null;
     }
+  }
+  if (options.comentariosRechazo !== undefined) {
+    payload.comentarios_rechazo = options.comentariosRechazo;
   }
 
   return payload;
@@ -712,7 +721,8 @@ function mapDocumentRow(
     typeCode: row.tipo_documento,
     type: documentTypeLabels.get(row.tipo_documento) ?? row.tipo_documento,
     fileUrl: row.archivo_url,
-    verified: Boolean(row.verificado),
+    estadoValidacion: row.estado_validacion ?? "PENDIENTE",
+    comentariosRechazo: row.comentarios_rechazo ?? null,
     verifiedById: row.verified_by ?? null,
     verifiedByLabel: row.verified_by ? profileLabels.get(row.verified_by) ?? row.verified_by : null,
     verifiedAt: row.verified_at ?? null,
@@ -1376,7 +1386,7 @@ export async function convertSolicitudToVoluntario(
     if (request.estado !== "aprobada") {
       await changeEstadoAdmision({
         requestId: request.id,
-        stateCode: "aprobada",
+        stateCode: "APROBADA",
         comment: "ConversiÃ³n a voluntario ejecutada desde admisiÃ³n.",
         actorId,
       });
@@ -1483,7 +1493,8 @@ export async function createDocumentoAdmision(
     requestId: string;
     type: string;
     fileUrl: string;
-    verified?: boolean;
+    estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+    comentariosRechazo?: string | null;
     actorId?: string | null;
   }
 ): Promise<AdmissionDocumentRow> {
@@ -1516,7 +1527,8 @@ export async function createDocumentoAdmision(
           requestId,
           type,
           fileUrl,
-          verified: input.verified ?? false,
+          estadoValidacion: input.estadoValidacion,
+          comentariosRechazo: input.comentariosRechazo,
           actorId,
         })
       )
@@ -1547,7 +1559,8 @@ export async function updateDocumentoAdmision(input: {
   documentId: string;
   type?: string;
   fileUrl?: string;
-  verified?: boolean;
+  estadoValidacion?: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  comentariosRechazo?: string | null;
   actorId?: string | null;
 }): Promise<AdmissionDocumentRow> {
   try {
@@ -1579,7 +1592,8 @@ export async function updateDocumentoAdmision(input: {
       existingRow,
       type: input.type,
       fileUrl: input.fileUrl,
-      verified: input.verified,
+      estadoValidacion: input.estadoValidacion,
+      comentariosRechazo: input.comentariosRechazo,
     });
 
     const { data, error } = await rrhhSchema()

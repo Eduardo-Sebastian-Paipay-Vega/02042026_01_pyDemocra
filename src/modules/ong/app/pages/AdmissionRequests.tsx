@@ -173,10 +173,10 @@ export function AdmissionRequests() {
   );
   const [requestForm, setRequestForm] = useSessionStorageState<RequestForm>(
     "ong.view.admission.request-form.values",
-    { nombres: "", apellidos: "", email: "", notes: "", stateCode: "nueva" }
+    { nombres: "", apellidos: "", email: "", notes: "", stateCode: "PENDIENTE" }
   );
   const [requestError, setRequestError] = useState<string | null>(null);
-  const [stateCode, setStateCode] = useState<AdmissionStateCode>("nueva");
+  const [stateCode, setStateCode] = useState<AdmissionStateCode>("PENDIENTE");
   const [stateComment, setStateComment] = useState("");
   const [stateError, setStateError] = useState<string | null>(null);
   const [convertForm, setConvertForm] = useState<ConvertForm>({ numeroDocumento: "", tipoDocumento: "", genero: "", codigoPais: "PE", telefono: "", fechaNacimiento: "", observaciones: "", codigoEstado: "" });
@@ -232,7 +232,7 @@ export function AdmissionRequests() {
   function resetRequestForm() {
     setEditingRequest(null);
     setEditingRequestId(null);
-    setRequestForm({ nombres: "", apellidos: "", email: "", notes: "", stateCode: stateOptions[0]?.value ?? "nueva" });
+    setRequestForm({ nombres: "", apellidos: "", email: "", notes: "", stateCode: stateOptions[0]?.value ?? "PENDIENTE" });
     setRequestError(null);
   }
 

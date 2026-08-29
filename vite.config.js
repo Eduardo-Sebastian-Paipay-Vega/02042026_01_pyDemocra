@@ -63,6 +63,9 @@ function spaFallback() {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), spaFallback()],
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development"),
+  },
   resolve: {
     alias: {
       // Namespaced por módulo para que "@" no se pise entre src/ y ONG/src/

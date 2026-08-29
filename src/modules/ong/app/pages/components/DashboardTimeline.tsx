@@ -14,13 +14,13 @@ export function DashboardTimeline({ timeline, loading }: DashboardTimelineProps)
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex gap-4">
             <div className="relative mt-1">
-              <div className="h-2 w-2 rounded-full bg-neutral-200 dark:bg-zinc-700" />
-              <div className="absolute left-1 top-4 h-full w-px -translate-x-1/2 bg-neutral-200 dark:bg-zinc-800" />
+              <div className="h-2 w-2 rounded-full bg-neutral-200 dark:bg-[#26231F]" />
+              <div className="absolute left-1 top-4 h-full w-px -translate-x-1/2 bg-neutral-200 dark:bg-[#26231F]" />
             </div>
             <div className="flex-1">
-              <div className="h-4 w-32 bg-neutral-200 dark:bg-zinc-700 rounded mb-2" />
-              <div className="h-3 w-48 bg-neutral-200 dark:bg-zinc-800 rounded mb-2" />
-              <div className="h-3 w-24 bg-neutral-200 dark:bg-zinc-800 rounded" />
+              <div className="h-4 w-32 bg-neutral-200 dark:bg-[#26231F] rounded mb-2" />
+              <div className="h-3 w-48 bg-neutral-200 dark:bg-[#26231F] rounded mb-2" />
+              <div className="h-3 w-24 bg-neutral-200 dark:bg-[#26231F] rounded" />
             </div>
           </div>
         ))}
@@ -31,16 +31,16 @@ export function DashboardTimeline({ timeline, loading }: DashboardTimelineProps)
   if (timeline.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
-        <div className="h-12 w-12 rounded-full bg-neutral-100 dark:bg-zinc-900 flex items-center justify-center mb-3">
-          <CalendarX className="h-6 w-6 text-neutral-400 dark:text-zinc-600" />
+        <div className="h-12 w-12 rounded-full bg-neutral-100 dark:bg-[#23211D] flex items-center justify-center mb-3">
+          <CalendarX className="h-6 w-6 text-neutral-400 dark:text-[#686561]" />
         </div>
-        <p className="text-sm font-medium text-neutral-900 dark:text-zinc-100">
+        <p className="text-sm font-medium text-neutral-900 dark:text-[#F9F7F3]">
           No hay actividades
         </p>
-        <p className="mt-1 text-sm text-neutral-500 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-[#A4A29F]">
           No hay eventos programados para hoy.
         </p>
-        <button className="mt-4 px-4 py-2 text-sm font-medium bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+        <button className="mt-4 px-4 py-2 text-sm font-medium bg-zinc-900 text-white dark:bg-[#356C92] dark:text-white rounded-lg hover:bg-zinc-800 dark:hover:bg-[#356C92]/90 transition-colors">
           + Programar Actividad
         </button>
       </div>
@@ -58,25 +58,25 @@ export function DashboardTimeline({ timeline, loading }: DashboardTimelineProps)
           className="flex gap-4 group"
         >
           <div className="relative mt-1.5 flex flex-col items-center">
-            <div className={`h-2.5 w-2.5 rounded-full ${item.dotColor} ring-4 ring-white dark:ring-zinc-950 z-10`} />
+            <div className={`h-2.5 w-2.5 rounded-full ${item.dotColor} ring-4 ring-white dark:ring-[#171512] z-10`} />
             {index !== timeline.length - 1 && (
-              <div className="absolute top-3 bottom-[-24px] w-px bg-neutral-200 dark:bg-zinc-800" />
+              <div className="absolute top-3 bottom-[-24px] w-px bg-neutral-200 dark:bg-[#26231F]" />
             )}
           </div>
           <div className="flex-1 pb-4">
-            <h4 className="text-base font-medium text-neutral-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <h4 className="text-base font-medium text-neutral-900 dark:text-[#F9F7F3] group-hover:text-blue-600 dark:group-hover:text-[#F9F7F3] transition-colors">
               {item.title}
             </h4>
-            <p className="mt-0.5 text-sm text-neutral-500 dark:text-zinc-400">
+            <p className="mt-0.5 text-sm text-neutral-500 dark:text-[#A4A29F]">
               {item.subtitle}
             </p>
             <div className="mt-2 flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm font-medium text-neutral-500 dark:text-zinc-400 bg-neutral-100 dark:bg-zinc-900 px-2 py-1 rounded-md">
+              <div className="flex items-center gap-1 text-sm font-medium text-neutral-500 dark:text-[#A4A29F] bg-neutral-100 dark:bg-[#23211D] px-2 py-1 rounded-md">
                 <Clock className="h-3 w-3" />
                 {item.time}
               </div>
               {item.locationName && (
-                <div className="flex items-center gap-1 text-sm font-medium text-neutral-500 dark:text-zinc-400">
+                <div className="flex items-center gap-1 text-sm font-medium text-neutral-500 dark:text-[#A4A29F]">
                   <MapPin className="h-3 w-3 text-red-400" />
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.locationName)}`}

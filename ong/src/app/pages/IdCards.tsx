@@ -9,6 +9,8 @@ import { GradientButton } from '@/core/components/ui/gradient-button';
 import { StatusDot } from '@/core/components/ui/status-dot';
 import { useIdCards } from "../modules/people/hooks/useIdCards";
 import { useIdCardMutations } from "../modules/people/hooks/useIdCardMutations";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/core/components/ui/button";
 import {
   IdCardDetailModal,
   IdCardFormModal,
@@ -37,13 +39,22 @@ const templateColumns: Column<IdCardTemplateSummaryRow>[] = [
     key: "name",
     label: "Plantilla",
     render: (row) => (
-      <div>
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
-          <span style={{ color: "var(--t-text)" }}>{row.name}</span>
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-[var(--t-surface)]" style={{ border: "1px solid var(--t-border)" }}>
+          {/* Suponemos que baseImageUrl vendrá en la fila */}
+          {/* @ts-ignore */}
+          {row.baseImageUrl ? (
+            // @ts-ignore
+            <img src={row.baseImageUrl} alt={row.name} className="h-full w-full object-cover" />
+          ) : (
+            <CreditCard className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
+          )}
         </div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.templateWidth} x {row.templateHeight} px
+        <div>
+          <div className="font-medium" style={{ color: "var(--t-text)" }}>{row.name}</div>
+          <div className="mt-0.5 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+            {row.templateWidth} x {row.templateHeight} px
+          </div>
         </div>
       </div>
     ),
@@ -82,13 +93,21 @@ const cardColumns: Column<IdCardListRow>[] = [
     key: "volunteer",
     label: "Voluntario",
     render: (row) => (
-      <div>
-        <div className="flex items-center gap-2">
-          <UserRound className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
-          <span style={{ color: "var(--t-text)" }}>{row.volunteerName}</span>
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--t-surface)]" style={{ border: "1px solid var(--t-border)" }}>
+          {/* @ts-ignore */}
+          {row.avatarUrl ? (
+            // @ts-ignore
+            <img src={row.avatarUrl} alt={row.volunteerName} className="h-full w-full object-cover" />
+          ) : (
+            <UserRound className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
+          )}
         </div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.documentLabel}
+        <div>
+          <div className="font-medium" style={{ color: "var(--t-text)" }}>{row.volunteerName}</div>
+          <div className="mt-0.5 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+            {row.documentLabel}
+          </div>
         </div>
       </div>
     ),
@@ -128,26 +147,33 @@ const cardColumns: Column<IdCardListRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         <div>{row.issuedAtLabel}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.expiresAtLabel}
-        </div>
+        {row.expiresAtLabel && row.expiresAtLabel !== "Sin fecha" && (
+          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+            Expira: {row.expiresAtLabel}
+          </div>
+        )}
       </div>
     ),
   },
 ];
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
+function SummaryCard({ label, value, icon: Icon }: { label: string; value: string, icon: any }) {
   return (
     <div
-      className="rounded-2xl px-4 py-3"
+      className="relative overflow-hidden rounded-xl px-4 py-3"
       style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
     >
-      <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-        {label}
-      </p>
-      <p className="mt-1 text-[18px]" style={{ color: "var(--t-text)" }}>
-        {value}
-      </p>
+      <div className="relative z-10">
+        <p className="text-[12px] font-medium" style={{ color: "var(--t-text-secondary)" }}>
+          {label}
+        </p>
+        <p className="mt-0.5 text-3xl font-bold tracking-tight" style={{ color: "var(--t-text)" }}>
+          {value}
+        </p>
+      </div>
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 opacity-5">
+        <Icon className="h-20 w-20" />
+      </div>
     </div>
   );
 }
@@ -307,8 +333,7 @@ export function IdCards() {
       {
         label: "Revocar",
         onClick: (row: IdCardListRow) => setRevokeCardId(row.id),
-      // @ts-ignore
-      // @ts-ignore
+        // @ts-ignore
         variant: "destructive" as const,
       },
     ]);
@@ -391,15 +416,18 @@ export function IdCards() {
         <PageHeader
           title="Credenciales ID"
           description="Diseña plantillas de credencial y emite identificaciones digitales para el voluntariado."
-          action={{ label: "Actualizar", onClick: workspace.refresh }}
-        />
+        >
+          <Button variant="ghost" size="sm" onClick={workspace.refresh} className="h-8 w-8 p-0" title="Actualizar datos">
+            <RefreshCw className="h-4 w-4" style={{ color: "var(--t-text-secondary)" }} />
+          </Button>
+        </PageHeader>
       </motion.div>
 
       <motion.div variants={fadeUp as any} className="grid gap-3 md:grid-cols-4">
-        <SummaryCard label="Plantillas" value={String(workspace.data.templates.length)} />
-        <SummaryCard label="Plantillas activas" value={String(activeTemplateCount)} />
-        <SummaryCard label="Credenciales" value={String(workspace.data.cards.length)} />
-        <SummaryCard label="Credenciales activas" value={String(activeCardCount)} />
+        <SummaryCard label="Plantillas totales" value={String(workspace.data.templates.length)} icon={CreditCard} />
+        <SummaryCard label="Plantillas activas" value={String(activeTemplateCount)} icon={CreditCard} />
+        <SummaryCard label="Credenciales emitidas" value={String(workspace.data.cards.length)} icon={UserRound} />
+        <SummaryCard label="Credenciales activas" value={String(activeCardCount)} icon={QrCode} />
       </motion.div>
 
 

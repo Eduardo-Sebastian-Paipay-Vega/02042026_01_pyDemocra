@@ -46,6 +46,7 @@ function mapSensitiveDetailToListRow(detail: SensitiveMedicalDetail): SensitiveM
       profileLabel: detail.profileLabel,
       hasRecord: detail.hasRecord,
       summary: detail.hasRecord ? "Ficha médica registrada" : "Pendiente de creación",
+      createdAt: null,
       updatedAt: detail.updatedAt,
       loggable: Boolean(detail.recordId),
     };
@@ -61,6 +62,7 @@ function mapSensitiveDetailToListRow(detail: SensitiveMedicalDetail): SensitiveM
     stateLabel: detail.stateLabel,
     hasRecord: detail.hasRecord,
     summary: detail.hasRecord ? "Ficha médica registrada" : "Pendiente de creación",
+    createdAt: null,
     updatedAt: detail.updatedAt,
     loggable: false,
   };
@@ -134,7 +136,7 @@ export function MedicalRecords() {
           </div>
           <div>
             <div style={{ color: "var(--t-text)" }}>{row.personName}</div>
-            <div className="mt-0.5 text-[12px] font-medium" style={{ color: "var(--t-text)" }}>
+            <div className="mt-0.5 text-[12px] font-medium" style={{ color: "var(--t-text-secondary)" }}>
               {row.documentLabel}
             </div>
           </div>
@@ -145,9 +147,11 @@ export function MedicalRecords() {
       key: "context",
       label: "Contexto",
       render: (row) => (
-        <StatusDot variant="info">
-          {row.scope === "beneficiaries" ? row.profileLabel : row.stateLabel}
-        </StatusDot>
+        <div className="capitalize">
+          <StatusDot variant="info">
+            {row.scope === "beneficiaries" ? row.profileLabel : row.stateLabel}
+          </StatusDot>
+        </div>
       ),
     },
     {
@@ -164,6 +168,7 @@ export function MedicalRecords() {
     {
       key: "updatedAt",
       label: "Actualizado",
+      className: "w-[130px]",
       render: (row) => (
         <span
           className="text-[12px]"
@@ -304,9 +309,13 @@ export function MedicalRecords() {
           ) : (
              <button className="bg-[#171512] border border-[#26231F] px-4 py-2 rounded-lg text-sm text-[#A4A29F] hover:bg-[#1F1D1A] transition-colors" onClick={() => setScope("volunteers")}>Voluntarios</button>
           )}
-          <button className="bg-[#356C92] border border-[#356C92]/50 px-4 py-2 rounded-lg text-sm text-white font-medium flex items-center gap-2 hover:bg-[#2b597a] transition-colors shadow-lg" onClick={records.refresh} disabled={records.loading}>
+          <button 
+            className="p-2.5 rounded-lg text-[#A4A29F] hover:text-[#F9F7F3] bg-[#171512] hover:bg-[#1F1D1A] border border-[#26231F] transition-colors shadow-sm ml-2" 
+            onClick={records.refresh} 
+            disabled={records.loading} 
+            title="Actualizar"
+          >
              <RefreshCw className={`h-4 w-4 ${records.loading ? 'animate-spin' : ''}`} />
-             <span>Actualizar</span>
           </button>
         </div>
       </header>
@@ -353,7 +362,7 @@ export function MedicalRecords() {
           </div>
 
           {/* Tarjeta de Gráfico / Evolución */}
-          <div className="h-[280px] bg-[#171512] border border-[#26231F] rounded-[12px] flex flex-col items-center justify-center p-6">
+          <div className={`bg-[#171512] border border-[#26231F] rounded-[12px] flex flex-col items-center p-6 ${evolutionData.length > 0 ? 'h-[280px] justify-center' : 'py-10'}`}>
              <div className="bg-[#23211D] p-3 rounded-xl mb-3">
                 <LucideBarChart className="w-6 h-6 text-[#A4A29F]" />
              </div>
@@ -369,15 +378,41 @@ export function MedicalRecords() {
                  </ResponsiveContainer>
                </div>
              ) : (
-               <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">No hay datos suficientes para generar el gráfico de evolución en este momento.</p>
+               <p className="text-sm text-[#A4A29F] text-center max-w-xs mt-1">No hay datos suficientes para generar el gráfico de evolución en este momento.</p>
              )}
           </div>
 
           {/* Tarjeta de Feed en Vivo (Tabla) */}
           <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+             <div className="mb-5">
+                <h2 className="text-base font-medium text-[#F9F7F3]">Registros recientes</h2>
+             </div>
+             
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                <h2 className="text-sm font-medium text-[#F9F7F3]">Feed en Vivo de Registros</h2>
-                
+                {/* Filters */}
+                <div className="flex flex-wrap gap-2">
+                   {[
+                     { label: "Todas", value: "all" },
+                     { label: "Con ficha", value: "withRecord" },
+                     { label: "Sin ficha", value: "withoutRecord" },
+                   ].map((filter) => {
+                     const isActive = recordFilter === filter.value;
+                     return (
+                       <button
+                         key={filter.value}
+                         className={`inline-flex h-8 items-center rounded-lg px-3.5 text-xs font-medium transition-colors ${
+                           isActive
+                             ? "bg-[#1F181E] border border-[#8B5CF6]/30 text-[#8B5CF6]"
+                             : "bg-[#100F0D] border border-[#26231F] text-[#A4A29F] hover:bg-[#1F1D1A]"
+                         }`}
+                         onClick={() => setRecordFilter(filter.value as any)}
+                       >
+                         {filter.label}
+                       </button>
+                     );
+                   })}
+                </div>
+
                 {/* Search */}
                 <div className="relative w-full sm:max-w-xs">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A4A29F]" />
@@ -388,30 +423,6 @@ export function MedicalRecords() {
                     className="h-9 w-full rounded-lg pl-9 pr-4 text-xs bg-[#100F0D] border border-[#26231F] text-[#F9F7F3] outline-none focus:border-[#356C92] transition-colors"
                   />
                 </div>
-             </div>
-
-             {/* Filters */}
-             <div className="flex flex-wrap gap-2 mb-4">
-                {[
-                  { label: "Todas", value: "all" },
-                  { label: "Con ficha", value: "withRecord" },
-                  { label: "Sin ficha", value: "withoutRecord" },
-                ].map((filter) => {
-                  const isActive = recordFilter === filter.value;
-                  return (
-                    <button
-                      key={filter.value}
-                      className={`inline-flex h-7 items-center rounded-full px-3 text-[11px] font-medium transition-colors ${
-                        isActive
-                          ? "bg-[#1F181E] border border-[#8B5CF6]/20 text-[#8B5CF6]"
-                          : "bg-[#100F0D] border border-[#26231F] text-[#A4A29F] hover:bg-[#1F1D1A]"
-                      }`}
-                      onClick={() => setRecordFilter(filter.value as any)}
-                    >
-                      {filter.label}
-                    </button>
-                  );
-                })}
              </div>
 
              {/* Tabla */}
@@ -459,8 +470,8 @@ export function MedicalRecords() {
                  ))}
                </div>
              ) : (
-               <div className="flex-1 flex flex-col items-center justify-center">
-                 <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">Sin actividades ni atenciones programadas para el día de hoy.</p>
+               <div className="flex-1 flex flex-col items-center justify-center py-4">
+                 <p className="text-sm text-[#A4A29F] text-center max-w-xs mt-2">Sin actividades ni atenciones programadas para el día de hoy.</p>
                </div>
              )}
           </div>
@@ -474,19 +485,19 @@ export function MedicalRecords() {
                    onClick={() => setRecordFilter("withoutRecord")}
                 >
                    <span className="text-sm text-[#F9F7F3]">Fichas Pendientes</span>
-                   <span className="bg-[#100F0D] text-[10px] px-2 py-0.5 rounded text-[#A4A29F] border border-[#26231F]">{withoutRecordCount}</span>
+                   <span className="bg-[#100F0D] text-xs px-2.5 py-1 rounded-md text-[#F9F7F3] border border-[#26231F] font-medium min-w-[28px] text-center">{withoutRecordCount}</span>
                 </button>
                 <button 
                    className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
                    onClick={() => setRecordFilter("withRecord")}
                 >
                    <span className="text-sm text-[#F9F7F3]">Fichas Registradas</span>
-                   <span className="bg-[#100F0D] text-[10px] px-2 py-0.5 rounded text-[#A4A29F] border border-[#26231F]">{withRecordCount}</span>
+                   <span className="bg-[#100F0D] text-xs px-2.5 py-1 rounded-md text-[#F9F7F3] border border-[#26231F] font-medium min-w-[28px] text-center">{withRecordCount}</span>
                 </button>
                 <button 
                    className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
                 >
-                   <span className="text-sm text-[#F9F7F3]">Auditoría de Accesos</span>
+                   <span className="text-sm text-[#F9F7F3]">Auditoría de accesos</span>
                    <ChevronRight className="w-4 h-4 text-[#A4A29F]" />
                 </button>
              </div>

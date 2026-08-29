@@ -3,6 +3,7 @@ import {
   listSensitiveMedicalRecords,
   getSensitiveMedicalDetail,
   saveBeneficiaryMedicalRecord,
+  getTodayClinicalAgenda,
 } from "./medicalRecords.service";
 import { clinicoSchema, ongSchema } from "../personas/shared";
 import * as sharedPersona from "../personas/shared";
@@ -169,6 +170,42 @@ describe("Medical Records Service - Zero-Fail Tolerance Suite", () => {
       await expect(listSensitiveMedicalRecords("beneficiaries")).rejects.toThrow(
         "Failed to fetch: Network Error 503"
       );
+    });
+  });
+
+  describe("HAPPY PATHS: Agenda and Medical Records", () => {
+    it("TST-OK-001: getTodayClinicalAgenda should fetch and map today's activities correctly", async () => {
+      vi.mocked(sharedPersona.getRequiredTenantId).mockResolvedValueOnce("tenant-xyz");
+
+      const mockData = [
+        {
+          id: "act-1",
+          titulo: "Consulta Psicológica",
+          fecha_inicio: "2026-08-27T10:00:00.000Z",
+          fecha_fin: "2026-08-27T11:00:00.000Z",
+          codigo_estado: "PROGRAMADA",
+        }
+      ];
+
+      const mockQuery = {
+        from: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue({ data: mockData, error: null })
+      };
+      vi.mocked(sharedPersona.ongSchema).mockReturnValue(mockQuery as any);
+
+      const agenda = await getTodayClinicalAgenda();
+
+      expect(agenda).toBeDefined();
+      expect(agenda.length).toBe(1);
+      expect(agenda[0].titulo).toBe("Consulta Psicológica");
+      expect(mockQuery.gte).toHaveBeenCalledWith("fecha_inicio", expect.any(String));
+      expect(mockQuery.lte).toHaveBeenCalledWith("fecha_inicio", expect.any(String));
+      expect(mockQuery.eq).toHaveBeenCalledWith("tenant_id", "tenant-xyz");
     });
   });
 });

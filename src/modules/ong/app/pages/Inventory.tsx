@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
+import { cn } from "../lib/utils";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
 import { PageHeader } from "../components/shared/PageHeader";
@@ -51,23 +53,37 @@ function formatNumber(value: number | null) {
 }
 
 const itemColumns: Column<any>[] = [
-  { key: "item", label: "Item", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.code}</div></div> },
+  { key: "item", label: "Item", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.code}</div></div> },
   { key: "unit", label: "Unidad / Estado", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>{item.unitLabel}</div><div>{item.stateLabel}</div></div> },
   { key: "status", label: "Activo", render: (item) => <StatusDot variant={item.statusVariant}>{item.activeLabel}</StatusDot> },
-  { key: "stock", label: "Stock", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{formatNumber(item.derivedStock)}</span> },
+  { key: "stock", label: "Stock", render: (item) => {
+    const isOutOfStock = item.derivedStock === null || item.derivedStock <= 0;
+    return (
+      <div className="flex items-center gap-2">
+        <span className={cn("text-[13px] font-medium", isOutOfStock ? "text-red-500" : "text-[var(--t-text-secondary)]")}>
+          {formatNumber(item.derivedStock)}
+        </span>
+        {isOutOfStock && (
+          <span className="inline-flex items-center rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-500 ring-1 ring-inset ring-red-500/20">
+            Agotado
+          </span>
+        )}
+      </div>
+    );
+  } },
 ];
 
 const locationColumns: Column<any>[] = [
-  { key: "name", label: "Ubicacion", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.code}</div></div> },
+  { key: "name", label: "Ubicacion", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.code}</div></div> },
   { key: "country", label: "Pais", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.countryLabel}</span> },
   { key: "address", label: "Direccion", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{item.address || "-"}</span> },
   { key: "status", label: "Activo", render: (item) => <StatusDot variant={item.statusVariant}>{item.activeLabel}</StatusDot> },
 ];
 
 const movementColumns: Column<any>[] = [
-  { key: "item", label: "Item", render: (item) => <div><div style={{ color: "var(--t-text)" }}>{item.itemName}</div><div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>{item.itemId}</div></div> },
+  { key: "item", label: "Item", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.itemName}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.itemId}</div></div> },
   { key: "type", label: "Tipo", render: (item) => <StatusDot variant={item.statusVariant}>{item.typeName}</StatusDot> },
-  { key: "quantity", label: "Cantidad", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{formatNumber(item.quantity)}</span> },
+  { key: "quantity", label: "Cantidad", render: (item) => <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>{formatNumber(item.quantity)}</span> },
   { key: "path", label: "Origen / Destino", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>Origen: {item.originName}</div><div>Destino: {item.destinationName}</div></div> },
   { key: "trace", label: "Registro", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>{item.date}</div><div>{item.registeredBy}</div></div> },
 ];
@@ -131,9 +147,31 @@ export function Inventory() {
   const kardexLocationOptions = useMemo(() => [{ value: "all", label: "Ubicacion: Todas" }, ...kardex.locationOptions], [kardex.locationOptions]);
   const kardexTypeOptions = useMemo(() => [{ value: "all", label: "Tipo: Todos" }, ...kardex.typeOptions.map((item) => ({ value: String(item.value), label: item.label }))], [kardex.typeOptions]);
 
+  const getHeaderAction = () => {
+    switch (view) {
+      case "items":
+        return {
+          label: "Nuevo item",
+          onClick: () => { setEditingItem(null); setItemForm({ code: "", name: "", description: "", unitCode: items.unitOptions[0]?.value ?? "", stateCode: items.stateOptions[0]?.value ?? "", active: true }); setItemError(null); setItemFormOpen(true); },
+        };
+      case "locations":
+        return {
+          label: "Nueva ubicacion",
+          onClick: () => { setEditingLocation(null); setLocationForm({ code: "", name: "", address: "", latitude: "", longitude: "", countryCode: locations.countryOptions[0]?.value ?? "PE", active: true }); setLocationError(null); setLocationFormOpen(true); },
+        };
+      case "movements":
+        return {
+          label: "Nuevo movimiento",
+          onClick: () => { setEditingMovement(null); setMovementForm({ itemId: "all", typeId: "all", quantity: "", originId: "all", destinationId: "all", transactionDate: "" }); setMovementError(null); setMovementFormOpen(true); },
+        };
+      default:
+        return undefined;
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <PageHeader title="Recursos - Inventario" description="Operacion real sobre ong.items, ong.ubicaciones, ong.tipo_transaccion_inventario y ong.transacciones_inventario." action={{ label: "Refrescar", onClick: () => { items.refresh(); locations.refresh(); movements.refresh(); kardex.refresh(); } }} />
+      <PageHeader title="Recursos - Inventario" description="Operacion real sobre ong.items, ong.ubicaciones, ong.tipo_transaccion_inventario y ong.transacciones_inventario." action={getHeaderAction()} />
       <div className="flex flex-wrap gap-2">
         <GradientButton size="sm" onClick={() => setView("items")}>Items</GradientButton>
         <OutlineButton size="sm" onClick={() => setView("locations")}>Ubicaciones</OutlineButton>
@@ -160,14 +198,18 @@ export function Inventory() {
             { label: "Editar", onClick: (row) => { setEditingItem(row); setItemForm({ code: row.code, name: row.name, description: row.description, unitCode: row.unitCode, stateCode: row.stateCode, active: row.active }); setItemError(null); setItemFormOpen(true); } },
             { label: "Inactivar", onClick: (row) => setItemRemoveTarget(row), variant: "destructive" },
           ]} />
-          <div className="flex justify-between rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(items.total === 0 ? 0 : (itemsPage - 1) * PAGE_SIZE + 1)}-{Math.min(items.total, itemsPage * PAGE_SIZE)} de {items.total}</p>
+          <div className="flex justify-between items-center rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex items-center gap-3">
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(items.total === 0 ? 0 : (itemsPage - 1) * PAGE_SIZE + 1)}-{Math.min(items.total, itemsPage * PAGE_SIZE)} de {items.total}</p>
+              <button onClick={() => items.refresh()} className="text-[var(--t-text-dim)] hover:text-[var(--t-text)] transition-colors" title="Refrescar items">
+                <RefreshCw size={14} />
+              </button>
+            </div>
             <div className="flex gap-2">
               <OutlineButton size="sm" onClick={() => setItemsPage((current) => current - 1)} disabled={itemsPage <= 1}>Anterior</OutlineButton>
               <OutlineButton size="sm" onClick={() => setItemsPage((current) => current + 1)} disabled={itemsPage * PAGE_SIZE >= items.total}>Siguiente</OutlineButton>
             </div>
           </div>
-          <GradientButton size="sm" onClick={() => { setEditingItem(null); setItemForm({ code: "", name: "", description: "", unitCode: items.unitOptions[0]?.value ?? "", stateCode: items.stateOptions[0]?.value ?? "", active: true }); setItemError(null); setItemFormOpen(true); }}>Nuevo item</GradientButton>
         </>
       )}
 
@@ -180,14 +222,18 @@ export function Inventory() {
             { label: "Editar", onClick: (row) => { setEditingLocation(row); setLocationForm({ code: row.code, name: row.name, address: row.address, latitude: row.latitude === null ? "" : String(row.latitude), longitude: row.longitude === null ? "" : String(row.longitude), countryCode: row.countryCode, active: row.active }); setLocationError(null); setLocationFormOpen(true); } },
             { label: "Inactivar", onClick: (row) => setLocationRemoveTarget(row), variant: "destructive" },
           ]} />
-          <div className="flex justify-between rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(locations.total === 0 ? 0 : (locationsPage - 1) * PAGE_SIZE + 1)}-{Math.min(locations.total, locationsPage * PAGE_SIZE)} de {locations.total}</p>
+          <div className="flex justify-between items-center rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex items-center gap-3">
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(locations.total === 0 ? 0 : (locationsPage - 1) * PAGE_SIZE + 1)}-{Math.min(locations.total, locationsPage * PAGE_SIZE)} de {locations.total}</p>
+              <button onClick={() => locations.refresh()} className="text-[var(--t-text-dim)] hover:text-[var(--t-text)] transition-colors" title="Refrescar ubicaciones">
+                <RefreshCw size={14} />
+              </button>
+            </div>
             <div className="flex gap-2">
               <OutlineButton size="sm" onClick={() => setLocationsPage((current) => current - 1)} disabled={locationsPage <= 1}>Anterior</OutlineButton>
               <OutlineButton size="sm" onClick={() => setLocationsPage((current) => current + 1)} disabled={locationsPage * PAGE_SIZE >= locations.total}>Siguiente</OutlineButton>
             </div>
           </div>
-          <GradientButton size="sm" onClick={() => { setEditingLocation(null); setLocationForm({ code: "", name: "", address: "", latitude: "", longitude: "", countryCode: locations.countryOptions[0]?.value ?? "PE", active: true }); setLocationError(null); setLocationFormOpen(true); }}>Nueva ubicacion</GradientButton>
         </>
       )}
 
@@ -209,14 +255,18 @@ export function Inventory() {
             { label: "Editar", onClick: (row) => { setEditingMovement(row); setMovementForm({ itemId: row.itemId, typeId: row.typeCode, quantity: String(row.quantity), originId: row.originId ?? "all", destinationId: row.destinationId ?? "all", transactionDate: row.rawDate.slice(0, 10) }); setMovementError(null); setMovementFormOpen(true); } },
             { label: "Eliminar", onClick: (row) => setMovementRemoveTarget(row), variant: "destructive" },
           ]} />
-          <div className="flex justify-between rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(movements.total === 0 ? 0 : (movementsPage - 1) * PAGE_SIZE + 1)}-{Math.min(movements.total, movementsPage * PAGE_SIZE)} de {movements.total}</p>
+          <div className="flex justify-between items-center rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex items-center gap-3">
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(movements.total === 0 ? 0 : (movementsPage - 1) * PAGE_SIZE + 1)}-{Math.min(movements.total, movementsPage * PAGE_SIZE)} de {movements.total}</p>
+              <button onClick={() => movements.refresh()} className="text-[var(--t-text-dim)] hover:text-[var(--t-text)] transition-colors" title="Refrescar movimientos">
+                <RefreshCw size={14} />
+              </button>
+            </div>
             <div className="flex gap-2">
               <OutlineButton size="sm" onClick={() => setMovementsPage((current) => current - 1)} disabled={movementsPage <= 1}>Anterior</OutlineButton>
               <OutlineButton size="sm" onClick={() => setMovementsPage((current) => current + 1)} disabled={movementsPage * PAGE_SIZE >= movements.total}>Siguiente</OutlineButton>
             </div>
           </div>
-          <GradientButton size="sm" onClick={() => { setEditingMovement(null); setMovementForm({ itemId: "all", typeId: "all", quantity: "", originId: "all", destinationId: "all", transactionDate: "" }); setMovementError(null); setMovementFormOpen(true); }}>Nuevo movimiento</GradientButton>
         </>
       )}
 
@@ -232,8 +282,13 @@ export function Inventory() {
           </div>
           {kardex.error && <ErrorBlock message={kardex.error} onRetry={kardex.refresh} />}
           <DataTable columns={movementColumns} data={kardex.rows} loading={kardex.loading} emptyMessage="No hay movimientos para el kardex." />
-          <div className="flex justify-between rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(kardex.total === 0 ? 0 : (kardexPage - 1) * PAGE_SIZE + 1)}-{Math.min(kardex.total, kardexPage * PAGE_SIZE)} de {kardex.total}</p>
+          <div className="flex justify-between items-center rounded-2xl px-4 py-3" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+            <div className="flex items-center gap-3">
+              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{(kardex.total === 0 ? 0 : (kardexPage - 1) * PAGE_SIZE + 1)}-{Math.min(kardex.total, kardexPage * PAGE_SIZE)} de {kardex.total}</p>
+              <button onClick={() => kardex.refresh()} className="text-[var(--t-text-dim)] hover:text-[var(--t-text)] transition-colors" title="Refrescar kardex">
+                <RefreshCw size={14} />
+              </button>
+            </div>
             <div className="flex gap-2">
               <OutlineButton size="sm" onClick={() => setKardexPage((current) => current - 1)} disabled={kardexPage <= 1}>Anterior</OutlineButton>
               <OutlineButton size="sm" onClick={() => setKardexPage((current) => current + 1)} disabled={kardexPage * PAGE_SIZE >= kardex.total}>Siguiente</OutlineButton>

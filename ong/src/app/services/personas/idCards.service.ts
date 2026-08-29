@@ -387,8 +387,7 @@ function mapTemplateSummary(row: TemplateRow, fieldCount: number): IdCardTemplat
 function mapFieldRow(row: TemplateFieldDbRow): IdCardTemplateFieldRow {
   return {
     id: row.id,
-      // @ts-ignore
-      // @ts-ignore
+    // @ts-ignore
     fieldKey: row.field_key,
     label: ID_CARD_FIELD_LABELS[row.field_key],
     posX: Number(row.pos_x),
@@ -734,12 +733,11 @@ async function saveTemplate(
       throw new Error("No se pudo recuperar la plantilla creada.");
     }
   }
-      // @ts-ignore
 
-      // @ts-ignore
+  // @ts-ignore
   await upsertTemplateFields(tenantId, persistedId, normalized.fields);
 
-      // @ts-ignore
+  // @ts-ignore
   const detail = await getIdCardTemplateDetail(persistedId);
   if (!detail) {
     throw new Error("La plantilla fue guardada, pero ya no esta disponible.");

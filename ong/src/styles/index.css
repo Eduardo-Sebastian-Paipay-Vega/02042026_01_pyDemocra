@@ -168,3 +168,47 @@ select optgroup,
 [data-app-theme="oscuro"] .panel-principal-theme .panel-principal-tertiary-btn {
   background-color: var(--t-border);
 }
+
+/* ─── Paleta oscura "admission documents" (warm dark): scope propio ───
+ * Alcance: AdmissionDocuments.tsx — verificación documental de postulantes.
+ * Sigue los tokens del Design System proporcionado por el usuario
+ * (bg #100F0D, card #171512, border #26231F, etc.)
+ *
+ * Scopes:
+ * - .admision-docs-theme → AdmissionDocuments.tsx
+ */
+[data-app-theme="oscuro"] .admision-docs-theme {
+  --t-bg: #100F0D;
+  --t-board: #100F0D;
+  --t-surface: #171512;
+  --t-elevated: #171512;
+  --t-sidebar: #100F0D;
+  --t-topbar: #100F0D;
+  --t-border: #26231F;
+  --t-border-strong: #26231F;
+  --t-text: #F9F7F3;
+  --t-text-secondary: #A4A29F;
+  --t-text-tertiary: #686561;
+  --t-text-dim: #686561;
+  --t-muted: #686561;
+  --t-placeholder: rgba(104, 101, 97, 0.6);
+  --t-primary: #356C92;
+  --t-primary-soft: rgba(53, 108, 146, 0.16);
+  --t-secondary: #356C92;
+  --t-secondary-soft: rgba(53, 108, 146, 0.16);
+  --t-info: #356C92;
+  --t-info-soft: rgba(53, 108, 146, 0.16);
+  --t-hover: #1F1D1A;
+  --t-active: rgba(31, 29, 26, 0.40);
+  --t-input-bg: #171512;
+  --t-success: #08996A;
+  --t-success-soft: #161D17;
+  --t-warning: #D97706;
+  --t-warning-soft: #231C11;
+  --t-danger: #ef4444;
+  --t-danger-bg: rgba(239, 68, 68, 0.08);
+  --t-accent-purple: #8B5CF6;
+  --t-accent-purple-soft: #1F181E;
+  --t-accent-emerald: #08996A;
+  --t-accent-amber: #D97706;
+}
