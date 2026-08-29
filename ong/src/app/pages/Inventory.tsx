@@ -44,11 +44,15 @@ function SelectField({ value, onChange, options, disabled = false }: { value: st
   );
 }
 
-function DetailField({ label, value }: { label: string; value: string }) {
+function DetailField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl px-3 py-2" style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}>
-      <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{label}</p>
-      <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{value || "-"}</p>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--t-text-dim)" }}>
+        {label}
+      </span>
+      <span className="text-[14px] font-medium leading-relaxed" style={{ color: "var(--t-text)" }}>
+        {value || "-"}
+      </span>
     </div>
   );
 }
@@ -391,21 +395,55 @@ export function Inventory() {
       </ModalShell>
 
       <ModalShell open={Boolean(itemDetailId)} onClose={() => setItemDetailId(null)} width="max-w-[920px]">
-        <div className="space-y-3 p-4">
-          {itemDetail.loading && <p className="text-[12px]">Cargando detalle...</p>}
+        <div className="flex items-start justify-between px-6 py-5" style={{ borderBottom: "1px solid var(--t-border)" }}>
+          <h3 className="text-[16px] font-semibold" style={{ color: "var(--t-text)" }}>
+            {itemDetail.detail ? `Detalles del Ítem: ${itemDetail.detail.item.name}` : "Detalles del Ítem"}
+          </h3>
+          <button type="button" className="rounded-md px-2 py-1 text-[12px] opacity-70 hover:opacity-100" onClick={() => setItemDetailId(null)}>X</button>
+        </div>
+        <div className="p-6">
+          {itemDetail.loading && <p className="text-[13px] text-center text-[var(--t-text-dim)] py-10">Cargando detalles...</p>}
           {itemDetail.error && <ErrorBlock message={itemDetail.error} onRetry={itemDetail.refresh} />}
           {itemDetail.detail && (
-            <>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="Item" value={itemDetail.detail.item.name} />
-                <DetailField label="Codigo" value={itemDetail.detail.item.code} />
-                <DetailField label="Unidad" value={itemDetail.detail.item.unitLabel} />
-                <DetailField label="Estado" value={itemDetail.detail.item.stateLabel} />
-                <DetailField label="Stock derivado" value={formatNumber(itemDetail.detail.item.derivedStock)} />
-                <DetailField label="Descripcion" value={itemDetail.detail.item.description || "-"} />
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
+                <div className="overflow-hidden rounded-2xl border bg-[var(--t-surface)] border-[var(--t-border)] flex items-center justify-center aspect-square md:aspect-[3/4]">
+                  {itemDetail.detail.item.imageUrl ? (
+                    <img src={itemDetail.detail.item.imageUrl} alt={itemDetail.detail.item.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-[var(--t-text-dim)]">
+                      <Package size={48} className="opacity-20" />
+                      <span className="text-[12px] font-medium opacity-50">Sin foto</span>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 content-start">
+                  <DetailField label="Código de Ítem" value={itemDetail.detail.item.code} />
+                  <DetailField label="Unidad de Medida" value={itemDetail.detail.item.unitLabel} />
+                  <DetailField label="Estado" value={itemDetail.detail.item.stateLabel} />
+                  <DetailField label="Stock Disponible" value={formatNumber(itemDetail.detail.item.derivedStock)} />
+                  <div className="sm:col-span-2">
+                    <DetailField label="Detalles Adicionales" value={itemDetail.detail.item.description || "-"} />
+                  </div>
+                </div>
               </div>
-              <DataTable columns={movementColumns} data={itemDetail.detail.latestMovements} emptyMessage="Sin movimientos recientes." />
-            </>
+              
+              <div>
+                <h4 className="mb-4 text-[13px] font-semibold uppercase tracking-wider" style={{ color: "var(--t-text-dim)" }}>
+                  Movimientos Recientes
+                </h4>
+                {itemDetail.detail.latestMovements.length > 0 ? (
+                  <DataTable columns={movementColumns} data={itemDetail.detail.latestMovements} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--t-border)] bg-[var(--t-surface)]/50 p-8 text-center">
+                    <RefreshCw className="mb-3 h-6 w-6 text-[var(--t-text-dim)] opacity-40" />
+                    <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
+                      Aún no se han registrado movimientos recientes para este ítem.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </ModalShell>
@@ -469,19 +507,53 @@ export function Inventory() {
       </ModalShell>
 
       <ModalShell open={Boolean(locationDetailId)} onClose={() => setLocationDetailId(null)} width="max-w-[920px]">
-        <div className="space-y-3 p-4">
-          {locationDetail.loading && <p className="text-[12px]">Cargando detalle...</p>}
+        <div className="flex items-start justify-between px-6 py-5" style={{ borderBottom: "1px solid var(--t-border)" }}>
+          <h3 className="text-[16px] font-semibold" style={{ color: "var(--t-text)" }}>
+            {locationDetail.detail ? `Detalles de Ubicación: ${locationDetail.detail.location.name}` : "Detalles de Ubicación"}
+          </h3>
+          <button type="button" className="rounded-md px-2 py-1 text-[12px] opacity-70 hover:opacity-100" onClick={() => setLocationDetailId(null)}>X</button>
+        </div>
+        <div className="p-6">
+          {locationDetail.loading && <p className="text-[13px] text-center text-[var(--t-text-dim)] py-10">Cargando detalles...</p>}
           {locationDetail.error && <ErrorBlock message={locationDetail.error} onRetry={locationDetail.refresh} />}
           {locationDetail.detail && (
-            <>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <DetailField label="Ubicacion" value={locationDetail.detail.location.name} />
-                <DetailField label="Codigo" value={locationDetail.detail.location.code} />
-                <DetailField label="Pais" value={locationDetail.detail.location.countryLabel} />
-                <DetailField label="Direccion" value={locationDetail.detail.location.address || "-"} />
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
+                <div className="overflow-hidden rounded-2xl border bg-[var(--t-surface)] border-[var(--t-border)] flex items-center justify-center aspect-square md:aspect-[3/4]">
+                  {locationDetail.detail.location.imageUrl ? (
+                    <img src={locationDetail.detail.location.imageUrl} alt={locationDetail.detail.location.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-[var(--t-text-dim)]">
+                      <Package size={48} className="opacity-20" />
+                      <span className="text-[12px] font-medium opacity-50">Sin foto</span>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 content-start">
+                  <DetailField label="Código" value={locationDetail.detail.location.code} />
+                  <DetailField label="País" value={locationDetail.detail.location.countryLabel} />
+                  <div className="sm:col-span-2">
+                    <DetailField label="Dirección" value={locationDetail.detail.location.address || "-"} />
+                  </div>
+                </div>
               </div>
-              <DataTable columns={movementColumns} data={locationDetail.detail.latestMovements} emptyMessage="Sin movimientos recientes." />
-            </>
+              
+              <div>
+                <h4 className="mb-4 text-[13px] font-semibold uppercase tracking-wider" style={{ color: "var(--t-text-dim)" }}>
+                  Movimientos Recientes
+                </h4>
+                {locationDetail.detail.latestMovements.length > 0 ? (
+                  <DataTable columns={movementColumns} data={locationDetail.detail.latestMovements} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--t-border)] bg-[var(--t-surface)]/50 p-8 text-center">
+                    <RefreshCw className="mb-3 h-6 w-6 text-[var(--t-text-dim)] opacity-40" />
+                    <p className="text-[13px]" style={{ color: "var(--t-text-secondary)" }}>
+                      Aún no se han registrado movimientos recientes para esta ubicación.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </ModalShell>
@@ -534,18 +606,26 @@ export function Inventory() {
       </ModalShell>
 
       <ModalShell open={Boolean(movementDetailId)} onClose={() => setMovementDetailId(null)} width="max-w-[760px]">
-        <div className="space-y-3 p-4">
-          {movementDetail.loading && <p className="text-[12px]">Cargando detalle...</p>}
+        <div className="flex items-start justify-between px-6 py-5" style={{ borderBottom: "1px solid var(--t-border)" }}>
+          <h3 className="text-[16px] font-semibold" style={{ color: "var(--t-text)" }}>
+            {movementDetail.detail ? `Detalles del Movimiento` : "Detalles del Movimiento"}
+          </h3>
+          <button type="button" className="rounded-md px-2 py-1 text-[12px] opacity-70 hover:opacity-100" onClick={() => setMovementDetailId(null)}>X</button>
+        </div>
+        <div className="p-6">
+          {movementDetail.loading && <p className="text-[13px] text-center text-[var(--t-text-dim)] py-10">Cargando detalles...</p>}
           {movementDetail.error && <ErrorBlock message={movementDetail.error} onRetry={movementDetail.refresh} />}
           {movementDetail.detail && (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <DetailField label="Item" value={movementDetail.detail.movement.itemName} />
-              <DetailField label="Tipo" value={movementDetail.detail.movement.typeName} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              <DetailField label="Ítem" value={movementDetail.detail.movement.itemName} />
+              <DetailField label="Tipo de Movimiento" value={movementDetail.detail.movement.typeName} />
               <DetailField label="Cantidad" value={formatNumber(movementDetail.detail.movement.quantity)} />
-              <DetailField label="Fecha" value={movementDetail.detail.movement.date} />
+              <DetailField label="Fecha de Transacción" value={movementDetail.detail.movement.date} />
               <DetailField label="Origen" value={movementDetail.detail.movement.originName} />
               <DetailField label="Destino" value={movementDetail.detail.movement.destinationName} />
-              <DetailField label="Registrado por" value={movementDetail.detail.movement.registeredBy} />
+              <div className="sm:col-span-2">
+                <DetailField label="Registrado por" value={movementDetail.detail.movement.registeredBy} />
+              </div>
             </div>
           )}
         </div>
