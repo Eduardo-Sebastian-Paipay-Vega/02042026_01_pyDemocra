@@ -97,8 +97,8 @@ export function ImageUploadField({
             : existingUrl
             ? "Imagen actual"
             : isDragging
-            ? "Suelta la imagen aqu├¡"
-            : "Sin imagen ÔÇö arrastra o usa el bot├│n"}
+            ? "Suelta la imagen aquí"
+            : "Sin imagen — arrastra o usa el botón"}
         </span>
 
         <div className="flex shrink-0 items-center gap-1">

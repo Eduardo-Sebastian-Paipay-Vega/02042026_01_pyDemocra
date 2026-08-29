@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { RefreshCw, Package } from "lucide-react";
+import { RefreshCw, Package, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { ImageUploadField } from '@/core/components/ui/image-upload-field';
@@ -164,7 +164,8 @@ export function Inventory() {
 
   const [itemFormOpen, setItemFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
-  const [itemForm, setItemForm] = useState({ code: "", name: "", description: "", unitCode: "", stateCode: "", active: true, imageUrl: "", imageFile: null as File | null });
+  const [itemForm, setItemForm] = useState({ code: `INV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`, name: "", description: "", unitCode: "", stateCode: "", active: true, imageUrl: "", imageFile: null as File | null });
+  const [itemFormErrors, setItemFormErrors] = useState<Record<string, string>>({});
   const [itemError, setItemError] = useState<string | null>(null);
   const [itemDetailId, setItemDetailId] = useState<string | null>(null);
   const [itemRemoveTarget, setItemRemoveTarget] = useState<any | null>(null);
@@ -203,7 +204,7 @@ export function Inventory() {
       case "items":
         return {
           label: "Nuevo item",
-          onClick: () => { setEditingItem(null); setItemForm({ code: "", name: "", description: "", unitCode: items.unitOptions[0]?.value ?? "", stateCode: items.stateOptions[0]?.value ?? "", active: true, imageUrl: "", imageFile: null }); setItemError(null); setItemFormOpen(true); },
+          onClick: () => { setEditingItem(null); setItemForm({ code: `INV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`, name: "", description: "", unitCode: items.unitOptions[0]?.value ?? "", stateCode: items.stateOptions[0]?.value ?? "", active: true, imageUrl: "", imageFile: null }); setItemError(null); setItemFormErrors({}); setItemFormOpen(true); },
         };
       case "locations":
         return {
@@ -347,49 +348,141 @@ export function Inventory() {
           </div>
         </>
       )}
-      <ModalShell open={itemFormOpen} onClose={() => setItemFormOpen(false)} width="max-w-[860px]">
-        <div className="flex items-start justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-          <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>{editingItem ? "Editar item" : "Nuevo item"}</h3>
-          <button type="button" className="rounded-md px-2 py-1 text-[12px]" onClick={() => setItemFormOpen(false)}>X</button>
+      <ModalShell open={itemFormOpen} onClose={() => setItemFormOpen(false)} width="max-w-[720px]">
+        <div className="flex items-start justify-between px-6 py-4" style={{ borderBottom: "1px solid var(--t-border)" }}>
+          <h3 className="text-[16px] font-semibold" style={{ color: "var(--t-text)" }}>{editingItem ? "Editar Ítem" : "Nuevo Ítem"}</h3>
+          <button type="button" className="rounded-md p-1 opacity-70 transition-opacity hover:opacity-100" onClick={() => setItemFormOpen(false)}>
+            <X className="h-4 w-4" style={{ color: "var(--t-text)" }} />
+          </button>
         </div>
-        <div className="space-y-3 p-4">
+        <div className="space-y-6 p-6">
           {itemError && <ErrorBlock message={itemError} onRetry={() => setItemError(null)} />}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <input value={itemForm.code} onChange={(event) => setItemForm((current) => ({ ...current, code: event.target.value }))} placeholder="Código (ej: INV-001, auto si vacío)" className="h-9 rounded-xl px-3 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
-            <input value={itemForm.name} onChange={(event) => setItemForm((current) => ({ ...current, name: event.target.value }))} placeholder="Nombre" className="h-9 rounded-xl px-3 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
+          
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[12px] font-medium" style={{ color: "var(--t-text)" }}>Nombre del Ítem <span className="text-red-500">*</span></label>
+              <input 
+                value={itemForm.name} 
+                onChange={(event) => { setItemForm((current) => ({ ...current, name: event.target.value })); setItemFormErrors(e => ({...e, name: ""})); }} 
+                placeholder="Ej. Silla de ruedas estándar" 
+                className={cn("h-10 rounded-xl px-3 text-[13px] outline-none transition-colors", itemFormErrors.name ? "border-red-500 bg-red-500/5 focus:ring-red-500" : "focus:ring-1 focus:ring-[var(--t-accent)]")} 
+                style={{ border: itemFormErrors.name ? "1px solid #ef4444" : "1px solid var(--t-border)", background: itemFormErrors.name ? "" : "var(--t-input-bg)", color: "var(--t-text-secondary)" }} 
+              />
+              {itemFormErrors.name && <span className="text-[11px] text-red-500">{itemFormErrors.name}</span>}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-medium" style={{ color: "var(--t-text)" }}>Unidad de Medida <span className="text-red-500">*</span></label>
+              <div className={cn("rounded-xl transition-colors", itemFormErrors.unitCode ? "border border-red-500 bg-red-500/5" : "")}>
+                <SelectField 
+                  value={itemForm.unitCode} 
+                  onChange={(value) => { setItemForm((current) => ({ ...current, unitCode: value })); setItemFormErrors(e => ({...e, unitCode: ""})); }} 
+                  options={items.unitOptions.length ? items.unitOptions : [{ value: "", label: "Sin unidades configuradas" }]} 
+                />
+              </div>
+              {itemFormErrors.unitCode && <span className="text-[11px] text-red-500">{itemFormErrors.unitCode}</span>}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-medium" style={{ color: "var(--t-text)" }}>Estado Físico <span className="text-red-500">*</span></label>
+              <div className={cn("rounded-xl transition-colors", itemFormErrors.stateCode ? "border border-red-500 bg-red-500/5" : "")}>
+                <SelectField 
+                  value={itemForm.stateCode} 
+                  onChange={(value) => { setItemForm((current) => ({ ...current, stateCode: value })); setItemFormErrors(e => ({...e, stateCode: ""})); }} 
+                  options={items.stateOptions.length ? items.stateOptions : [{ value: "", label: "Sin estados configurados" }]} 
+                />
+              </div>
+              {itemFormErrors.stateCode && <span className="text-[11px] text-red-500">{itemFormErrors.stateCode}</span>}
+            </div>
+
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[12px] font-medium" style={{ color: "var(--t-text)" }}>Descripción Adicional</label>
+              <textarea 
+                value={itemForm.description} 
+                onChange={(event) => setItemForm((current) => ({ ...current, description: event.target.value }))} 
+                rows={3} 
+                placeholder="Detalles sobre el uso, características especiales, etc." 
+                className="w-full rounded-xl px-3 py-2 text-[13px] outline-none transition-colors focus:ring-1 focus:ring-[var(--t-accent)]" 
+                style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} 
+              />
+            </div>
+
+            <div className="flex flex-col gap-3 md:col-span-2">
+              <div className="flex items-center gap-3 py-1">
+                <button
+                  type="button"
+                  onClick={() => setItemForm(c => ({ ...c, active: !c.active }))}
+                  className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none"
+                  style={{ backgroundColor: itemForm.active ? "var(--t-accent, #6366f1)" : "var(--t-border, #e5e7eb)" }}
+                >
+                  <span
+                    className={cn("pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out", itemForm.active ? "translate-x-6" : "translate-x-1")}
+                  />
+                </button>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium" style={{ color: "var(--t-text)" }}>Ítem Activo</span>
+                  <span className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+                    {itemForm.active ? "El ítem aparecerá en los catálogos y búsquedas." : "El ítem estará oculto y no podrá ser asignado."}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 pt-2" style={{ borderTop: "1px solid var(--t-border)" }}>
+              <ImageUploadField
+                label="Fotografía del Ítem (Opcional)"
+                existingUrl={itemForm.imageUrl || null}
+                previewFile={itemForm.imageFile}
+                onFileSelect={(file) => setItemForm((current) => ({ ...current, imageFile: file }))}
+                onClear={() => setItemForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))}
+                accept="image/png,image/jpeg,image/webp"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <SelectField value={itemForm.unitCode} onChange={(value) => setItemForm((current) => ({ ...current, unitCode: value }))} options={items.unitOptions.length ? items.unitOptions : [{ value: "", label: "Sin unidades" }]} />
-            <SelectField value={itemForm.stateCode} onChange={(value) => setItemForm((current) => ({ ...current, stateCode: value }))} options={items.stateOptions.length ? items.stateOptions : [{ value: "", label: "Sin estados" }]} />
-          </div>
-          <textarea value={itemForm.description} onChange={(event) => setItemForm((current) => ({ ...current, description: event.target.value }))} rows={4} placeholder="Descripcion" className="w-full rounded-xl px-3 py-2 text-[12px] outline-none" style={{ border: "1px solid var(--t-border)", background: "var(--t-input-bg)", color: "var(--t-text-secondary)" }} />
-          <label className="flex items-center gap-2 text-[12px]" style={{ color: "var(--t-text-secondary)" }}><input type="checkbox" checked={itemForm.active} onChange={(event) => setItemForm((current) => ({ ...current, active: event.target.checked }))} />Item activo</label>
-          <ImageUploadField
-            label="Imagen del item (opcional)"
-            existingUrl={itemForm.imageUrl || null}
-            previewFile={itemForm.imageFile}
-            onFileSelect={(file) => setItemForm((current) => ({ ...current, imageFile: file }))}
-            onClear={() => setItemForm((current) => ({ ...current, imageFile: null, imageUrl: "" }))}
-          />
-          <div className="flex gap-2">
-            <GradientButton size="sm" onClick={async () => {
-              if (!itemForm.name.trim() || !itemForm.unitCode || !itemForm.stateCode) { setItemError("Nombre, unidad y estado son obligatorios. El código se auto-genera si lo dejas vacío."); return; }
-              try {
-                let resolvedImageUrl: string | null = itemForm.imageUrl || null;
-                if (itemForm.imageFile) {
-                  const upload = await uploadFileToStorage({ ...getAssetsUploadBucket(), file: itemForm.imageFile, pathSegments: ["items", itemForm.code.trim() || "item"] });
-                  resolvedImageUrl = upload.publicUrl ?? upload.route;
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <OutlineButton size="md" onClick={() => setItemFormOpen(false)} disabled={items.isCreating || items.isUpdating}>
+              Cancelar
+            </OutlineButton>
+            <GradientButton 
+              size="md" 
+              onClick={async () => {
+                const errors: Record<string, string> = {};
+                if (!itemForm.name.trim()) errors.name = "El nombre es obligatorio";
+                if (!itemForm.unitCode) errors.unitCode = "Debe seleccionar una unidad";
+                if (!itemForm.stateCode) errors.stateCode = "Debe seleccionar un estado";
+                
+                if (Object.keys(errors).length > 0) {
+                  setItemFormErrors(errors);
+                  return;
                 }
-                const payload = { code: itemForm.code.trim(), name: itemForm.name.trim(), description: itemForm.description || null, unitCode: itemForm.unitCode, stateCode: itemForm.stateCode, active: itemForm.active, imageUrl: resolvedImageUrl };
-                if (editingItem) await items.update({ itemId: editingItem.id, ...payload });
-                else await items.create(payload);
-                toast.success(editingItem ? "Item actualizado." : "Item registrado.");
-                setItemFormOpen(false);
-              } catch (error) {
-                setItemError(error instanceof Error ? error.message : "No se pudo guardar el item.");
-              }
-            }} disabled={items.isCreating || items.isUpdating}>{items.isCreating || items.isUpdating ? "Guardando..." : "Guardar"}</GradientButton>
-            <OutlineButton size="sm" onClick={() => setItemFormOpen(false)} disabled={items.isCreating || items.isUpdating}>Cancelar</OutlineButton>
+                
+                try {
+                  let resolvedImageUrl: string | null = itemForm.imageUrl || null;
+                  if (itemForm.imageFile) {
+                    const upload = await uploadFileToStorage({ ...getAssetsUploadBucket(), file: itemForm.imageFile, pathSegments: ["items", itemForm.code.trim() || "item"] });
+                    resolvedImageUrl = upload.publicUrl ?? upload.route;
+                  }
+                  const payload = { code: itemForm.code.trim(), name: itemForm.name.trim(), description: itemForm.description || null, unitCode: itemForm.unitCode, stateCode: itemForm.stateCode, active: itemForm.active, imageUrl: resolvedImageUrl };
+                  if (editingItem) await items.update({ itemId: editingItem.id, ...payload });
+                  else await items.create(payload);
+                  toast.success(editingItem ? "Ítem actualizado correctamente." : "Ítem registrado correctamente.");
+                  setItemFormOpen(false);
+                } catch (error) {
+                  setItemError(error instanceof Error ? error.message : "No se pudo guardar el ítem.");
+                }
+              }} 
+              disabled={items.isCreating || items.isUpdating}
+            >
+              {items.isCreating || items.isUpdating ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Guardando...
+                </span>
+              ) : (
+                "Guardar Ítem"
+              )}
+            </GradientButton>
           </div>
         </div>
       </ModalShell>
