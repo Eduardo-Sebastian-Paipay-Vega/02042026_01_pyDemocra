@@ -1,0 +1,4 @@
+- **Qué se hizo**: Se añadió la representación visual (`Avatar`, `AvatarFallback`, `AvatarImage`) para el campo de imagen en la tabla de items del módulo de inventario.
+- **Por qué se hizo**: Para cumplir con la instrucción ampliada de "Design Skills" de mostrar correctamente avatares de ítems o placeholders si están vacíos.
+- **Qué beneficio aporta**: Mejora drásticamente la capacidad del usuario de reconocer rápidamente los items en la interfaz mediante estímulos visuales (íconos).
+- **Qué funcionalidades quedaron afectadas**: `Inventory.tsx` (modificación visual de la columna).

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Package } from "lucide-react";
 import { cn } from "../lib/utils";
 import { DataTable, type Column } from "../components/shared/DataTable";
 import { FilterBar } from "../components/shared/FilterBar";
@@ -10,6 +10,7 @@ import { GradientButton } from "@/core/components/ui/gradient-button";
 import { ModalShell } from "@/core/components/ui/modal-shell";
 import { OutlineButton } from "@/core/components/ui/outline-button";
 import { StatusDot } from "@/core/components/ui/status-dot";
+import { Avatar, AvatarFallback, AvatarImage } from "@/core/components/ui/avatar";
 import { useInventarioMovimientos } from "../modules/resources/hooks/useInventarioMovimientos";
 import { useItemDetail } from "../modules/resources/hooks/useItemDetail";
 import { useItems } from "../modules/resources/hooks/useItems";
@@ -53,7 +54,22 @@ function formatNumber(value: number | null) {
 }
 
 const itemColumns: Column<any>[] = [
-  { key: "item", label: "Item", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.code}</div></div> },
+  { key: "item", label: "Item", render: (item) => (
+    <div className="flex items-center gap-3">
+      <Avatar className="h-10 w-10 rounded-xl border border-[var(--t-border)] bg-[var(--t-surface)]">
+        <AvatarImage src={item.imageUrl} alt={item.name} className="object-cover" />
+        <AvatarFallback className="rounded-xl bg-[var(--t-hover)] text-[var(--t-text-dim)]">
+          <Package className="h-5 w-5 opacity-50" />
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div>
+        <div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>
+          {item.code}{item.sku ? ` • ${item.sku}` : ""}
+        </div>
+      </div>
+    </div>
+  ) },
   { key: "unit", label: "Unidad / Estado", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>{item.unitLabel}</div><div>{item.stateLabel}</div></div> },
   { key: "status", label: "Activo", render: (item) => <StatusDot variant={item.statusVariant}>{item.activeLabel}</StatusDot> },
   { key: "stock", label: "Stock", render: (item) => {

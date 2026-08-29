@@ -1,0 +1,13 @@
+- **Fecha y hora**: 2026-08-29 11:35
+- **Objetivo del cambio**: Añadir avatar e imagen para cada ítem en el módulo de inventario, tal cual fue solicitado en la iteración ampliada del Prompt Maestro.
+- **Contexto del problema**: Faltaba mostrar la `imagen_url` de los items en la tabla y ajustar el espaciado de las celdas (filas con un espacio constreñido).
+- **Motivo de la modificación**: Requerimiento adicional de UI/UX (Design Skills).
+- **Solución implementada**: 
+  - Se importó e implementó el componente `<Avatar>` (con su respectivo `AvatarImage` y `AvatarFallback` usando el ícono `Package`).
+  - Se ajustó el espaciado y alineamiento con un `flex gap-3` en el renderizado de la columna principal.
+- **Riesgos identificados**: Ninguno.
+- **Impacto esperado**: Mayor escaneabilidad visual y mejor aprovechamiento del dato real (`imagen_url`).
+- **Módulos afectados**: `/ong/app/pages/Inventory.tsx`
+- **Dependencias involucradas**: `@/core/components/ui/avatar`, `lucide-react`.
+- **Posibles efectos secundarios**: Ninguno.
+- **Estado del cambio**: Completado

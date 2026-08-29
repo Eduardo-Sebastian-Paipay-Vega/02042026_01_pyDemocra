@@ -1,0 +1,1 @@
+- `src/modules/ong/app/pages/Inventory.tsx`: Modificado. Se importó `Avatar`, `AvatarFallback`, `AvatarImage`, `Package`. Se ajustó la función de renderizado `itemColumns` para incluir visualización gráfica de la imagen del ítem con placeholder y espaciado `gap-3`.
