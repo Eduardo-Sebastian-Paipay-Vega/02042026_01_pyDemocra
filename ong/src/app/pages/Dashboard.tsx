@@ -1989,7 +1989,7 @@ export function Dashboard() {
           </div>
         </div>
       </ModalShell>
-    </>
+    </motion.div>
   );
 }
 
