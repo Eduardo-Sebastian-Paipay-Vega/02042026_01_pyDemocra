@@ -30540,6 +30540,12 @@
           "column_name": "updated_by",
           "is_nullable": "YES",
           "column_default": null
+        },
+        {
+          "data_type": "text",
+          "column_name": "imagen_url",
+          "is_nullable": "YES",
+          "column_default": null
         }
       ],
       "rls_forced": false,

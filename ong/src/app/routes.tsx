@@ -455,7 +455,7 @@ export const router = createBrowserRouter(
           ...protectedPage("finance", <Finance />),
         },
         {
-          path: "resources/courses",
+          path: "academico/cursos",
           ...protectedPage("courses", <Courses />),
         },
         {

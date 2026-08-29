@@ -1,5 +1,6 @@
 import {
   Bell,
+  BookOpen,
   Calendar,
   CheckSquare,
   Clock,
@@ -112,6 +113,7 @@ const NAV_GROUPS: TenantNavGroup[] = [
   { id: "notificaciones", label: "Notificaciones", icon: Bell },
   { id: "gobernanza", label: "Gobernanza", icon: Database },
   { id: "configuracion", label: "Configuracion", icon: Settings },
+  { id: "academico", label: "Académico", icon: BookOpen },
 ];
 
 const ROUTES: TenantRouteDefinition[] = [
@@ -375,11 +377,11 @@ const ROUTES: TenantRouteDefinition[] = [
     id: "courses",
     label: "Cursos y certificados",
     title: "Cursos y certificados",
-    breadcrumb: "Recursos",
-    path: `${ONG_SHELL_BASE_PATH}/resources/courses`,
+    breadcrumb: "Académico",
+    path: `${ONG_SHELL_BASE_PATH}/academico/cursos`,
     legacyPath: "/admin/courses",
-    icon: CheckSquare,
-    groupId: "recursos",
+    icon: BookOpen,
+    groupId: "academico",
     moduleKeys: ["resources", "ong"],
     anyPermissions: ["resources.inventory.read", "resources.finance.read"],
   },
