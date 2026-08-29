@@ -9,6 +9,7 @@ import { ModalShell } from '@/core/components/ui/modal-shell';
 import { GradientButton } from '@/core/components/ui/gradient-button';
 import { OutlineButton } from '@/core/components/ui/outline-button';
 import { StatusDot } from '@/core/components/ui/status-dot';
+import { Badge } from '@/core/components/ui/badge';
 import type { AreaRow, AreaFormInput } from "../services/gobernanza/areas.service";
 import {
   listAreas,
@@ -44,11 +45,9 @@ const columns: Column<AreaRow>[] = [
     key: "name",
     label: "Área",
     render: (row) => (
-      <div>
-        <div style={{ color: "var(--t-text)" }}>{row.name}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.code}
-        </div>
+      <div className="flex flex-col items-start gap-1">
+        <div className="font-medium" style={{ color: "var(--t-text)" }}>{row.name}</div>
+        <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">{row.code}</Badge>
       </div>
     ),
   },
@@ -59,6 +58,16 @@ const columns: Column<AreaRow>[] = [
       <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.description ?? "—"}
       </span>
+    ),
+  },
+  {
+    key: "proyectos",
+    label: "Proyectos",
+    align: "center",
+    render: (row) => (
+      <Badge variant="outline" className="text-[11px] font-medium">
+        {row.projectCount} {row.projectCount === 1 ? 'proyecto' : 'proyectos'}
+      </Badge>
     ),
   },
   {
@@ -87,6 +96,14 @@ export function Areas() {
   const [rows, setRows] = useState<AreaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [editTarget, setEditTarget] = useState<AreaRow | null>(null);
@@ -97,14 +114,14 @@ export function Areas() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await listAreas(search);
+      const data = await listAreas(debouncedSearch);
       setRows(data);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al cargar áreas.");
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     load();
@@ -168,6 +185,7 @@ export function Areas() {
     {
       label: (row: AreaRow) => (row.active ? "Desactivar" : "Activar"),
       onClick: handleToggleActive,
+      variant: "destructive" as const, // Making deactivate a destructive variant for better UI
     },
   ];
 
@@ -201,14 +219,6 @@ export function Areas() {
           searchPlaceholder="Buscar por nombre o código..."
           searchValue={search}
           onSearchChange={setSearch}
-      // @ts-ignore
-      // @ts-ignore
-          actions={
-            <GradientButton size="sm" onClick={openCreate}>
-              <Plus className="h-3.5 w-3.5" />
-              Nueva área
-            </GradientButton>
-          }
         />
       </motion.div>
 
