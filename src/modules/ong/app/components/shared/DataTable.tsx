@@ -92,10 +92,10 @@ export function DataTable<T extends { id: string }>({
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:bg-[var(--t-active)]"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 opacity-60 hover:opacity-100 hover:bg-[var(--t-active)]"
                         style={{ color: "var(--t-muted)" }}
                       >
-                        <MoreVertical className="h-3.5 w-3.5" />
+                        <MoreVertical className="h-4 w-4" />
                         <span className="sr-only">Acciones</span>
                       </button>
                     </DropdownMenuTrigger>

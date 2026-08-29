@@ -67,7 +67,10 @@ export async function listCursos(search = ""): Promise<CursoRow[]> {
     .select("id, nombre_curso, descripcion, horas_certificacion, imagen_url, activo")
     .eq("tenant_id", tenantId)
     .order("nombre_curso");
-  if (error) throw new Error(toFriendlyError(error, "No se pudieron cargar los cursos."));
+  if (error) {
+    console.error("SUPABASE ERROR:", error);
+    throw new Error(toFriendlyError(error, "No se pudieron cargar los cursos."));
+  }
 
   // 2. Hacer el join/count manual con inscripciones
   const cursoIds = (data ?? []).map((c) => c.id);
@@ -135,7 +138,55 @@ export async function createCurso(input: {
     horasCertificacion: data.horas_certificacion,
     imageUrl: data.imagen_url ?? null,
     activo: data.activo ?? true,
+    inscritosCount: 0,
   };
+}
+
+
+export async function updateCurso(id: string, input: {
+  nombre: string;
+  descripcion: string | null;
+  horasCertificacion: number | null;
+  imageUrl?: string | null;
+  activo: boolean;
+}): Promise<void> {
+  const tenantId = await getRequiredTenantId();
+  const actorId = await resolveCurrentUserId();
+  const ts = nowIso();
+
+  const { error } = await academicoSchema()
+    .from("cursos")
+    .update({
+      nombre_curso: input.nombre.trim(),
+      descripcion: input.descripcion ?? null,
+      horas_certificacion: input.horasCertificacion,
+      imagen_url: input.imageUrl ?? null,
+      activo: input.activo,
+      updated_at: ts,
+      updated_by: actorId,
+    })
+    .eq("id", id)
+    .eq("tenant_id", tenantId);
+
+  if (error) throw new Error(toFriendlyError(error, "No se pudo actualizar el curso."));
+}
+
+export async function toggleCursoActivo(id: string, activo: boolean): Promise<void> {
+  const tenantId = await getRequiredTenantId();
+  const actorId = await resolveCurrentUserId();
+  const ts = nowIso();
+
+  const { error } = await academicoSchema()
+    .from("cursos")
+    .update({
+      activo,
+      updated_at: ts,
+      updated_by: actorId,
+    })
+    .eq("id", id)
+    .eq("tenant_id", tenantId);
+
+  if (error) throw new Error(toFriendlyError(error, "No se pudo cambiar el estado del curso."));
 }
 
 // ─── Inscripciones ────────────────────────────────────────────────────────────
@@ -312,6 +363,7 @@ export async function listCertificadosByCurso(cursoId: string): Promise<Certific
   const { data: curso } = await academicoSchema()
     .from("cursos")
     .select("nombre_curso")
+    .eq("tenant_id", tenantId)
     .eq("id", cursoId)
     .maybeSingle();
 

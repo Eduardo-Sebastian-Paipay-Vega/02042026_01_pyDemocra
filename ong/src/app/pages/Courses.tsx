@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { BookOpen, GraduationCap, Plus, Users, RefreshCw, AlertCircle, Inbox } from "lucide-react";
+import { BookOpen, GraduationCap, Plus, Users, RefreshCw, AlertCircle, Inbox, Download } from "lucide-react";
 import { DataTable, type Column, type RowAction } from '@/core/components/shared/DataTable';
 import { PageHeader } from '@/core/components/shared/PageHeader';
 import { GradientButton } from '@/core/components/ui/gradient-button';
@@ -17,6 +17,8 @@ import {
   listCursos,
   listInscripcionesByCurso,
   updateInscripcion,
+  updateCurso,
+  toggleCursoActivo,
   NOTA_APROBACION,
   type CertificadoRow,
   type CursoRow,
@@ -204,6 +206,34 @@ const certificadoColumns: Column<CertificadoRow>[] = [
   { key: "fechaEmision", label: "Fecha de emisión", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.fechaEmision}</span> },
 ];
 
+// ─── Export ───────────────────────────────────────────────────────────────────
+
+function exportInscripcionesToCSV(cursoNombre: string, data: InscripcionRow[]) {
+  if (!data || data.length === 0) {
+    toast.error("No hay inscripciones para exportar.");
+    return;
+  }
+  const headers = ["ID Inscripcion", "Voluntario", "Estado", "Nota", "Fecha Inscripcion", "ID Certificado"];
+  const csvRows = data.map((r) => [
+    `"${r.id}"`,
+    `"${r.voluntarioNombre || ""}"`,
+    `"${r.estado || ""}"`,
+    `"${r.nota !== null ? r.nota : ""}"`,
+    `"${r.createdAt || ""}"`,
+    `"${r.certificadoId || ""}"`,
+  ]);
+  const csvContent = [headers.join(","), ...csvRows.map((e) => e.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `inscripciones_${cursoNombre.replace(/\s+/g, "_").toLowerCase()}_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Inscripciones exportadas exitosamente.");
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 type CoursesView = "cursos" | "inscripciones" | "certificados";
@@ -226,6 +256,7 @@ export function Courses() {
 
   // New course modal
   const [cursoModalOpen, setCursoModalOpen] = useState(false);
+  const [editCursoId, setEditCursoId] = useState<string | null>(null);
   const [cursoForm, setCursoForm] = useState({ nombre: "", descripcion: "", horas: "", imageUrl: "", activo: true, imageFile: null as File | null });
   const [cursoFormErrors, setCursoFormErrors] = useState<Record<string, string>>({});
   const [savingCurso, setSavingCurso] = useState(false);
@@ -319,7 +350,7 @@ export function Courses() {
     setSavingCurso(true);
     setCursoFormErrors({});
     try {
-      let uploadedImageUrl: string | null = null;
+      let uploadedImageUrl = cursoForm.imageUrl;
       if (cursoForm.imageFile) {
         const upload = await uploadFileToStorage({
           ...getAssetsUploadBucket(),
@@ -328,27 +359,65 @@ export function Courses() {
         });
         uploadedImageUrl = upload.publicUrl;
       }
-      const created = await createCurso({
-        nombre: cursoForm.nombre,
-        descripcion: cursoForm.descripcion.trim() || null,
-        horasCertificacion: horas,
-        imageUrl: uploadedImageUrl,
-      });
+      
+      if (editCursoId) {
+        await updateCurso(editCursoId, {
+          nombre: cursoForm.nombre,
+          descripcion: cursoForm.descripcion.trim() || null,
+          horasCertificacion: horas,
+          imageUrl: uploadedImageUrl,
+          activo: cursoForm.activo,
+        });
+        toast.success("Curso actualizado", { description: cursoForm.nombre });
+      } else {
+        const created = await createCurso({
+          nombre: cursoForm.nombre,
+          descripcion: cursoForm.descripcion.trim() || null,
+          horasCertificacion: horas,
+          imageUrl: uploadedImageUrl,
+        });
+        toast.success("Curso creado", { description: created.nombre });
+      }
       setCursoModalOpen(false);
+      setEditCursoId(null);
       setCursoForm({ nombre: "", descripcion: "", horas: "", imageUrl: "", activo: true, imageFile: null });
       await loadCursos();
-      toast.success("Curso creado", { description: created.nombre });
     } catch (err) {
-      setCursoFormErrors({ global: err instanceof Error ? err.message : "No se pudo crear el curso." });
+      setCursoFormErrors({ global: err instanceof Error ? err.message : "No se pudo guardar el curso." });
     } finally {
       setSavingCurso(false);
     }
-  }, [cursoForm]);
+  }, [cursoForm, editCursoId, loadCursos]);
 
   const openCreateCurso = () => {
+    setEditCursoId(null);
     setCursoForm({ nombre: "", descripcion: "", horas: "", imageUrl: "", activo: true, imageFile: null });
     setCursoFormErrors({});
     setCursoModalOpen(true);
+  };
+
+  const openEditCurso = (row: CursoRow) => {
+    setEditCursoId(row.id);
+    setCursoForm({
+      nombre: row.nombre,
+      descripcion: row.descripcion || "",
+      horas: row.horasCertificacion ? String(row.horasCertificacion) : "",
+      imageUrl: row.imageUrl || "",
+      activo: row.activo,
+      imageFile: null,
+    });
+    setCursoFormErrors({});
+    setCursoModalOpen(true);
+  };
+
+  const handleToggleCurso = async (row: CursoRow) => {
+    try {
+      await toggleCursoActivo(row.id, !row.activo);
+      toast.success(row.activo ? "Curso desactivado" : "Curso activado");
+      await loadCursos();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al cambiar estado");
+    }
   };
 
   // ── Enroll ──────────────────────────────────────────────────────────────────
@@ -421,6 +490,11 @@ export function Courses() {
   // ── Actions ──────────────────────────────────────────────────────────────────
   const cursoActions: RowAction<CursoRow>[] = [
     { label: "Gestionar curso", onClick: selectCurso },
+    { label: "Editar curso", onClick: openEditCurso },
+    {
+      label: (row) => (row.activo ? "Desactivar" : "Activar"),
+      onClick: handleToggleCurso,
+    },
   ];
 
   const inscripcionActions: RowAction<InscripcionRow>[] = [
@@ -466,12 +540,24 @@ export function Courses() {
     }
 
     return (
-      <DataTable
-        columns={inscripcionColumns}
-        data={inscripciones}
-        loading={inscripcionesLoading}
-        actions={inscripcionActions}
-      />
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <OutlineButton
+            size="sm"
+            onClick={() => exportInscripcionesToCSV(selectedCurso.nombre || "curso", inscripciones)}
+            className="flex items-center gap-1.5 text-[var(--t-text-secondary)] border-[var(--t-border)] hover:bg-[var(--t-hover)]"
+          >
+            <Download className="h-4 w-4 text-emerald-400" />
+            Exportar CSV
+          </OutlineButton>
+        </div>
+        <DataTable
+          columns={inscripcionColumns}
+          data={inscripciones}
+          loading={inscripcionesLoading}
+          actions={inscripcionActions}
+        />
+      </div>
     );
   };
 
@@ -577,7 +663,7 @@ export function Courses() {
 
       {/* ── Modal: Nuevo curso ───────────────────────────────────────────────── */}
       <ModalShell open={cursoModalOpen} onClose={() => setCursoModalOpen(false)} width="max-w-md">
-        <ModalHeader title="Crear Nuevo Curso" onClose={() => setCursoModalOpen(false)} />
+        <ModalHeader title={editCursoId ? "Editar Curso" : "Crear Nuevo Curso"} onClose={() => setCursoModalOpen(false)} />
         <div className="space-y-4 p-5">
           <Field label="Nombre del curso" required error={cursoFormErrors.nombre}>
             <input

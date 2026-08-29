@@ -68,7 +68,7 @@ const templateColumns: Column<NotificationTemplateRow>[] = [
     label: "Plantilla",
     render: (row) => (
       <div>
-        <div style={{ color: "var(--t-text)" }}>{row.name}</div>
+        <div className="font-medium" style={{ color: "var(--t-text)" }}>{row.name}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
           {row.subject || "Sin asunto"}
         </div>
@@ -83,31 +83,54 @@ const templateColumns: Column<NotificationTemplateRow>[] = [
   {
     key: "event",
     label: "Evento / Variables",
-    render: (row) => (
-      <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        <div>{row.eventCode || "Sin codigo_evento"}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.variablesSummary}
+    render: (row) => {
+      let vars: string[] = [];
+      try {
+        vars = JSON.parse(row.variablesJson);
+      } catch (e) {
+        // ignore
+      }
+      return (
+        <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          <div className="font-semibold">{row.eventCode || "Sin codigo_evento"}</div>
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {Array.isArray(vars) && vars.length > 0 ? (
+              vars.map((v) => (
+                <span
+                  key={v}
+                  className="rounded-md px-1.5 py-0.5 text-[10px]"
+                  style={{
+                    background: "var(--t-hover)",
+                    color: "var(--t-text-dim)",
+                    border: "1px solid var(--t-border)",
+                  }}
+                >
+                  {`{{${v}}}`}
+                </span>
+              ))
+            ) : (
+              <span className="text-[10px] italic" style={{ color: "var(--t-text-dim)" }}>
+                Sin variables
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     key: "content",
     label: "Contenido",
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.contentSummary}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.active ? "Disponible para uso" : "Desactivada"}
-        </div>
+        <div className="line-clamp-2 leading-relaxed">{row.contentSummary}</div>
       </div>
     ),
   },
   {
     key: "status",
     label: "Estado",
-    render: (row) => <StatusDot variant={row.statusVariant}>{row.activeLabel}</StatusDot>,
+    render: (row) => <StatusDot variant={row.active ? "success" : "secondary"}>{row.activeLabel}</StatusDot>,
   },
   {
     key: "updated",
@@ -252,47 +275,38 @@ export function NotificationTemplates() {
         }
       />
 
-      <div
-        className="rounded-2xl px-4 py-3"
-        style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-      >
-        <div className="flex flex-wrap items-center gap-3">
-          <NotificationsStatusBadge
-            allowed={data.access.canReadTemplates}
-            allowedLabel="Lectura de plantillas disponible"
-            deniedLabel="Sin acceso de lectura"
-          />
-          <NotificationsStatusBadge
-            allowed={data.access.canManageTemplates}
-            allowedLabel="Gestion de plantillas disponible"
-            deniedLabel="Sin acceso de gestion"
-          />
-          <NotificationsStatusBadge
-            allowed={data.channelOptions.length > 0}
-            allowedLabel="Catalogo de canales real"
-            deniedLabel="Sin catalogo de canales"
-          />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-col gap-2 rounded-2xl p-4 transition-colors hover:bg-[var(--t-hover)]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <div className="flex items-center justify-between text-[var(--t-text-dim)]">
+            <span className="text-[12px] font-medium">Plantillas reales</span>
+            <FileText className="h-4 w-4" />
+          </div>
+          <span className="text-2xl font-bold text-[var(--t-text)]">{data.summary.total}</span>
         </div>
-        {data.warnings.map((item) => (
-          <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            {item}
-          </p>
-        ))}
-        {data.unsupportedFlows.map((item) => (
-          <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            {item}
-          </p>
-        ))}
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <NotificationsSummaryField label="Plantillas reales" value={String(data.summary.total)} />
-        <NotificationsSummaryField label="Activas" value={String(data.summary.active)} />
-        <NotificationsSummaryField label="Inactivas" value={String(data.summary.inactive)} />
-        <NotificationsSummaryField
-          label="Con codigo_evento"
-          value={String(data.summary.withEventCode)}
-        />
+        
+        <div className="flex flex-col gap-2 rounded-2xl p-4 transition-colors hover:bg-[var(--t-hover)]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <div className="flex items-center justify-between text-green-500/80">
+            <span className="text-[12px] font-medium">Activas</span>
+            <Power className="h-4 w-4" />
+          </div>
+          <span className="text-2xl font-bold text-[var(--t-text)]">{data.summary.active}</span>
+        </div>
+        
+        <div className="flex flex-col gap-2 rounded-2xl p-4 transition-colors hover:bg-[var(--t-hover)]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <div className="flex items-center justify-between text-[var(--t-text-dim)]">
+            <span className="text-[12px] font-medium">Inactivas</span>
+            <Power className="h-4 w-4 opacity-50" />
+          </div>
+          <span className="text-2xl font-bold text-[var(--t-text)]">{data.summary.inactive}</span>
+        </div>
+        
+        <div className="flex flex-col gap-2 rounded-2xl p-4 transition-colors hover:bg-[var(--t-hover)]" style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}>
+          <div className="flex items-center justify-between text-blue-500/80">
+            <span className="text-[12px] font-medium">Con código</span>
+            <Zap className="h-4 w-4" />
+          </div>
+          <span className="text-2xl font-bold text-[var(--t-text)]">{data.summary.withEventCode}</span>
+        </div>
       </div>
 
       {(error || !data.access.canReadTemplates) && (
@@ -313,20 +327,23 @@ export function NotificationTemplates() {
           </h2>
         </div>
 
-        <FilterBar
-          searchPlaceholder="Buscar por nombre, canal, asunto, codigo_evento o variables..."
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          filters={statusOptions}
-          onFilterClick={(value) => setStatusFilter(value as TemplateStatusFilter)}
-        />
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <NotificationsSelectField
-            value={channelFilter}
-            onChange={setChannelFilter}
-            options={channelOptions}
-          />
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex-1">
+            <FilterBar
+              searchPlaceholder="Buscar por nombre, canal, asunto, codigo_evento o variables..."
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              filters={statusOptions}
+              onFilterClick={(value) => setStatusFilter(value as TemplateStatusFilter)}
+            />
+          </div>
+          <div className="w-full shrink-0 lg:w-64">
+            <NotificationsSelectField
+              value={channelFilter}
+              onChange={setChannelFilter}
+              options={channelOptions}
+            />
+          </div>
         </div>
 
         <div className="mt-4">
@@ -334,20 +351,34 @@ export function NotificationTemplates() {
             columns={templateColumns}
             data={data.access.canReadTemplates ? filteredRows : []}
             loading={loading}
-            emptyMessage="No se encontraron plantillas reales con los filtros actuales."
+            emptyMessage={
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--t-hover)]">
+                  <Mail className="h-6 w-6" style={{ color: "var(--t-text-dim)" }} />
+                </div>
+                <h3 className="text-[14px] font-medium" style={{ color: "var(--t-text)" }}>Sin plantillas</h3>
+                <p className="mt-1 max-w-[250px] text-center text-[12px]" style={{ color: "var(--t-text-dim)" }}>
+                  No se encontraron plantillas con los filtros actuales.
+                </p>
+                {data.access.canManageTemplates && (
+                  <button
+                    onClick={openCreateModal}
+                    className="mt-4 rounded-xl px-4 py-2 text-[12px] font-medium text-white transition-opacity hover:opacity-90"
+                    style={{ background: "var(--t-primary)" }}
+                  >
+                    Crear primera plantilla
+                  </button>
+                )}
+              </div>
+            }
             actions={
               data.access.canManageTemplates
                 ? [
                     { label: "Ver detalle", onClick: (row) => setDetailTemplateId(row.id) },
                     { label: "Editar", onClick: (row) => openEditModal(row) },
                     {
-                      label: "Desactivar",
-                      variant: "destructive",
-                      onClick: (row) => void toggleTemplate(row, false),
-                    },
-                    {
-                      label: "Reactivar",
-                      onClick: (row) => void toggleTemplate(row, true),
+                      label: (row) => (row.active ? "Desactivar" : "Reactivar"),
+                      onClick: (row) => void toggleTemplate(row, !row.active),
                     },
                   ]
                 : [{ label: "Ver detalle", onClick: (row) => setDetailTemplateId(row.id) }]

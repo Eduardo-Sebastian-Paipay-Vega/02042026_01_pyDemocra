@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle, GraduationCap, Users, X } from "lucide-react";
+import { BookOpen, CheckCircle, GraduationCap, Users, X, Download } from "lucide-react";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
@@ -168,6 +168,32 @@ const inscripcionColumns: Column<InscripcionRow>[] = [
     ),
   },
 ];
+
+function exportInscripcionesToCSV(cursoNombre: string, data: InscripcionRow[]) {
+  if (!data || data.length === 0) {
+    toast.error("No hay inscripciones para exportar.");
+    return;
+  }
+  const headers = ["ID Inscripcion", "Voluntario", "Estado", "Nota", "Fecha Inscripcion", "ID Certificado"];
+  const csvRows = data.map((r) => [
+    `"${r.id}"`,
+    `"${r.voluntarioNombre || ""}"`,
+    `"${r.estado || ""}"`,
+    `"${r.nota !== null ? r.nota : ""}"`,
+    `"${r.createdAt || ""}"`,
+    `"${r.certificadoId || ""}"`,
+  ]);
+  const csvContent = [headers.join(","), ...csvRows.map((e) => e.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `inscripciones_${cursoNombre.replace(/\s+/g, "_").toLowerCase()}_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast.success("Inscripciones exportadas exitosamente.");
+}
 
 export function Courses() {
   const [loading, setLoading] = useState(true);
@@ -511,9 +537,19 @@ export function Courses() {
                 academico.inscripciones + academico.certificados
               </p>
             </div>
-            <button type="button" onClick={() => setInscripcionesOpen(false)}>
-              <X className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            </button>
+            <div className="flex items-center gap-3">
+              <OutlineButton
+                size="sm"
+                onClick={() => exportInscripcionesToCSV(inscripcionesCurso?.nombre || "curso", inscripciones)}
+                className="flex items-center gap-1.5 text-neutral-700 dark:text-zinc-300 border-neutral-200 dark:border-zinc-800 hover:bg-zinc-800"
+              >
+                <Download className="h-4 w-4 text-emerald-400" />
+                Exportar CSV
+              </OutlineButton>
+              <button type="button" onClick={() => setInscripcionesOpen(false)}>
+                <X className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
+              </button>
+            </div>
           </div>
 
           <DataTable

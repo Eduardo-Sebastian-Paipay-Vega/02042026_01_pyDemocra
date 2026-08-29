@@ -35,6 +35,7 @@ import {
   Users,
   X,
   Zap,
+  BookOpen
 } from "lucide-react";
 
 import { PageHeader } from '@/core/components/shared/PageHeader';
@@ -773,7 +774,7 @@ export function Dashboard() {
   ];
 
   return (
-    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="bg-[#100F0D] text-[#F9F7F3] min-h-screen p-6 font-sans space-y-4">
       {/* HEADER EJECUTIVO DEL DASHBOARD CON ACCIONES REALES */}
       <motion.div variants={fadeUp as any}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -791,10 +792,10 @@ export function Dashboard() {
               size="sm"
               onClick={refresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5"
-              style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
+              className="flex items-center gap-1.5 text-[#A4A29F]"
+              
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} style={{ color: "var(--t-text-dim)" }} />
+              <RefreshCw className={`h-3.5 w-3.5 text-[#686561] ${isRefreshing ? "animate-spin" : ""}`} />
               Actualizar
             </OutlineButton>
 
@@ -803,10 +804,10 @@ export function Dashboard() {
               value={periodFilter}
               onValueChange={(val) => setPeriodFilter(val as PeriodFilter)}
             >
-              <SelectTrigger className="h-9 w-fit min-w-[110px] rounded-xl text-[13px] font-medium transition-colors" style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)", color: "var(--t-text-secondary)" }}>
+              <SelectTrigger className="h-9 w-fit min-w-[110px] rounded-xl text-[13px] font-medium transition-colors bg-[#171512] border border-[#26231F] rounded-xl" >
                 <SelectValue placeholder="Periodo" />
               </SelectTrigger>
-              <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+              <SelectContent  className="text-[#F9F7F3]">
                 <SelectItem value="month" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Mes</SelectItem>
                 <SelectItem value="quarter" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Último Trimestre</SelectItem>
                 <SelectItem value="year" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Año</SelectItem>
@@ -818,10 +819,10 @@ export function Dashboard() {
               value={selectedProjectFilter}
               onValueChange={setSelectedProjectFilter}
             >
-              <SelectTrigger className="h-9 w-fit min-w-[140px] rounded-xl text-[13px] font-medium transition-colors" style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)", color: "var(--t-text-secondary)" }}>
+              <SelectTrigger className="h-9 w-fit min-w-[140px] rounded-xl text-[13px] font-medium transition-colors bg-[#171512] border border-[#26231F] rounded-xl" >
                 <SelectValue placeholder="Proyecto" />
               </SelectTrigger>
-              <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+              <SelectContent  className="text-[#F9F7F3]">
                 <SelectItem value="all" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Todos los Proyectos</SelectItem>
                 {taskOptions.map((p) => (
                   <SelectItem key={p.value} value={p.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
@@ -838,7 +839,7 @@ export function Dashboard() {
               className="flex items-center gap-1.5"
               style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
             >
-              <Settings className="h-3.5 w-3.5" style={{ color: "var(--t-text-dim)" }} />
+              <Settings className="h-3.5 w-3.5 text-[#686561]"  />
               Personalizar
             </OutlineButton>
 
@@ -870,8 +871,8 @@ export function Dashboard() {
 
               {isQuickActionOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-52 rounded-2xl p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95"
-                  style={{ border: "1px solid var(--t-border)", background: "var(--t-surface)" }}
+                  className="absolute right-0 mt-2 w-52 rounded-2xl p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95 bg-[#171512] border border-[#26231F] rounded-xl"
+                  
                 >
                   <button
                     type="button"
@@ -921,6 +922,19 @@ export function Dashboard() {
                     <UserPlus className="h-4 w-4 text-amber-400" />
                     Revisar Admisiones
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsQuickActionOpen(false);
+                      navigate("/app/academico/cursos");
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium hover:bg-[var(--t-hover)] text-left transition-colors"
+                    style={{ color: "var(--t-text)" }}
+                  >
+                    <BookOpen className="h-4 w-4 text-sky-400" />
+                    Cursos y Certificados
+                  </button>
+
                 </div>
               )}
             </div>
@@ -933,18 +947,18 @@ export function Dashboard() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. VOLUNTARIOS ACTIVOS */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Voluntarios Activos</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="text-[13px] font-medium text-[#A4A29F]" >Voluntarios Activos</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#161D17] text-[#08996A] border border-[#08996A]/20">
                 <Users className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{activeVolunteersCount}</p>
-              <span className="text-[11px] font-medium text-emerald-400/70 bg-emerald-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{activeVolunteersCount}</p>
+              <span className="text-xs font-medium text-[#08996A] bg-[#161D17] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#08996A]/20">
                 <TrendingUp className="h-3 w-3" /> En sistema
               </span>
             </div>
@@ -952,20 +966,20 @@ export function Dashboard() {
 
           {/* 2. PROYECTOS Y ACTIVIDADES */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Proyectos y Actividades</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <span className="text-[13px] font-medium text-[#A4A29F]" >Proyectos y Actividades</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#161D17] text-[#08996A] border border-[#08996A]/20">
                 <FolderKanban className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>
-                {activeProjectsCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>proy.</span> • {activeActivitiesCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>act.</span>
+              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >
+                {activeProjectsCount} <span className="text-sm font-normal text-[#686561]" >proy.</span> • {activeActivitiesCount} <span className="text-sm font-normal text-[#686561]" >act.</span>
               </p>
-              <span className="text-[11px] font-medium text-indigo-300/70 bg-indigo-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <span className="text-xs font-medium text-[#08996A] bg-[#161D17] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#08996A]/20">
                 <CheckCircle2 className="h-3 w-3" /> Activos
               </span>
             </div>
@@ -973,18 +987,18 @@ export function Dashboard() {
 
           {/* 3. HORAS APROBADAS */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Horas Aprobadas Totales</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <span className="text-[13px] font-medium text-[#A4A29F]" >Horas Aprobadas Totales</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1F181E] text-[#8B5CF6] border border-[#8B5CF6]/20">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{safeHoursToText(approvedHoursTotal)}</p>
-              <span className="text-[11px] font-medium text-purple-300/70 bg-purple-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{safeHoursToText(approvedHoursTotal)}</p>
+              <span className="text-xs font-medium text-[#8B5CF6] bg-[#1F181E] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#8B5CF6]/20">
                 <Award className="h-3 w-3" /> Auditado OK
               </span>
             </div>
@@ -992,18 +1006,18 @@ export function Dashboard() {
 
           {/* 4. PENDIENTES DE REVISIÓN */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>Pendientes de Revisión</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="text-[13px] font-medium text-[#A4A29F]" >Pendientes de Revisión</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#231C11] text-[#D97706] border border-[#D97706]/20">
                 <AlertCircle className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--t-text)" }}>{pendingApprovalsCount} <span className="text-sm font-normal" style={{ color: "var(--t-text-dim)" }}>pend.</span></p>
-              <span className="text-[11px] font-medium text-amber-400/70 bg-amber-500/5 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{pendingApprovalsCount} <span className="text-sm font-normal text-[#686561]" >pend.</span></p>
+              <span className="text-xs font-medium text-[#D97706] bg-[#231C11] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#D97706]/20">
                 <Clock className="h-3 w-3" /> Requiere atención
               </span>
             </div>
@@ -1017,16 +1031,16 @@ export function Dashboard() {
           {/* GRÁFICO DE EVOLUCIÓN DE HORAS */}
           {widgetSettings.showEvolutionChart && (
             <div
-              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[#171512] border border-[#26231F] rounded-xl"
+              
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+                  <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
                     <TrendingUp className="h-5 w-5 text-indigo-400" />
                     Evolución del Voluntariado (Horas)
                   </h3>
-                  <p className="text-[13px] mt-0.5" style={{ color: "var(--t-text-dim)" }}>
+                  <p className="text-[13px] mt-0.5 text-[#686561]" >
                     Comparativa de horas solicitadas vs validadas en los últimos meses.
                   </p>
                 </div>
@@ -1082,12 +1096,12 @@ export function Dashboard() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="h-full w-full flex flex-col items-center justify-center text-center space-y-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-inner" style={{ background: "var(--t-input-bg)", borderColor: "var(--t-border-strong)" }}>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-inner bg-[#23211D] border-[#26231F]" >
                       <TrendingUp className="h-6 w-6 text-indigo-400/50" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold" style={{ color: "var(--t-text)" }}>Aún no hay horas registradas</p>
-                      <p className="text-[12px] max-w-[250px] mx-auto mt-1" style={{ color: "var(--t-text-dim)" }}>
+                      <p className="text-[13px] font-semibold text-[#F9F7F3]" >Aún no hay horas registradas</p>
+                      <p className="text-[12px] max-w-[250px] mx-auto mt-1 text-[#686561]" >
                         A medida que los voluntarios registren y validen sus horas, verás el progreso aquí.
                       </p>
                     </div>
@@ -1100,16 +1114,16 @@ export function Dashboard() {
           {/* AGENDA Y COMPROMISOS DE HOY (REAL DATABASE ITEMS ONLY) */}
           {widgetSettings.showTodayAgenda && (
             <div
-              className="rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              className="rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between bg-[#171512] border border-[#26231F] rounded-xl"
+              
             >
               <div>
                 <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-                  <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+                  <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
                     <Calendar className="h-5 w-5 text-indigo-400" />
                     Agenda de Hoy
                   </h3>
-                  <span className="text-[13px] font-mono font-medium" style={{ color: "var(--t-text-dim)" }}>
+                  <span className="text-[13px] font-mono font-medium text-[#686561]" >
                     {new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
                   </span>
                 </div>
@@ -1171,15 +1185,15 @@ export function Dashboard() {
           {/* FEED DE ACTIVIDAD EN TIEMPO REAL (100% REAL DE LA BASE DE DATOS) */}
           {widgetSettings.showActivityFeed && (
             <div
-              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[#171512] border border-[#26231F] rounded-xl"
+              
             >
               <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-                <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: "var(--t-text)" }}>
+                <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
                   <Radio className="h-5 w-5 text-indigo-400" />
                   Feed de Actividad en Vivo
                 </h3>
-                <span className="text-[12px] font-mono flex items-center gap-1" style={{ color: "var(--t-text-dim)" }}>
+                <span className="text-[12px] font-mono flex items-center gap-1 text-[#686561]" >
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   En directo
                 </span>
@@ -1198,16 +1212,16 @@ export function Dashboard() {
                           {item.avatar}
                         </div>
                         <div>
-                          <p style={{ color: "var(--t-text)" }}>
+                          <p  className="text-[#F9F7F3]">
                             <span className="font-semibold">{item.user}</span>{" "}
-                            <span style={{ color: "var(--t-text-dim)" }}>{item.action}</span>
+                            <span  className="text-[#686561]">{item.action}</span>
                           </p>
                           <p className="text-[12px] text-indigo-400 font-medium truncate max-w-sm mt-0.5">
                             {item.target}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[12px] font-mono shrink-0" style={{ color: "var(--t-text-dim)" }}>{item.time}</span>
+                      <span className="text-[12px] font-mono shrink-0 text-[#686561]" >{item.time}</span>
                     </div>
                   ))
                 ) : (
@@ -1238,11 +1252,11 @@ export function Dashboard() {
           {/* ACCESOS DIRECTOS Y ESTADO OPERATIVO (VALORES REALES DE SUPABASE) */}
           {widgetSettings.showQuickAccess && (
             <div
-              className="rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between"
-              style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
+              className="rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between bg-[#171512] border border-[#26231F] rounded-xl"
+              
             >
               <div>
-                <h3 className="text-base font-semibold flex items-center gap-2 pb-3" style={{ color: "var(--t-text)", borderBottom: "1px solid var(--t-border)" }}>
+                <h3 className="text-base font-semibold flex items-center gap-2 pb-3 text-[#F9F7F3]" >
                   <Zap className="h-5 w-5 text-amber-400" />
                   Accesos Directos
                 </h3>
@@ -1254,11 +1268,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
+                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
                       <UserPlus className="h-4 w-4 text-indigo-400" />
                       Revisar Admisiones
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-mono text-[12px]">
+                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
                       {metrics.admissionPending ?? 0} pend.
                     </span>
                   </button>
@@ -1269,11 +1283,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
+                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
                       <CheckSquare className="h-4 w-4 text-emerald-400" />
                       Validar Horas Pendientes
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-mono text-[12px]">
+                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
                       {metrics.approvalsPending ?? 0} solicit.
                     </span>
                   </button>
@@ -1284,18 +1298,34 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium" style={{ color: "var(--t-text)" }}>
+                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
                       <Upload className="h-4 w-4 text-purple-400" />
                       Repositorio de Evidencias
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 font-mono text-[12px]">
+                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
                       {metrics.evidencesUploaded ?? 0} arch.
                     </span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate("/app/academico/cursos")}
+                    className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
+                    style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
+                  >
+                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
+                      <BookOpen className="h-4 w-4 text-sky-400" />
+                      Cursos y Certificados
+                    </span>
+                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                      Abrir
+                    </span>
+                  </button>
+
                 </div>
               </div>
 
-              <div className="pt-3 text-[12px] flex items-center justify-between font-mono" style={{ borderTop: "1px solid var(--t-border)", color: "var(--t-text-dim)" }}>
+              <div className="pt-3 text-[12px] flex items-center justify-between font-mono text-[#686561]" >
                 <span>Estado Servidor ONG:</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> 100% Operativo
@@ -1496,7 +1526,7 @@ export function Dashboard() {
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
     <SelectValue placeholder="Selecciona proyecto" />
   </SelectTrigger>
-  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+  <SelectContent  className="text-[#F9F7F3]">
     {taskOptions.map((t) => (
       <SelectItem key={t.value} value={t.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {t.label}
@@ -1552,7 +1582,7 @@ export function Dashboard() {
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
     <SelectValue placeholder="Selecciona estado" />
   </SelectTrigger>
-  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+  <SelectContent  className="text-[#F9F7F3]">
     {activityStateOptions.map((st) => (
       <SelectItem key={st.value} value={st.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {st.label}
@@ -1583,7 +1613,7 @@ export function Dashboard() {
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
     <SelectValue placeholder="Selecciona ubicaci�n" />
   </SelectTrigger>
-  <SelectContent style={{ background: "var(--t-elevated)", border: "1px solid var(--t-border-strong)", color: "var(--t-text)" }}>
+  <SelectContent  className="text-[#F9F7F3]">
     {locationOptions.map((l) => (
       <SelectItem key={l.value} value={l.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {l.label}
