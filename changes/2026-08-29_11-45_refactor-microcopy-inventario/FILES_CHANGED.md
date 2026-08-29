@@ -1,0 +1,1 @@
+- `src/modules/ong/app/pages/Inventory.tsx`: Modificado. Actualización de `PageHeader` description. Cambio de "Items" a "Ítems". Inserción de "CÓD: " en los renderers de códigos en `itemColumns`, `locationColumns` y `movementColumns`. Modificación estructural de la celda de Unidad / Estado para adoptar un flex container y un badge.

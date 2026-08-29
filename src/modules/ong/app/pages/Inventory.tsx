@@ -65,12 +65,19 @@ const itemColumns: Column<any>[] = [
       <div>
         <div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div>
         <div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>
-          {item.code}{item.sku ? ` • ${item.sku}` : ""}
+          CÓD: {item.code}{item.sku ? ` • ${item.sku}` : ""}
         </div>
       </div>
     </div>
   ) },
-  { key: "unit", label: "Unidad / Estado", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>{item.unitLabel}</div><div>{item.stateLabel}</div></div> },
+  { key: "unit", label: "Unidad / Estado", render: (item) => (
+    <div className="flex items-center gap-2">
+      <span className="text-[13px] text-[var(--t-text-secondary)]">{item.unitLabel}</span>
+      <span className="inline-flex items-center rounded-full border border-[var(--t-border)] bg-[var(--t-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--t-text-dim)]">
+        {item.stateLabel}
+      </span>
+    </div>
+  ) },
   { key: "status", label: "Activo", render: (item) => <StatusDot variant={item.statusVariant}>{item.activeLabel}</StatusDot> },
   { key: "stock", label: "Stock", render: (item) => {
     const isOutOfStock = item.derivedStock === null || item.derivedStock <= 0;
@@ -90,14 +97,14 @@ const itemColumns: Column<any>[] = [
 ];
 
 const locationColumns: Column<any>[] = [
-  { key: "name", label: "Ubicacion", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.code}</div></div> },
+  { key: "name", label: "Ubicacion", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.name}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>CÓD: {item.code}</div></div> },
   { key: "country", label: "Pais", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>{item.countryLabel}</span> },
   { key: "address", label: "Direccion", render: (item) => <span className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>{item.address || "-"}</span> },
   { key: "status", label: "Activo", render: (item) => <StatusDot variant={item.statusVariant}>{item.activeLabel}</StatusDot> },
 ];
 
 const movementColumns: Column<any>[] = [
-  { key: "item", label: "Item", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.itemName}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>{item.itemId}</div></div> },
+  { key: "item", label: "Item", render: (item) => <div><div className="font-medium" style={{ color: "var(--t-text)" }}>{item.itemName}</div><div className="mt-1 inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] uppercase font-mono" style={{ background: "var(--t-hover)", color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}>CÓD: {item.itemId}</div></div> },
   { key: "type", label: "Tipo", render: (item) => <StatusDot variant={item.statusVariant}>{item.typeName}</StatusDot> },
   { key: "quantity", label: "Cantidad", render: (item) => <span className="text-[13px] font-medium" style={{ color: "var(--t-text-secondary)" }}>{formatNumber(item.quantity)}</span> },
   { key: "path", label: "Origen / Destino", render: (item) => <div className="text-[12px]" style={{ color: "var(--t-text-dim)" }}><div>Origen: {item.originName}</div><div>Destino: {item.destinationName}</div></div> },
@@ -187,9 +194,9 @@ export function Inventory() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <PageHeader title="Recursos - Inventario" description="Operacion real sobre ong.items, ong.ubicaciones, ong.tipo_transaccion_inventario y ong.transacciones_inventario." action={getHeaderAction()} />
+      <PageHeader title="Recursos - Inventario" description="Administración de ítems, ubicaciones, movimientos y kardex de inventario de la organización." action={getHeaderAction()} />
       <div className="flex flex-wrap gap-2">
-        <GradientButton size="sm" onClick={() => setView("items")}>Items</GradientButton>
+        <GradientButton size="sm" onClick={() => setView("items")}>Ítems</GradientButton>
         <OutlineButton size="sm" onClick={() => setView("locations")}>Ubicaciones</OutlineButton>
         <OutlineButton size="sm" onClick={() => setView("movements")}>Movimientos</OutlineButton>
         <OutlineButton size="sm" onClick={() => setView("kardex")}>Kardex</OutlineButton>

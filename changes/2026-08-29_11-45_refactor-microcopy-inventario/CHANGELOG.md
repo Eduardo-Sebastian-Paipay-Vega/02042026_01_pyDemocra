@@ -1,0 +1,15 @@
+- **Fecha y hora**: 2026-08-29 11:45
+- **Objetivo del cambio**: Refinamiento de microcopy y legibilidad en el módulo de inventario.
+- **Contexto del problema**: Jerga técnica ("tenant") expuesta al usuario, textos pequeños apilados sin jerarquía ("Unidad / Estado") y falta de contexto en los identificadores de código.
+- **Motivo de la modificación**: Correcciones sugeridas por el análisis de UI/UX (Mejoras de Texto y Microcopy).
+- **Solución implementada**:
+  - Reemplazo de "tenant" por "organización" en el `PageHeader`.
+  - Corrección ortográfica "Items" -> "Ítems" en la navegación por pestañas.
+  - Prefijado de identificadores con "CÓD: " (ej. `CÓD: 01`).
+  - Desapilamiento de la columna "Unidad / Estado", convirtiendo el Estado en un Badge de condición.
+- **Riesgos identificados**: Ninguno.
+- **Impacto esperado**: Mayor legibilidad y comprensión rápida por parte del usuario final.
+- **Módulos afectados**: `/ong/app/pages/Inventory.tsx`
+- **Dependencias involucradas**: N/A
+- **Posibles efectos secundarios**: Ninguno.
+- **Estado del cambio**: Completado

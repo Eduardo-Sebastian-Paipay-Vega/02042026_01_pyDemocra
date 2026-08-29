@@ -1,0 +1,4 @@
+- **Qué se hizo**: Se actualizaron copys (textos) de la vista de inventario para eliminar jerga, se corrigió ortografía ("Ítems") y se prefijaron los códigos ("CÓD:"). Se mejoró visualmente la columna Unidad/Estado.
+- **Por qué se hizo**: Para aumentar el estándar visual y la legibilidad a nivel de micro-elementos según lo dictado por el sistema de diseño.
+- **Qué beneficio aporta**: Reduce la carga cognitiva del usuario al dejar claro qué es un código y cuál es el estado del ítem (a través de un badge en lugar de texto plano pegado a la unidad).
+- **Qué funcionalidades quedaron afectadas**: `Inventory.tsx`.
