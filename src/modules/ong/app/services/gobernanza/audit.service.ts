@@ -48,25 +48,25 @@ function matchesSearch(row: GovernanceAuditEvent, searchTerm: string): boolean {
   ].some((value) => value.toLowerCase().includes(normalized));
 }
 
-function toPublicAuditEvent(row: PublicAuditRow): GovernanceAuditEvent {
+function toPublicAuditEvent(row: any): GovernanceAuditEvent {
   return {
     id: row.id,
     source: "public.audit_logs",
-    schemaName: row.schema_name,
-    tableName: row.table_name,
-    operation: row.operation,
-    recordPk: row.record_pk,
-    actorId: row.changed_by,
-    actorLabel: row.changed_by ?? "Sistema",
+    schemaName: "public",
+    tableName: row.resource_name || "unknown",
+    operation: row.event_type || "UNKNOWN",
+    recordPk: null,
+    actorId: row.actor_id,
+    actorLabel: row.actor_id ?? "Sistema",
     occurredAt: row.created_at,
     occurredAtLabel: toDateTimeLabel(row.created_at),
-    summary: `${row.schema_name}.${row.table_name} ${row.operation}`,
+    summary: `${row.resource_name} ${row.event_type}`,
     sourceLabel: "public.audit_logs",
-    ip: null,
-    userAgent: null,
+    ip: row.ip || null,
+    userAgent: row.user_agent || null,
     correlationId: null,
-    oldData: row.old_data,
-    newData: row.new_data,
+    oldData: row.payload_before,
+    newData: row.payload_after,
   };
 }
 
@@ -101,23 +101,23 @@ async function fetchPublicAuditRows(filters: GovernanceAuditFilters): Promise<Go
   let query = publicSchema()
     .from("audit_logs")
     .select(
-      "id, tenant_id, schema_name, table_name, operation, record_pk, old_data, new_data, changed_by, created_at"
+      "id, tenant_id, actor_id, event_type, resource_name, payload_before, payload_after, ip, user_agent, retention_until, created_at"
     )
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (filters.schemaName !== "all") {
-    query = query.eq("schema_name", filters.schemaName);
+  if (filters.schemaName !== "all" && filters.schemaName !== "public") {
+    return [];
   }
   if (filters.tableName !== "all") {
-    query = query.eq("table_name", filters.tableName);
+    query = query.ilike("resource_name", `%${filters.tableName}%`);
   }
   if (filters.operation !== "all") {
-    query = query.eq("operation", filters.operation);
+    query = query.eq("event_type", filters.operation);
   }
   if (filters.actorId !== "all") {
-    query = query.eq("changed_by", filters.actorId);
+    query = query.eq("actor_id", filters.actorId);
   }
   if (dateFrom) {
     query = query.gte("created_at", `${dateFrom}T00:00:00`);
@@ -131,7 +131,7 @@ async function fetchPublicAuditRows(filters: GovernanceAuditFilters): Promise<Go
     throw new Error(error.message);
   }
 
-  return ((data ?? []) as PublicAuditRow[]).map(toPublicAuditEvent);
+  return ((data ?? []) as any[]).map(toPublicAuditEvent);
 }
 
 async function fetchLegacyAuditRows(filters: GovernanceAuditFilters): Promise<GovernanceAuditEvent[]> {
