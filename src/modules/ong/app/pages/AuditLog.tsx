@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { FileText, History, ShieldAlert, Filter } from "lucide-react";
-import { PageHeader } from "../components/shared/PageHeader";
-import { FilterBar } from "../components/shared/FilterBar";
-import { DataTable, type Column } from "../components/shared/DataTable";
+import { PageHeader } from "@/core/components/shared/PageHeader";
+import { FilterBar } from "@/core/components/shared/FilterBar";
+import { DataTable, type Column } from "@/core/components/shared/DataTable";
 import { ModalShell } from "@/core/components/ui/modal-shell";
 import { StatusDot } from "@/core/components/ui/status-dot";
 import { Popover, PopoverContent, PopoverTrigger } from "@/core/components/ui/popover";
@@ -37,9 +37,9 @@ const columns: Column<GovernanceAuditEvent>[] = [
     label: "Entidad",
     render: (row) => (
       <div>
-        <div style={{ color: "var(--t-text)" }}>{row.schemaName}.{row.tableName}</div>
+        <div style={{ color: "var(--t-text)" }}>{`${row.schemaName}.${row.tableName}`}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.recordPk ? 'PK: ' + row.recordPk : ""}
+          {row.recordPk ? `PK: ${row.recordPk}` : ""}
         </div>
       </div>
     ),
@@ -263,7 +263,7 @@ export function AuditLog() {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <GovernanceDetailField
                   label="Entidad"
-                  value={`${detailRow.schemaName}.${detailRow.tableName}`}
+                  value={detailRow.schemaName + "." + detailRow.tableName}
                 />
                 <GovernanceDetailField label="Operacion" value={detailRow.operation} />
                 <GovernanceDetailField label="Registro" value={detailRow.recordPk ?? "-"} />
