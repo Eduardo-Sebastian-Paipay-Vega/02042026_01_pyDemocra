@@ -39,7 +39,7 @@ const columns: Column<GovernanceAuditEvent>[] = [
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.schemaName}.{row.tableName}</div>
         <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.recordPk ? PK:  : ""}
+          {row.recordPk ? 'PK: ' + row.recordPk : ""}
         </div>
       </div>
     ),
@@ -263,7 +263,7 @@ export function AuditLog() {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <GovernanceDetailField
                   label="Entidad"
-                  value={${detailRow.schemaName}.}
+                  value={`${detailRow.schemaName}.${detailRow.tableName}`}
                 />
                 <GovernanceDetailField label="Operacion" value={detailRow.operation} />
                 <GovernanceDetailField label="Registro" value={detailRow.recordPk ?? "-"} />
