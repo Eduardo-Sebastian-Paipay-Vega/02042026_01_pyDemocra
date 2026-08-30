@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
 import { LockKeyhole, ShieldAlert, UserRound } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import type { DateRange } from "react-day-picker";
 import { PageHeader } from '@/core/components/shared/PageHeader';
 import { FilterBar } from '@/core/components/shared/FilterBar';
 import { DataTable, type Column } from '@/core/components/shared/DataTable';
@@ -9,6 +12,8 @@ import { ModalShell } from '@/core/components/ui/modal-shell';
 import { GradientButton } from '@/core/components/ui/gradient-button';
 import { OutlineButton } from '@/core/components/ui/outline-button';
 import { StatusDot } from '@/core/components/ui/status-dot';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs';
+import { DatePickerWithRange } from '@/core/components/ui/date-range-picker';
 import { useSensitiveAccess } from "../modules/governance/hooks/useSensitiveAccess";
 import { useRoleAccessConstraints } from "../modules/governance/hooks/useRoleAccessConstraints";
 import type {
@@ -26,6 +31,32 @@ import {
   getConstraintScopeLabel,
   getConstraintSearchValue,
 } from "../services/gobernanza/sensitiveAccess.service";
+import { z } from "zod";
+
+const constraintSchema = z.object({
+  roleId: z.string().min(1, "El rol es obligatorio."),
+  sedeId: z.string(),
+  ipCidr: z.string().refine((val) => !val || /^[0-9a-fA-F.:/]+$/.test(val), {
+    message: "El CIDR/IP contiene caracteres no válidos.",
+  }),
+  timeStart: z.string(),
+  timeEnd: z.string(),
+  requireTrustedDevice: z.boolean(),
+}).refine((data) => {
+  const { timeStart, timeEnd } = data;
+  if ((timeStart && !timeEnd) || (!timeStart && timeEnd)) return false;
+  return true;
+}, {
+  message: "Debes completar tanto la hora de inicio como la de fin.",
+  path: ["timeEnd"]
+}).refine((data) => {
+  const { timeStart, timeEnd } = data;
+  if (timeStart && timeEnd && timeEnd <= timeStart) return false;
+  return true;
+}, {
+  message: "La hora fin debe ser mayor que la hora inicio.",
+  path: ["timeEnd"]
+});
 
 const stagger = {
   hidden: {},
@@ -79,9 +110,14 @@ const logColumns: Column<SensitiveAccessLogRow>[] = [
     key: "date",
     label: "Fecha",
     render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.accessedAtLabel}
-      </span>
+      <div className="flex flex-col">
+        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          {row.accessedAtLabel}
+        </span>
+        <span className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+          {row.accessedAt ? `hace ${formatDistanceToNow(new Date(row.accessedAt), { locale: es })}` : ""}
+        </span>
+      </div>
     ),
   },
 ];
@@ -121,9 +157,14 @@ const constraintColumns: Column<RoleAccessConstraintRow>[] = [
     key: "created",
     label: "Creado",
     render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.createdAtLabel}
-      </span>
+      <div className="flex flex-col">
+        <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          {row.createdAtLabel}
+        </span>
+        <span className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+          {row.createdAt ? `hace ${formatDistanceToNow(new Date(row.createdAt), { locale: es })}` : ""}
+        </span>
+      </div>
     ),
   },
 ];
@@ -144,8 +185,7 @@ function buildConstraintForm(
 export function SensitiveAccess() {
   const [searchValue, setSearchValue] = useState("");
   const [actorFilter, setActorFilter] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [constraintSearch, setConstraintSearch] = useState("");
   const [selectedLog, setSelectedLog] = useState<SensitiveAccessLogRow | null>(null);
   const [editingConstraint, setEditingConstraint] = useState<RoleAccessConstraintRow | null>(null);
@@ -157,14 +197,24 @@ export function SensitiveAccess() {
   const [isConstraintModalOpen, setIsConstraintModalOpen] = useState(false);
 
   const filters = useMemo(
-    () => ({
-      searchTerm: searchValue,
-      actorId: actorFilter,
-      dateFrom: dateFrom || null,
-      dateTo: dateTo || null,
-      limit: 150,
-    }),
-    [actorFilter, dateFrom, dateTo, searchValue]
+    () => {
+      const formatDate = (d?: Date) => {
+        if (!d) return null;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      return {
+        searchTerm: searchValue,
+        actorId: actorFilter,
+        dateFrom: dateRange?.from ? formatDate(dateRange.from) : null,
+        dateTo: dateRange?.to ? formatDate(dateRange.to) : null,
+        limit: 150,
+      };
+    },
+    [actorFilter, dateRange, searchValue]
   );
 
   const { loading, error, data, refresh } = useSensitiveAccess(filters);
@@ -196,6 +246,15 @@ export function SensitiveAccess() {
   }
 
   async function saveConstraint() {
+    try {
+      constraintSchema.parse(constraintForm);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        setConstraintError(validationError.errors[0].message);
+        return;
+      }
+    }
+
     try {
       if (editingConstraint) {
         await constraintMutations.update({
@@ -281,10 +340,19 @@ export function SensitiveAccess() {
 
       {error && (
         <motion.div variants={fadeUp}>
-          <GovernanceErrorBlock message={error} onRetry={refresh} />
+          <GovernanceErrorBlock 
+            message="Acceso Restringido. Necesitas permisos de Auditoría Clínica para ver esto." 
+            onRetry={refresh} 
+          />
         </motion.div>
       )}
 
+      <Tabs defaultValue="logs" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="logs">Logs de Auditoría</TabsTrigger>
+          <TabsTrigger value="constraints">Reglas de Restricción</TabsTrigger>
+        </TabsList>
+        <TabsContent value="logs">
       <motion.div variants={fadeUp}>
         <div
           className="rounded-2xl p-4"
@@ -317,28 +385,7 @@ export function SensitiveAccess() {
                 onChange={setActorFilter}
                 options={data.actorOptions}
               />
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(event) => setDateFrom(event.target.value)}
-                className="h-9 rounded-xl px-3 text-[12px] outline-none"
-                style={{
-                  border: "1px solid var(--t-border)",
-                  background: "var(--t-input-bg)",
-                  color: "var(--t-text-secondary)",
-                }}
-              />
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(event) => setDateTo(event.target.value)}
-                className="h-9 rounded-xl px-3 text-[12px] outline-none"
-                style={{
-                  border: "1px solid var(--t-border)",
-                  background: "var(--t-input-bg)",
-                  color: "var(--t-text-secondary)",
-                }}
-              />
+              <DatePickerWithRange date={dateRange} setDate={setDateRange} />
             </div>
 
             <DataTable
@@ -352,6 +399,8 @@ export function SensitiveAccess() {
         </div>
       </motion.div>
 
+        </TabsContent>
+        <TabsContent value="constraints">
       <motion.div variants={fadeUp}>
         <div
           className="rounded-2xl p-4"
@@ -407,6 +456,9 @@ export function SensitiveAccess() {
           </div>
         </div>
       </motion.div>
+
+        </TabsContent>
+      </Tabs>
 
       <ModalShell
         open={Boolean(selectedLog)}
