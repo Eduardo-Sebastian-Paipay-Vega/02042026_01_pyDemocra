@@ -1,4 +1,11 @@
 import { StatusDot } from '@/core/components/ui/status-dot';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/core/components/ui/select";
 
 export function GovernanceErrorBlock({
   message,
@@ -61,23 +68,20 @@ export function GovernanceSelectField({
   disabled?: boolean;
 }) {
   return (
-    <select
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      disabled={disabled}
-      className="ong-field-control ong-native-select h-10 rounded-xl px-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
-      style={{
-        border: "1px solid var(--t-border-strong)",
-        background: "var(--t-input-bg)",
-        color: "var(--t-text)",
-      }}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger 
+        className="h-10 rounded-xl px-3 text-[12px] outline-none w-full border-[#26231F] bg-[#100F0D] text-[#F9F7F3]"
+      >
+        <SelectValue placeholder="Seleccionar opción" />
+      </SelectTrigger>
+      <SelectContent className="bg-[#171512] border-[#26231F] text-[#F9F7F3]">
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value} className="text-[12px] focus:bg-[#1F1D1A] focus:text-white">
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

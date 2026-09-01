@@ -48,40 +48,26 @@ function matchesSearch(row: GovernanceAuditEvent, searchTerm: string): boolean {
   ].some((value) => value.toLowerCase().includes(normalized));
 }
 
-function toPublicAuditEvent(row: PublicAuditRow): GovernanceAuditEvent {
+function toPublicAuditEvent(r: any): GovernanceAuditEvent {
+  const row = r as any;
   return {
     id: row.id,
     source: "public.audit_logs",
-      // @ts-ignore
-      // @ts-ignore
-    schemaName: row.schema_name,
-      // @ts-ignore
-      // @ts-ignore
-    tableName: row.table_name,
-      // @ts-ignore
-      // @ts-ignore
-    operation: row.operation,
-      // @ts-ignore
-    recordPk: row.record_pk,
-      // @ts-ignore
-      // @ts-ignore
-    actorId: row.changed_by,
-      // @ts-ignore
-    actorLabel: row.changed_by ?? "Sistema",
+    schemaName: "public",
+    tableName: row.resource_name || "unknown",
+    operation: row.event_type || "UNKNOWN",
+    recordPk: row.payload_after?.id || row.payload_before?.id || null,
+    actorId: row.actor_id,
+    actorLabel: row.actor_id ?? "Sistema",
     occurredAt: row.created_at,
-      // @ts-ignore
     occurredAtLabel: toDateTimeLabel(row.created_at),
-      // @ts-ignore
-      // @ts-ignore
-    summary: `${row.schema_name}.${row.table_name} ${row.operation}`,
+    summary: `public.${row.resource_name} ${row.event_type}`,
     sourceLabel: "public.audit_logs",
-    ip: null,
-    userAgent: null,
+    ip: row.ip || null,
+    userAgent: row.user_agent || null,
     correlationId: null,
-      // @ts-ignore
-    oldData: row.old_data,
-      // @ts-ignore
-    newData: row.new_data,
+    oldData: row.payload_before,
+    newData: row.payload_after,
   };
 }
 
@@ -118,23 +104,20 @@ async function fetchPublicAuditRows(filters: GovernanceAuditFilters): Promise<Go
   let query = publicSchema()
     .from("audit_logs")
     .select(
-      "id, tenant_id, schema_name, table_name, operation, record_pk, old_data, new_data, changed_by, created_at"
+      "id, tenant_id, actor_id, event_type, resource_name, payload_before, payload_after, ip, user_agent, created_at"
     )
     .eq("tenant_id", tenantId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (filters.schemaName !== "all") {
-    query = query.eq("schema_name", filters.schemaName);
-  }
   if (filters.tableName !== "all") {
-    query = query.eq("table_name", filters.tableName);
+    query = query.eq("resource_name", filters.tableName);
   }
   if (filters.operation !== "all") {
-    query = query.eq("operation", filters.operation);
+    query = query.eq("event_type", filters.operation);
   }
   if (filters.actorId !== "all") {
-    query = query.eq("changed_by", filters.actorId);
+    query = query.eq("actor_id", filters.actorId);
   }
   if (dateFrom) {
     query = query.gte("created_at", `${dateFrom}T00:00:00`);
@@ -148,7 +131,7 @@ async function fetchPublicAuditRows(filters: GovernanceAuditFilters): Promise<Go
     throw new Error(error.message);
   }
 
-  return ((data ?? []) as PublicAuditRow[]).map(toPublicAuditEvent);
+  return ((data ?? []) as any[]).map(toPublicAuditEvent);
 }
 
 async function fetchLegacyAuditRows(filters: GovernanceAuditFilters): Promise<GovernanceAuditEvent[]> {
@@ -245,7 +228,7 @@ export async function listGovernanceAuditEvents(
       warnings.push(legacyResult.error);
     }
 
-    if (!publicResult.rows.length && !legacyResult.rows.length) {
+    if (publicResult.error && legacyResult.error) {
       throw new Error(
         warnings[warnings.length - 1] ??
           "No se encontraron fuentes de auditoria disponibles."

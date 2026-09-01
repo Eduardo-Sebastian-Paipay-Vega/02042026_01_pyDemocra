@@ -391,7 +391,7 @@ export function MyProfile() {
                       Seguridad & Actividad Reciente
                     </h3>
                     <p className="text-xs" style={{ color: "var(--t-text-dim)" }}>
-                      Monitoreo de la sesiÃ³n y protecciÃ³n de credenciales
+                      Monitoreo de la sesión y protecciÃ³n de credenciales
                     </p>
                   </div>
                 </div>

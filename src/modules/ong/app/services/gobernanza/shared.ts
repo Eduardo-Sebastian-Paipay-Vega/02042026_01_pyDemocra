@@ -252,7 +252,7 @@ async function hasPermission(permission: string, warnings: string[]): Promise<bo
 
     if (error) {
       warnings.push(
-        `No se pudo validar el permiso ${permission} con public.fn_has_permission().`
+        `Error al validar el permiso: ${permission}.`
       );
       return false;
     }
@@ -268,7 +268,7 @@ async function isTenantAdmin(warnings: string[]): Promise<boolean> {
   try {
     const { data, error } = await governanceDb.rpc("fn_is_tenant_admin");
     if (error) {
-      warnings.push("No se pudo validar tenant admin con public.fn_is_tenant_admin() (permiso core iam.admin).");
+      warnings.push("Error al validar el estado de administrador.");
       return false;
     }
     return data === true;

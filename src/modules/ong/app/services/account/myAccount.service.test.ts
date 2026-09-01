@@ -38,7 +38,7 @@ describe("getMyProfile", () => {
       error: null,
     });
 
-    await expect(getMyProfile()).rejects.toThrow("No hay sesiÃ³n activa.");
+    await expect(getMyProfile()).rejects.toThrow("No hay sesión activa.");
   });
 
   it("propaga el mensaje del error de auth si existe", async () => {
@@ -99,7 +99,7 @@ describe("updateMyFullName", () => {
     });
 
     await expect(updateMyFullName("Nuevo Nombre")).rejects.toThrow(
-      "No hay sesiÃ³n activa."
+      "No hay sesión activa."
     );
   });
 
@@ -155,7 +155,7 @@ describe("updateMyAvatar", () => {
     });
     const file = new File(["data"], "avatar.png", { type: "image/png" });
 
-    await expect(updateMyAvatar(file)).rejects.toThrow("No hay sesiÃ³n activa.");
+    await expect(updateMyAvatar(file)).rejects.toThrow("No hay sesión activa.");
     expect(storage.uploadFileToStorage).not.toHaveBeenCalled();
   });
 

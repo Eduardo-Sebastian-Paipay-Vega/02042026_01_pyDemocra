@@ -3,7 +3,7 @@ import { StatusDot } from '@/core/components/ui/status-dot';
 
 export function SettingsTechnicalDetails({
   details,
-  summary = "Algunos detalles tecnicos estan disponibles para soporte.",
+  summary = "Algunos detalles técnicos están disponibles para soporte.",
 }: {
   details: string | string[];
   summary?: string;
@@ -24,7 +24,7 @@ export function SettingsTechnicalDetails({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
       >
-        {open ? "Ocultar detalles" : "Mostrar informacion tecnica"}
+        {open ? "Ocultar detalles" : "Mostrar información técnica"}
       </button>
       {open && (
         <div
@@ -65,7 +65,7 @@ export function SettingsErrorBlock({
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-          No pudimos completar esta accion. Intenta nuevamente o contacta al administrador.
+          No pudimos completar esta acción. Intenta nuevamente o contacta al administrador.
         </p>
         <button
           type="button"

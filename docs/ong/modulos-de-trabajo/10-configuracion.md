@@ -89,6 +89,7 @@
 - La edicion de datos de perfil no se expone para terceros porque `public.profiles` solo permite `UPDATE` self-only en RLS.
 - La baja operativa de usuario se resuelve revocando todas las filas de `public.user_roles_sedes`; no se inventa soft delete porque el Core no lo documenta para estas tablas.
 - `Seguridad de sesion` usa `settings.sessions.read` como permiso base de lectura y `settings.sessions.terminate` como permiso de mutacion; `devices.*`, `terminals.*` e `iam.sessions.terminate` quedan como compatibilidad legacy mientras el Core no publique permisos nuevos mas finos para esos recursos.
+- **Visualización de sesiones**: El contador de 'sesiones activas' en el listado lee la tabla de auditoría `public.sessions` (evaluando que `expires_at` sea mayor a NOW y no exista `revoked_at`). No lee el estado nativo de Supabase Auth en tiempo real. Un usuario que utiliza un token refrescado automáticamente puede aparecer con "0 sesiones activas" en la bitácora hasta que realice un inicio de sesión manual que registre un nuevo evento.
 - La revocacion por sesion individual usa `public.fn_remote_revoke_app_session`; la revocacion por usuario usa la Edge Function `admin-revoke-user-sessions`.
 
 ## 14. Acciones implementadas

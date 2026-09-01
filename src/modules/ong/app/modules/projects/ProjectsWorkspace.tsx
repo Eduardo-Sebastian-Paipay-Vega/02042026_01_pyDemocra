@@ -3571,7 +3571,7 @@ export function ProjectsWorkspace({ section }: { section: ProjectModuleSection }
               type="text"
               placeholder={
                 section === "projects"
-                  ? "Buscar por cÃ³digo, proyecto..."
+                  ? "Buscar por código, proyecto..."
                   : section === "tasks"
                   ? "Buscar por tarea, actividad..."
                   : section === "activities"

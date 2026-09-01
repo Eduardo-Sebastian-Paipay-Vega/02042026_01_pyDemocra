@@ -484,7 +484,7 @@ function sanitizeConstraintInput(input: RoleAccessConstraintFormInput) {
   return {
     role_id: roleId,
     sede_id: sedeId,
-    ip_cidr: ipCidr,
+    ip_cidr: ipCidr || null,
     time_start: timeStart,
     time_end: timeEnd,
     require_trusted_device: Boolean(input.requireTrustedDevice),

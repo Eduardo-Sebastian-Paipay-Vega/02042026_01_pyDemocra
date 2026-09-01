@@ -91,7 +91,7 @@ begin
     tenant_id, user_id, context_type, context_id, role_id, status
   ) values (
     v_link.tenant_id, v_user_id,
-    v_link.target_type, v_link.target_id,
+    v_link.target_type, coalesce(v_link.target_id, v_link.tenant_id),
     v_link.assigned_role_id, 'active'
   )
   on conflict (tenant_id, user_id, context_type, context_id) do update
@@ -199,7 +199,7 @@ begin
   -- ─────────────────────────────────────────────────────────
   insert into public.audit_logs (
     tenant_id, actor_id, event_type, resource_name,
-    payload_after, criticality, retention_until
+    payload_after, retention_until
   ) values (
     v_link.tenant_id, v_user_id,
     'ONBOARDING_COMPLETED', 'access_links',
@@ -210,7 +210,6 @@ begin
       'membership_id', v_membership_id,
       'entity_id',     v_entity_id
     ),
-    'medium',
     now() + make_interval(days => coalesce(
       (select pp.retention_days
        from public.tenants t

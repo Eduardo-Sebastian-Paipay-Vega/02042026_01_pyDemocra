@@ -140,16 +140,40 @@ const columns: Column<SystemUserRow>[] = [
   {
     key: "sessions",
     label: "Sesiones",
-    render: (row) => (
-      <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.totalSessionCount === null
-          ? "Sin permiso"
-          : `${row.activeSessionCount ?? 0} activas / ${row.totalSessionCount} total`}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.lastSessionAtLabel}
+    render: (row) => {
+      if (row.totalSessionCount === null) {
+        return (
+          <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+            Sin permiso
+          </div>
+        );
+      }
+
+      const hasSessions = row.totalSessionCount > 0;
+      const noActiveButHasTotal = hasSessions && (row.activeSessionCount ?? 0) === 0;
+
+      return (
+        <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
+          <span
+            title={
+              noActiveButHasTotal
+                ? "Cero sesiones activas en la bitácora. (NOTA: El usuario podría tener una sesión activa vía refresh-token de Supabase que no figura aquí)."
+                : "Lectura desde tabla de auditoría (public.sessions)."
+            }
+            className={
+              noActiveButHasTotal
+                ? "cursor-help text-amber-600 dark:text-amber-500 font-medium"
+                : "text-[var(--t-text)]"
+            }
+          >
+            {row.activeSessionCount ?? 0} activas / {row.totalSessionCount} auditadas
+          </span>
+          <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+            {row.lastSessionAtLabel}
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     key: "updated",
@@ -495,6 +519,7 @@ export function SystemUsers() {
           <SettingsTechnicalDetails
             details={[
               "Gestiona perfiles reales del tenant desde public.profiles y su acceso institucional mediante public.user_roles_sedes. La creacion o invitacion de usuarios se resuelve por backend seguro y el resumen de sesiones depende de `settings.sessions.read`.",
+              "NOTA DE SESIONES: El contador de 'sesiones activas' lee la tabla de auditoría public.sessions (limitado por expires_at), no la sesión nativa de Supabase Auth. Si usas un token refrescado automáticamente, puedes figurar con '0 activas' hasta que vuelvas a hacer un login manual.",
               ...data.warnings,
               "`settings.users.manage` habilita la Edge Function `admin-provision-user`. `settings.sessions.read` habilita el resumen visible de sesiones y `settings.sessions.terminate` permite la revocacion masiva por usuario.",
               ...data.unsupportedFlows,

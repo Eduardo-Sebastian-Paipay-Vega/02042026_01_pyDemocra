@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
 import { Eye, ListChecks, Shield, Users } from "lucide-react";
+import { z } from "zod";
 import { PageHeader } from "../components/shared/PageHeader";
 import { FilterBar } from "../components/shared/FilterBar";
 import { DataTable, type Column } from "../components/shared/DataTable";
@@ -47,6 +48,37 @@ type RoleFormState = {
   hierarchyLevel: string;
   permissionIds: string[];
 };
+
+const roleSchema = z.object({
+  name: z.string().min(1, "El nombre del rol es obligatorio."),
+  hierarchyLevel: z.coerce.number().int("Debe ser un número entero.").min(0, "El nivel jerárquico no puede ser negativo.")
+});
+
+const MODULE_TRANSLATIONS: Record<string, string> = {
+  billing: "Facturación",
+  core: "Núcleo",
+  iam: "Accesos",
+  operation: "Operaciones",
+  projects: "Proyectos",
+  resources: "Inventario",
+  ace: "Accesos y Credenciales",
+};
+
+function translateModule(mod: string) {
+  return MODULE_TRANSLATIONS[mod] || (mod.charAt(0).toUpperCase() + mod.slice(1));
+}
+
+function sanitizePermissionDescription(desc: string | null | undefined, id: string) {
+  if (!desc) return id;
+  return desc
+    .replace(/\(fn_[^)]*\)/gi, "")
+    .replace(/\bfn_\w+/gi, "")
+    .replace(/links?\s+de\s+acceso/gi, "enlaces de acceso")
+    .replace(/del\s+tenant/gi, "de la organización")
+    .replace(/\(\s*\)/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 function buildRoleForm(role?: RoleRow | null): RoleFormState {
   return {
@@ -247,22 +279,18 @@ export function Roles() {
   }
 
   async function submitForm() {
-    const hierarchyLevel = Number.parseInt(form.hierarchyLevel, 10);
-
-    if (!form.name.trim()) {
-      setFormError("El nombre del rol es obligatorio.");
-      return;
-    }
-    if (!Number.isInteger(hierarchyLevel)) {
-      setFormError("El nivel jerarquico debe ser un entero valido.");
+    const result = roleSchema.safeParse(form);
+    
+    if (!result.success) {
+      setFormError(result.error.issues[0].message);
       return;
     }
 
     try {
       await mutations.save({
         roleId: form.roleId,
-        name: form.name.trim(),
-        hierarchyLevel,
+        name: result.data.name.trim(),
+        hierarchyLevel: result.data.hierarchyLevel,
         permissionIds: form.permissionIds,
       });
 
@@ -546,22 +574,23 @@ export function Roles() {
       </ModalShell>
 
       <ModalShell open={isFormOpen} onClose={() => setIsFormOpen(false)} width="max-w-[920px]">
-        <div className="space-y-4 p-4">
+        <div className="space-y-4 p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
+              <h3 className="text-[15px] font-semibold" style={{ color: "var(--t-text)" }}>
                 {editingRole ? "Editar rol" : "Nuevo rol"}
               </h3>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                La configuracion sincroniza public.roles y public.role_permissions.
+              <p className="text-[12px] mt-0.5" style={{ color: "var(--t-text-dim)" }}>
+                Configura el nombre, nivel y permisos del rol.
               </p>
             </div>
             <button
               type="button"
-              className="rounded-md px-2 py-1 text-[12px]"
+              className="rounded-lg p-1.5 text-[#7A7A7A] hover:text-[#C8C5BF] hover:bg-[#1F1D1A] transition-colors"
               onClick={() => setIsFormOpen(false)}
+              aria-label="Cerrar"
             >
-              X
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
 
@@ -569,92 +598,136 @@ export function Roles() {
             <SettingsErrorBlock message={formError} onRetry={() => setFormError(null)} />
           )}
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="space-y-1">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-[#A4A29F]">Nombre del Rol</label>
               <input
                 value={form.name}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, name: event.target.value }))
                 }
-                placeholder="Nombre del rol"
-                className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+                placeholder="Ej. Coordinador de Voluntarios"
+                className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors focus:border-[#356C92]"
                 style={INPUT_STYLE}
               />
               <SettingsFieldError
                 message={!form.name.trim() && formError ? "El nombre es obligatorio." : undefined}
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-[#A4A29F]">Nivel de Jerarquía (0-100)</label>
               <input
                 type="number"
+                min="0"
                 value={form.hierarchyLevel}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, hierarchyLevel: event.target.value }))
                 }
-                placeholder="Nivel jerarquico"
-                className="h-9 w-full rounded-xl px-3 text-[12px] outline-none"
+                placeholder="100"
+                className="h-10 w-full rounded-xl px-3 text-[13px] outline-none transition-colors focus:border-[#356C92]"
                 style={INPUT_STYLE}
               />
               <SettingsFieldError
                 message={
                   !form.hierarchyLevel.trim() && formError
-                    ? "El nivel jerarquico es obligatorio."
+                    ? "El nivel jerárquico es obligatorio."
                     : undefined
                 }
               />
             </div>
           </div>
 
-          <div
-            className="rounded-2xl px-4 py-3"
-            style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-          >
-            <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-              Los permisos disponibles provienen de public.cat_permissions. Los checkboxes cambian el estado real de public.role_permissions.
-            </p>
+          <div className="flex items-center gap-2 mt-1">
+            <Shield className="h-3.5 w-3.5 text-[#5A5A5A]" />
+            <span className="text-[12px] font-medium text-[#7A7A7A]">Permisos por módulo</span>
+            <span className="text-[11px] text-[#5A5A5A]">
+              — {form.permissionIds.length} seleccionados
+            </span>
           </div>
 
-          <div className="max-h-[420px] space-y-4 overflow-y-auto pr-1">
-            {permissionGroups.map(([module, permissions]) => (
-              <div key={module} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <StatusDot variant="secondary">{module}</StatusDot>
-                </div>
-                <div className="grid gap-2 md:grid-cols-2">
-                  {permissions.map((permission) => (
-                    <label
-                      key={permission.id}
-                      className="flex items-start gap-2 rounded-xl px-3 py-2"
-                      style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.permissionIds.includes(permission.id)}
-                        onChange={() => togglePermission(permission.id)}
-                      />
-                      <span>
-                        <span className="block text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                          {permission.id}
-                        </span>
-                        <span className="block text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                          {permission.description}
-                        </span>
+          <div className="max-h-[420px] space-y-3 overflow-y-auto pr-2 scrollbar-thin">
+            {permissionGroups.map(([module, permissions]) => {
+              const allModuleIds = permissions.map((p) => p.id);
+              const allSelected = allModuleIds.every((id) => form.permissionIds.includes(id));
+              
+              return (
+                <details key={module} className="group rounded-xl border border-[#26231F] bg-[#171512] overflow-hidden">
+                  <summary className="flex items-center justify-between cursor-pointer p-3.5 bg-[#1F1D1A] group-open:border-b border-[#26231F]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#100F0D] group-open:rotate-180 transition-transform">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#A4A29F]"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                      <h4 className="text-sm font-semibold text-[#F9F7F3]">{translateModule(module)}</h4>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#100F0D] border border-[#26231F] text-[#A4A29F]">
+                        {permissions.filter(p => form.permissionIds.includes(p.id)).length} / {permissions.length}
                       </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setForm((current) => ({
+                            ...current,
+                            permissionIds: allSelected 
+                              ? current.permissionIds.filter((id) => !allModuleIds.includes(id))
+                              : Array.from(new Set([...current.permissionIds, ...allModuleIds]))
+                          }));
+                        }}
+                        className="text-xs text-[#356C92] hover:text-[#5BA4D9] font-medium transition-colors border border-[#356C92]/30 px-2.5 py-1 rounded-md bg-[#356C92]/5 hover:bg-[#356C92]/10"
+                      >
+                        {allSelected ? "Deseleccionar todos" : "Seleccionar todos"}
+                      </button>
+                    </div>
+                  </summary>
+                  <div className="p-3 grid gap-2.5 grid-cols-1 md:grid-cols-2 bg-[#171512]">
+                    {permissions.map((permission) => {
+                      const isSelected = form.permissionIds.includes(permission.id);
+                      return (
+                        <label
+                          key={permission.id}
+                          className="flex items-center gap-3 rounded-lg px-3.5 h-[58px] cursor-pointer transition-all duration-150 hover:bg-[#1F1D1A]"
+                          style={{
+                            border: `1px solid ${isSelected ? "#356C92" : "#2A2A2A"}`,
+                            background: isSelected ? "rgba(53,108,146,0.07)" : "transparent",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 flex-shrink-0 rounded border-[#3A3A3A] text-[#356C92] focus:ring-[#356C92]/40 bg-[#100F0D] accent-[#356C92]"
+                            checked={isSelected}
+                            onChange={() => togglePermission(permission.id)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span
+                              className="block text-[13px] font-semibold leading-tight truncate"
+                              style={{ color: isSelected ? "#E8E6E1" : "#C8C5BF" }}
+                              title={sanitizePermissionDescription(permission.description, permission.id)}
+                            >
+                              {sanitizePermissionDescription(permission.description, permission.id)}
+                            </span>
+                            <span className="block text-[12px] mt-0.5 truncate font-mono" style={{ color: "#6B6B6B" }}>
+                              {permission.id}
+                            </span>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </details>
+              );
+            })}
           </div>
 
-          <div className="flex gap-2">
-            <GradientButton
-              size="sm"
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              className="rounded-full px-5 py-2 text-sm font-semibold text-white bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] transition-colors disabled:opacity-50 shadow-sm"
               onClick={() => void submitForm()}
               disabled={mutations.isSaving}
             >
-              {mutations.isSaving ? "Guardando..." : "Guardar"}
-            </GradientButton>
+              {mutations.isSaving ? "Guardando..." : editingRole ? "Actualizar rol" : "Crear rol"}
+            </button>
             <OutlineButton
               size="sm"
               onClick={() => setIsFormOpen(false)}

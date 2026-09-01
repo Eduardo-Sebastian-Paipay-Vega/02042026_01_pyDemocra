@@ -1,0 +1,30 @@
+[
+  {
+    "schema": "public",
+    "definition": "\r\n  select exists (\r\n    select 1\r\n    from public.user_roles_sedes urs\r\n    join public.roles r on r.id = urs.role_id\r\n    join public.role_permissions rp on rp.role_id = r.id\r\n    where urs.user_id = auth.uid()\r\n      and rp.permission = p_permission\r\n      and r.tenant_id = public.fn_current_tenant_id()\r\n      and (p_sede_id is null or urs.sede_id = p_sede_id)\r\n  );\r\n",
+    "return_type": "boolean",
+    "routine_type": "FUNCTION",
+    "function_name": "fn_has_permission"
+  },
+  {
+    "schema": "public",
+    "definition": "\r\n  select public.fn_has_permission('iam.admin', null);\r\n",
+    "return_type": "boolean",
+    "routine_type": "FUNCTION",
+    "function_name": "fn_is_tenant_admin"
+  },
+  {
+    "schema": "public",
+    "definition": "\n  select p.tenant_id\n  from public.profiles p\n  where p.id = auth.uid()\n  limit 1;\n",
+    "return_type": "uuid",
+    "routine_type": "FUNCTION",
+    "function_name": "fn_current_tenant_id"
+  },
+  {
+    "schema": "public",
+    "definition": "\r\n  SELECT\r\n    ( EXISTS (\r\n        SELECT 1 FROM public.user_roles ur\r\n        JOIN public.role_permissions rp ON rp.role_id = ur.role_id\r\n        WHERE ur.user_id=auth.uid() AND ur.tenant_id=public.fn_current_tenant_id()\r\n          AND rp.permission=p_permission\r\n          AND (ur.expires_at IS NULL OR ur.expires_at > now())\r\n      )\r\n      OR EXISTS (\r\n        SELECT 1 FROM public.user_permission_overrides o\r\n        WHERE o.user_id=auth.uid() AND o.tenant_id=public.fn_current_tenant_id()\r\n          AND o.permission=p_permission AND o.effect='grant'\r\n          AND (o.expires_at IS NULL OR o.expires_at > now())\r\n      )\r\n    )\r\n    AND NOT EXISTS (\r\n        SELECT 1 FROM public.user_permission_overrides o\r\n        WHERE o.user_id=auth.uid() AND o.tenant_id=public.fn_current_tenant_id()\r\n          AND o.permission=p_permission AND o.effect='deny'\r\n          AND (o.expires_at IS NULL OR o.expires_at > now())\r\n    )\r\n",
+    "return_type": "boolean",
+    "routine_type": "FUNCTION",
+    "function_name": "fn_has_permission"
+  }
+]

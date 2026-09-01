@@ -1,4 +1,4 @@
-﻿import { Suspense } from "react";
+import { Suspense } from "react";
 import { RouterProvider } from "react-router";
 import { Toaster } from "sonner";
 import { router } from "./routes";
@@ -15,7 +15,8 @@ export default function App() {
         <RouterProvider router={router} />
       </Suspense>
       <Toaster
-        position="bottom-right"
+        position="bottom-left"
+        offset={32}
         toastOptions={{
           style: {
             background: "var(--t-elevated, rgba(24,24,24,0.85))",
@@ -23,6 +24,7 @@ export default function App() {
             color: "var(--t-text, #F5F5F5)",
             backdropFilter: "blur(20px)",
             fontSize: "13px",
+            zIndex: 99999,
           },
         }}
         gap={8}

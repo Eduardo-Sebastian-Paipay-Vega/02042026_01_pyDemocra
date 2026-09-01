@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { FileText, History, ShieldAlert, Filter } from "lucide-react";
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { PageHeader } from "@/core/components/shared/PageHeader";
 import { FilterBar } from "@/core/components/shared/FilterBar";
 import { DataTable, type Column } from "@/core/components/shared/DataTable";
@@ -111,6 +112,43 @@ export function AuditLog() {
   const hasAccess = data.access.canReadAudit || data.access.isTenantAdmin;
   const showContent = !error && !loading && hasAccess;
 
+  const kpis = useMemo(() => {
+    const total = data.rows.length;
+    const inserts = data.rows.filter(r => r.operation === "INSERT").length;
+    const updates = data.rows.filter(r => r.operation === "UPDATE").length;
+    const deletes = data.rows.filter(r => r.operation === "DELETE").length;
+
+    return [
+      { label: "Total Registros", value: total, badge: "General", badgeType: "purple" },
+      { label: "Nuevos (INSERT)", value: inserts, badge: "Recientes", badgeType: "emerald" },
+      { label: "Modificados (UPDATE)", value: updates, badge: "Cambios", badgeType: "amber" },
+      { label: "Borrados (DELETE)", value: deletes, badge: "Critico", badgeType: "purple" },
+    ];
+  }, [data.rows]);
+
+  const chartData = useMemo(() => {
+    if (!data.rows) return [];
+    
+    const countsByDay = data.rows.reduce((acc, row) => {
+      const day = row.occurredAt.split('T')[0];
+      if (!acc[day]) acc[day] = 0;
+      acc[day]++;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (29 - i));
+      const isoDate = d.toISOString().split('T')[0];
+      return {
+        date: d.toLocaleDateString('es-PE', { month: 'short', day: 'numeric' }),
+        eventos: countsByDay[isoDate] || 0
+      };
+    });
+
+    return last30Days;
+  }, [data.rows]);
+
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeUp}>
@@ -138,6 +176,43 @@ export function AuditLog() {
 
       {showContent && (
         <>
+          <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
+            {kpis.map((kpi, idx) => {
+              const badgeClasses = {
+                emerald: "bg-[#161D17] text-[#08996A] border border-[#08996A]/20",
+                purple: "bg-[#1F181E] text-[#8B5CF6] border border-[#8B5CF6]/20",
+                amber: "bg-[#231C11] text-[#D97706] border border-[#D97706]/20",
+              }[kpi.badgeType] || "bg-[#1F181E] text-[#8B5CF6] border border-[#8B5CF6]/20";
+
+              return (
+                <div key={idx} className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative flex flex-col justify-between h-[100px]">
+                  <span className="text-xs text-[#A4A29F] font-medium">{kpi.label}</span>
+                  <span className="text-2xl font-bold text-[#F9F7F3]">{kpi.value}</span>
+                  <div className={`absolute top-3 right-3 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${badgeClasses}`}>
+                    {kpi.badge}
+                  </div>
+                </div>
+              );
+            })}
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 h-[240px] mb-4">
+            <h3 className="text-sm font-medium text-[#F9F7F3] mb-4">Actividad (últimos 30 días)</h3>
+            <div className="h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                  <XAxis dataKey="date" hide />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                    contentStyle={{ backgroundColor: '#171512', borderColor: '#26231F', borderRadius: '8px', fontSize: '12px', color: '#F9F7F3' }}
+                    itemStyle={{ color: '#8B5CF6', fontWeight: 600 }}
+                  />
+                  <Bar dataKey="eventos" fill="#8B5CF6" radius={[4, 4, 4, 4]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 items-center">
             <div className="flex-1 w-full">
               <FilterBar

@@ -48,7 +48,7 @@ export const TriageSaludMental = () => {
             <div className="space-y-8">
               
               <div>
-                <h3 className="text-xl font-bold text-white mb-6">Â¿CÃ³mo te sientes hoy?</h3>
+                <h3 className="text-xl font-bold text-white mb-6">Â¿Cómo te sientes hoy?</h3>
                 <div className="flex justify-between px-2 mb-2 text-3xl">
                   <span>ðŸ˜¢</span>
                   <span>ðŸ˜•</span>

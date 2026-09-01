@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -233,7 +233,7 @@ function ModalHeader({ title, description, onClose }: { title: string; descripti
 function toResolutionTitle(target: ResolutionTarget | null): string {
   if (!target) return "Resolver";
   const actionText = target.targetStatus === "approved" ? "Aprobar" : "Rechazar";
-  return target.kind === "hour" ? `${actionText} Horas` : `${actionText} Solicitud de Admisión`;
+  return target.kind === "hour" ? `${actionText} Horas` : `${actionText} Solicitud de AdmisiÃ³n`;
 }
 
 function getInitials(name: string): string {
@@ -358,11 +358,11 @@ export function Dashboard() {
     return [
       { name: "Jue", aprobadas: 0, solicitadas: 0 },
       { name: "Vie", aprobadas: 0, solicitadas: 0 },
-      { name: "Sáb", aprobadas: 0, solicitadas: 0 },
+      { name: "SÃ¡b", aprobadas: 0, solicitadas: 0 },
       { name: "Dom", aprobadas: 0, solicitadas: 0 },
       { name: "Lun", aprobadas: 0, solicitadas: 0 },
       { name: "Mar", aprobadas: 0, solicitadas: 0 },
-      { name: "Mié", aprobadas: 0, solicitadas: 0 },
+      { name: "MiÃ©", aprobadas: 0, solicitadas: 0 },
     ];
   }, [weeklyImpact.data]);
 
@@ -382,7 +382,7 @@ export function Dashboard() {
         items.push({
           id: `h-${h.id}`,
           user: h.volunteerName || "Voluntario",
-          action: `registró ${h.hours}h de voluntariado`,
+          action: `registrÃ³ ${h.hours}h de voluntariado`,
           target: h.activityName || "Actividad",
           time: formatDate(h.date),
           avatar: getInitials(h.volunteerName || "V"),
@@ -395,7 +395,7 @@ export function Dashboard() {
         items.push({
           id: `r-${r.id}`,
           user: r.name || "Postulante",
-          action: "envió solicitud de admisión",
+          action: "enviÃ³ solicitud de admisiÃ³n",
           target: r.email || "Registro",
           time: formatDate(r.submittedAt),
           avatar: getInitials(r.name || "P"),
@@ -407,8 +407,8 @@ export function Dashboard() {
       recentActivities.data.forEach((a) => {
         items.push({
           id: `a-${a.id}`,
-          user: "Coordinación",
-          action: `programó la actividad "${a.name}"`,
+          user: "CoordinaciÃ³n",
+          action: `programÃ³ la actividad "${a.name}"`,
           target: a.projectName || "Proyecto",
           time: formatScheduleLabel(a.startAt, a.endAt),
           avatar: "CO",
@@ -504,7 +504,7 @@ export function Dashboard() {
     if (Number.isNaN(parsedEstimated)) {
       // @ts-ignore
       // @ts-ignore
-      (validationErrors as any).estimatedHours = "Ingresa un número válido de horas estimadas.";
+      (validationErrors as any).estimatedHours = "Ingresa un nÃºmero vÃ¡lido de horas estimadas.";
     }
     if (Object.keys(validationErrors).length > 0) {
       setActivityFormErrors(validationErrors);
@@ -574,7 +574,7 @@ export function Dashboard() {
       const detail = await fetchDashboardAdmissionDetail(admissionId);
       setAdmissionDetail(detail);
     } catch (err) {
-      setAdmissionDetailError(toFriendlyError(err, "No se pudo cargar la solicitud de admisión."));
+      setAdmissionDetailError(toFriendlyError(err, "No se pudo cargar la solicitud de admisiÃ³n."));
     } finally {
       setAdmissionDetailLoading(false);
     }
@@ -630,7 +630,7 @@ export function Dashboard() {
       setIsHourDetailOpen(false);
       setIsAdmissionDetailOpen(false);
     } catch (err) {
-      setResolutionError(toFriendlyError(err, "No se pudo guardar la resolución en la BD."));
+      setResolutionError(toFriendlyError(err, "No se pudo guardar la resoluciÃ³n en la BD."));
     }
   }, [resolutionTarget, resolutionComment, resolveHour, resolveAdmission, closeResolutionModal]);
 
@@ -699,14 +699,14 @@ export function Dashboard() {
           <div className="font-medium text-zinc-100">{item.name}</div>
           <div className="mt-0.5 text-[11px] text-zinc-400">
             {item.projectName}
-            {item.locationName ? ` • ${item.locationName}` : ""}
+            {item.locationName ? ` â€¢ ${item.locationName}` : ""}
           </div>
         </div>
       ),
     },
     {
       key: "date",
-      label: "Programación",
+      label: "ProgramaciÃ³n",
       render: (item) => (
         <span className="font-mono text-xs text-zinc-400">
           {formatScheduleLabel(item.startAt, item.endAt)}
@@ -744,12 +744,12 @@ export function Dashboard() {
     },
     {
       key: "email",
-      label: "Correo Electrónico",
+      label: "Correo ElectrÃ³nico",
       render: (item) => <span className="text-xs text-zinc-400 font-mono">{item.email}</span>,
     },
     {
       key: "submittedAt",
-      label: "Fecha Envío",
+      label: "Fecha EnvÃ­o",
       render: (item) => <span className="font-mono text-xs text-zinc-400">{formatDate(item.submittedAt)}</span>,
     },
     {
@@ -774,43 +774,43 @@ export function Dashboard() {
   ];
 
   return (
-    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="bg-[#100F0D] text-[#F9F7F3] min-h-screen p-6 font-sans space-y-4">
+    <motion.div variants={stagger as any} initial="hidden" animate="visible" className="bg-[var(--color-bg-main)] text-[var(--color-text-primary)] min-h-screen p-6 font-sans space-y-4">
       {/* HEADER EJECUTIVO DEL DASHBOARD CON ACCIONES REALES */}
       <motion.div variants={fadeUp as any}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex-1 min-w-0">
             <PageHeader
               title="Panel Principal"
-              description="Resumen operativo general, métricas clave en tiempo real y gestión de la ONG."
+              description="Resumen operativo general, mÃ©tricas clave en tiempo real y gestiÃ³n de la ONG."
             />
           </div>
 
-          {/* ── Barra de acciones unificada (una sola fila) ── */}
+          {/* â”€â”€ Barra de acciones unificada (una sola fila) â”€â”€ */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* BOTÓN ACTUALIZAR */}
+            {/* BOTÃ“N ACTUALIZAR */}
             <OutlineButton
               size="sm"
               onClick={refresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 text-[#A4A29F]"
+              className="flex items-center gap-1.5 text-[var(--color-text-secondary)]"
               
             >
-              <RefreshCw className={`h-3.5 w-3.5 text-[#686561] ${isRefreshing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-3.5 w-3.5 text-[var(--color-text-muted)] ${isRefreshing ? "animate-spin" : ""}`} />
               Actualizar
             </OutlineButton>
 
-            {/* SELECTOR DE PERÍODO (Custom) */}
+            {/* SELECTOR DE PERÃODO (Custom) */}
             <Select
               value={periodFilter}
               onValueChange={(val) => setPeriodFilter(val as PeriodFilter)}
             >
-              <SelectTrigger className="h-9 w-fit min-w-[110px] rounded-xl text-[13px] font-medium transition-colors bg-[#171512] border border-[#26231F] rounded-xl" >
+              <SelectTrigger className="h-9 w-fit min-w-[110px] rounded-xl text-[13px] font-medium transition-colors bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl" >
                 <SelectValue placeholder="Periodo" />
               </SelectTrigger>
-              <SelectContent  className="text-[#F9F7F3]">
+              <SelectContent  className="text-[var(--color-text-primary)]">
                 <SelectItem value="month" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Mes</SelectItem>
-                <SelectItem value="quarter" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Último Trimestre</SelectItem>
-                <SelectItem value="year" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este Año</SelectItem>
+                <SelectItem value="quarter" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Ãšltimo Trimestre</SelectItem>
+                <SelectItem value="year" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Este AÃ±o</SelectItem>
               </SelectContent>
             </Select>
 
@@ -819,10 +819,10 @@ export function Dashboard() {
               value={selectedProjectFilter}
               onValueChange={setSelectedProjectFilter}
             >
-              <SelectTrigger className="h-9 w-fit min-w-[140px] rounded-xl text-[13px] font-medium transition-colors bg-[#171512] border border-[#26231F] rounded-xl" >
+              <SelectTrigger className="h-9 w-fit min-w-[140px] rounded-xl text-[13px] font-medium transition-colors bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl" >
                 <SelectValue placeholder="Proyecto" />
               </SelectTrigger>
-              <SelectContent  className="text-[#F9F7F3]">
+              <SelectContent  className="text-[var(--color-text-primary)]">
                 <SelectItem value="all" className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">Todos los Proyectos</SelectItem>
                 {taskOptions.map((p) => (
                   <SelectItem key={p.value} value={p.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
@@ -832,18 +832,18 @@ export function Dashboard() {
               </SelectContent>
             </Select>
 
-            {/* BOTÓN PERSONALIZAR */}
+            {/* BOTÃ“N PERSONALIZAR */}
             <OutlineButton
               size="sm"
               onClick={() => setIsSettingsModalOpen(true)}
               className="flex items-center gap-1.5"
               style={{ color: "var(--t-text-secondary)", borderColor: "var(--t-border)" }}
             >
-              <Settings className="h-3.5 w-3.5 text-[#686561]"  />
+              <Settings className="h-3.5 w-3.5 text-[var(--color-text-muted)]"  />
               Personalizar
             </OutlineButton>
 
-            {/* BOTÓN DESCARGAR REPORTE */}
+            {/* BOTÃ“N DESCARGAR REPORTE */}
             <OutlineButton
               size="sm"
               onClick={() => {
@@ -857,7 +857,7 @@ export function Dashboard() {
               Reporte PDF
             </OutlineButton>
 
-            {/* BOTÓN ACCIÓN RÁPIDA DROPDOWN */}
+            {/* BOTÃ“N ACCIÃ“N RÃPIDA DROPDOWN */}
             <div className="relative">
               <GradientButton
                 size="sm"
@@ -865,13 +865,13 @@ export function Dashboard() {
                 className="flex items-center gap-1.5 shadow-lg"
               >
                 <Zap className="h-4 w-4 fill-white" />
-                + Acción Rápida
+                + AcciÃ³n RÃ¡pida
                 <ChevronDown className="h-3.5 w-3.5" />
               </GradientButton>
 
               {isQuickActionOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-52 rounded-2xl p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95 bg-[#171512] border border-[#26231F] rounded-xl"
+                  className="absolute right-0 mt-2 w-52 rounded-2xl p-1.5 shadow-2xl z-50 backdrop-blur-md animate-in fade-in zoom-in-95 bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
                   
                 >
                   <button
@@ -942,23 +942,23 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {/* 4 GRANDES TARJETAS DE MÉTRICAS PRINCIPALES (100% REALES DESDE SUPABASE) */}
+      {/* 4 GRANDES TARJETAS DE MÃ‰TRICAS PRINCIPALES (100% REALES DESDE SUPABASE) */}
       <motion.div variants={fadeUp as any}>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* 1. VOLUNTARIOS ACTIVOS */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
             
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-[#A4A29F]" >Voluntarios Activos</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#161D17] text-[#08996A] border border-[#08996A]/20">
+              <span className="text-[13px] font-medium text-[var(--color-text-secondary)]" >Voluntarios Activos</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-accent-emerald)/10] text-[var(--color-accent-emerald)] border border-[var(--color-accent-emerald)]/20">
                 <Users className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{activeVolunteersCount}</p>
-              <span className="text-xs font-medium text-[#08996A] bg-[#161D17] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#08996A]/20">
+              <p className="text-3xl font-bold tabular-nums text-[var(--color-text-primary)]" >{activeVolunteersCount}</p>
+              <span className="text-xs font-medium text-[var(--color-accent-emerald)] bg-[var(--color-accent-emerald)/10] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--color-accent-emerald)]/20">
                 <TrendingUp className="h-3 w-3" /> En sistema
               </span>
             </div>
@@ -966,20 +966,20 @@ export function Dashboard() {
 
           {/* 2. PROYECTOS Y ACTIVIDADES */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
             
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-[#A4A29F]" >Proyectos y Actividades</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#161D17] text-[#08996A] border border-[#08996A]/20">
+              <span className="text-[13px] font-medium text-[var(--color-text-secondary)]" >Proyectos y Actividades</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-accent-emerald)/10] text-[var(--color-accent-emerald)] border border-[var(--color-accent-emerald)]/20">
                 <FolderKanban className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >
-                {activeProjectsCount} <span className="text-sm font-normal text-[#686561]" >proy.</span> • {activeActivitiesCount} <span className="text-sm font-normal text-[#686561]" >act.</span>
+              <p className="text-3xl font-bold tabular-nums text-[var(--color-text-primary)]" >
+                {activeProjectsCount} <span className="text-sm font-normal text-[var(--color-text-muted)]" >proy.</span> â€¢ {activeActivitiesCount} <span className="text-sm font-normal text-[var(--color-text-muted)]" >act.</span>
               </p>
-              <span className="text-xs font-medium text-[#08996A] bg-[#161D17] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#08996A]/20">
+              <span className="text-xs font-medium text-[var(--color-accent-emerald)] bg-[var(--color-accent-emerald)/10] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--color-accent-emerald)]/20">
                 <CheckCircle2 className="h-3 w-3" /> Activos
               </span>
             </div>
@@ -987,61 +987,61 @@ export function Dashboard() {
 
           {/* 3. HORAS APROBADAS */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
             
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-[#A4A29F]" >Horas Aprobadas Totales</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#1F181E] text-[#8B5CF6] border border-[#8B5CF6]/20">
+              <span className="text-[13px] font-medium text-[var(--color-text-secondary)]" >Horas Aprobadas Totales</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-accent-purple)/10] text-[var(--color-accent-purple)] border border-[var(--color-accent-purple)]/20">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{safeHoursToText(approvedHoursTotal)}</p>
-              <span className="text-xs font-medium text-[#8B5CF6] bg-[#1F181E] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#8B5CF6]/20">
+              <p className="text-3xl font-bold tabular-nums text-[var(--color-text-primary)]" >{safeHoursToText(approvedHoursTotal)}</p>
+              <span className="text-xs font-medium text-[var(--color-accent-purple)] bg-[var(--color-accent-purple)/10] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--color-accent-purple)]/20">
                 <Award className="h-3 w-3" /> Auditado OK
               </span>
             </div>
           </div>
 
-          {/* 4. PENDIENTES DE REVISIÓN */}
+          {/* 4. PENDIENTES DE REVISIÃ“N */}
           <div
-            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[#171512] border border-[#26231F] rounded-xl"
+            className="rounded-2xl p-4 shadow-sm hover:shadow-md transition-all bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
             
           >
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-[#A4A29F]" >Pendientes de Revisión</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#231C11] text-[#D97706] border border-[#D97706]/20">
+              <span className="text-[13px] font-medium text-[var(--color-text-secondary)]" >Pendientes de RevisiÃ³n</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-accent-amber)/10] text-[var(--color-accent-amber)] border border-[var(--color-accent-amber)]/20">
                 <AlertCircle className="h-4 w-4" />
               </div>
             </div>
             <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-3xl font-bold tabular-nums text-[#F9F7F3]" >{pendingApprovalsCount} <span className="text-sm font-normal text-[#686561]" >pend.</span></p>
-              <span className="text-xs font-medium text-[#D97706] bg-[#231C11] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[#D97706]/20">
-                <Clock className="h-3 w-3" /> Requiere atención
+              <p className="text-3xl font-bold tabular-nums text-[var(--color-text-primary)]" >{pendingApprovalsCount} <span className="text-sm font-normal text-[var(--color-text-muted)]" >pend.</span></p>
+              <span className="text-xs font-medium text-[var(--color-accent-amber)] bg-[var(--color-accent-amber)/10] px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-[var(--color-accent-amber)]/20">
+                <Clock className="h-3 w-3" /> Requiere atenciÃ³n
               </span>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* SECCIÓN PRINCIPAL: GRÁFICO DE ÁREA Y AGENDA DE HOY */}
+      {/* SECCIÃ“N PRINCIPAL: GRÃFICO DE ÃREA Y AGENDA DE HOY */}
       {(widgetSettings.showEvolutionChart || widgetSettings.showTodayAgenda) && (
         <motion.div variants={fadeUp as any} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* GRÁFICO DE EVOLUCIÓN DE HORAS */}
+          {/* GRÃFICO DE EVOLUCIÃ“N DE HORAS */}
           {widgetSettings.showEvolutionChart && (
             <div
-              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[#171512] border border-[#26231F] rounded-xl"
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
               
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
+                  <h3 className="text-base font-semibold flex items-center gap-2 text-[var(--color-text-primary)]" >
                     <TrendingUp className="h-5 w-5 text-indigo-400" />
-                    Evolución del Voluntariado (Horas)
+                    EvoluciÃ³n del Voluntariado (Horas)
                   </h3>
-                  <p className="text-[13px] mt-0.5 text-[#686561]" >
-                    Comparativa de horas solicitadas vs validadas en los últimos meses.
+                  <p className="text-[13px] mt-0.5 text-[var(--color-text-muted)]" >
+                    Comparativa de horas solicitadas vs validadas en los Ãºltimos meses.
                   </p>
                 </div>
 
@@ -1056,16 +1056,16 @@ export function Dashboard() {
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorAprobadas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                          <stop offset="5%" stopColor="var(--color-accent-purple)" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="var(--color-accent-purple)" stopOpacity={0.0} />
                         </linearGradient>
                         <linearGradient id="colorSolicitadas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                          <stop offset="5%" stopColor="var(--color-accent-emerald)" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="var(--color-accent-emerald)" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
+                      <XAxis dataKey="name" stroke="var(--color-text-secondary)" fontSize={11} tickLine={false} />
+                      <YAxis stroke="var(--color-text-secondary)" fontSize={11} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "#18181b",
@@ -1078,7 +1078,7 @@ export function Dashboard() {
                         type="monotone"
                         dataKey="solicitadas"
                         name="Solicitadas"
-                        stroke="#10b981"
+                        stroke="var(--color-accent-emerald)"
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorSolicitadas)"
@@ -1087,7 +1087,7 @@ export function Dashboard() {
                         type="monotone"
                         dataKey="aprobadas"
                         name="Aprobadas"
-                        stroke="#6366f1"
+                        stroke="var(--color-accent-purple)"
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorAprobadas)"
@@ -1096,13 +1096,13 @@ export function Dashboard() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="h-full w-full flex flex-col items-center justify-center text-center space-y-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-inner bg-[#23211D] border-[#26231F]" >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-inner bg-[#23211D] border-[var(--color-border-subtle)]" >
                       <TrendingUp className="h-6 w-6 text-indigo-400/50" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-[#F9F7F3]" >Aún no hay horas registradas</p>
-                      <p className="text-[12px] max-w-[250px] mx-auto mt-1 text-[#686561]" >
-                        A medida que los voluntarios registren y validen sus horas, verás el progreso aquí.
+                      <p className="text-[13px] font-semibold text-[var(--color-text-primary)]" >AÃºn no hay horas registradas</p>
+                      <p className="text-[12px] max-w-[250px] mx-auto mt-1 text-[var(--color-text-muted)]" >
+                        A medida que los voluntarios registren y validen sus horas, verÃ¡s el progreso aquÃ­.
                       </p>
                     </div>
                   </div>
@@ -1114,16 +1114,16 @@ export function Dashboard() {
           {/* AGENDA Y COMPROMISOS DE HOY (REAL DATABASE ITEMS ONLY) */}
           {widgetSettings.showTodayAgenda && (
             <div
-              className="rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between bg-[#171512] border border-[#26231F] rounded-xl"
+              className="rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
               
             >
               <div>
                 <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-                  <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
+                  <h3 className="text-base font-semibold flex items-center gap-2 text-[var(--color-text-primary)]" >
                     <Calendar className="h-5 w-5 text-indigo-400" />
                     Agenda de Hoy
                   </h3>
-                  <span className="text-[13px] font-mono font-medium text-[#686561]" >
+                  <span className="text-[13px] font-mono font-medium text-[var(--color-text-muted)]" >
                     {new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
                   </span>
                 </div>
@@ -1138,7 +1138,7 @@ export function Dashboard() {
                         <div>
                           <h4 className="text-xs font-semibold text-zinc-200">{item.title}</h4>
                           <p className="text-[11px] text-zinc-400">{item.subtitle}</p>
-                          <span className="text-[10px] text-emerald-400 font-mono mt-1 block">👥 {item.assignedCount ?? 0} voluntarios asignados</span>
+                          <span className="text-[10px] text-emerald-400 font-mono mt-1 block">ðŸ‘¥ {item.assignedCount ?? 0} voluntarios asignados</span>
                         </div>
                       </div>
                     ))
@@ -1150,7 +1150,7 @@ export function Dashboard() {
                       <div>
                         <p className="text-xs text-zinc-300 font-semibold">Sin actividades programadas hoy</p>
                         <p className="text-[11px] text-zinc-500 max-w-[200px] mx-auto mt-1">
-                          Las actividades creadas para la fecha actual aparecerán aquí.
+                          Las actividades creadas para la fecha actual aparecerÃ¡n aquÃ­.
                         </p>
                       </div>
                       <button
@@ -1185,15 +1185,15 @@ export function Dashboard() {
           {/* FEED DE ACTIVIDAD EN TIEMPO REAL (100% REAL DE LA BASE DE DATOS) */}
           {widgetSettings.showActivityFeed && (
             <div
-              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[#171512] border border-[#26231F] rounded-xl"
+              className="lg:col-span-2 rounded-2xl p-5 space-y-4 shadow-sm bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
               
             >
               <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid var(--t-border)" }}>
-                <h3 className="text-base font-semibold flex items-center gap-2 text-[#F9F7F3]" >
+                <h3 className="text-base font-semibold flex items-center gap-2 text-[var(--color-text-primary)]" >
                   <Radio className="h-5 w-5 text-indigo-400" />
                   Feed de Actividad en Vivo
                 </h3>
-                <span className="text-[12px] font-mono flex items-center gap-1 text-[#686561]" >
+                <span className="text-[12px] font-mono flex items-center gap-1 text-[var(--color-text-muted)]" >
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   En directo
                 </span>
@@ -1212,16 +1212,16 @@ export function Dashboard() {
                           {item.avatar}
                         </div>
                         <div>
-                          <p  className="text-[#F9F7F3]">
+                          <p  className="text-[var(--color-text-primary)]">
                             <span className="font-semibold">{item.user}</span>{" "}
-                            <span  className="text-[#686561]">{item.action}</span>
+                            <span  className="text-[var(--color-text-muted)]">{item.action}</span>
                           </p>
                           <p className="text-[12px] text-indigo-400 font-medium truncate max-w-sm mt-0.5">
                             {item.target}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[12px] font-mono shrink-0 text-[#686561]" >{item.time}</span>
+                      <span className="text-[12px] font-mono shrink-0 text-[var(--color-text-muted)]" >{item.time}</span>
                     </div>
                   ))
                 ) : (
@@ -1252,11 +1252,11 @@ export function Dashboard() {
           {/* ACCESOS DIRECTOS Y ESTADO OPERATIVO (VALORES REALES DE SUPABASE) */}
           {widgetSettings.showQuickAccess && (
             <div
-              className="rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between bg-[#171512] border border-[#26231F] rounded-xl"
+              className="rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl"
               
             >
               <div>
-                <h3 className="text-base font-semibold flex items-center gap-2 pb-3 text-[#F9F7F3]" >
+                <h3 className="text-base font-semibold flex items-center gap-2 pb-3 text-[var(--color-text-primary)]" >
                   <Zap className="h-5 w-5 text-amber-400" />
                   Accesos Directos
                 </h3>
@@ -1268,11 +1268,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
+                    <span className="flex items-center gap-2 font-medium text-[var(--color-text-primary)]" >
                       <UserPlus className="h-4 w-4 text-indigo-400" />
                       Revisar Admisiones
                     </span>
-                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                    <span className="bg-[var(--color-bg-main)] text-xs px-2 py-1 rounded text-[var(--color-text-secondary)]">
                       {metrics.admissionPending ?? 0} pend.
                     </span>
                   </button>
@@ -1283,11 +1283,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
+                    <span className="flex items-center gap-2 font-medium text-[var(--color-text-primary)]" >
                       <CheckSquare className="h-4 w-4 text-emerald-400" />
                       Validar Horas Pendientes
                     </span>
-                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                    <span className="bg-[var(--color-bg-main)] text-xs px-2 py-1 rounded text-[var(--color-text-secondary)]">
                       {metrics.approvalsPending ?? 0} solicit.
                     </span>
                   </button>
@@ -1298,11 +1298,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
+                    <span className="flex items-center gap-2 font-medium text-[var(--color-text-primary)]" >
                       <Upload className="h-4 w-4 text-purple-400" />
                       Repositorio de Evidencias
                     </span>
-                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                    <span className="bg-[var(--color-bg-main)] text-xs px-2 py-1 rounded text-[var(--color-text-secondary)]">
                       {metrics.evidencesUploaded ?? 0} arch.
                     </span>
                   </button>
@@ -1313,11 +1313,11 @@ export function Dashboard() {
                     className="flex w-full items-center justify-between p-3 rounded-xl text-[13px] transition-colors hover:bg-[var(--t-hover)]"
                     style={{ background: "var(--t-input-bg)", border: "1px solid var(--t-border)" }}
                   >
-                    <span className="flex items-center gap-2 font-medium text-[#F9F7F3]" >
+                    <span className="flex items-center gap-2 font-medium text-[var(--color-text-primary)]" >
                       <BookOpen className="h-4 w-4 text-sky-400" />
                       Cursos y Certificados
                     </span>
-                    <span className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                    <span className="bg-[var(--color-bg-main)] text-xs px-2 py-1 rounded text-[var(--color-text-secondary)]">
                       Abrir
                     </span>
                   </button>
@@ -1325,7 +1325,7 @@ export function Dashboard() {
                 </div>
               </div>
 
-              <div className="pt-3 text-[12px] flex items-center justify-between font-mono text-[#686561]" >
+              <div className="pt-3 text-[12px] flex items-center justify-between font-mono text-[var(--color-text-muted)]" >
                 <span>Estado Servidor ONG:</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> 100% Operativo
@@ -1526,7 +1526,7 @@ export function Dashboard() {
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
     <SelectValue placeholder="Selecciona proyecto" />
   </SelectTrigger>
-  <SelectContent  className="text-[#F9F7F3]">
+  <SelectContent  className="text-[var(--color-text-primary)]">
     {taskOptions.map((t) => (
       <SelectItem key={t.value} value={t.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {t.label}
@@ -1539,13 +1539,13 @@ export function Dashboard() {
 
             <div>
               <label className="block font-medium text-zinc-300 mb-1">
-                Título de la Actividad <span className="text-red-400">*</span>
+                TÃ­tulo de la Actividad <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={activityFormDraft.title}
                 onChange={(e) => setActivityFormDraft((d) => ({ ...d, title: e.target.value }))}
-                placeholder="Ej. Taller de Capacitación Comunitario"
+                placeholder="Ej. Taller de CapacitaciÃ³n Comunitario"
                 className="w-full rounded-xl px-3 py-2 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200"
               />
               <FieldError message={activityFormErrors.title} />
@@ -1582,7 +1582,7 @@ export function Dashboard() {
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
     <SelectValue placeholder="Selecciona estado" />
   </SelectTrigger>
-  <SelectContent  className="text-[#F9F7F3]">
+  <SelectContent  className="text-[var(--color-text-primary)]">
     {activityStateOptions.map((st) => (
       <SelectItem key={st.value} value={st.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {st.label}
@@ -1605,15 +1605,15 @@ export function Dashboard() {
           </div>
 
           <div>
-            <label className="block font-medium text-zinc-300 mb-1 text-xs">Ubicación</label>
+            <label className="block font-medium text-zinc-300 mb-1 text-xs">UbicaciÃ³n</label>
             <Select
   value={activityFormDraft.locationId}
   onValueChange={(val) => setActivityFormDraft((d) => ({ ...d, locationId: val }))}
 >
   <SelectTrigger className="w-full h-10 rounded-xl px-3 outline-none border border-zinc-800 bg-zinc-900 text-zinc-200">
-    <SelectValue placeholder="Selecciona ubicaci�n" />
+    <SelectValue placeholder="Selecciona ubicación" />
   </SelectTrigger>
-  <SelectContent  className="text-[#F9F7F3]">
+  <SelectContent  className="text-[var(--color-text-primary)]">
     {locationOptions.map((l) => (
       <SelectItem key={l.value} value={l.value} className="text-[13px] hover:bg-[var(--t-hover)] focus:bg-[var(--t-hover)] focus:text-[var(--t-text)]">
         {l.label}
@@ -1624,7 +1624,7 @@ export function Dashboard() {
           </div>
 
           <div>
-            <label className="block font-medium text-zinc-300 mb-1 text-xs">Descripción / Objetivos</label>
+            <label className="block font-medium text-zinc-300 mb-1 text-xs">DescripciÃ³n / Objetivos</label>
             <textarea
               rows={3}
               value={activityFormDraft.description}
@@ -1650,20 +1650,20 @@ export function Dashboard() {
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Detalle de la Actividad"
-            description="Información detallada de la actividad registrada en la BD."
+            description="InformaciÃ³n detallada de la actividad registrada en la BD."
             onClose={() => setIsActivityDetailOpen(false)}
           />
 
           {activityDetailLoading ? (
-            <p className="text-xs text-zinc-400 py-4 text-center">Cargando información desde la base de datos...</p>
+            <p className="text-xs text-zinc-400 py-4 text-center">Cargando informaciÃ³n desde la base de datos...</p>
           ) : activityDetailError ? (
             <BlockError message={activityDetailError} onRetry={() => activityDetailTargetId && void openActivityDetailModal(activityDetailTargetId)} />
           ) : activityDetail ? (
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
-                <DetailField label="Título" value={activityDetail.title} />
+                <DetailField label="TÃ­tulo" value={activityDetail.title} />
                 <DetailField label="Proyecto" value={activityDetail.projectName} />
-                <DetailField label="Ubicación" value={activityDetail.locationName ?? "-"} />
+                <DetailField label="UbicaciÃ³n" value={activityDetail.locationName ?? "-"} />
                 <DetailField label="Estado" value={activityDetail.statusLabel} />
                 <DetailField label="Inicio" value={formatDateTime(activityDetail.startAt)} />
                 <DetailField label="Fin" value={formatDateTime(activityDetail.endAt)} />
@@ -1673,7 +1673,7 @@ export function Dashboard() {
 
               {activityDetail.description && (
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Descripción</p>
+                  <p className="text-[11px] text-zinc-400 font-medium mb-1">DescripciÃ³n</p>
                   <p className="text-zinc-200">{activityDetail.description}</p>
                 </div>
               )}
@@ -1711,7 +1711,7 @@ export function Dashboard() {
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Detalle de Registro de Horas"
-            description="Revisión de horas solicitadas por el voluntario."
+            description="RevisiÃ³n de horas solicitadas por el voluntario."
             onClose={() => setIsHourDetailOpen(false)}
           />
 
@@ -1788,30 +1788,30 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      {/* MODAL DETALLE DE ADMISIÓN (REAL DB FETCH) */}
+      {/* MODAL DETALLE DE ADMISIÃ“N (REAL DB FETCH) */}
       <ModalShell open={isAdmissionDetailOpen} onClose={() => setIsAdmissionDetailOpen(false)} width="max-w-[640px]">
         <div className="space-y-4 p-5">
           <ModalHeader
-            title="Detalle de Solicitud de Admisión"
-            description="Información del postulante para unirse a la ONG."
+            title="Detalle de Solicitud de AdmisiÃ³n"
+            description="InformaciÃ³n del postulante para unirse a la ONG."
             onClose={() => setIsAdmissionDetailOpen(false)}
           />
 
           {admissionDetailLoading ? (
-            <p className="text-xs text-zinc-400 py-4 text-center">Cargando solicitud de admisión desde Supabase...</p>
+            <p className="text-xs text-zinc-400 py-4 text-center">Cargando solicitud de admisiÃ³n desde Supabase...</p>
           ) : admissionDetailError ? (
             <BlockError message={admissionDetailError} onRetry={() => admissionDetailTargetId && void openAdmissionDetailModal(admissionDetailTargetId)} />
           ) : admissionDetail ? (
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3"> <DetailField label="Nombre Completo" value={admissionDetail.fullName} />
-                <DetailField label="Correo Electrónico" value={admissionDetail.email} /> <DetailField label="Teléfono" value={(admissionDetail as any).phone ?? "-"} />
-                <DetailField label="Fecha de Envío" value={formatDate(admissionDetail.submittedAt)} />
+                <DetailField label="Correo ElectrÃ³nico" value={admissionDetail.email} /> <DetailField label="TelÃ©fono" value={(admissionDetail as any).phone ?? "-"} />
+                <DetailField label="Fecha de EnvÃ­o" value={formatDate(admissionDetail.submittedAt)} />
                 <DetailField label="Estado" value={admissionDetail.status} />
               </div>
 
               {admissionDetail.notes && (
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Motivo / Notas de Postulación</p>
+                  <p className="text-[11px] text-zinc-400 font-medium mb-1">Motivo / Notas de PostulaciÃ³n</p>
                   <p className="text-zinc-200">{admissionDetail.notes}</p>
                 </div>
               )}
@@ -1835,7 +1835,7 @@ export function Dashboard() {
                       })
                     }
                   >
-                    Aprobar Postulación
+                    Aprobar PostulaciÃ³n
                   </OutlineButton>
 
                   <OutlineButton
@@ -1856,7 +1856,7 @@ export function Dashboard() {
                     }
                     className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                   >
-                    Rechazar Postulación
+                    Rechazar PostulaciÃ³n
                   </OutlineButton>
                 </div>
               )}
@@ -1865,17 +1865,17 @@ export function Dashboard() {
         </div>
       </ModalShell>
 
-      {/* MODAL DE RESOLUCIÓN (APROBAR / RECHAZAR CON COMENTARIOS EN BD) */}
+      {/* MODAL DE RESOLUCIÃ“N (APROBAR / RECHAZAR CON COMENTARIOS EN BD) */}
       <ModalShell open={Boolean(resolutionTarget)} onClose={closeResolutionModal} width="max-w-[540px]">
         <div className="space-y-4 p-5">
           <ModalHeader
             title={toResolutionTitle(resolutionTarget)}
             description={
               resolutionTarget?.kind === "hour"
-                ? "El comentario se guardará en ong.aprobaciones y ong.horas_actividad."
+                ? "El comentario se guardarÃ¡ en ong.aprobaciones y ong.horas_actividad."
                 : resolutionTarget?.targetStatus === "rejected"
                 ? "Ingresa el motivo del rechazo."
-                : "Puedes ingresar observaciones adicionales de aprobación."
+                : "Puedes ingresar observaciones adicionales de aprobaciÃ³n."
             }
             onClose={closeResolutionModal}
           />
@@ -1903,25 +1903,25 @@ export function Dashboard() {
                 Cancelar
               </OutlineButton>
               <GradientButton size="sm" onClick={() => void submitResolution()} disabled={isResolutionSubmitting}>
-                {isResolutionSubmitting ? "Guardando en BD..." : "Confirmar Resolución"}
+                {isResolutionSubmitting ? "Guardando en BD..." : "Confirmar ResoluciÃ³n"}
               </GradientButton>
             </div>
           </div>
         </div>
       </ModalShell>
 
-      {/* MODAL CANCELAR ACTIVIDAD (CANCELACIÓN REAL EN BD) */}
+      {/* MODAL CANCELAR ACTIVIDAD (CANCELACIÃ“N REAL EN BD) */}
       <ModalShell open={Boolean(cancelTarget)} onClose={() => !isCancellingActivity && setCancelTarget(null)} width="max-w-[500px]">
         <div className="space-y-4 p-5">
           <ModalHeader
             title="Cancelar Actividad"
-            description="Actualizará el estado de la actividad a cancelada en Supabase."
+            description="ActualizarÃ¡ el estado de la actividad a cancelada en Supabase."
             onClose={() => !isCancellingActivity && setCancelTarget(null)}
           />
 
           <div className="space-y-3 text-xs">
             <p className="text-zinc-300">
-              {cancelTarget ? `¿Confirmas la cancelación de "${cancelTarget.name}"?` : "Selecciona una actividad."}
+              {cancelTarget ? `Â¿Confirmas la cancelaciÃ³n de "${cancelTarget.name}"?` : "Selecciona una actividad."}
             </p>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
@@ -1929,7 +1929,7 @@ export function Dashboard() {
                 Volver
               </OutlineButton>
               <GradientButton size="sm" onClick={() => void submitCancelActivity()} disabled={isCancellingActivity}>
-                {isCancellingActivity ? "Cancelando..." : "Confirmar Cancelación"}
+                {isCancellingActivity ? "Cancelando..." : "Confirmar CancelaciÃ³n"}
               </GradientButton>
             </div>
           </div>
@@ -1952,8 +1952,8 @@ export function Dashboard() {
           <div className="space-y-3 text-xs">
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
-                <span className="font-medium text-zinc-200 block">Gráfico de Evolución de Horas</span>
-                <span className="text-[11px] text-zinc-400">Mostrar gráfico comparativo de tendencias.</span>
+                <span className="font-medium text-zinc-200 block">GrÃ¡fico de EvoluciÃ³n de Horas</span>
+                <span className="text-[11px] text-zinc-400">Mostrar grÃ¡fico comparativo de tendencias.</span>
               </div>
               <input
                 type="checkbox"
@@ -1979,7 +1979,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
                 <span className="font-medium text-zinc-200 block">Feed de Actividad en Vivo</span>
-                <span className="text-[11px] text-zinc-400">Mostrar historial dinámico en tiempo real.</span>
+                <span className="text-[11px] text-zinc-400">Mostrar historial dinÃ¡mico en tiempo real.</span>
               </div>
               <input
                 type="checkbox"
@@ -1992,7 +1992,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
               <div>
                 <span className="font-medium text-zinc-200 block">Accesos Directos Operativos</span>
-                <span className="text-[11px] text-zinc-400">Mostrar botones de acceso rápido.</span>
+                <span className="text-[11px] text-zinc-400">Mostrar botones de acceso rÃ¡pido.</span>
               </div>
               <input
                 type="checkbox"

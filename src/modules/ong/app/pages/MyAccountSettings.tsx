@@ -74,7 +74,7 @@ export function MyAccountSettings() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  // DetecciÃ³n en vivo de sesiÃ³n y dispositivo real
+  // DetecciÃ³n en vivo de sesión y dispositivo real
   const [currentDevice] = useState(() => getRealDeviceDetails());
   const [lastSignInTime, setLastSignInTime] = useState<string>("SesiÃ³n activa ahora");
 
@@ -126,7 +126,7 @@ export function MyAccountSettings() {
         setGenero(row.genero ?? "Masculino");
         setAvatarPreview(row.avatar_url ?? null);
 
-        // 2. Obtener datos reales de sesiÃ³n y metadatos desde Supabase Auth
+        // 2. Obtener datos reales de sesión y metadatos desde Supabase Auth
         const { data: authData } = await supabase.auth.getUser();
         if (authData.user) {
           if (authData.user.last_sign_in_at) {
@@ -267,7 +267,7 @@ export function MyAccountSettings() {
     }
   };
 
-  // CRUD: Cerrar sesiÃ³n en otros dispositivos vÃ­a Supabase Auth Scope
+  // CRUD: Cerrar sesión en otros dispositivos vÃ­a Supabase Auth Scope
   const handleSignOutOthers = async () => {
     setSigningOutOthers(true);
     try {
@@ -643,7 +643,7 @@ export function MyAccountSettings() {
                         AutenticaciÃ³n de Dos Factores (2FA)
                       </h3>
                       <p className="text-xs text-neutral-500 dark:text-zinc-400">
-                        Agrega una capa adicional de seguridad requiriendo un cÃ³digo dinÃ¡mico TOTP
+                        Agrega una capa adicional de seguridad requiriendo un código dinÃ¡mico TOTP
                       </p>
                     </div>
                   </div>
@@ -690,7 +690,7 @@ export function MyAccountSettings() {
                     disabled={signingOutOthers}
                     className="text-xs text-rose-400 hover:text-rose-300"
                   >
-                    {signingOutOthers ? "Cerrandoâ€¦" : "Cerrar sesiÃ³n en otros dispositivos"}
+                    {signingOutOthers ? "Cerrandoâ€¦" : "Cerrar sesión en otros dispositivos"}
                   </OutlineButton>
                 </div>
 

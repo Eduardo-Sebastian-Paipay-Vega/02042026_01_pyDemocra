@@ -258,7 +258,7 @@ export function CreateTenantPage() {
     setOtpError(null);
 
     if (otpCode.length < 6) {
-      setOtpError("El cÃ³digo OTP debe ser de 6 dÃ­gitos.");
+      setOtpError("El código OTP debe ser de 6 dÃ­gitos.");
       return;
     }
 
@@ -284,7 +284,7 @@ export function CreateTenantPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        throw new Error("SesiÃ³n no disponible. Por favor inicie sesiÃ³n.");
+        throw new Error("SesiÃ³n no disponible. Por favor inicie sesión.");
       }
 
       const response = await fetch("/api/onboarding/bootstrap-tenant", {
@@ -701,7 +701,7 @@ export function CreateTenantPage() {
             <Mail className="h-10 w-10 text-indigo-400 mx-auto mb-2 animate-bounce" />
             <h2 className="text-[22px] font-bold text-[#F5F5F5]">VerificaciÃ³n OTP por Correo</h2>
             <p className="text-[13px] text-neutral-500 dark:text-zinc-400">
-              Hemos enviado un cÃ³digo de 6 dÃ­gitos vÃ­a Resend API a <strong className="text-white">{email}</strong>.
+              Hemos enviado un código de 6 dÃ­gitos vÃ­a Resend API a <strong className="text-white">{email}</strong>.
             </p>
 
             {activeDebugOtp && (
@@ -727,12 +727,12 @@ export function CreateTenantPage() {
             )}
 
             <div className="flex justify-between items-center text-[12px] text-neutral-500 dark:text-zinc-400 px-4">
-              <span>El cÃ³digo expira en 10 minutos</span>
+              <span>El código expira en 10 minutos</span>
               {resendCountdown > 0 ? (
                 <span>Reenviar en {resendCountdown}s</span>
               ) : (
                 <button type="button" onClick={() => setResendCountdown(60)} className="text-indigo-400 underline">
-                  Reenviar cÃ³digo
+                  Reenviar código
                 </button>
               )}
             </div>

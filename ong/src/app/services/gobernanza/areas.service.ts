@@ -27,6 +27,7 @@ export interface AreaFormInput {
   code: string;
   name: string;
   description: string;
+  active?: boolean;
 }
 
 type RawArea = {
@@ -77,7 +78,7 @@ export async function listAreas(search?: string): Promise<AreaRow[]> {
   const tenantId = await getRequiredTenantId();
   let q = ongSchema()
     .from("areas")
-    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos(count)")
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
     .eq("tenant_id", tenantId)
     .order("nombre_area", { ascending: true });
 
@@ -104,19 +105,19 @@ export async function createArea(input: AreaFormInput): Promise<AreaRow> {
     .maybeSingle();
   if (existing) throw new Error(`Ya existe un área con el código "${code}".`);
 
-  const payload: Record<string, unknown> = {
+  const payload: any = {
     tenant_id: tenantId,
     codigo: code,
     nombre_area: name,
     descripcion: description,
-    activo: true,
+    activo: input.active !== undefined ? input.active : true,
   };
   if (userId) payload.created_by = userId;
 
   const { data, error } = await ongSchema()
     .from("areas")
     .insert(payload)
-    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos(count)")
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
     .single();
   if (error) throw new Error(toFriendlyError(error, "No se pudo crear el área."));
   return mapArea(data as RawArea);
@@ -136,11 +137,12 @@ export async function updateArea(id: string, input: AreaFormInput): Promise<Area
     .maybeSingle();
   if (existing) throw new Error(`Ya existe otro área con el código "${code}".`);
 
-  const payload: Record<string, unknown> = {
+  const payload: any = {
     codigo: code,
     nombre_area: name,
     descripcion: description,
   };
+  if (input.active !== undefined) payload.activo = input.active;
   if (userId) payload.updated_by = userId;
 
   const { data, error } = await ongSchema()
@@ -148,7 +150,7 @@ export async function updateArea(id: string, input: AreaFormInput): Promise<Area
     .update(payload)
     .eq("id", id)
     .eq("tenant_id", tenantId)
-    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos(count)")
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
     .single();
   if (error) throw new Error(toFriendlyError(error, "No se pudo actualizar el área."));
   return mapArea(data as RawArea);

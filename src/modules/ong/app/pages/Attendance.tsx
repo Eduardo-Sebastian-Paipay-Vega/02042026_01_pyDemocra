@@ -649,7 +649,7 @@ export function Attendance() {
       }
     } catch (actionError) {
       const message =
-        actionError instanceof Error ? actionError.message : "No se pudo validar el cÃ³digo QR.";
+        actionError instanceof Error ? actionError.message : "No se pudo validar el código QR.";
       setScanError(message);
       setScanResult(null);
       if (scanForm.enableAudio) {
@@ -1968,7 +1968,7 @@ function QrScanModal({
 
             <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
               <span className="rounded-full px-3 py-1 text-[11px] font-medium text-emerald-300 bg-black/70 backdrop-blur-md border border-emerald-500/30 flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-emerald-400" /> Centra el cÃ³digo QR en el cuadro
+                <Sparkles className="h-3 w-3 text-emerald-400" /> Centra el código QR en el cuadro
               </span>
             </div>
           </div>

@@ -208,7 +208,7 @@ export function TenantStatusScreen({
               className="inline-block rounded-xl px-6 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #3D6BFF 0%, #2DBFB0 100%)" }}
             >
-              Ir a iniciar sesiÃ³n
+              Ir a iniciar sesión
             </Link>
           </div>
         ) : null}

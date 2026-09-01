@@ -55,13 +55,13 @@ export function ModalShell({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-6">
+        <div key="modal-backdrop" className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-[rgba(2,2,6,0.76)] backdrop-blur-md"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onPointerDown={handleBackdropPointerDown}
             aria-hidden="true"
           />

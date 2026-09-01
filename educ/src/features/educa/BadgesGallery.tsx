@@ -9,7 +9,7 @@ const mockBadges = [
   { id: 2, name: 'Imparable', description: 'Racha de 7 dÃ­as de estudio continuo', icon: <Zap className="w-8 h-8 text-blue-400" />, color: 'from-blue-900/50 to-blue-600/20', border: 'border-blue-500/30' },
   { id: 3, name: 'Erudito', description: 'Nota perfecta en 3 quizzes seguidos', icon: <BookOpen className="w-8 h-8 text-purple-400" />, color: 'from-purple-900/50 to-purple-600/20', border: 'border-purple-500/30' },
   { id: 4, name: 'GuardiÃ¡n', description: 'AyudÃ³ a 5 compaÃ±eros en el foro', icon: <Shield className="w-8 h-8 text-green-400" />, color: 'from-green-900/50 to-green-600/20', border: 'border-green-500/30' },
-  { id: 5, name: 'PrecisiÃ³n', description: 'Cero errores en cÃ³digo de prueba', icon: <Target className="w-8 h-8 text-red-400" />, color: 'from-red-900/50 to-red-600/20', border: 'border-red-500/30' },
+  { id: 5, name: 'PrecisiÃ³n', description: 'Cero errores en código de prueba', icon: <Target className="w-8 h-8 text-red-400" />, color: 'from-red-900/50 to-red-600/20', border: 'border-red-500/30' },
 ];
 
 export const BadgesGallery = () => {

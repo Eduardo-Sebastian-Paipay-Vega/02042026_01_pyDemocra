@@ -17,6 +17,7 @@ function getOngSupabaseClient(): SupabaseClient<AppDatabase> {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        storageKey: 'sb-democra-auth-token'
       },
     });
   }

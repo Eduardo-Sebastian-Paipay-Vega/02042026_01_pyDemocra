@@ -19,7 +19,7 @@ export type MyProfileRow = Pick<
 export async function getMyProfile(): Promise<MyProfileRow> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
-    throw new Error(userError?.message ?? "No hay sesiÃ³n activa.");
+    throw new Error(userError?.message ?? "No hay sesión activa.");
   }
 
   const { data, error } = await supabase
@@ -41,7 +41,7 @@ export async function getMyProfile(): Promise<MyProfileRow> {
 export async function updateMyFullName(fullName: string): Promise<void> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
-    throw new Error(userError?.message ?? "No hay sesiÃ³n activa.");
+    throw new Error(userError?.message ?? "No hay sesión activa.");
   }
 
   const trimmed = fullName.trim();
@@ -66,7 +66,7 @@ export async function updateMyFullName(fullName: string): Promise<void> {
 export async function updateMyAvatar(file: File): Promise<string> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
-    throw new Error(userError?.message ?? "No hay sesiÃ³n activa.");
+    throw new Error(userError?.message ?? "No hay sesión activa.");
   }
 
   const upload = await uploadFileToStorage({
@@ -99,7 +99,7 @@ export async function updateMyProfileDetails(input: {
 }): Promise<void> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
-    throw new Error(userError?.message ?? "No hay sesiÃ³n activa.");
+    throw new Error(userError?.message ?? "No hay sesión activa.");
   }
 
   const payload: Record<string, any> = {};

@@ -502,7 +502,7 @@ export async function listGovernanceCatalogEntries(
       case "public.cat_tipos_documento": {
         let query = publicSchema()
           .from("cat_tipos_documento")
-          .select("codigo, nombre")
+          .select("codigo, nombre, activo")
           .order("nombre", { ascending: true })
           .limit(200);
 
@@ -522,7 +522,7 @@ export async function listGovernanceCatalogEntries(
       case "public.cat_generos": {
         let query = publicSchema()
           .from("cat_generos")
-          .select("codigo, nombre")
+          .select("codigo, nombre, activo")
           .order("nombre", { ascending: true })
           .limit(200);
 
@@ -542,7 +542,7 @@ export async function listGovernanceCatalogEntries(
       case "public.cat_paises": {
         let query = publicSchema()
           .from("cat_paises")
-          .select("codigo, nombre")
+          .select("codigo, nombre, activo")
           .order("nombre", { ascending: true })
           .limit(200);
 
@@ -562,7 +562,7 @@ export async function listGovernanceCatalogEntries(
       case "public.cat_monedas": {
         let query = publicSchema()
           .from("cat_monedas")
-          .select("codigo, nombre, simbolo")
+          .select("codigo, nombre, simbolo, activo")
           .order("nombre", { ascending: true })
           .limit(200);
 
@@ -584,7 +584,7 @@ export async function listGovernanceCatalogEntries(
       case "public.cat_module_statuses": {
         let query = publicSchema()
           .from("cat_module_statuses")
-          .select("codigo, nombre")
+          .select("codigo, nombre, activo")
           .order("nombre", { ascending: true })
           .limit(200);
 

@@ -1,109 +1,167 @@
-import { ongSchema, getRequiredTenantId, resolveCurrentUserId, toFriendlyError } from "./shared";
-import type { AppDatabase } from "../../../lib/db/ong/app-database";
+import {
+  getRequiredTenantId,
+  ongSchema,
+  resolveCurrentUserId,
+  sanitizeText,
+  toDateTimeLabel,
+  toFriendlyError,
+} from "../proyectos/shared";
 
-export type AreaRow = AppDatabase["ong"]["Tables"]["areas"]["Row"];
+const CODE_MAX = 20;
+const NAME_MAX = 120;
+const DESC_MAX = 500;
 
-export interface AreaWithProjects extends AreaRow {
-  proyectos_count: number;
+export interface AreaRow {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  active: boolean;
+  createdAt: string;
+  createdAtLabel: string;
+  updatedAt: string;
+  projectCount: number;
 }
 
-export async function listAreas(searchTerm: string = ""): Promise<AreaWithProjects[]> {
-  const tenantId = await getRequiredTenantId();
-
-  let query = ongSchema().from("areas").select(`
-    *,
-    proyectos ( id )
-  `).eq("tenant_id", tenantId);
-
-  if (searchTerm.trim()) {
-    const term = `%${searchTerm.trim()}%`;
-    query = query.or(`nombre_area.ilike.${term},codigo.ilike.${term}`);
-  }
-
-  const { data, error } = await query.order("nombre_area", { ascending: true });
-
-  if (error) {
-    throw new Error(toFriendlyError(error, "Error al cargar las áreas"));
-  }
-
-  return (data as any[]).map(area => ({
-    ...area,
-    proyectos_count: area.proyectos ? area.proyectos.length : 0
-  }));
+export interface AreaFormInput {
+  code: string;
+  name: string;
+  description: string;
+  active?: boolean;
 }
 
-export async function createArea(payload: { codigo: string; nombre_area: string; descripcion?: string; activo: boolean }): Promise<AreaRow> {
-  const tenantId = await getRequiredTenantId();
-  const currentUserId = await resolveCurrentUserId();
+type RawArea = {
+  id: string;
+  codigo: string;
+  nombre_area: string;
+  descripcion: string | null;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+  proyectos?: [{ count: number }] | { count: number } | any;
+};
 
-  if (!currentUserId) {
-    throw new Error("No se pudo identificar el usuario activo.");
+function mapArea(row: RawArea): AreaRow {
+  let projectCount = 0;
+  if (Array.isArray(row.proyectos) && row.proyectos.length > 0) {
+    projectCount = row.proyectos[0].count || 0;
+  } else if (row.proyectos && !Array.isArray(row.proyectos)) {
+    projectCount = row.proyectos.count || 0;
   }
 
-  const { data, error } = await ongSchema().from("areas").insert({
+  return {
+    id: row.id,
+    code: row.codigo,
+    name: row.nombre_area,
+    description: row.descripcion,
+    active: row.activo,
+    createdAt: row.created_at,
+    createdAtLabel: toDateTimeLabel(row.created_at),
+    updatedAt: row.updated_at,
+    projectCount,
+  };
+}
+
+function validateInput(input: AreaFormInput): { code: string; name: string; description: string | null } {
+  const code = sanitizeText(input.code, CODE_MAX);
+  if (!code) throw new Error("El código del área es obligatorio.");
+  if (!/^[A-Z0-9_-]+$/i.test(code)) throw new Error("El código solo puede contener letras, números, guiones y guiones bajos.");
+
+  const name = sanitizeText(input.name, NAME_MAX);
+  if (!name) throw new Error("El nombre del área es obligatorio.");
+
+  const description = sanitizeText(input.description, DESC_MAX);
+  return { code: code.toUpperCase(), name, description };
+}
+
+export async function listAreas(search?: string): Promise<AreaRow[]> {
+  const tenantId = await getRequiredTenantId();
+  let q = ongSchema()
+    .from("areas")
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
+    .eq("tenant_id", tenantId)
+    .order("nombre_area", { ascending: true });
+
+  if (search?.trim()) {
+    const term = `%${search.trim()}%`;
+    q = q.or(`nombre_area.ilike.${term},codigo.ilike.${term}`);
+  }
+
+  const { data, error } = await q;
+  if (error) throw new Error(toFriendlyError(error, "No se pudo cargar las áreas."));
+  return (data as RawArea[]).map(mapArea);
+}
+
+export async function createArea(input: AreaFormInput): Promise<AreaRow> {
+  const tenantId = await getRequiredTenantId();
+  const userId = await resolveCurrentUserId();
+  const { code, name, description } = validateInput(input);
+
+  const { data: existing } = await ongSchema()
+    .from("areas")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("codigo", code)
+    .maybeSingle();
+  if (existing) throw new Error(`Ya existe un área con el código "${code}".`);
+
+  const payload: any = {
     tenant_id: tenantId,
-    codigo: payload.codigo,
-    nombre_area: payload.nombre_area,
-    descripcion: payload.descripcion || null,
-    activo: payload.activo,
-    created_by: currentUserId,
-    updated_by: currentUserId,
-  } as any).select().single();
+    codigo: code,
+    nombre_area: name,
+    descripcion: description,
+    activo: input.active !== undefined ? input.active : true,
+  };
+  if (userId) payload.created_by = userId;
 
-  if (error) {
-    throw new Error(toFriendlyError(error, "Error al crear el área"));
-  }
-  
-  return data as AreaRow;
+  const { data, error } = await ongSchema()
+    .from("areas")
+    .insert(payload)
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
+    .single();
+  if (error) throw new Error(toFriendlyError(error, "No se pudo crear el área."));
+  return mapArea(data as RawArea);
 }
 
-export async function updateArea(id: string, payload: { codigo: string; nombre_area: string; descripcion?: string; activo: boolean }): Promise<AreaRow> {
+export async function updateArea(id: string, input: AreaFormInput): Promise<AreaRow> {
   const tenantId = await getRequiredTenantId();
-  const currentUserId = await resolveCurrentUserId();
+  const userId = await resolveCurrentUserId();
+  const { code, name, description } = validateInput(input);
 
-  if (!currentUserId) {
-    throw new Error("No se pudo identificar el usuario activo.");
-  }
+  const { data: existing } = await ongSchema()
+    .from("areas")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("codigo", code)
+    .neq("id", id)
+    .maybeSingle();
+  if (existing) throw new Error(`Ya existe otro área con el código "${code}".`);
 
-  const { data, error } = await ongSchema().from("areas").update({
-    codigo: payload.codigo,
-    nombre_area: payload.nombre_area,
-    descripcion: payload.descripcion || null,
-    activo: payload.activo,
-    updated_by: currentUserId,
-    updated_at: new Date().toISOString()
-  } as any)
-  .eq("id", id)
-  .eq("tenant_id", tenantId)
-  .select().single();
+  const payload: any = {
+    codigo: code,
+    nombre_area: name,
+    descripcion: description,
+  };
+  if (input.active !== undefined) payload.activo = input.active;
+  if (userId) payload.updated_by = userId;
 
-  if (error) {
-    throw new Error(toFriendlyError(error, "Error al actualizar el área"));
-  }
-  
-  return data as AreaRow;
+  const { data, error } = await ongSchema()
+    .from("areas")
+    .update(payload)
+    .eq("id", id)
+    .eq("tenant_id", tenantId)
+    .select("id, codigo, nombre_area, descripcion, activo, created_at, updated_at, proyectos!fk_ong_proyectos_id_area(count)")
+    .single();
+  if (error) throw new Error(toFriendlyError(error, "No se pudo actualizar el área."));
+  return mapArea(data as RawArea);
 }
 
-export async function toggleAreaStatus(id: string, activo: boolean): Promise<AreaRow> {
+export async function toggleAreaActive(id: string, active: boolean): Promise<void> {
   const tenantId = await getRequiredTenantId();
-  const currentUserId = await resolveCurrentUserId();
-
-  if (!currentUserId) {
-    throw new Error("No se pudo identificar el usuario activo.");
-  }
-
-  const { data, error } = await ongSchema().from("areas").update({
-    activo: activo,
-    updated_by: currentUserId,
-    updated_at: new Date().toISOString()
-  } as any)
-  .eq("id", id)
-  .eq("tenant_id", tenantId)
-  .select().single();
-
-  if (error) {
-    throw new Error(toFriendlyError(error, "Error al cambiar el estado del área"));
-  }
-  
-  return data as AreaRow;
+  const { error } = await ongSchema()
+    .from("areas")
+    .update({ activo: active })
+    .eq("id", id)
+    .eq("tenant_id", tenantId);
+  if (error) throw new Error(toFriendlyError(error, "No se pudo actualizar el estado del área."));
 }

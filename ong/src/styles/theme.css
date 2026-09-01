@@ -119,6 +119,21 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Tokens Panel Principal (Bento Grid) */
+  --color-bg-main: #100F0D;
+  --color-bg-card: #171512;
+  --color-bg-hover: #1F1D1A;
+  --color-border-subtle: #26231F;
+  --color-text-primary: #F9F7F3;
+  --color-text-secondary: #A4A29F;
+  --color-text-muted: #686561;
+  --color-accent-primary: #356C92;
+  --color-accent-emerald: #08996A;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-amber: #D97706;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
 }
 
 @layer base {

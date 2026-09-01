@@ -188,3 +188,62 @@ export function SettingsFieldError({ message }: { message?: string | null }) {
   );
 }
 
+export function SettingsTextField({
+  value,
+  onChange,
+  disabled = false,
+  type = "text",
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  type?: "text" | "email" | "password" | "number";
+  placeholder?: string;
+}) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={disabled}
+      placeholder={placeholder}
+      className="h-9 w-full rounded-xl px-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      style={{
+        border: "1px solid var(--t-border)",
+        background: "var(--t-input-bg)",
+        color: "var(--t-text)",
+      }}
+    />
+  );
+}
+
+export function SettingsTextAreaField({
+  value,
+  onChange,
+  disabled = false,
+  placeholder,
+  rows = 3,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={disabled}
+      placeholder={placeholder}
+      rows={rows}
+      className="w-full rounded-xl p-3 text-[12px] outline-none disabled:cursor-not-allowed disabled:opacity-70 resize-y"
+      style={{
+        border: "1px solid var(--t-border)",
+        background: "var(--t-input-bg)",
+        color: "var(--t-text)",
+      }}
+    />
+  );
+}

@@ -117,7 +117,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 <div className="contact-premium__cta">
                   <div className="contact-premium__title">Soluciones a medida</div>
                   <div className="contact-premium__text">
-                    Escanea el cÃ³digo para una respuesta inmediata vÃ­a WhatsApp o
+                    Escanea el código para una respuesta inmediata vÃ­a WhatsApp o
                     utiliza nuestros accesos rÃ¡pidos.
                   </div>
                   <div className="contact-premium__actions">

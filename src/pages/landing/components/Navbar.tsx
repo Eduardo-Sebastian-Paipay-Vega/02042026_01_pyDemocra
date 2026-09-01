@@ -13,7 +13,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
 
   const navLinks = [
     { name: "Producto",      href: "#producto" },
-    { name: "CÃ³mo funciona", href: "#como-funciona" },
+    { name: "Cómo funciona", href: "#como-funciona" },
     { name: "Precios",       href: "#precios" },
     { name: "Empresa",       href: "#empresa" },
   ];
@@ -114,7 +114,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
             onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#ffffff")}
             onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "var(--body-fg)")}
           >
-            Iniciar sesiÃ³n
+            Iniciar sesión
           </Link>
 
           {/* Contact â€” sliding underline indicator */}
@@ -191,7 +191,7 @@ export function Navbar({ onOpenContact }: NavbarProps) {
               </a>
               <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ghost" className="w-full text-white/60 hover:text-white hover:bg-white/5 rounded-xl">
-                  Iniciar sesiÃ³n
+                  Iniciar sesión
                 </Button>
               </Link>
               <button

@@ -141,7 +141,7 @@ export const PasarelaPagos = () => {
                   <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mb-4 border-4 border-purple-500">
                     <span className="text-black font-black text-xs">QR CODE AQUI</span>
                   </div>
-                  <p className="text-xs text-slate-400 text-center">Escanea el cÃ³digo QR desde tu aplicativo Yape o Plin para confirmar el pago automÃ¡tico.</p>
+                  <p className="text-xs text-slate-400 text-center">Escanea el código QR desde tu aplicativo Yape o Plin para confirmar el pago automÃ¡tico.</p>
                 </div>
               )}
 

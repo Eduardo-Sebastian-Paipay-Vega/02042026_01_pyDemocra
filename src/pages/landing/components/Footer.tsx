@@ -8,15 +8,15 @@ export function Footer({ onOpenContact }: FooterProps) {
   const links: Record<string, string[]> = {
     Producto: ["CaracterÃ­sticas", "Precios", "Integraciones", "API Docs", "Changelog"],
     Empresa: ["Sobre nosotros", "Blog", "Carreras", "Prensa", "Contacto"],
-    Participa: ["Canjear cÃ³digo", "Registro voluntarios", "Portal ONG"],
-    Legal: ["Privacidad", "TÃ©rminos", "Seguridad", "Cookies", "GDPR"],
+    Participa: ["Canjear código", "Registro voluntarios", "Portal ONG"],
+    Legal: ["Privacidad", "Términos", "Seguridad", "Cookies", "GDPR"],
   };
 
   const sectionHrefs: Record<string, string> = {
     "CaracterÃ­sticas": "#producto",
     "Precios": "#precios",
-    "CÃ³mo funciona": "#como-funciona",
-    "Canjear cÃ³digo": "/ong/join",
+    "Cómo funciona": "#como-funciona",
+    "Canjear código": "/ong/join",
     "Registro voluntarios": "/ong/signup",
     "Portal ONG": "/ong",
   };
@@ -43,7 +43,7 @@ export function Footer({ onOpenContact }: FooterProps) {
               </div>
             </div>
             <p className="text-white/40 text-sm leading-relaxed font-light">
-              Gobernanza democrÃ¡tica con IA
+              Gobernanza democrática con IA
             </p>
           </motion.div>
 

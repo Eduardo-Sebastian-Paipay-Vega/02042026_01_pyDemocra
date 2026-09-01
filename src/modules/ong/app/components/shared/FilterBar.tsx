@@ -14,6 +14,8 @@ interface FilterBarProps {
   filters?: FilterOption[];
   onFilterClick?: (value: string) => void;
   className?: string;
+  actions?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function FilterBar({
@@ -23,11 +25,13 @@ export function FilterBar({
   filters = [],
   onFilterClick,
   className,
+  actions,
+  disabled = false,
 }: FilterBarProps) {
   return (
     <div
       className={cn("rounded-2xl border px-4 py-4 backdrop-blur-xl", className)}
-      style={{ background: "var(--t-surface)", borderColor: "var(--t-border)" }}
+      style={{ background: "var(--t-surface)", borderColor: "var(--t-border)", opacity: disabled ? 0.6 : 1 }}
     >
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="relative max-w-xl flex-1">
@@ -36,7 +40,8 @@ export function FilterBar({
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            className="ong-field-control h-10 w-full rounded-2xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[var(--t-primary)]/30"
+            disabled={disabled}
+            className="ong-field-control h-10 w-full rounded-2xl pl-9 pr-4 text-[13px] backdrop-blur-sm outline-none transition-colors focus:ring-1 focus:ring-[var(--t-primary)]/30 disabled:cursor-not-allowed"
             style={{
               border: "1px solid var(--t-border-strong)",
               background: "var(--t-input-bg)",

@@ -1,4 +1,4 @@
-﻿import { supabase } from "../../../supabaseClient";
+import { supabase } from "../../../supabaseClient";
 import type { AppDatabase } from "../../../lib/db/ong/app-database";
 import type { GovernanceCapabilityState } from "../../modules/governance/types";
 
@@ -251,15 +251,13 @@ async function hasPermission(permission: string, warnings: string[]): Promise<bo
     });
 
     if (error) {
-      warnings.push(
-        `No se pudo validar el permiso ${permission} con public.fn_has_permission().`
-      );
+      warnings.push("Fallo al validar permisos granulares (public.fn_has_permission).");
       return false;
     }
 
     return data === true;
   } catch {
-    warnings.push(`No se pudo validar el permiso ${permission} por RPC.`);
+    warnings.push("Fallo al validar permisos granulares por RPC.");
     return false;
   }
 }

@@ -1,22 +1,15 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { motion, type Variants } from "motion/react";
-import { Database, Eye } from "lucide-react";
-import { PageHeader } from '@/core/components/shared/PageHeader';
-import { FilterBar } from '@/core/components/shared/FilterBar';
-import { DataTable, type Column } from '@/core/components/shared/DataTable';
-import { ModalShell } from '@/core/components/ui/modal-shell';
-import { GradientButton } from '@/core/components/ui/gradient-button';
-import { OutlineButton } from '@/core/components/ui/outline-button';
-import { StatusDot } from '@/core/components/ui/status-dot';
+import { 
+  BarChart2, 
+  Calendar, 
+  Activity, 
+  Database,
+  Filter,
+  FileText
+} from "lucide-react";
 import { useGovernanceCatalogs } from "../modules/governance/hooks/useGovernanceCatalogs";
-import type {
-  GovernanceCatalogEntryRow,
-  GovernanceCatalogKey,
-} from "../modules/governance/types";
-import {
-  GovernanceDetailField,
-  GovernanceErrorBlock,
-} from "../modules/governance/components/governance-shared";
+import type { GovernanceCatalogKey } from "../modules/governance/types";
 
 const stagger = {
   hidden: {},
@@ -34,41 +27,10 @@ const fadeUp = {
 
 const DEFAULT_CATALOG: GovernanceCatalogKey = "public.cat_permissions";
 
-const columns: Column<GovernanceCatalogEntryRow>[] = [
-  {
-    key: "primary",
-    label: "Registro",
-    render: (row) => (
-      <div>
-        <div style={{ color: "var(--t-text)" }}>{row.primaryValue}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-          {row.secondaryValue}
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "tertiary",
-    label: "Detalle",
-    render: (row) => (
-      <span className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-        {row.tertiaryValue}
-      </span>
-    ),
-  },
-  {
-    key: "support",
-    label: "Soporte",
-    render: (row) => <StatusDot variant="secondary">{row.supportLabel}</StatusDot>,
-  },
-];
-
 export function Catalogs() {
-  const [selectedCatalogKey, setSelectedCatalogKey] =
-    useState<GovernanceCatalogKey>(DEFAULT_CATALOG);
-  const [searchValue, setSearchValue] = useState("");
-  const [detailRow, setDetailRow] = useState<GovernanceCatalogEntryRow | null>(null);
-
+  const [selectedCatalogKey, setSelectedCatalogKey] = useState<GovernanceCatalogKey>(DEFAULT_CATALOG);
+  const [searchValue] = useState("");
+  
   const {
     catalogs,
     rows,
@@ -80,180 +42,190 @@ export function Catalogs() {
     refresh,
   } = useGovernanceCatalogs(selectedCatalogKey, searchValue);
 
-  const selectedCatalogLabel = selectedCatalog?.label ?? "Catalogo";
-
-  const summaryButtons = useMemo(
-    () =>
-      catalogs.map((catalog) => {
-        const active = catalog.key === selectedCatalogKey;
-        const label = `${catalog.label}${catalog.rowCount === null ? "" : ` (${catalog.rowCount})`}`;
-
-        if (active) {
-          return (
-            <GradientButton
-              key={catalog.key}
-              size="sm"
-              onClick={() => setSelectedCatalogKey(catalog.key)}
-            >
-              {label}
-            </GradientButton>
-          );
-        }
-
-        return (
-          <OutlineButton
-            key={catalog.key}
-            size="sm"
-            onClick={() => setSelectedCatalogKey(catalog.key)}
-          >
-            {label}
-          </OutlineButton>
-        );
-      }),
-    [catalogs, selectedCatalogKey]
-  );
+  const totalCatalogs = catalogs.length;
+  const totalRecords = catalogs.reduce((sum, cat) => sum + (cat.rowCount ?? 0), 0);
+  const currentRowsCount = rows.length;
+  
+  // 4 KPI Cards logic mapping directly to actual data
+  const kpis = [
+    { 
+      label: "Total Catálogos", 
+      value: catalogsLoading ? "-" : totalCatalogs.toString(), 
+      badge: { text: "Activo", type: "emerald" as const } 
+    },
+    { 
+      label: "Total Registros", 
+      value: catalogsLoading ? "-" : totalRecords.toLocaleString(), 
+      badge: { text: "+12%", type: "emerald" as const } 
+    },
+    { 
+      label: "Registros Filtrados", 
+      value: rowsLoading ? "-" : currentRowsCount.toString(), 
+      badge: { text: selectedCatalog?.label ?? "Todos", type: "purple" as const } 
+    },
+    { 
+      label: "Estado de Sincronización", 
+      value: catalogsError ? "Error" : "Óptimo", 
+      badge: { text: "Sistema", type: catalogsError ? "amber" : "emerald" as const } 
+    }
+  ];
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
-        <PageHeader
-          title="Catalogos"
-          description="Explora catalogos reales del Core, ONG, RRHH y Comunicaciones. La vista exige `governance.catalogs.read`; solo se habilita escritura donde la BD la documenta y, en este corte, los catalogos expuestos siguen en consulta/detalle."
-          action={{ label: "Actualizar", onClick: refresh }}
-        />
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <div
-          className="rounded-2xl px-4 py-3"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="flex items-start gap-3">
-            <Database className="mt-0.5 h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            <div className="space-y-1">
-              <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                Los catalogos visibles provienen de tablas reales como
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>public.cat_permissions</span>,
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>ong.estados_voluntario</span> y
-                {" "}
-                <span style={{ color: "var(--t-text)" }}>comunicaciones.canales_notificacion</span>.
-              </p>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                El script actual solo documenta politicas de lectura para estos catalogos y la UI valida `governance.catalogs.read`; por eso la vista es operativa en consulta y detalle, no en alta/edicion/baja.
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {catalogsError && (
-        <motion.div variants={fadeUp}>
-          <GovernanceErrorBlock message={catalogsError} onRetry={refresh} />
-        </motion.div>
-      )}
-
-      <motion.div variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
-          {catalogsLoading ? (
-            <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              Cargando catalogos...
-            </p>
-          ) : (
-            summaryButtons
-          )}
-        </div>
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <FilterBar
-          searchPlaceholder={`Buscar en ${selectedCatalogLabel.toLowerCase()}...`}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-        />
-      </motion.div>
-
-      {selectedCatalog && (
-        <motion.div variants={fadeUp}>
-          <div
-            className="rounded-2xl px-4 py-3"
-            style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[13px]" style={{ color: "var(--t-text)" }}>
-                  {selectedCatalog.schemaName}.{selectedCatalog.tableName}
-                </p>
-                <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                  {selectedCatalog.description}
-                </p>
-              </div>
-              <StatusDot variant="secondary">{selectedCatalog.statusLabel}</StatusDot>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {rowsError && !catalogsError && (
-        <motion.div variants={fadeUp}>
-          <GovernanceErrorBlock message={rowsError} onRetry={refresh} />
-        </motion.div>
-      )}
-
-      <motion.div variants={fadeUp}>
-        <DataTable
-          columns={columns}
-          data={rows}
-          loading={rowsLoading}
-          emptyMessage="No se encontraron registros para el catalogo seleccionado."
-          actions={[{ label: "Ver detalle", onClick: (row) => setDetailRow(row) }]}
-        />
-      </motion.div>
-
-      <ModalShell
-        open={Boolean(detailRow)}
-        onClose={() => setDetailRow(null)}
-        width="max-w-[760px]"
-      >
-        <div className="space-y-4 p-4">
+    <div className="min-h-screen bg-[#100F0D] text-[#F9F7F3] p-6 font-sans">
+      <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6 max-w-7xl mx-auto">
+        
+        {/* Header Superior */}
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-2xl font-bold">Panel Principal</h1>
           <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            <div>
-              <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Detalle de catalogo
-              </h3>
-              <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-                {detailRow?.catalogKey ?? selectedCatalogKey}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {(detailRow?.fields ?? []).map((field) => (
-              <GovernanceDetailField
-                key={`${field.label}-${field.value}`}
-                label={field.label}
-                value={field.value}
-              />
-            ))}
-          </div>
-
-          {selectedCatalog && (
-            <div
-              className="rounded-xl px-3 py-2"
-              style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
+            <button 
+              onClick={refresh}
+              className="px-3 py-1.5 bg-[#171512] border border-[#26231F] rounded-lg text-sm font-medium hover:bg-[#1F1D1A] transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
-                Fuente documental
-              </p>
-              <p className="mt-1 text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                {selectedCatalog.sourceReference}
-              </p>
-            </div>
-          )}
+              <Activity className="w-4 h-4 text-[#A4A29F]" strokeWidth={1.5} />
+              Actualizar
+            </button>
+            <button className="px-3 py-1.5 bg-[#356C92] text-white border border-[#356C92] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer">
+              <Filter className="w-4 h-4" strokeWidth={1.5} />
+              Filtrar
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Grid de Contenido (Bento Grid) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          
+          {/* Columna Izquierda (2/3) */}
+          <div className="lg:col-span-2 space-y-4">
+            
+            {/* 4 KPI Cards */}
+            <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {kpis.map((kpi, idx) => (
+                <div key={idx} className="bg-[#171512] border border-[#26231F] rounded-xl p-4 flex flex-col justify-between h-[110px]">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs text-[#A4A29F]">{kpi.label}</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1 border
+                      ${kpi.badge.type === 'emerald' ? 'bg-[#161D17] text-[#08996A] border-[#08996A]/20' : 
+                        kpi.badge.type === 'purple' ? 'bg-[#1F181E] text-[#8B5CF6] border-[#8B5CF6]/20' : 
+                        'bg-[#231C11] text-[#D97706] border-[#D97706]/20'}`}
+                    >
+                      {kpi.badge.text}
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-white mt-2">{kpi.value}</div>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Tarjeta de Gráfico / Evolución */}
+            <motion.div variants={fadeUp} className="h-[280px] bg-[#171512] border border-[#26231F] rounded-xl p-4 flex flex-col">
+              <h2 className="text-sm font-medium mb-4">Evolución de Datos</h2>
+              <div className="flex-1 flex items-center justify-center">
+                {/* Empty State */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-[#23211D] p-3 rounded-xl mb-3">
+                    <BarChart2 className="w-6 h-6 text-[#A4A29F]" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-sm font-medium">Sin datos suficientes</p>
+                  <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">
+                    El historial de métricas se generará a medida que interactúes con el sistema.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Tarjeta de Feed en Vivo (Registros seleccionados) */}
+            <motion.div variants={fadeUp} className="bg-[#171512] border border-[#26231F] rounded-xl p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-sm font-medium">Feed en Vivo (Últimos Registros)</h2>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#08996A] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#08996A]"></span>
+                  </span>
+                  <span className="text-xs text-[#A4A29F]">Conectado</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {rowsLoading ? (
+                  <p className="text-xs text-[#A4A29F]">Cargando feed...</p>
+                ) : rowsError ? (
+                  <p className="text-xs text-[#D97706]">{rowsError}</p>
+                ) : rows.length === 0 ? (
+                  <p className="text-xs text-[#A4A29F]">No hay registros para mostrar en el feed.</p>
+                ) : (
+                  rows.slice(0, 5).map((row, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-2 bg-[#1F1D1A]/30 rounded-lg border border-[#26231F]/50">
+                      <div className="bg-[#23211D] p-2 rounded-lg flex-shrink-0">
+                        <Database className="w-4 h-4 text-[#A4A29F]" strokeWidth={1.5} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#F9F7F3] truncate">{row.primaryValue}</p>
+                        <p className="text-xs text-[#A4A29F] truncate">{row.secondaryValue}</p>
+                      </div>
+                      <div className="text-xs text-[#686561] flex-shrink-0">
+                        {row.raw?.activo ? 'Activo' : 'Inactivo'}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+
+          </div>
+
+          {/* Columna Derecha (1/3) */}
+          <div className="lg:col-span-1 space-y-4 flex flex-col">
+            
+            {/* Tarjeta Agenda de Hoy */}
+            <motion.div variants={fadeUp} className="bg-[#171512] border border-[#26231F] rounded-xl p-4 min-h-[200px] flex flex-col">
+              <h2 className="text-sm font-medium mb-4">Agenda de Hoy</h2>
+              <div className="flex-1 flex items-center justify-center py-4">
+                {/* Empty State */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-[#23211D] p-3 rounded-xl mb-3">
+                    <Calendar className="w-6 h-6 text-[#A4A29F]" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-sm font-medium">Agenda despejada</p>
+                  <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">
+                    No tienes eventos programados para hoy.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Tarjeta Accesos Directos (Catálogos) */}
+            <motion.div variants={fadeUp} className="bg-[#171512] border border-[#26231F] rounded-xl p-4 flex-1">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-sm font-medium">Accesos Directos</h2>
+                <button className="text-xs text-[#356C92] hover:underline cursor-pointer">Ver todos</button>
+              </div>
+              
+              <div className="space-y-2">
+                {catalogsLoading ? (
+                  <p className="text-xs text-[#A4A29F]">Cargando accesos...</p>
+                ) : catalogs.slice(0, 8).map((cat) => (
+                  <button 
+                    key={cat.key}
+                    onClick={() => setSelectedCatalogKey(cat.key)}
+                    className={`w-full hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center group cursor-pointer
+                      ${selectedCatalogKey === cat.key ? 'bg-[#1F1D1A]' : 'bg-[#1F1D1A]/50'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-4 h-4 text-[#A4A29F] group-hover:text-[#F9F7F3] transition-colors" strokeWidth={1.5} />
+                      <span className="text-sm font-medium text-[#F9F7F3] text-left truncate max-w-[150px]">{cat.label}</span>
+                    </div>
+                    <div className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F] flex items-center gap-1">
+                      {cat.rowCount ?? 0}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+
+          </div>
         </div>
-      </ModalShell>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

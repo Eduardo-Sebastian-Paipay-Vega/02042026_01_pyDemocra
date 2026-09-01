@@ -174,36 +174,7 @@ export function SoftDelete() {
         </motion.div>
       )}
 
-      <motion.div variants={fadeUp}>
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="mb-4 flex items-center gap-2">
-            <ArchiveX className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            <h2 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Cobertura de retención
-            </h2>
-          </div>
 
-          <div className="space-y-3">
-            {data.supportNotes.map((note) => (
-              <div
-                key={note}
-                className="rounded-xl px-3 py-2"
-                style={{ background: "var(--t-hover)", border: "1px solid var(--t-border)" }}
-              >
-                <div className="flex items-start gap-2">
-                  <ShieldAlert className="mt-0.5 h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-                  <p className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
-                    {note}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
 
       <motion.div variants={fadeUp}>
         <div

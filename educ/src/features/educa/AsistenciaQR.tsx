@@ -33,7 +33,7 @@ export const AsistenciaQR = () => {
             Asistencia CriptogrÃ¡fica
           </h2>
           <p className="text-muted-foreground mt-1">
-            Proyecta este cÃ³digo dinÃ¡mico. Los estudiantes usarÃ¡n su *Sovereign Wallet* para marcar asistencia.
+            Proyecta este código dinÃ¡mico. Los estudiantes usarÃ¡n su *Sovereign Wallet* para marcar asistencia.
           </p>
         </div>
         <div className="flex items-center gap-3">

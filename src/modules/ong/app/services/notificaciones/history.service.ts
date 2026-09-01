@@ -580,7 +580,7 @@ export async function getNotificationTopbarItems(
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
   const access = await resolveNotificationCapabilities();
   if (!access.currentUserId || !access.tenantId) {
-    throw new Error("No tienes sesiÃ³n activa.");
+    throw new Error("No tienes sesión activa.");
   }
 
   const sanitizedId = sanitizeOptionalId(notificationId);

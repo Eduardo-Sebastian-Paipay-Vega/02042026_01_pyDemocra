@@ -9,6 +9,13 @@ import { ModalShell } from '@/core/components/ui/modal-shell';
 import { GradientButton } from '@/core/components/ui/gradient-button';
 import { OutlineButton } from '@/core/components/ui/outline-button';
 import { StatusDot } from '@/core/components/ui/status-dot';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/core/components/ui/select';
 import { useSecurityMutations } from "../modules/settings/hooks/useSecurityMutations";
 import { useSecuritySettings } from "../modules/settings/hooks/useSecuritySettings";
 import type {
@@ -65,7 +72,7 @@ const sessionColumns: Column<SessionRow>[] = [
     render: (row) => (
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.userLabel}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.sessionType} · {row.ip}
         </div>
       </div>
@@ -77,7 +84,7 @@ const sessionColumns: Column<SessionRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.terminalName}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.deviceLabel}
         </div>
       </div>
@@ -106,7 +113,7 @@ const sessionColumns: Column<SessionRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.createdAtLabel}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           Expira {row.expiresAtLabel}
         </div>
       </div>
@@ -121,7 +128,7 @@ const deviceColumns: Column<DeviceRow>[] = [
     render: (row) => (
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.deviceFingerprint}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.userLabel}
         </div>
       </div>
@@ -142,7 +149,7 @@ const deviceColumns: Column<DeviceRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.lastSeenAtLabel}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.lastIp}
         </div>
       </div>
@@ -166,7 +173,7 @@ const terminalColumns: Column<TerminalRow>[] = [
     render: (row) => (
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.name}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.createdAtLabel}
         </div>
       </div>
@@ -178,7 +185,7 @@ const terminalColumns: Column<TerminalRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.sessionCount} sesiones
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.activeSessionCount} activas
         </div>
       </div>
@@ -193,7 +200,7 @@ const authColumns: Column<AuthEventRow>[] = [
     render: (row) => (
       <div>
         <div style={{ color: "var(--t-text)" }}>{row.eventType}</div>
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.userLabel}
         </div>
       </div>
@@ -214,7 +221,7 @@ const authColumns: Column<AuthEventRow>[] = [
     render: (row) => (
       <div className="text-[12px]" style={{ color: "var(--t-text-secondary)" }}>
         {row.terminalName}
-        <div className="mt-0.5 text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--t-text-secondary)" }}>
           {row.deviceLabel}
         </div>
       </div>
@@ -361,13 +368,13 @@ export function Security() {
         sessionId: revokeTarget.id,
         reason: revokeReason,
       });
-      toast.success("Sesion revocada.");
+      toast.success("Sesión revocada.");
       setRevokeTarget(null);
       setRevokeReason("");
       setRevokeError(null);
     } catch (closeError) {
       setRevokeError(
-        closeError instanceof Error ? closeError.message : "No se pudo cerrar la sesion."
+        closeError instanceof Error ? closeError.message : "No se pudo cerrar la sesión."
       );
     }
   }
@@ -414,8 +421,8 @@ export function Security() {
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeUp}>
         <PageHeader
-          title="Seguridad de sesion"
-          description="Monitorea las sesiones activas, dispositivos confiables, terminales y eventos de autenticación del tenant."
+          title="Seguridad de sesión"
+          description="Monitorea las sesiones activas, dispositivos confiables, terminales y eventos de autenticación de la organización."
           action={{ label: "Actualizar", onClick: refresh }}
         />
       </motion.div>
@@ -443,22 +450,15 @@ export function Security() {
             />
             <SettingsPermissionBadge
               allowed={data.access.canManageTerminals}
-              allowedLabel="Gestion de terminales"
-              deniedLabel="Sin gestion de terminales"
+              allowedLabel="Gestión de terminales"
+              deniedLabel="Sin gestión de terminales"
             />
             <SettingsPermissionBadge
               allowed={data.access.canReadAuthEvents}
-              allowedLabel="Lectura de auth events"
-              deniedLabel="Sin auth events"
+              allowedLabel="Lectura de eventos de autenticación"
+              deniedLabel="Sin eventos de autenticación"
             />
           </div>
-          <SettingsTechnicalDetails
-            details={[
-              ...data.warnings,
-              "El permiso de lectura de sesiones es el minimo requerido para el monitoreo. El permiso de terminacion habilita el cierre remoto individual y masivo.",
-              ...data.unsupportedFlows,
-            ]}
-          />
         </div>
       </motion.div>
 
@@ -467,7 +467,7 @@ export function Security() {
           <SettingsSummaryField label="Sesiones activas" value={String(summary.activeSessions)} />
           <SettingsSummaryField label="Dispositivos confiables" value={String(summary.trustedDevices)} />
           <SettingsSummaryField label="Terminales" value={String(summary.terminals)} />
-          <SettingsSummaryField label="Auth events visibles" value={String(summary.authEvents)} />
+          <SettingsSummaryField label="Eventos de autenticación" value={String(summary.authEvents)} />
         </div>
       </motion.div>
 
@@ -496,27 +496,42 @@ export function Security() {
             />
           ) : (
             <>
-              <FilterBar
-                searchPlaceholder="Buscar por usuario, terminal, dispositivo o IP..."
-                searchValue={sessionSearch}
-                onSearchChange={setSessionSearch}
-              />
-              <div className="mt-3 flex justify-end">
-                <select
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                <div className="flex-1 w-full">
+                  <FilterBar
+                    searchPlaceholder="Buscar por usuario, terminal, dispositivo o IP..."
+                    searchValue={sessionSearch}
+                    onSearchChange={setSessionSearch}
+                  />
+                </div>
+                <Select
                   value={sessionStatus}
-                  onChange={(event) =>
+                  onValueChange={(val) =>
                     setSessionStatus(
-                      event.target.value as "all" | "active" | "expired" | "revoked"
+                      val as "all" | "active" | "expired" | "revoked"
                     )
                   }
-                  className="h-9 rounded-xl px-3 text-[12px] outline-none"
-                  style={INPUT_STYLE}
                 >
-                  <option value="all">Todas</option>
-                  <option value="active">Activas</option>
-                  <option value="expired">Expiradas</option>
-                  <option value="revoked">Revocadas</option>
-                </select>
+                  <SelectTrigger className="w-full sm:w-[140px] bg-[#100F0D] border-[#26231F] text-[#A4A29F] h-9 rounded-xl px-3 text-[12px]">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[120] bg-[#171512] border-[#26231F] text-[#F9F7F3]">
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="active">Activas</SelectItem>
+                    <SelectItem value="expired">Expiradas</SelectItem>
+                    <SelectItem value="revoked">Revocadas</SelectItem>
+                  </SelectContent>
+                </Select>
+                {data.access.canManageSessions && (
+                  <button
+                    onClick={() => {
+                      toast.info("Función de revocación masiva en desarrollo.");
+                    }}
+                    className="w-full sm:w-auto h-9 px-4 rounded-xl border border-[#ef4444]/20 text-[#ef4444] hover:bg-[#ef4444]/10 text-[12px] font-medium transition-colors whitespace-nowrap"
+                  >
+                    Cerrar todas
+                  </button>
+                )}
               </div>
               <div className="mt-4">
                 <DataTable
@@ -529,7 +544,7 @@ export function Security() {
                       ? [
                           { label: "Ver detalle", onClick: (row) => setSelectedSession(row) },
                           {
-                            label: "Cerrar sesion",
+                            label: "Cerrar sesión",
                             variant: "destructive",
                             onClick: (row) => {
                               if (row.statusKind !== "active") {
@@ -561,7 +576,7 @@ export function Security() {
             <ShieldCheck className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Detalle de sesion
+                Detalle de sesión
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                 Información de la sesión activa o histórica.
@@ -738,7 +753,7 @@ export function Security() {
         <div className="space-y-4 p-4">
           <div>
             <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Cerrar sesion
+              Cerrar sesión
             </h3>
             <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
               Cierra la sesión de forma remota e inmediata. El usuario deberá autenticarse nuevamente.
@@ -790,7 +805,7 @@ export function Security() {
             <ScrollText className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
             <div>
               <h3 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Detalle de auth event
+                Detalle de evento de autenticación
               </h3>
               <p className="text-[12px]" style={{ color: "var(--t-text-dim)" }}>
                 Información del evento de autenticación registrado.
@@ -803,7 +818,7 @@ export function Security() {
               <SettingsDetailField label="Usuario" value={selectedAuthEvent.userLabel} />
               <SettingsDetailField label="Evento" value={selectedAuthEvent.eventType} />
               <SettingsDetailField label="Resultado" value={selectedAuthEvent.resultLabel} />
-              <SettingsDetailField label="Sesion" value={selectedAuthEvent.sessionLabel} />
+              <SettingsDetailField label="Sesión" value={selectedAuthEvent.sessionLabel} />
               <SettingsDetailField label="Terminal" value={selectedAuthEvent.terminalName} />
               <SettingsDetailField label="Dispositivo" value={selectedAuthEvent.deviceLabel} />
               <SettingsDetailField label="IP" value={selectedAuthEvent.ip} />

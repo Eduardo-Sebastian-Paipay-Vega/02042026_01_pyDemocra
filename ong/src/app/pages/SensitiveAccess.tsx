@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import { toast } from "sonner";
-import { LockKeyhole, ShieldAlert, UserRound } from "lucide-react";
+import {  LockKeyhole, ShieldAlert, UserRound , Activity, Plus, BarChart2, Search, Calendar, Edit2, Trash2, Clock, MapPin } from 'lucide-react';
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
@@ -250,7 +250,7 @@ export function SensitiveAccess() {
       constraintSchema.parse(constraintForm);
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
-        setConstraintError(validationError.errors[0].message);
+        setConstraintError(validationError.issues[0].message);
         return;
       }
     }
@@ -296,171 +296,225 @@ export function SensitiveAccess() {
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeUp}>
-        <PageHeader
-          title="Accesos sensibles"
-          description="Monitorea los accesos a información clínica sensible y gestiona las restricciones de acceso por rol."
-          action={{ label: "Actualizar", onClick: refresh }}
-        />
-      </motion.div>
-
-      <motion.div variants={fadeUp}>
-        <div
-          className="rounded-2xl px-4 py-3"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="flex flex-wrap items-center gap-3">
-            <GovernancePermissionBadge
-              allowed={data.access.canReadSensitiveAccess}
-              allowedLabel="Lectura de log sensible"
-              deniedLabel="Sin lectura de log sensible"
-            />
-            <GovernancePermissionBadge
-              allowed={data.access.canManageConstraints}
-              allowedLabel="Gestion de restricciones"
-              deniedLabel="Sin gestion de restricciones"
-            />
-          </div>
-          {data.warnings.length > 0 && (
-            <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {data.warnings.join(" ")}
-            </p>
-          )}
-          <p className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-            El permiso de lectura sensible habilita la bitácora consolidada. Los permisos de gestión de roles controlan las restricciones de acceso.
-          </p>
-          {data.unsupportedFlows.map((item) => (
-            <p key={item} className="mt-2 text-[12px]" style={{ color: "var(--t-text-dim)" }}>
-              {item}
-            </p>
-          ))}
+    <motion.div
+      variants={fadeUp}
+      initial="initial"
+      animate="animate"
+      className="bg-[#100F0D] text-[#F9F7F3] min-h-screen p-6 font-sans sensitive-access-dashboard"
+    >
+      {/* Header Superior */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Panel Principal</h1>
+          <p className="text-sm text-[#A4A29F]">Gobernanza y Accesos Sensibles</p>
         </div>
-      </motion.div>
+        <div className="flex gap-2">
+          <button onClick={refresh} className="bg-[#171512] border border-[#26231F] px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#1F1D1A] transition-colors flex items-center gap-2 text-[#F9F7F3]">
+            Actualizar
+          </button>
+          {data.access.canManageConstraints && (
+            <button onClick={openCreateConstraint} className="bg-[#356C92] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#356C92]/90 transition-colors flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Nueva Restricción
+            </button>
+          )}
+        </div>
+      </div>
 
       {error && (
-        <motion.div variants={fadeUp}>
-          <GovernanceErrorBlock 
-            message="Acceso Restringido. Necesitas permisos de Auditoría Clínica para ver esto." 
-            onRetry={refresh} 
-          />
-        </motion.div>
+        <div className="mb-4">
+          <GovernanceErrorBlock message={error} onRetry={refresh} />
+        </div>
       )}
 
-      <Tabs defaultValue="logs" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="logs">Logs de Auditoría</TabsTrigger>
-          <TabsTrigger value="constraints">Reglas de Restricción</TabsTrigger>
-        </TabsList>
-        <TabsContent value="logs">
-      <motion.div variants={fadeUp}>
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="mb-4 flex items-center gap-2">
-            <ShieldAlert className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-            <h2 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-              Eventos de acceso sensible
-            </h2>
-          </div>
-
-          {!error && !loading && !data.access.canReadSensitiveAccess && (
-            <GovernanceErrorBlock
-              message="Para revisar esta bitacora se requiere `governance.sensitive.read` o tenant admin."
-              onRetry={refresh}
-            />
-          )}
-
-          <div className="space-y-4">
-            <FilterBar
-              searchPlaceholder="Buscar por beneficiario, voluntario, documento, actor o motivo..."
-              searchValue={searchValue}
-              onSearchChange={setSearchValue}
-            />
-
-            <div className="flex flex-wrap gap-2">
-              <GovernanceSelectField
-                value={actorFilter}
-                onChange={setActorFilter}
-                options={data.actorOptions}
-              />
-              <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+      {/* Grid de Contenido */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        {/* Columna Izquierda (2/3) */}
+        <div className="lg:col-span-2 space-y-4">
+          
+          {/* Fila de 4 KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+              <h3 className="text-xs text-[#A4A29F] mb-1">Total Accesos</h3>
+              <p className="text-2xl font-bold text-white">{data.logRows.length}</p>
+              <div className="absolute top-3 right-3 bg-[#161D17] text-[#08996A] border border-[#08996A]/20 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Activity className="w-3 h-3" /> Vivo
+              </div>
+            </div>
+            
+            <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+              <h3 className="text-xs text-[#A4A29F] mb-1">Restricciones</h3>
+              <p className="text-2xl font-bold text-white">{data.constraints.length}</p>
+              <div className="absolute top-3 right-3 bg-[#1F181E] text-[#8B5CF6] border border-[#8B5CF6]/20 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                <LockKeyhole className="w-3 h-3" /> Activas
+              </div>
+            </div>
+            
+            <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+              <h3 className="text-xs text-[#A4A29F] mb-1">Alertas</h3>
+              <p className="text-2xl font-bold text-white">{data.warnings.length}</p>
+              <div className="absolute top-3 right-3 bg-[#231C11] text-[#D97706] border border-[#D97706]/20 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldAlert className="w-3 h-3" /> {data.warnings.length > 0 ? "Revisar" : "Ok"}
+              </div>
             </div>
 
-            <DataTable
-              columns={logColumns}
-              data={data.access.canReadSensitiveAccess ? data.logRows : []}
-              loading={loading}
-              emptyMessage="No se encontraron eventos de acceso sensible."
-              actions={[{ label: "Ver detalle", onClick: (row) => setSelectedLog(row) }]}
-            />
+            <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4 relative overflow-hidden">
+              <h3 className="text-xs text-[#A4A29F] mb-1">Roles</h3>
+              <p className="text-2xl font-bold text-white">{data.roleOptions.length}</p>
+              <div className="absolute top-3 right-3 bg-[#161D17] text-[#08996A] border border-[#08996A]/20 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                Seguro
+              </div>
+            </div>
           </div>
-        </div>
-      </motion.div>
 
-        </TabsContent>
-        <TabsContent value="constraints">
-      <motion.div variants={fadeUp}>
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
-        >
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <LockKeyhole className="h-4 w-4" style={{ color: "var(--t-text-dim)" }} />
-              <h2 className="text-[14px]" style={{ color: "var(--t-text)" }}>
-                Restricciones por rol
+          {/* Tarjeta de Gráfico / Evolución */}
+          <div className="h-[280px] bg-[#171512] border border-[#26231F] rounded-[12px] p-4 flex flex-col">
+            <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-[#8B5CF6]" />
+              Evolución de Accesos
+            </h2>
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#23211D]/30 rounded-xl border border-dashed border-[#26231F]">
+              <div className="bg-[#23211D] p-3 rounded-xl mb-3">
+                <BarChart2 className="w-6 h-6 text-[#686561]" />
+              </div>
+              <p className="text-sm font-medium">Sin datos suficientes</p>
+              <p className="text-xs text-[#A4A29F] text-center max-w-xs mt-1">
+                No hay suficiente historial de eventos para generar la gráfica de evolución.
+              </p>
+            </div>
+          </div>
+
+          {/* Tarjeta de Feed en Vivo */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#08996A]" />
+                Feed en Vivo
+              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#686561]" />
+                  <input
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    placeholder="Buscar..."
+                    className="h-9 w-full rounded-lg pl-10 pr-3 text-xs outline-none bg-[#100F0D] border border-[#26231F] text-[#F9F7F3] placeholder-[#686561]"
+                  />
+                </div>
+                <GovernanceSelectField
+                  value={actorFilter}
+                  onChange={setActorFilter}
+                  options={data.actorOptions}
+                />
+                <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+              </div>
+            </div>
+            
+            <div className="[&_th]:!bg-[#100F0D] [&_th]:!text-[#A4A29F] [&_th]:!border-[#26231F] [&_td]:!border-[#26231F] [&_tr:hover]:!bg-[#1F1D1A]">
+              <DataTable
+                columns={logColumns}
+                data={data.logRows}
+                loading={loading}
+                emptyMessage="No se registraron accesos."
+                onRowClick={(row) => setSelectedLog(row as any)}
+              />
+            </div>
+          </div>
+
+        </div>
+
+        {/* Columna Derecha (1/3) */}
+        <div className="lg:col-span-1 space-y-4">
+          
+          {/* Tarjeta Accesos Directos */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+            <h2 className="text-sm font-semibold mb-4 text-[#F9F7F3]">Accesos Directos</h2>
+            <div className="space-y-2">
+              <button 
+                onClick={openCreateConstraint}
+                disabled={!data.access.canManageConstraints}
+                className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#23211D] p-1.5 rounded-md">
+                    <Plus className="w-4 h-4 text-[#A4A29F]" />
+                  </div>
+                  <span className="text-sm font-medium text-[#F9F7F3]">Nueva Restricción</span>
+                </div>
+                <div className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                  <LockKeyhole className="w-3 h-3" />
+                </div>
+              </button>
+
+              <button 
+                onClick={refresh}
+                className="w-full text-left hover:bg-[#1F1D1A] transition-colors rounded-lg p-3 flex justify-between items-center bg-[#1F1D1A]/50 border border-transparent hover:border-[#26231F]"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#23211D] p-1.5 rounded-md">
+                    <Activity className="w-4 h-4 text-[#A4A29F]" />
+                  </div>
+                  <span className="text-sm font-medium text-[#F9F7F3]">Recargar Datos</span>
+                </div>
+                <div className="bg-[#100F0D] text-xs px-2 py-1 rounded text-[#A4A29F]">
+                  <Activity className="w-3 h-3" />
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Tarjeta Agenda de Hoy (Restricciones) */}
+          <div className="bg-[#171512] border border-[#26231F] rounded-[12px] p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#356C92]" />
+                Agenda de Hoy
               </h2>
             </div>
-
-            {data.access.canManageConstraints && (
-              <GradientButton size="sm" onClick={openCreateConstraint}>
-                Nueva restriccion
-              </GradientButton>
+            
+            {data.constraints.length === 0 ? (
+              <div className="flex flex-col items-center justify-center bg-[#23211D]/30 rounded-xl border border-dashed border-[#26231F] py-8">
+                <div className="bg-[#23211D] p-3 rounded-xl mb-3">
+                  <LockKeyhole className="w-6 h-6 text-[#686561]" />
+                </div>
+                <p className="text-sm font-medium">Sin restricciones</p>
+                <p className="text-xs text-[#A4A29F] text-center mt-1">
+                  No hay políticas activas en la agenda.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1 scrollbar-none">
+                {data.constraints.map((c) => (
+                  <div key={c.id} className="bg-[#1F1D1A]/50 hover:bg-[#1F1D1A] transition-colors p-3 rounded-lg border border-[#26231F]">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-xs font-semibold text-white">{c.roleName}</span>
+                      <div className="flex gap-1">
+                        {data.access.canManageConstraints && (
+                          <>
+                            <button onClick={() => openEditConstraint(c)} className="text-[#A4A29F] hover:text-[#356C92]"><Edit2 className="w-3 h-3" /></button>
+                            <button onClick={() => setRemoveConstraint(c)} className="text-[#A4A29F] hover:text-[#ef4444]"><Trash2 className="w-3 h-3" /></button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-[#A4A29F] flex items-center gap-1 mt-1">
+                      <Clock className="w-3 h-3" />
+                      {c.timeStart && c.timeEnd ? c.timeStart + " - " + c.timeEnd : "24 horas"}
+                    </div>
+                    <div className="text-[11px] text-[#A4A29F] flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      {c.sedeName}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
-          {!error && !loading && !data.access.canReadConstraints && (
-            <GovernanceErrorBlock
-              message="No tienes permisos para visualizar las restricciones de acceso. Se requiere el permiso de gestión de roles o acceso de administrador."
-              onRetry={refresh}
-            />
-          )}
-
-          <div className="space-y-4">
-            <FilterBar
-              searchPlaceholder="Buscar por rol, sede, IP o horario..."
-              searchValue={constraintSearch}
-              onSearchChange={setConstraintSearch}
-            />
-
-            <DataTable
-              columns={constraintColumns}
-              data={data.access.canReadConstraints ? filteredConstraints : []}
-              loading={loading}
-              emptyMessage="No se encontraron restricciones de acceso."
-              actions={
-                data.access.canManageConstraints
-                  ? [
-                      { label: "Editar", onClick: (row) => openEditConstraint(row) },
-                      {
-                        label: "Eliminar",
-                        onClick: (row) => setRemoveConstraint(row),
-                        variant: "destructive",
-                      },
-                    ]
-                  : []
-              }
-            />
-          </div>
         </div>
-      </motion.div>
-
-        </TabsContent>
-      </Tabs>
-
-      <ModalShell
+      </div>
+<ModalShell
         open={Boolean(selectedLog)}
         onClose={() => setSelectedLog(null)}
         width="max-w-[760px]"
@@ -644,6 +698,7 @@ export function SensitiveAccess() {
           </div>
         </div>
       </ModalShell>
+    
     </motion.div>
   );
 }

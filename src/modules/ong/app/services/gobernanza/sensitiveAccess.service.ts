@@ -43,8 +43,8 @@ type PublicSedeRow = AppDatabase["public"]["Tables"]["sedes"]["Row"];
 const DEFAULT_LIMIT = 120;
 
 const SENSITIVE_FLOW_NOTES = [
-  "La vista consolida `clinico.accesos_sensibles_log` y `clinico.accesos_sensibles_voluntario_log`; Gobernanza expone solo la bitacora, no el contenido de las fichas.",
-  "Las filas historicas de `clinico.accesos_sensibles_log` no documentan `ip` ni `user_agent`; cuando el contrato origen no los trae, la UI muestra `-`.",
+  "La vista consolida los accesos sensibles a fichas de beneficiarios y voluntarios; Gobernanza expone solo la bitácora, no el contenido de las fichas.",
+  "Las filas históricas de accesos antiguos pueden no documentar IP ni User Agent; cuando no están disponibles, se muestra '-'.",
 ];
 
 function resolveLimit(limit: number | undefined): number {
@@ -395,7 +395,7 @@ export async function getGovernanceSensitiveAccessData(
       access.canReadSensitiveAccess
         ? fetchBeneficiarySensitiveAccessRows(tenantId, filters).catch((error) => {
             warnings.push(
-              toFriendlyError(error, "No se pudo consultar clinico.accesos_sensibles_log.")
+              toFriendlyError(error, "No se pudo consultar el registro de accesos sensibles.")
             );
             return [] as SensitiveAccessLogRow[];
           })
@@ -405,7 +405,7 @@ export async function getGovernanceSensitiveAccessData(
             warnings.push(
               toFriendlyError(
                 error,
-                "No se pudo consultar clinico.accesos_sensibles_voluntario_log."
+                "No se pudo consultar el registro de accesos de voluntarios."
               )
             );
             return [] as SensitiveAccessLogRow[];
@@ -416,7 +416,7 @@ export async function getGovernanceSensitiveAccessData(
             warnings.push(
               toFriendlyError(
                 error,
-                "No se pudo consultar public.role_access_constraints."
+                "No se pudieron consultar las restricciones de acceso."
               )
             );
             return {
@@ -478,7 +478,7 @@ function sanitizeConstraintInput(input: RoleAccessConstraintFormInput) {
   return {
     role_id: roleId,
     sede_id: sedeId,
-    ip_cidr: ipCidr,
+    ip_cidr: ipCidr || null,
     time_start: timeStart,
     time_end: timeEnd,
     require_trusted_device: Boolean(input.requireTrustedDevice),
